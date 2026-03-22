@@ -28,7 +28,7 @@ type LineWithTiming = TerminalLine & {
   durationFrames: number
 }
 
-function buildLineTiming(lines: TerminalLine[]): LineWithTiming[] {
+function buildLineTiming(lines: TerminalLine[], fps: number): LineWithTiming[] {
   let cursor = 0
   return lines.map((line) => {
     const start = cursor
@@ -40,7 +40,7 @@ function buildLineTiming(lines: TerminalLine[]): LineWithTiming[] {
     } else {
       duration = OUTPUT_REVEAL_FRAMES
     }
-    const delayFrames = line.delayAfterMs ? Math.ceil(line.delayAfterMs / (1000 / 30)) : 0
+    const delayFrames = line.delayAfterMs ? Math.ceil(line.delayAfterMs / (1000 / fps)) : 0
     cursor = start + duration + delayFrames
     return { ...line, startFrame: start, durationFrames: duration }
   })
@@ -88,7 +88,7 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines, fps:
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
 
-  const timedLines = buildLineTiming(lines)
+  const timedLines = buildLineTiming(lines, fps)
 
   const windowSpring = spring({ frame, fps, config: { damping: 200 }, durationInFrames: 20 })
   const windowOpacity = interpolate(windowSpring, [0, 1], [0, 1])

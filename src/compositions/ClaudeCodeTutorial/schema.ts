@@ -5,7 +5,7 @@ const IntroSceneSchema = z.object({
   type: z.literal("intro"),
   title: z.string(),
   subtitle: z.string().optional(),
-  durationInSeconds: z.number().int().min(1).max(30),
+  durationInSeconds: z.number().min(1).max(30),
 })
 
 const TerminalLineSchema = z.object({
@@ -18,7 +18,7 @@ const TerminalSceneSchema = z.object({
   type: z.literal("terminal"),
   title: z.string().optional(),
   lines: z.array(TerminalLineSchema).min(1),
-  durationInSeconds: z.number().int().min(2).max(120),
+  durationInSeconds: z.number().min(2).max(120),
 })
 
 const CalloutSceneSchema = z.object({
@@ -26,20 +26,20 @@ const CalloutSceneSchema = z.object({
   text: z.string(),
   position: z.enum(["top", "bottom", "right"]),
   background: z.enum(["overlay", "solid"]).default("overlay"),
-  durationInSeconds: z.number().int().min(1).max(15),
+  durationInSeconds: z.number().min(1).max(15),
 })
 
 const OutroSceneSchema = z.object({
   type: z.literal("outro"),
   title: z.string(),
   bullets: z.array(z.string()).optional(),
-  durationInSeconds: z.number().int().min(2).max(20),
+  durationInSeconds: z.number().min(2).max(20),
 })
 
 const CustomSceneSchema = z.object({
   type: z.literal("custom"),
   componentId: z.string(),
-  durationInSeconds: z.number().int().min(1).max(120),
+  durationInSeconds: z.number().min(1).max(120),
   props: z.record(z.string(), z.any()).optional(),
 })
 

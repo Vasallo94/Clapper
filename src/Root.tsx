@@ -1,3 +1,4 @@
+import React from "react";
 import "./index.css";
 import { Composition } from "remotion";
 import { MyComposition } from "./Composition";

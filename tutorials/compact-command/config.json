@@ -1,0 +1,46 @@
+{
+  "id": "compact-command",
+  "title": "El comando /compact",
+  "description": "Cómo usar /compact para comprimir el contexto de Claude Code",
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "scenes": [
+    {
+      "type": "intro",
+      "title": "El comando /compact",
+      "subtitle": "Comprime el contexto sin perder el hilo",
+      "durationInSeconds": 4
+    },
+    {
+      "type": "terminal",
+      "title": "Uso básico",
+      "lines": [
+        { "kind": "command", "text": "claude" },
+        { "kind": "claude", "text": "> Hola, ¿en qué puedo ayudarte hoy?" },
+        { "kind": "blank", "text": "" },
+        { "kind": "command", "text": "/compact" },
+        { "kind": "output", "text": "  Comprimiendo contexto..." },
+        { "kind": "output", "text": "✓ Contexto comprimido. Tokens: 1,200 → 340" }
+      ],
+      "durationInSeconds": 8
+    },
+    {
+      "type": "callout",
+      "text": "/compact resume toda la conversación anterior en un resumen compacto. Ideal cuando el contexto está lleno pero quieres seguir trabajando.",
+      "position": "bottom",
+      "background": "overlay",
+      "durationInSeconds": 5
+    },
+    {
+      "type": "outro",
+      "title": "Resumen",
+      "bullets": [
+        "Usa /compact cuando el contexto esté casi lleno",
+        "No pierdes el hilo — solo se comprime",
+        "Puedes ver cuántos tokens ahorraste"
+      ],
+      "durationInSeconds": 6
+    }
+  ]
+}

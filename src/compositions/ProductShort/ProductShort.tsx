@@ -2,6 +2,7 @@ import React from "react"
 import { AbsoluteFill, Series } from "remotion"
 import { ThemeContext } from "../ClaudeCodeTutorial/ThemeContext"
 import { ProductShortConfig } from "./schema"
+import { BenefitsScene } from "./scenes/BenefitsScene"
 import { HeroScene } from "./scenes/HeroScene"
 
 export const ProductShort: React.FC<ProductShortConfig> = (config) => {
@@ -14,7 +15,8 @@ export const ProductShort: React.FC<ProductShortConfig> = (config) => {
             return (
               <Series.Sequence key={i} durationInFrames={durationInFrames}>
                 {scene.type === "hero" && <HeroScene {...scene} />}
-                {scene.type !== "hero" && (
+                {scene.type === "benefits" && <BenefitsScene {...scene} />}
+                {scene.type !== "hero" && scene.type !== "benefits" && (
                   <AbsoluteFill
                     style={{
                       display: "flex",

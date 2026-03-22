@@ -1,0 +1,95 @@
+import React from "react"
+import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { z } from "zod"
+import { ProductShortConfigSchema } from "../schema"
+
+type BenefitsSceneProps = Extract<
+  z.infer<typeof ProductShortConfigSchema>["scenes"][number],
+  { type: "benefits" }
+>
+
+const STAGGER_FRAMES = 12
+
+export const BenefitsScene: React.FC<BenefitsSceneProps> = ({ title, items }) => {
+  const frame = useCurrentFrame()
+  const { fps } = useVideoConfig()
+
+  const titleSpring = spring({ frame, fps, config: { damping: 200 }, durationInFrames: 20 })
+
+  return (
+    <AbsoluteFill
+      style={{
+        background: "#FFFFFF",
+        display: "flex",
+        flexDirection: "column",
+        padding: "120px 60px",
+        gap: 40,
+      }}
+    >
+      {/* Red accent bar on the left */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          width: 8,
+          height: "100%",
+          background: "#CC3333",
+        }}
+      />
+
+      {title && (
+        <div
+          style={{
+            fontFamily: "system-ui, sans-serif",
+            fontSize: 48,
+            fontWeight: 700,
+            color: "#1A1A1A",
+            opacity: titleSpring,
+            paddingLeft: 24,
+          }}
+        >
+          {title}
+        </div>
+      )}
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 36, paddingLeft: 24 }}>
+        {items.map((item, idx) => {
+          const itemSpring = spring({
+            frame: Math.max(0, frame - (idx + 1) * STAGGER_FRAMES),
+            fps,
+            config: { damping: 200 },
+            durationInFrames: 20,
+          })
+          const itemX = interpolate(itemSpring, [0, 1], [40, 0])
+
+          return (
+            <div
+              key={idx}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 24,
+                opacity: itemSpring,
+                transform: `translateX(${itemX}px)`,
+              }}
+            >
+              <div style={{ fontSize: 48, flexShrink: 0 }}>{item.icon}</div>
+              <div
+                style={{
+                  fontFamily: "system-ui, sans-serif",
+                  fontSize: 36,
+                  fontWeight: 500,
+                  color: "#1A1A1A",
+                  lineHeight: 1.3,
+                }}
+              >
+                {item.text}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </AbsoluteFill>
+  )
+}

@@ -1,5 +1,5 @@
 // src/compositions/ClaudeCodeTutorial/scenes/TerminalScene.tsx
-import React from "react"
+import React, { useMemo } from "react"
 import {
   AbsoluteFill,
   interpolate,
@@ -21,7 +21,7 @@ const CLAUDE_CHARS_PER_FRAME = 3
 type TerminalSceneProps = Extract<
   z.infer<typeof TutorialConfigSchema>["scenes"][number],
   { type: "terminal" }
-> & { fps: number }
+>
 
 type LineWithTiming = TerminalLine & {
   startFrame: number
@@ -84,14 +84,13 @@ const TerminalLineItem: React.FC<{ line: LineWithTiming; frame: number }> = ({ l
   )
 }
 
-export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines, fps: _fps }) => {
+export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
 
-  const timedLines = buildLineTiming(lines, fps)
+  const timedLines = useMemo(() => buildLineTiming(lines, fps), [lines, fps])
 
   const windowSpring = spring({ frame, fps, config: { damping: 200 }, durationInFrames: 20 })
-  const windowOpacity = interpolate(windowSpring, [0, 1], [0, 1])
   const windowY = interpolate(windowSpring, [0, 1], [20, 0])
 
   const lastCommand = [...timedLines].reverse().find((l) => l.kind === "command")
@@ -132,7 +131,7 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines, fps:
           borderRadius: 10,
           overflow: "hidden",
           boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
-          opacity: windowOpacity,
+          opacity: windowSpring,
           transform: `translateY(${windowY}px)`,
         }}
       >

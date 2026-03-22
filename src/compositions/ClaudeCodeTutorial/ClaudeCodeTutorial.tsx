@@ -7,7 +7,6 @@ import { TerminalScene } from "./scenes/TerminalScene"
 import { CalloutScene } from "./scenes/CalloutScene"
 import { OutroScene } from "./scenes/OutroScene"
 import { CustomScene } from "./scenes/CustomScene"
-import { ScreenRecordingScene } from "./scenes/ScreenRecordingScene"
 
 export const ClaudeCodeTutorial: React.FC<TutorialConfig> = (config) => {
   const bg = config.theme === "linea-directa" ? "#FFFFFF" : "#0d1117"
@@ -20,11 +19,10 @@ export const ClaudeCodeTutorial: React.FC<TutorialConfig> = (config) => {
             return (
               <Series.Sequence key={i} durationInFrames={durationInFrames}>
                 {scene.type === "intro" && <IntroScene {...scene} />}
-                {scene.type === "terminal" && <TerminalScene {...scene} fps={config.fps} />}
+                {scene.type === "terminal" && <TerminalScene {...scene} />}
                 {scene.type === "callout" && <CalloutScene {...scene} />}
                 {scene.type === "outro" && <OutroScene {...scene} />}
                 {scene.type === "custom" && <CustomScene {...scene} />}
-                {scene.type === "screenRecording" && <ScreenRecordingScene {...scene} fps={config.fps} />}
               </Series.Sequence>
             )
           })}

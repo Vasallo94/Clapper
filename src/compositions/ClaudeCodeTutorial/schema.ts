@@ -43,35 +43,12 @@ const CustomSceneSchema = z.object({
   props: z.record(z.string(), z.any()).optional(),
 })
 
-const ScreenRecordingSceneSchema = z.object({
-  type: z.literal("screenRecording"),
-  src: z.string(),
-  trim: z
-    .object({
-      startSec: z.number().min(0),
-      endSec: z.number().min(0),
-    })
-    .refine((t) => t.endSec > t.startSec, "endSec must be greater than startSec")
-    .optional(),
-  frame: z
-    .object({
-      background: z.string().default("#FFFFFF"),
-      borderRadius: z.number().default(12),
-      padding: z.number().default(40),
-      shadow: z.boolean().default(true),
-    })
-    .optional(),
-  resolvedSrc: z.string().optional(),
-  durationInSeconds: z.number().min(1).max(120),
-})
-
 const SceneSchema = z.union([
   IntroSceneSchema,
   TerminalSceneSchema,
   CalloutSceneSchema,
   OutroSceneSchema,
   CustomSceneSchema,
-  ScreenRecordingSceneSchema,
 ])
 
 export const TutorialConfigSchema = z.object({

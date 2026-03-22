@@ -16,6 +16,12 @@ const ORIGIN: Record<"top" | "bottom" | "right", { x: number; y: number }> = {
   right: { x: 40, y: 0 },
 }
 
+const ALIGN_MAP: Record<"top" | "bottom" | "right", string> = {
+  top: "flex-start",
+  bottom: "flex-end",
+  right: "center",
+}
+
 export const CalloutScene: React.FC<CalloutSceneProps> = ({
   text,
   position,
@@ -33,12 +39,20 @@ export const CalloutScene: React.FC<CalloutSceneProps> = ({
   const opacity = interpolate(enterSpring, [0, 0.4], [0, 1], { extrapolateRight: "clamp" })
 
   const justify = position === "right" ? "flex-end" : "center"
-  const align = position === "top" ? "flex-start" : position === "bottom" ? "flex-end" : "center"
+
+  const align = ALIGN_MAP[position]
+
+  let bgColor: string
+  if (isLD) {
+    bgColor = "#FFFFFF"
+  } else {
+    bgColor = background === "overlay" ? "rgba(0,0,0,0.65)" : "#0d1117"
+  }
 
   return (
     <AbsoluteFill
       style={{
-        background: isLD ? "#FFFFFF" : (background === "overlay" ? "rgba(0,0,0,0.65)" : "#0d1117"),
+        background: bgColor,
         display: "flex",
         alignItems: align,
         justifyContent: justify,

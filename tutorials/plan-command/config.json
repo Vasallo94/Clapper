@@ -1,0 +1,159 @@
+{
+  "id": "plan-command",
+  "title": "Plan Mode en Claude Code",
+  "description": "Cómo usar /plan para analizar tu código y diseñar cambios antes de implementarlos — sin tocar un solo archivo",
+  "theme": "linea-directa",
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "scenes": [
+    {
+      "type": "intro",
+      "title": "Plan Mode en Claude Code",
+      "subtitle": "Piensa antes de escribir código",
+      "durationInSeconds": 4
+    },
+    {
+      "type": "terminal",
+      "title": "Activar Plan Mode",
+      "lines": [
+        {
+          "kind": "command",
+          "text": "$ claude",
+          "delayAfterMs": 1000
+        },
+        {
+          "kind": "output",
+          "text": "Claude Code v2.1.39 — session started"
+        },
+        {
+          "kind": "blank",
+          "text": "",
+          "delayAfterMs": 600
+        },
+        {
+          "kind": "command",
+          "text": "> /plan",
+          "delayAfterMs": 800
+        },
+        {
+          "kind": "output",
+          "text": "✓ Plan mode activated — read-only, no file changes allowed"
+        },
+        {
+          "kind": "blank",
+          "text": "",
+          "delayAfterMs": 400
+        },
+        {
+          "kind": "claude",
+          "text": "Estoy en modo plan. Puedo analizar tu código, buscar patrones y proponer cambios — pero no editaré nada hasta que apruebes."
+        }
+      ],
+      "durationInSeconds": 10
+    },
+    {
+      "type": "terminal",
+      "title": "Planificar un refactor",
+      "lines": [
+        {
+          "kind": "command",
+          "text": "> Analiza el módulo de auth y planifica un refactor para soportar OAuth2",
+          "delayAfterMs": 800
+        },
+        {
+          "kind": "claude",
+          "text": "Analizando src/auth/... Encontré 3 archivos con acoplamiento directo a JWT.",
+          "delayAfterMs": 600
+        },
+        {
+          "kind": "blank",
+          "text": ""
+        },
+        {
+          "kind": "claude",
+          "text": "Plan propuesto:"
+        },
+        {
+          "kind": "claude",
+          "text": "1. Extraer interfaz AuthProvider con métodos login(), verify(), refresh()"
+        },
+        {
+          "kind": "claude",
+          "text": "2. Crear JwtProvider y OAuthProvider que implementen la interfaz"
+        },
+        {
+          "kind": "claude",
+          "text": "3. Migrar las 12 referencias directas a usar AuthProvider"
+        },
+        {
+          "kind": "blank",
+          "text": "",
+          "delayAfterMs": 400
+        },
+        {
+          "kind": "claude",
+          "text": "¿Quieres que proceda con la implementación o ajusto algo del plan?"
+        }
+      ],
+      "durationInSeconds": 14
+    },
+    {
+      "type": "callout",
+      "text": "Plan Mode es read-only: Claude analiza tu código sin modificar nada. Usa menos tokens y evita cambios incorrectos en cascada.",
+      "position": "bottom",
+      "background": "overlay",
+      "durationInSeconds": 5
+    },
+    {
+      "type": "terminal",
+      "title": "Formas de activar Plan Mode",
+      "lines": [
+        {
+          "kind": "command",
+          "text": "> /plan                    ← slash command dentro de una sesión",
+          "delayAfterMs": 600
+        },
+        {
+          "kind": "blank",
+          "text": ""
+        },
+        {
+          "kind": "command",
+          "text": "> Shift+Tab × 2            ← atajo de teclado rápido",
+          "delayAfterMs": 600
+        },
+        {
+          "kind": "blank",
+          "text": ""
+        },
+        {
+          "kind": "command",
+          "text": "> Ctrl+G                   ← editar el plan en tu editor",
+          "delayAfterMs": 600
+        },
+        {
+          "kind": "blank",
+          "text": "",
+          "delayAfterMs": 400
+        },
+        {
+          "kind": "claude",
+          "text": "Shift+Tab alterna entre modo plan y modo normal. Ctrl+G abre el plan en tu editor para editarlo directamente."
+        }
+      ],
+      "durationInSeconds": 10
+    },
+    {
+      "type": "outro",
+      "title": "Plan Mode: Lo esencial",
+      "bullets": [
+        "/plan activa modo read-only — Claude analiza sin modificar archivos",
+        "Shift+Tab × 2 alterna entre plan y ejecución",
+        "Ctrl+G abre el plan en tu editor para revisarlo",
+        "Planificar primero = menos tokens, menos errores, mejores resultados"
+      ],
+      "durationInSeconds": 7
+    }
+  ]
+}

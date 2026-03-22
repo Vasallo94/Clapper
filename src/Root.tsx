@@ -13,6 +13,7 @@ const defaultTutorialProps = {
   fps: 30 as const,
   width: 1280 as const,
   height: 720 as const,
+  theme: "default" as const,
   scenes: [
     { type: "intro" as const, title: "Tutorial", durationInSeconds: 3 },
   ],

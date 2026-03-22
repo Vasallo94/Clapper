@@ -8,4 +8,6 @@ out
 
 # Vídeos generados — binarios grandes, no trackear
 tutorials/*/output.mp4
+tutorials/*/assets/*.mp4
+public/tutorial-assets/
 public/voiceover/

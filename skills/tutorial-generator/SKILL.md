@@ -5,7 +5,7 @@ description: Genera vídeos educativos de Claude Code features usando Remotion. 
 
 # Tutorial Generator
 
-Genera un vídeo MP4 educativo sobre una feature de Claude Code con terminal simulada.
+Genera un vídeo MP4 educativo sobre una feature de Claude Code con terminal real (VHS) o simulada.
 
 ## Cuando se te invoca
 
@@ -43,6 +43,38 @@ Lanza un subagente con esta instrucción exacta:
 
 Usa la respuesta estructurada del subagente como fuente de verdad para los comandos y outputs del tutorial.
 
+## Paso 2.5: Genera recording.tape (opcional)
+
+Si quieres que los comandos se ejecuten de verdad en la terminal (en vez de simular), genera un archivo VHS `.tape`:
+
+```tape
+Output assets/recording.mp4
+Set Theme "Catppuccin Mocha"
+Set FontSize 18
+Set Width 1200
+Set Height 600
+Set Padding 20
+Set WaitTimeout 60s
+
+Type "claude"
+Enter
+Wait />/
+Sleep 1s
+Type "[comando del demo subagente]"
+Enter
+Wait /[patrón de output esperado]/
+Sleep 2s
+```
+
+Ejecuta con:
+```bash
+cd tutorials/[slug] && vhs recording.tape
+```
+
+**Requisitos:** `brew install vhs` (incluye ffmpeg y ttyd). Claude CLI debe estar en PATH.
+
+**Fallback:** Si VHS no está instalado o falla, usa `TerminalScene` en config.json como simulación.
+
 ## Paso 3: Genera config.json
 
 Con toda la información recopilada, escribe `tutorials/[slug]/config.json`.
@@ -54,6 +86,20 @@ El JSON debe ser válido según el schema en `src/compositions/ClaudeCodeTutoria
 2. `terminal` (6-15s): demostración real del comando con líneas de tipo command, output, claude
 3. `callout` (3-5s): explicación del "por qué" o "cuándo usar" en lenguaje natural
 4. `outro` (4-8s): resumen con bullets accionables
+
+### Campo `theme`
+
+`"theme": "default" | "linea-directa"` — controla el branding de todas las escenas.
+- `"default"`: fondo oscuro, acentos verdes (estilo Claude Code)
+- `"linea-directa"`: fondo blanco, acentos rojos #CC3333, mascota pixel art
+
+### Tipo "screenRecording" (para grabaciones VHS):
+- `src`: ruta relativa al .mp4 grabado (ej: "assets/recording.mp4")
+- `trim`: recortar inicio/fin `{ "startSec": 0.5, "endSec": 28 }`
+- `frame`: styling del marco `{ "background": "#FFFFFF", "padding": 48 }`
+- `durationInSeconds`: duración de la escena en el vídeo final
+
+Usa `screenRecording` cuando necesites output auténtico de terminal. Usa `terminal` para simulaciones rápidas.
 
 ### Reglas para el tipo "terminal":
 - `kind: "command"` → lo que escribe el usuario (usa los comandos exactos del subagente)

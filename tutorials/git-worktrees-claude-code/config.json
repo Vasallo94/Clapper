@@ -1,0 +1,122 @@
+{
+  "id": "git-worktrees-claude-code",
+  "title": "Git Worktrees en Claude Code",
+  "description": "Cómo usar git worktrees para trabajar en múltiples ramas de forma completamente aislada sin interrumpir tu sesión actual",
+  "theme": "linea-directa",
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "scenes": [
+    {
+      "type": "intro",
+      "title": "Git Worktrees en Claude Code",
+      "subtitle": "Trabaja en ramas paralelas sin perder contexto",
+      "durationInSeconds": 4
+    },
+    {
+      "type": "terminal",
+      "title": "Crear un worktree aislado",
+      "lines": [
+        {
+          "kind": "command",
+          "text": "> EnterWorktree  (name: \"feature-auth\")",
+          "delayAfterMs": 800
+        },
+        {
+          "kind": "output",
+          "text": "Created worktree at .claude/worktrees/feature-auth"
+        },
+        {
+          "kind": "output",
+          "text": "Branch: worktree-feature-auth — session is now isolated",
+          "delayAfterMs": 400
+        },
+        {
+          "kind": "blank",
+          "text": ""
+        },
+        {
+          "kind": "command",
+          "text": "$ git worktree list",
+          "delayAfterMs": 600
+        },
+        {
+          "kind": "output",
+          "text": "/project                          8d07f65 [main]"
+        },
+        {
+          "kind": "output",
+          "text": "/project/.claude/worktrees/feature-auth  8d07f65 [worktree-feature-auth]"
+        },
+        {
+          "kind": "blank",
+          "text": "",
+          "delayAfterMs": 400
+        },
+        {
+          "kind": "claude",
+          "text": "Ahora trabajamos en una rama aislada. Los cambios aquí no afectan a main."
+        }
+      ],
+      "durationInSeconds": 12
+    },
+    {
+      "type": "callout",
+      "text": "Ideal para revisar un bug en producción mientras desarrollas una feature — sin stash, sin commits temporales.",
+      "position": "bottom",
+      "background": "overlay",
+      "durationInSeconds": 4
+    },
+    {
+      "type": "terminal",
+      "title": "Salir del worktree",
+      "lines": [
+        {
+          "kind": "command",
+          "text": "> ExitWorktree  (action: \"keep\")",
+          "delayAfterMs": 700
+        },
+        {
+          "kind": "output",
+          "text": "Exited worktree. Branch worktree-feature-auth preserved."
+        },
+        {
+          "kind": "output",
+          "text": "Session restored to /project [main]",
+          "delayAfterMs": 300
+        },
+        {
+          "kind": "blank",
+          "text": "",
+          "delayAfterMs": 600
+        },
+        {
+          "kind": "command",
+          "text": "> ExitWorktree  (action: \"remove\")",
+          "delayAfterMs": 700
+        },
+        {
+          "kind": "output",
+          "text": "Exited and removed worktree + branch worktree-feature-auth."
+        },
+        {
+          "kind": "claude",
+          "text": "\"keep\" conserva la rama para continuar después. \"remove\" limpia todo al salir.",
+          "delayAfterMs": 400
+        }
+      ],
+      "durationInSeconds": 10
+    },
+    {
+      "type": "outro",
+      "title": "Git Worktrees: Lo esencial",
+      "bullets": [
+        "EnterWorktree crea una rama aislada desde HEAD en .claude/worktrees/",
+        "ExitWorktree(keep) preserva la rama · ExitWorktree(remove) la elimina",
+        "Cada worktree tiene su propio CWD, memoria y contexto de sesión",
+        "Úsalo cuando el usuario mencione explícitamente \"worktree\""
+      ],
+      "durationInSeconds": 6
+    }
+  ]
+}

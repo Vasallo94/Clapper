@@ -1,0 +1,72 @@
+// src/compositions/ClaudeCodeTutorial/schema.ts
+import { z } from "zod"
+
+const IntroSceneSchema = z.object({
+  type: z.literal("intro"),
+  title: z.string(),
+  subtitle: z.string().optional(),
+  durationInSeconds: z.number().int().min(1).max(30),
+})
+
+const TerminalLineSchema = z.object({
+  kind: z.enum(["command", "output", "claude", "blank"]),
+  text: z.string(),
+  delayAfterMs: z.number().int().min(0).optional(),
+})
+
+const TerminalSceneSchema = z.object({
+  type: z.literal("terminal"),
+  title: z.string().optional(),
+  lines: z.array(TerminalLineSchema).min(1),
+  durationInSeconds: z.number().int().min(2).max(120),
+})
+
+const CalloutSceneSchema = z.object({
+  type: z.literal("callout"),
+  text: z.string(),
+  position: z.enum(["top", "bottom", "right"]),
+  background: z.enum(["overlay", "solid"]).default("overlay"),
+  durationInSeconds: z.number().int().min(1).max(15),
+})
+
+const OutroSceneSchema = z.object({
+  type: z.literal("outro"),
+  title: z.string(),
+  bullets: z.array(z.string()).optional(),
+  durationInSeconds: z.number().int().min(2).max(20),
+})
+
+const CustomSceneSchema = z.object({
+  type: z.literal("custom"),
+  componentId: z.string(),
+  durationInSeconds: z.number().int().min(1).max(120),
+  props: z.record(z.string(), z.any()).optional(),
+})
+
+const SceneSchema = z.union([
+  IntroSceneSchema,
+  TerminalSceneSchema,
+  CalloutSceneSchema,
+  OutroSceneSchema,
+  CustomSceneSchema,
+])
+
+export const TutorialConfigSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  fps: z.literal(30),
+  width: z.literal(1280),
+  height: z.literal(720),
+  scenes: z.array(SceneSchema).min(1),
+  voiceover: z
+    .object({
+      enabled: z.literal(true),
+      voiceId: z.string(),
+      scenes: z.record(z.string(), z.string()),
+    })
+    .optional(),
+})
+
+export type TutorialConfig = z.infer<typeof TutorialConfigSchema>
+export type TerminalLine = z.infer<typeof TerminalLineSchema>

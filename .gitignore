@@ -5,3 +5,7 @@ dist
 
 # Ignore the output video from Git but not videos you import into src/.
 out
+
+# Vídeos generados — binarios grandes, no trackear
+tutorials/*/output.mp4
+public/voiceover/

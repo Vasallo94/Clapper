@@ -1,54 +1,30 @@
-# Remotion video
+# Tutorial Video Generator
 
-<p align="center">
-  <a href="https://github.com/remotion-dev/logo">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-dark.apng">
-      <img alt="Animated Remotion Logo" src="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-light.gif">
-    </picture>
-  </a>
-</p>
+Pipeline para generar vídeos educativos sobre features de Claude Code usando [Remotion](https://remotion.dev).
 
-Welcome to your Remotion project!
+## Uso rápido
 
-## Commands
-
-**Install Dependencies**
-
-```console
+```bash
 npm i
+npx tsx scripts/render.ts tutorials/plan-command/config.json
 ```
 
-**Start Preview**
+El vídeo se genera en `tutorials/[slug]/output.mp4`.
 
-```console
+## Estructura
+
+- `src/compositions/ClaudeCodeTutorial/` — componentes de escenas (intro, terminal, callout, outro)
+- `tutorials/` — configs JSON de cada tutorial
+- `scripts/render.ts` — script de renderizado
+- `skills/tutorial-generator/` — skill de Claude Code para generar tutoriales
+
+## Temas
+
+- `"default"` — fondo oscuro, acentos verdes (estilo Claude Code)
+- `"linea-directa"` — fondo blanco, acentos rojos #CC3333, mascota pixel art
+
+## Preview
+
+```bash
 npm run dev
 ```
-
-**Render video**
-
-```console
-npx remotion render
-```
-
-**Upgrade Remotion**
-
-```console
-npx remotion upgrade
-```
-
-## Docs
-
-Get started with Remotion by reading the [fundamentals page](https://www.remotion.dev/docs/the-fundamentals).
-
-## Help
-
-We provide help on our [Discord server](https://discord.gg/6VzzNDwUwV).
-
-## Issues
-
-Found an issue with Remotion? [File an issue here](https://github.com/remotion-dev/remotion/issues/new).
-
-## License
-
-Note that for some entities a company license is needed. [Read the terms here](https://github.com/remotion-dev/remotion/blob/main/LICENSE.md).

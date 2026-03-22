@@ -3,6 +3,7 @@ import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { z } from "zod"
 import { TutorialConfigSchema } from "../schema"
+import { useTheme } from "../ThemeContext"
 
 type CalloutSceneProps = Extract<
   z.infer<typeof TutorialConfigSchema>["scenes"][number],
@@ -22,6 +23,8 @@ export const CalloutScene: React.FC<CalloutSceneProps> = ({
 }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
+  const theme = useTheme()
+  const isLD = theme === "linea-directa"
 
   const enterSpring = spring({ frame, fps, config: { damping: 20, stiffness: 200 }, durationInFrames: Math.ceil(fps * 0.6) })
   const origin = ORIGIN[position]
@@ -35,7 +38,7 @@ export const CalloutScene: React.FC<CalloutSceneProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: background === "overlay" ? "rgba(0,0,0,0.65)" : "#0d1117",
+        background: isLD ? "#FFFFFF" : (background === "overlay" ? "rgba(0,0,0,0.65)" : "#0d1117"),
         display: "flex",
         alignItems: align,
         justifyContent: justify,
@@ -45,14 +48,14 @@ export const CalloutScene: React.FC<CalloutSceneProps> = ({
       <div
         style={{
           maxWidth: 640,
-          background: "linear-gradient(135deg, #161b22 0%, #21262d 100%)",
-          border: "1px solid #30363d",
-          borderLeft: "4px solid #7ee787",
+          background: isLD ? "#FFFFFF" : "linear-gradient(135deg, #161b22 0%, #21262d 100%)",
+          border: isLD ? "1px solid #EFEFEF" : "1px solid #30363d",
+          borderLeft: isLD ? "4px solid #CC3333" : "4px solid #7ee787",
           borderRadius: 10,
           padding: "28px 36px",
           opacity,
           transform: `translate(${tx}px, ${ty}px)`,
-          boxShadow: "0 12px 40px rgba(0,0,0,0.5)",
+          boxShadow: isLD ? "0 4px 20px rgba(0,0,0,0.08)" : "0 12px 40px rgba(0,0,0,0.5)",
         }}
       >
         <div
@@ -60,7 +63,7 @@ export const CalloutScene: React.FC<CalloutSceneProps> = ({
             fontFamily: "system-ui, sans-serif",
             fontSize: 22,
             lineHeight: 1.5,
-            color: "#f0f6fc",
+            color: isLD ? "#1A1A1A" : "#f0f6fc",
             fontWeight: 500,
           }}
         >

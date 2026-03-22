@@ -3,6 +3,8 @@ import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { z } from "zod"
 import { TutorialConfigSchema } from "../schema"
+import { useTheme } from "../ThemeContext"
+import { PixelPhoneMascot } from "../components/PixelPhoneMascot"
 
 type IntroSceneProps = Extract<
   z.infer<typeof TutorialConfigSchema>["scenes"][number],
@@ -12,6 +14,8 @@ type IntroSceneProps = Extract<
 export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
+  const theme = useTheme()
+  const isLD = theme === "linea-directa"
 
   const titleSpring = spring({ frame, fps, config: { damping: 200 }, durationInFrames: fps })
   const titleY = interpolate(titleSpring, [0, 1], [40, 0])
@@ -34,7 +38,7 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
   return (
     <AbsoluteFill
       style={{
-        background: "linear-gradient(135deg, #0d1117 0%, #161b22 100%)",
+        background: isLD ? "#FFFFFF" : "linear-gradient(135deg, #0d1117 0%, #161b22 100%)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -42,6 +46,12 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
         gap: 20,
       }}
     >
+      {isLD && (
+        <div style={{ marginBottom: 24 }}>
+          <PixelPhoneMascot scale={1} animate={true} />
+        </div>
+      )}
+
       <div
         style={{
           fontFamily: "system-ui, sans-serif",
@@ -49,11 +59,11 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
           fontWeight: 600,
           letterSpacing: 4,
           textTransform: "uppercase",
-          color: "#7ee787",
+          color: isLD ? "#CC3333" : "#7ee787",
           opacity: titleOpacity,
         }}
       >
-        Claude Code · Tutorial
+        {isLD ? "Línea Directa · Claude Code" : "Claude Code · Tutorial"}
       </div>
 
       <div
@@ -61,7 +71,7 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
           fontFamily: "system-ui, sans-serif",
           fontSize: 56,
           fontWeight: 800,
-          color: "#f0f6fc",
+          color: isLD ? "#1A1A1A" : "#f0f6fc",
           textAlign: "center",
           maxWidth: 900,
           lineHeight: 1.2,
@@ -76,7 +86,7 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
         style={{
           width: lineWidth,
           height: 2,
-          background: "linear-gradient(90deg, #7ee787, #79c0ff)",
+          background: isLD ? "#CC3333" : "linear-gradient(90deg, #7ee787, #79c0ff)",
           borderRadius: 1,
         }}
       />
@@ -86,7 +96,7 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
           style={{
             fontFamily: "system-ui, sans-serif",
             fontSize: 22,
-            color: "#8b949e",
+            color: isLD ? "#888888" : "#8b949e",
             textAlign: "center",
             maxWidth: 700,
             opacity: subtitleOpacity,

@@ -2,7 +2,7 @@ import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { z } from "zod"
 import { ProductShortConfigSchema } from "../schema"
-import { PixelPhoneMascot } from "../../ClaudeCodeTutorial/components/PixelPhoneMascot"
+import { PhoneMascot } from "../../ClaudeCodeTutorial/components/PhoneMascot"
 
 type HeroSceneProps = Extract<
   z.infer<typeof ProductShortConfigSchema>["scenes"][number],
@@ -49,7 +49,7 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle }) => {
           transform: `translateY(${mascotY}px)`,
         }}
       >
-        <PixelPhoneMascot scale={2} animate={true} />
+        <PhoneMascot scale={2} animation="entry" />
       </div>
 
       <div

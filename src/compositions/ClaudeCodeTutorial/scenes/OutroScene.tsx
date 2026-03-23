@@ -5,7 +5,7 @@ import { z } from "zod"
 import { TutorialConfigSchema } from "../schema"
 import { useTheme } from "../ThemeContext"
 import { useThemeTokens } from "../themes"
-import { PixelPhoneMascot } from "../components/PixelPhoneMascot"
+import { PhoneMascot } from "../components/PhoneMascot"
 
 type OutroSceneProps = Extract<
   z.infer<typeof TutorialConfigSchema>["scenes"][number],
@@ -120,7 +120,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
 
       {isLD && (
         <div style={{ position: "absolute", bottom: 30, right: 40, opacity: 0.6 }}>
-          <PixelPhoneMascot scale={0.6} animate={false} />
+          <PhoneMascot scale={0.6} animation="idle" />
         </div>
       )}
     </AbsoluteFill>

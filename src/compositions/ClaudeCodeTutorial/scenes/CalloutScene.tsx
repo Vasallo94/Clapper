@@ -3,7 +3,9 @@ import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { z } from "zod"
 import { TutorialConfigSchema } from "../schema"
+import { useTheme } from "../ThemeContext"
 import { useThemeTokens } from "../themes"
+import { PhoneMascot } from "../components/PhoneMascot"
 
 type CalloutSceneProps = Extract<
   z.infer<typeof TutorialConfigSchema>["scenes"][number],
@@ -29,7 +31,9 @@ export const CalloutScene: React.FC<CalloutSceneProps> = ({
 }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
+  const theme = useTheme()
   const tokens = useThemeTokens()
+  const isLD = theme === "linea-directa"
 
   const enterSpring = spring({ frame, fps, config: { damping: 20, stiffness: 200 }, durationInFrames: Math.ceil(fps * 0.6) })
   const origin = ORIGIN[position]
@@ -77,6 +81,11 @@ export const CalloutScene: React.FC<CalloutSceneProps> = ({
           {text}
         </div>
       </div>
+      {isLD && (
+        <div style={{ position: "absolute", bottom: 20, right: 24, opacity: 0.5 }}>
+          <PhoneMascot scale={0.45} animation="idle" />
+        </div>
+      )}
     </AbsoluteFill>
   )
 }

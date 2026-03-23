@@ -5,7 +5,7 @@ import { z } from "zod"
 import { TutorialConfigSchema } from "../schema"
 import { useTheme } from "../ThemeContext"
 import { useThemeTokens } from "../themes"
-import { PixelPhoneMascot } from "../components/PixelPhoneMascot"
+import { PhoneMascot } from "../components/PhoneMascot"
 
 type IntroSceneProps = Extract<
   z.infer<typeof TutorialConfigSchema>["scenes"][number],
@@ -54,7 +54,7 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
     >
       {isLD && (
         <div style={{ marginBottom: 24 }}>
-          <PixelPhoneMascot scale={1} animate={true} />
+          <PhoneMascot scale={1} animation="entry" />
         </div>
       )}
 

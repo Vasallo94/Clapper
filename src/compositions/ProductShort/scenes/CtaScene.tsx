@@ -8,7 +8,7 @@ import {
 } from "remotion"
 import { z } from "zod"
 import { ProductShortConfigSchema } from "../schema"
-import { PixelPhoneMascot } from "../../ClaudeCodeTutorial/components/PixelPhoneMascot"
+import { PhoneMascot } from "../../ClaudeCodeTutorial/components/PhoneMascot"
 
 type CtaSceneProps = Extract<
   z.infer<typeof ProductShortConfigSchema>["scenes"][number],
@@ -86,7 +86,7 @@ export const CtaScene: React.FC<CtaSceneProps> = ({ text, url }) => {
       </div>
 
       <div style={{ transform: "scale(0.8)" }}>
-        <PixelPhoneMascot scale={1.5} animate={false} />
+        <PhoneMascot scale={1.5} animation="ring" />
       </div>
 
       <div

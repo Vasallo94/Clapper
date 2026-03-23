@@ -1,0 +1,113 @@
+import React from "react"
+import {
+  AbsoluteFill,
+  interpolate,
+  spring,
+  useCurrentFrame,
+  useVideoConfig,
+} from "remotion"
+import { z } from "zod"
+import { ProductShortConfigSchema } from "../schema"
+
+type PricingSceneProps = Extract<
+  z.infer<typeof ProductShortConfigSchema>["scenes"][number],
+  { type: "pricing" }
+>
+
+export const PricingScene: React.FC<PricingSceneProps> = ({
+  price,
+  period,
+  note,
+  variant,
+}) => {
+  const frame = useCurrentFrame()
+  const { fps } = useVideoConfig()
+
+  const isDark = variant === "dark"
+  const bg = isDark ? "#CC3333" : "#FFFFFF"
+  const priceColor = isDark ? "#FFFFFF" : "#CC3333"
+  const textColor = isDark ? "rgba(255,255,255,0.85)" : "#888888"
+
+  const priceSpring = spring({
+    frame,
+    fps,
+    config: { damping: 10, mass: 0.6 },
+    durationInFrames: 25,
+  })
+  const priceScale = interpolate(priceSpring, [0, 1], [0.3, 1])
+
+  const detailSpring = spring({
+    frame: Math.max(0, frame - 10),
+    fps,
+    config: { damping: 200 },
+    durationInFrames: 20,
+  })
+
+  return (
+    <AbsoluteFill
+      style={{
+        background: bg,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 24,
+      }}
+    >
+      {!isDark && (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            height: 400,
+            borderRadius: "50%",
+            border: "4px solid #CC3333",
+            opacity: 0.15,
+          }}
+        />
+      )}
+
+      <div
+        style={{
+          fontFamily: "system-ui, sans-serif",
+          fontSize: 120,
+          fontWeight: 900,
+          color: priceColor,
+          transform: `scale(${priceScale})`,
+        }}
+      >
+        {price}
+      </div>
+
+      {period && (
+        <div
+          style={{
+            fontFamily: "system-ui, sans-serif",
+            fontSize: 36,
+            color: textColor,
+            opacity: detailSpring,
+          }}
+        >
+          {period}
+        </div>
+      )}
+
+      {note && (
+        <div
+          style={{
+            fontFamily: "system-ui, sans-serif",
+            fontSize: 28,
+            color: textColor,
+            opacity: detailSpring,
+            marginTop: 8,
+          }}
+        >
+          {note}
+        </div>
+      )}
+    </AbsoluteFill>
+  )
+}

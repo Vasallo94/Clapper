@@ -4,6 +4,7 @@ import { ThemeContext } from "../ClaudeCodeTutorial/ThemeContext"
 import { ProductShortConfig } from "./schema"
 import { BenefitsScene } from "./scenes/BenefitsScene"
 import { HeroScene } from "./scenes/HeroScene"
+import { PricingScene } from "./scenes/PricingScene"
 
 export const ProductShort: React.FC<ProductShortConfig> = (config) => {
   return (
@@ -16,7 +17,8 @@ export const ProductShort: React.FC<ProductShortConfig> = (config) => {
               <Series.Sequence key={i} durationInFrames={durationInFrames}>
                 {scene.type === "hero" && <HeroScene {...scene} />}
                 {scene.type === "benefits" && <BenefitsScene {...scene} />}
-                {scene.type !== "hero" && scene.type !== "benefits" && (
+                {scene.type === "pricing" && <PricingScene {...scene} />}
+                {scene.type !== "hero" && scene.type !== "benefits" && scene.type !== "pricing" && (
                   <AbsoluteFill
                     style={{
                       display: "flex",

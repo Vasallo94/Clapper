@@ -9,4 +9,5 @@ out
 
 # Vídeos generados — binarios grandes, no trackear
 tutorials/*/output.mp4
+shorts/*/output.mp4
 public/voiceover/

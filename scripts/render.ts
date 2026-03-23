@@ -1,5 +1,5 @@
 // scripts/render.ts
-// Usage: npx tsx scripts/render.ts tutorials/[slug]/config.json
+// Usage: npx tsx scripts/render.ts <path-to-config.json>
 
 import { bundle } from "@remotion/bundler"
 import { renderMedia, selectComposition } from "@remotion/renderer"
@@ -9,7 +9,7 @@ import path from "path"
 
 const configPath = process.argv[2]
 if (!configPath) {
-  console.error("Usage: npx tsx scripts/render.ts tutorials/[slug]/config.json")
+  console.error("Usage: npx tsx scripts/render.ts <path-to-config.json>")
   process.exit(1)
 }
 
@@ -24,10 +24,11 @@ async function main() {
     webpackOverride: enableTailwind,
   })
 
-  console.log("🔍 Selecting composition ClaudeCodeTutorial...")
+  const compositionId = config.composition || "ClaudeCodeTutorial"
+  console.log(`🔍 Selecting composition ${compositionId}...`)
   const composition = await selectComposition({
     serveUrl: bundleLocation,
-    id: "ClaudeCodeTutorial",
+    id: compositionId,
     inputProps: config,
   })
 

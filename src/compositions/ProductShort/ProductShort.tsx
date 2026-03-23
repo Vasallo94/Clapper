@@ -3,6 +3,7 @@ import { AbsoluteFill, Series } from "remotion"
 import { ThemeContext } from "../ClaudeCodeTutorial/ThemeContext"
 import { ProductShortConfig } from "./schema"
 import { BenefitsScene } from "./scenes/BenefitsScene"
+import { CtaScene } from "./scenes/CtaScene"
 import { HeroScene } from "./scenes/HeroScene"
 import { PricingScene } from "./scenes/PricingScene"
 
@@ -18,20 +19,7 @@ export const ProductShort: React.FC<ProductShortConfig> = (config) => {
                 {scene.type === "hero" && <HeroScene {...scene} />}
                 {scene.type === "benefits" && <BenefitsScene {...scene} />}
                 {scene.type === "pricing" && <PricingScene {...scene} />}
-                {scene.type !== "hero" && scene.type !== "benefits" && scene.type !== "pricing" && (
-                  <AbsoluteFill
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontFamily: "system-ui, sans-serif",
-                      fontSize: 48,
-                      color: "#1A1A1A",
-                    }}
-                  >
-                    {scene.type}
-                  </AbsoluteFill>
-                )}
+                {scene.type === "cta" && <CtaScene {...scene} />}
               </Series.Sequence>
             )
           })}

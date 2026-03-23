@@ -1,6 +1,6 @@
 ---
-name: tutorial-generator
-description: Genera vídeos educativos de Claude Code features usando Remotion. Invoca con /tutorial-generator "instrucción" [--voiceover] [--no-demo]
+name: remotion-tutorial-generator
+description: Genera vídeos educativos de Claude Code features usando Remotion. Invoca con /remotion-tutorial-generator "instrucción" [--voiceover] [--no-demo]
 ---
 
 # Tutorial Generator
@@ -10,8 +10,8 @@ Genera un vídeo MP4 educativo sobre una feature de Claude Code con terminal sim
 ## Cuando se te invoca
 
 El usuario te pasa una instrucción en lenguaje natural. Puede incluir:
-- Un tema: `/tutorial-generator "explica /compact"`
-- Una URL de referencia + tema: `/tutorial-generator "https://docs.anthropic.com/..." "explica esta feature"`
+- Un tema: `/remotion-tutorial-generator "explica /compact"`
+- Una URL de referencia + tema: `/remotion-tutorial-generator "https://docs.anthropic.com/..." "explica esta feature"`
 - Flags: `--voiceover` (activa ElevenLabs TTS, no implementado aún), `--no-demo` (omite el subagente de demostración)
 
 ## Reglas de parsing
@@ -27,7 +27,7 @@ Lanza en paralelo:
 - **WebSearch** → busca ejemplos, posts, guías relacionadas
 - **WebFetch** → si se pasó una URL, léela directamente
 
-Lee también `skills/remotion-best-practices/` para entender qué tipos de escenas y efectos puedes usar en el template.
+Lee también `.claude/skills/remotion-best-practices/` para entender qué tipos de escenas y efectos puedes usar en el template.
 
 ## Paso 2: Demo subagente (por defecto activo, omitir con --no-demo)
 

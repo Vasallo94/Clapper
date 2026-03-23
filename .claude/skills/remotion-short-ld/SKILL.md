@@ -1,6 +1,6 @@
 ---
-name: short-ld
-description: Genera shorts de marketing vertical (9:16) para productos de Línea Directa. Invoca con /short-ld "producto" [--headline "texto"]
+name: remotion-short-ld
+description: Genera shorts de marketing vertical (9:16) para productos de Línea Directa. Invoca con /remotion-short-ld "producto" [--headline "texto"]
 ---
 
 # Short LD — Marketing Shorts para Línea Directa
@@ -10,8 +10,8 @@ Genera un vídeo MP4 vertical (1080×1920) de marketing para un producto de Lín
 ## Cuando se te invoca
 
 El usuario pasa un producto y opcionalmente un headline:
-- `/short-ld "seguro de coche"`
-- `/short-ld "seguro de mascotas" --headline "Desde 9€/mes"`
+- `/remotion-short-ld "seguro de coche"`
+- `/remotion-short-ld "seguro de mascotas" --headline "Desde 9€/mes"`
 
 ## Reglas de parsing
 

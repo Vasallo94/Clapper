@@ -1,0 +1,43 @@
+{
+  "id": "seguro-coche-demo",
+  "composition": "ProductShort",
+  "product": "Seguro de Coche",
+  "headline": "Todo riesgo desde 168€/año",
+  "theme": "linea-directa",
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "scenes": [
+    {
+      "type": "hero",
+      "title": "Seguro de Coche",
+      "subtitle": "Todo riesgo desde 168€/año",
+      "durationInSeconds": 4
+    },
+    {
+      "type": "benefits",
+      "title": "¿Qué incluye?",
+      "items": [
+        { "icon": "🛡️", "text": "Asistencia en carretera 24h" },
+        { "icon": "🔧", "text": "Reparación en talleres oficiales" },
+        { "icon": "🚗", "text": "Coche de sustitución" },
+        { "icon": "📱", "text": "Gestión 100% online" }
+      ],
+      "durationInSeconds": 6
+    },
+    {
+      "type": "pricing",
+      "price": "168€",
+      "period": "al año",
+      "note": "sin permanencia",
+      "variant": "dark",
+      "durationInSeconds": 4
+    },
+    {
+      "type": "cta",
+      "text": "Calcula tu precio",
+      "url": "lineadirecta.com",
+      "durationInSeconds": 4
+    }
+  ]
+}

@@ -3,9 +3,8 @@ import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { z } from "zod"
 import { TutorialConfigSchema } from "../schema"
-import { useTheme } from "../ThemeContext"
 import { useThemeTokens } from "../themes"
-import { PhoneMascot } from "../components/PhoneMascot"
+import { MascotWatermark } from "../components/MascotWatermark"
 
 type OutroSceneProps = Extract<
   z.infer<typeof TutorialConfigSchema>["scenes"][number],
@@ -15,9 +14,7 @@ type OutroSceneProps = Extract<
 export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
-  const theme = useTheme()
   const tokens = useThemeTokens()
-  const isLD = theme === "linea-directa"
 
   const titleSpring = spring({ frame, fps, config: { damping: 200 }, durationInFrames: Math.ceil(fps * 0.8) })
   const titleOpacity = interpolate(titleSpring, [0, 0.4], [0, 1], { extrapolateRight: "clamp" })
@@ -106,7 +103,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
           marginTop: 16,
           fontFamily: tokens.fontFamily,
           fontSize: 13,
-          color: isLD ? tokens.primary : tokens.foregroundLow,
+          color: tokens.labelColor,
           letterSpacing: 2,
           textTransform: "uppercase",
           opacity: interpolate(frame, [fps * 1.5, fps * 2], [0, 1], {
@@ -118,11 +115,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
         {tokens.label}
       </div>
 
-      {isLD && (
-        <div style={{ position: "absolute", bottom: 30, right: 40, opacity: 0.6 }}>
-          <PhoneMascot scale={0.6} animation="idle" />
-        </div>
-      )}
+      <MascotWatermark animation="idle" />
     </AbsoluteFill>
   )
 }

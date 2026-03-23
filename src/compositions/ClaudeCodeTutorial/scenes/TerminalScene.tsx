@@ -10,9 +10,8 @@ import {
 import { loadFont } from "@remotion/google-fonts/JetBrainsMono"
 import { z } from "zod"
 import { TutorialConfigSchema, TerminalLine } from "../schema"
-import { useTheme } from "../ThemeContext"
-import { useThemeTokens } from "../themes"
-import { PhoneMascot } from "../components/PhoneMascot"
+import { useThemeTokens, type ThemeTokens } from "../themes"
+import { MascotWatermark } from "../components/MascotWatermark"
 
 const { fontFamily } = loadFont("normal", { weights: ["400", "700"] })
 
@@ -49,7 +48,13 @@ function buildLineTiming(lines: TerminalLine[], fps: number): LineWithTiming[] {
   })
 }
 
-const UserMessage: React.FC<{ line: LineWithTiming; frame: number }> = ({ line, frame }) => {
+type MessageProps = {
+  line: LineWithTiming
+  frame: number
+  terminal: ThemeTokens["terminal"]
+}
+
+const UserMessage: React.FC<MessageProps> = ({ line, frame, terminal }) => {
   const localFrame = frame - line.startFrame
   if (localFrame < 0) return null
 
@@ -59,20 +64,20 @@ const UserMessage: React.FC<{ line: LineWithTiming; frame: number }> = ({ line, 
   return (
     <div
       style={{
-        border: "1px solid #333",
+        border: `1px solid ${terminal.userMessageBorder}`,
         borderRadius: 8,
         padding: "10px 14px",
         marginBottom: 16,
-        background: "#111",
+        background: terminal.userMessageBg,
       }}
     >
-      <div style={{ color: "#888", fontSize: 11, fontFamily, marginBottom: 4 }}>You</div>
-      <div style={{ color: "#e0e0e0", fontFamily, fontSize: 14 }}>{displayText}</div>
+      <div style={{ color: terminal.labelColor, fontSize: 11, fontFamily, marginBottom: 4 }}>You</div>
+      <div style={{ color: terminal.command, fontFamily, fontSize: 14 }}>{displayText}</div>
     </div>
   )
 }
 
-const ClaudeMessage: React.FC<{ line: LineWithTiming; frame: number }> = ({ line, frame }) => {
+const ClaudeMessage: React.FC<MessageProps> = ({ line, frame, terminal }) => {
   const localFrame = frame - line.startFrame
   if (localFrame < 0) return null
 
@@ -81,17 +86,17 @@ const ClaudeMessage: React.FC<{ line: LineWithTiming; frame: number }> = ({ line
 
   return (
     <div style={{ padding: "4px 0" }}>
-      <div style={{ color: "#C15F3C", fontSize: 11, fontFamily, marginBottom: 6, fontWeight: "bold" }}>
+      <div style={{ color: terminal.claude, fontSize: 11, fontFamily, marginBottom: 6, fontWeight: "bold" }}>
         ⏵ Claude
       </div>
-      <div style={{ color: "#d4d4d4", fontFamily, fontSize: 14, paddingLeft: 4 }}>
+      <div style={{ color: terminal.output, fontFamily, fontSize: 14, paddingLeft: 4 }}>
         {displayText}
       </div>
     </div>
   )
 }
 
-const OutputMessage: React.FC<{ line: LineWithTiming; frame: number }> = ({ line, frame }) => {
+const OutputMessage: React.FC<MessageProps> = ({ line, frame, terminal }) => {
   const localFrame = frame - line.startFrame
   if (localFrame < 0) return null
 
@@ -100,7 +105,7 @@ const OutputMessage: React.FC<{ line: LineWithTiming; frame: number }> = ({ line
   return (
     <div
       style={{
-        borderLeft: "2px solid #C15F3C",
+        borderLeft: `2px solid ${terminal.claude}`,
         paddingLeft: 12,
         marginTop: 4,
         marginBottom: 4,
@@ -108,7 +113,7 @@ const OutputMessage: React.FC<{ line: LineWithTiming; frame: number }> = ({ line
     >
       <div
         style={{
-          color: isSuccess ? "#6a9955" : "#888",
+          color: isSuccess ? terminal.successColor : terminal.labelColor,
           fontFamily,
           fontSize: 12,
         }}
@@ -122,9 +127,8 @@ const OutputMessage: React.FC<{ line: LineWithTiming; frame: number }> = ({ line
 export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
-  const theme = useTheme()
   const tokens = useThemeTokens()
-  const isLD = theme === "linea-directa"
+  const t = tokens.terminal
 
   const timedLines = useMemo(() => buildLineTiming(lines, fps), [lines, fps])
 
@@ -139,10 +143,12 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
   const filledBlocks = Math.round(contextPercent / 5)
   const contextBar = "█".repeat(filledBlocks) + "░".repeat(20 - filledBlocks)
 
+  const isDarkScene = t.sceneBackground !== tokens.background
+
   return (
     <AbsoluteFill
       style={{
-        background: isLD ? "#111" : tokens.background,
+        background: t.sceneBackground,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -155,7 +161,7 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
           style={{
             fontFamily: tokens.fontFamily,
             fontSize: 18,
-            color: "#888",
+            color: t.labelColor,
             marginBottom: 24,
             alignSelf: "flex-start",
             width: "90%",
@@ -170,25 +176,25 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
           width: "90%",
           borderRadius: 10,
           overflow: "hidden",
-          boxShadow: tokens.terminal.shadow,
+          boxShadow: t.shadow,
           opacity: windowSpring,
           transform: `translateY(${windowY}px)`,
-          border: "1px solid #333",
+          border: `1px solid ${t.borderColor}`,
         }}
       >
         {/* Title bar */}
         <div
           style={{
             height: 36,
-            background: tokens.terminal.titleBar,
+            background: t.titleBar,
             display: "flex",
             alignItems: "center",
             paddingLeft: 14,
             gap: 8,
-            borderBottom: "1px solid #333",
+            borderBottom: `1px solid ${t.borderColor}`,
           }}
         >
-          {tokens.terminal.dots.map((color, i) => (
+          {t.dots.map((color, i) => (
             <div
               key={i}
               style={{ width: 12, height: 12, borderRadius: "50%", background: color }}
@@ -200,7 +206,7 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
               textAlign: "center",
               fontFamily,
               fontSize: 12,
-              color: tokens.terminal.titleText,
+              color: t.titleText,
               marginRight: 52,
             }}
           >
@@ -211,7 +217,7 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
         {/* Terminal content */}
         <div
           style={{
-            background: tokens.terminal.bg,
+            background: t.bg,
             padding: "20px 24px",
             minHeight: 260,
             display: "flex",
@@ -220,13 +226,13 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
         >
           {timedLines.map((line, i) => {
             if (line.kind === "command") {
-              return <UserMessage key={i} line={line} frame={frame} />
+              return <UserMessage key={i} line={line} frame={frame} terminal={t} />
             }
             if (line.kind === "claude") {
-              return <ClaudeMessage key={i} line={line} frame={frame} />
+              return <ClaudeMessage key={i} line={line} frame={frame} terminal={t} />
             }
             if (line.kind === "output") {
-              return <OutputMessage key={i} line={line} frame={frame} />
+              return <OutputMessage key={i} line={line} frame={frame} terminal={t} />
             }
             // blank
             if (frame >= line.startFrame) {
@@ -240,8 +246,8 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
         <div
           style={{
             height: 28,
-            background: "#111",
-            borderTop: "1px solid #333",
+            background: t.statusBarBg,
+            borderTop: `1px solid ${t.borderColor}`,
             display: "flex",
             alignItems: "center",
             padding: "0 14px",
@@ -250,28 +256,24 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
             fontSize: 11,
           }}
         >
-          <span style={{ color: "#C15F3C" }}>● claude-opus-4-6</span>
-          <span style={{ color: "#333" }}>│</span>
-          <span style={{ color: "#666" }}>Context:</span>
+          <span style={{ color: t.claude }}>● claude-opus-4-6</span>
+          <span style={{ color: t.separatorColor }}>│</span>
+          <span style={{ color: t.costColor }}>Context:</span>
           <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ color: "#6a9955", fontSize: 9, letterSpacing: -1 }}>
+            <span style={{ color: t.successColor, fontSize: 9, letterSpacing: -1 }}>
               {contextBar.slice(0, filledBlocks)}
             </span>
-            <span style={{ color: "#333", fontSize: 9, letterSpacing: -1 }}>
+            <span style={{ color: t.separatorColor, fontSize: 9, letterSpacing: -1 }}>
               {contextBar.slice(filledBlocks)}
             </span>
-            <span style={{ color: "#888" }}>{Math.round(contextPercent)}%</span>
+            <span style={{ color: t.labelColor }}>{Math.round(contextPercent)}%</span>
           </span>
-          <span style={{ color: "#333" }}>│</span>
-          <span style={{ color: "#666" }}>$0.04</span>
+          <span style={{ color: t.separatorColor }}>│</span>
+          <span style={{ color: t.costColor }}>$0.04</span>
         </div>
       </div>
 
-      {isLD && (
-        <div style={{ position: "absolute", bottom: 20, right: 24, opacity: 0.7 }}>
-          <PhoneMascot scale={0.5} animation="dial" />
-        </div>
-      )}
+      <MascotWatermark animation="dial" darkBg={isDarkScene} />
     </AbsoluteFill>
   )
 }

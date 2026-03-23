@@ -7,11 +7,14 @@ type Animation = "none" | "idle" | "ring" | "entry" | "dial"
 interface PhoneMascotProps {
   scale?: number
   animation?: Animation
+  /** Use light outlines for dark backgrounds */
+  darkBg?: boolean
 }
 
 export const PhoneMascot: React.FC<PhoneMascotProps> = ({
   scale = 1,
   animation = "none",
+  darkBg = false,
 }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
@@ -91,6 +94,11 @@ export const PhoneMascot: React.FC<PhoneMascotProps> = ({
     ? interpolate(ringCycle, [0, 1, 2, 3], [-3, 3, -2, 2])
     : 0)
 
+  // Outline colors adapt to background
+  const outline = darkBg ? "#FFFFFF" : "#1A1A1A"
+  const outlineOpacity = darkBg ? 0.35 : 0.25
+  const cableOutlineOpacity = darkBg ? 0.4 : 0.3
+
   const w = 200 * scale
   const h = 200 * scale
 
@@ -111,8 +119,10 @@ export const PhoneMascot: React.FC<PhoneMascotProps> = ({
       }}
     >
       {/* Rear wheels */}
-      <rect x="16" y="112" width="22" height="30" rx="4" fill="#1A1A1A" />
-      <rect x="162" y="112" width="22" height="30" rx="4" fill="#1A1A1A" />
+      <rect x="16" y="112" width="22" height="30" rx="4" fill="#1A1A1A"
+        stroke={darkBg ? "#FFFFFF" : "none"} strokeWidth={darkBg ? 1 : 0} strokeOpacity={darkBg ? 0.2 : 0} />
+      <rect x="162" y="112" width="22" height="30" rx="4" fill="#1A1A1A"
+        stroke={darkBg ? "#FFFFFF" : "none"} strokeWidth={darkBg ? 1 : 0} strokeOpacity={darkBg ? 0.2 : 0} />
       <rect x="20" y="121" width="14" height="12" rx="2" fill="#666" />
       <rect x="166" y="121" width="14" height="12" rx="2" fill="#666" />
 
@@ -127,9 +137,9 @@ export const PhoneMascot: React.FC<PhoneMascotProps> = ({
         height="84"
         rx="6"
         fill="#CC3333"
-        stroke="#1A1A1A"
+        stroke={outline}
         strokeWidth="1.5"
-        strokeOpacity="0.25"
+        strokeOpacity={outlineOpacity}
       />
 
       {/* Body highlight */}
@@ -151,19 +161,22 @@ export const PhoneMascot: React.FC<PhoneMascotProps> = ({
       {/* Handset group (lifts on entry, vibrates on ring) */}
       <g transform={`translate(${handsetX}, ${handsetY})`}>
         {/* Earpieces */}
-        <rect x="38" y="14" width="36" height="26" rx="13" fill="#1A1A1A" />
-        <rect x="124" y="14" width="36" height="26" rx="13" fill="#1A1A1A" />
+        <rect x="38" y="14" width="36" height="26" rx="13" fill="#1A1A1A"
+          stroke={darkBg ? "#FFFFFF" : "none"} strokeWidth={darkBg ? 1 : 0} strokeOpacity={darkBg ? 0.3 : 0} />
+        <rect x="124" y="14" width="36" height="26" rx="13" fill="#1A1A1A"
+          stroke={darkBg ? "#FFFFFF" : "none"} strokeWidth={darkBg ? 1 : 0} strokeOpacity={darkBg ? 0.3 : 0} />
         {/* Bar */}
-        <rect x="66" y="14" width="66" height="14" rx="4" fill="#1A1A1A" />
+        <rect x="66" y="14" width="66" height="14" rx="4" fill="#1A1A1A"
+          stroke={darkBg ? "#FFFFFF" : "none"} strokeWidth={darkBg ? 1 : 0} strokeOpacity={darkBg ? 0.3 : 0} />
       </g>
 
       {/* Cable coil (stretches when handset lifts) */}
       {/* Cable outline for contrast on red backgrounds */}
       <path
         d={`M158 ${28 + handsetY} C166 ${22 + handsetY * 0.5}, 170 34, 178 28 C182 24, 180 34, 184 32`}
-        stroke="#1A1A1A"
+        stroke={outline}
         strokeWidth="5"
-        strokeOpacity="0.3"
+        strokeOpacity={cableOutlineOpacity}
         fill="none"
         strokeLinecap="round"
       />
@@ -178,11 +191,13 @@ export const PhoneMascot: React.FC<PhoneMascotProps> = ({
 
       {/* Front wheels */}
       <g transform={`rotate(${wheelRotation}, 24, 136)`}>
-        <rect x="10" y="118" width="28" height="36" rx="6" fill="#1A1A1A" />
+        <rect x="10" y="118" width="28" height="36" rx="6" fill="#1A1A1A"
+          stroke={darkBg ? "#FFFFFF" : "none"} strokeWidth={darkBg ? 1 : 0} strokeOpacity={darkBg ? 0.2 : 0} />
         <rect x="16" y="128" width="16" height="16" rx="3" fill="#666" />
       </g>
       <g transform={`rotate(${wheelRotation}, 176, 136)`}>
-        <rect x="162" y="118" width="28" height="36" rx="6" fill="#1A1A1A" />
+        <rect x="162" y="118" width="28" height="36" rx="6" fill="#1A1A1A"
+          stroke={darkBg ? "#FFFFFF" : "none"} strokeWidth={darkBg ? 1 : 0} strokeOpacity={darkBg ? 0.2 : 0} />
         <rect x="168" y="128" width="16" height="16" rx="3" fill="#666" />
       </g>
 
@@ -194,9 +209,9 @@ export const PhoneMascot: React.FC<PhoneMascotProps> = ({
         height="8"
         rx="2"
         fill="#AF2C2C"
-        stroke="#1A1A1A"
+        stroke={outline}
         strokeWidth="1"
-        strokeOpacity="0.2"
+        strokeOpacity={outlineOpacity}
       />
     </svg>
   )

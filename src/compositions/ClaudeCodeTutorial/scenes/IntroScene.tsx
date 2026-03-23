@@ -3,7 +3,6 @@ import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { z } from "zod"
 import { TutorialConfigSchema } from "../schema"
-import { useTheme } from "../ThemeContext"
 import { useThemeTokens } from "../themes"
 import { PhoneMascot } from "../components/PhoneMascot"
 
@@ -15,9 +14,7 @@ type IntroSceneProps = Extract<
 export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
-  const theme = useTheme()
   const tokens = useThemeTokens()
-  const isLD = theme === "linea-directa"
 
   const titleSpring = spring({ frame, fps, config: { damping: 200 }, durationInFrames: fps })
   const titleY = interpolate(titleSpring, [0, 1], [40, 0])
@@ -37,10 +34,6 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
     extrapolateRight: "clamp",
   })
 
-  const lineBackground = isLD
-    ? tokens.primary
-    : `linear-gradient(90deg, ${tokens.primary}, ${tokens.secondary})`
-
   return (
     <AbsoluteFill
       style={{
@@ -52,7 +45,7 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
         gap: 20,
       }}
     >
-      {isLD && (
+      {tokens.mascot.show && (
         <div style={{ marginBottom: 24 }}>
           <PhoneMascot scale={1} animation="entry" />
         </div>
@@ -92,7 +85,7 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
         style={{
           width: lineWidth,
           height: 2,
-          background: lineBackground,
+          background: tokens.accentLine,
           borderRadius: 1,
         }}
       />

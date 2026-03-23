@@ -8,6 +8,7 @@ import {
 } from "remotion"
 import { z } from "zod"
 import { ProductShortConfigSchema } from "../schema"
+import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
 import { PhoneMascot } from "../../ClaudeCodeTutorial/components/PhoneMascot"
 
 type CtaSceneProps = Extract<
@@ -20,6 +21,7 @@ const PULSE_COUNT = 3
 export const CtaScene: React.FC<CtaSceneProps> = ({ text, url }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
+  const tokens = useThemeTokens()
 
   const ctaSpring = spring({
     frame,
@@ -32,7 +34,7 @@ export const CtaScene: React.FC<CtaSceneProps> = ({ text, url }) => {
   return (
     <AbsoluteFill
       style={{
-        background: "#FFFFFF",
+        background: tokens.background,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -77,7 +79,7 @@ export const CtaScene: React.FC<CtaSceneProps> = ({ text, url }) => {
                 width: 600,
                 height: 600,
                 borderRadius: "50%",
-                border: "3px solid #CC3333",
+                border: `3px solid ${tokens.primary}`,
                 opacity: pulseOpacity,
               }}
             />
@@ -91,10 +93,10 @@ export const CtaScene: React.FC<CtaSceneProps> = ({ text, url }) => {
 
       <div
         style={{
-          fontFamily: "system-ui, sans-serif",
+          fontFamily: tokens.fontFamily,
           fontSize: 52,
           fontWeight: 700,
-          color: "#CC3333",
+          color: tokens.primary,
           textAlign: "center",
           opacity: ctaSpring,
           transform: `translateY(${ctaY}px)`,
@@ -106,9 +108,9 @@ export const CtaScene: React.FC<CtaSceneProps> = ({ text, url }) => {
       {url && (
         <div
           style={{
-            fontFamily: "system-ui, sans-serif",
+            fontFamily: tokens.fontFamily,
             fontSize: 28,
-            color: "#888888",
+            color: tokens.foregroundMid,
             opacity: ctaSpring,
           }}
         >

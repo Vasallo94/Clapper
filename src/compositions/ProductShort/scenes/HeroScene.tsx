@@ -2,6 +2,7 @@ import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { z } from "zod"
 import { ProductShortConfigSchema } from "../schema"
+import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
 import { PhoneMascot } from "../../ClaudeCodeTutorial/components/PhoneMascot"
 
 type HeroSceneProps = Extract<
@@ -12,6 +13,7 @@ type HeroSceneProps = Extract<
 export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
+  const tokens = useThemeTokens()
 
   const titleSpring = spring({ frame, fps, config: { damping: 200 }, durationInFrames: 20 })
   const titleY = interpolate(titleSpring, [0, 1], [60, 0])
@@ -34,7 +36,7 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle }) => {
   return (
     <AbsoluteFill
       style={{
-        background: "#CC3333",
+        background: tokens.primary,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -54,10 +56,10 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle }) => {
 
       <div
         style={{
-          fontFamily: "system-ui, sans-serif",
+          fontFamily: tokens.fontFamily,
           fontSize: 72,
           fontWeight: 800,
-          color: "#FFFFFF",
+          color: tokens.primaryForeground,
           textAlign: "center",
           lineHeight: 1.1,
           opacity: titleSpring,
@@ -70,10 +72,10 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle }) => {
       {subtitle && (
         <div
           style={{
-            fontFamily: "system-ui, sans-serif",
+            fontFamily: tokens.fontFamily,
             fontSize: 36,
             fontWeight: 400,
-            color: "rgba(255,255,255,0.9)",
+            color: `${tokens.primaryForeground}e6`,
             textAlign: "center",
             opacity: subtitleSpring,
           }}

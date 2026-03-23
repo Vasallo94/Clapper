@@ -71,6 +71,7 @@ Key token groups:
 - **Render script uses `@remotion/bundler` with Tailwind webpack override** — `remotion.config.ts` does NOT apply to the Node.js render API, the override is passed manually in `scripts/render.ts`.
 - **Never check theme name directly in scenes.** Use `useThemeTokens()` and read token values. The `isLD` / `useTheme()` pattern is deprecated.
 - **Scene prop types are exported from `schema.ts`.** Import `IntroSceneProps` etc. directly — don't use `Extract<z.infer<...>>`.
+- **Escaleta validation required.** All video generation skills must present a full escaleta (script) to the user via `AskUserQuestion` and obtain explicit approval before generating `config.json`. The iteration loop has no round limit. Research remains automatic.
 
 ## Code style
 

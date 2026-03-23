@@ -1,10 +1,11 @@
 // src/compositions/ClaudeCodeTutorial/scenes/IntroScene.tsx
 import React from "react"
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion"
 import { z } from "zod"
 import { TutorialConfigSchema } from "../schema"
 import { useThemeTokens } from "../themes"
 import { PhoneMascot } from "../components/PhoneMascot"
+import { useSlideIn } from "../hooks/useSlideIn"
 
 type IntroSceneProps = Extract<
   z.infer<typeof TutorialConfigSchema>["scenes"][number],
@@ -16,18 +17,8 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
 
-  const titleSpring = spring({ frame, fps, config: { damping: 200 }, durationInFrames: fps })
-  const titleY = interpolate(titleSpring, [0, 1], [40, 0])
-  const titleOpacity = interpolate(titleSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-
-  const subtitleOpacity = interpolate(frame, [fps * 0.5, fps * 1], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  })
-  const subtitleY = interpolate(frame, [fps * 0.5, fps * 1], [16, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  })
+  const titleAnim = useSlideIn({ distance: 40, durationInFrames: fps })
+  const subtitleAnim = useSlideIn({ distance: 16, delay: Math.ceil(fps * 0.5), durationInFrames: Math.ceil(fps * 0.5) })
 
   const lineWidth = interpolate(frame, [fps * 0.2, fps * 0.8], [0, 120], {
     extrapolateLeft: "clamp",
@@ -59,7 +50,7 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
           letterSpacing: 4,
           textTransform: "uppercase",
           color: tokens.primary,
-          opacity: titleOpacity,
+          opacity: titleAnim.opacity,
         }}
       >
         {tokens.label}
@@ -74,8 +65,8 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
           textAlign: "center",
           maxWidth: 900,
           lineHeight: 1.2,
-          opacity: titleOpacity,
-          transform: `translateY(${titleY}px)`,
+          opacity: titleAnim.opacity,
+          transform: `translateY(${titleAnim.y}px)`,
         }}
       >
         {title}
@@ -98,8 +89,8 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
             color: tokens.foregroundMid,
             textAlign: "center",
             maxWidth: 700,
-            opacity: subtitleOpacity,
-            transform: `translateY(${subtitleY}px)`,
+            opacity: subtitleAnim.opacity,
+            transform: `translateY(${subtitleAnim.y}px)`,
           }}
         >
           {subtitle}

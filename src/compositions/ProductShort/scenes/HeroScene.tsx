@@ -4,6 +4,7 @@ import { z } from "zod"
 import { ProductShortConfigSchema } from "../schema"
 import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
 import { PhoneMascot } from "../../ClaudeCodeTutorial/components/PhoneMascot"
+import { useSlideIn } from "../../ClaudeCodeTutorial/hooks/useSlideIn"
 
 type HeroSceneProps = Extract<
   z.infer<typeof ProductShortConfigSchema>["scenes"][number],
@@ -15,15 +16,8 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle }) => {
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
 
-  const titleSpring = spring({ frame, fps, config: { damping: 200 }, durationInFrames: 20 })
-  const titleY = interpolate(titleSpring, [0, 1], [60, 0])
-
-  const subtitleSpring = spring({
-    frame: Math.max(0, frame - 8),
-    fps,
-    config: { damping: 200 },
-    durationInFrames: 20,
-  })
+  const titleAnim = useSlideIn({ distance: 60 })
+  const subtitleAnim = useSlideIn({ distance: 30, delay: 8 })
 
   const mascotSpring = spring({
     frame: Math.max(0, frame - 4),
@@ -62,8 +56,8 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle }) => {
           color: tokens.primaryForeground,
           textAlign: "center",
           lineHeight: 1.1,
-          opacity: titleSpring,
-          transform: `translateY(${titleY}px)`,
+          opacity: titleAnim.opacity,
+          transform: `translateY(${titleAnim.y}px)`,
         }}
       >
         {title}
@@ -77,7 +71,7 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle }) => {
             fontWeight: 400,
             color: `${tokens.primaryForeground}e6`,
             textAlign: "center",
-            opacity: subtitleSpring,
+            opacity: subtitleAnim.opacity,
           }}
         >
           {subtitle}

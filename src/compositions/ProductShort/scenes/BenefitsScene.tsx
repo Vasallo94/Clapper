@@ -2,6 +2,8 @@ import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { z } from "zod"
 import { ProductShortConfigSchema } from "../schema"
+import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
+import { useSlideIn } from "../../ClaudeCodeTutorial/hooks/useSlideIn"
 
 type BenefitsSceneProps = Extract<
   z.infer<typeof ProductShortConfigSchema>["scenes"][number],
@@ -13,20 +15,21 @@ const STAGGER_FRAMES = 12
 export const BenefitsScene: React.FC<BenefitsSceneProps> = ({ title, items }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
+  const tokens = useThemeTokens()
 
-  const titleSpring = spring({ frame, fps, config: { damping: 200 }, durationInFrames: 20 })
+  const titleAnim = useSlideIn()
 
   return (
     <AbsoluteFill
       style={{
-        background: "#FFFFFF",
+        background: tokens.background,
         display: "flex",
         flexDirection: "column",
         padding: "120px 60px",
         gap: 40,
       }}
     >
-      {/* Red accent bar on the left */}
+      {/* Accent bar on the left */}
       <div
         style={{
           position: "absolute",
@@ -34,18 +37,18 @@ export const BenefitsScene: React.FC<BenefitsSceneProps> = ({ title, items }) =>
           top: 0,
           width: 8,
           height: "100%",
-          background: "#CC3333",
+          background: tokens.primary,
         }}
       />
 
       {title && (
         <div
           style={{
-            fontFamily: "system-ui, sans-serif",
+            fontFamily: tokens.fontFamily,
             fontSize: 48,
             fontWeight: 700,
-            color: "#1A1A1A",
-            opacity: titleSpring,
+            color: tokens.foreground,
+            opacity: titleAnim.opacity,
             paddingLeft: 24,
           }}
         >
@@ -77,10 +80,10 @@ export const BenefitsScene: React.FC<BenefitsSceneProps> = ({ title, items }) =>
               <div style={{ fontSize: 48, flexShrink: 0 }}>{item.icon}</div>
               <div
                 style={{
-                  fontFamily: "system-ui, sans-serif",
+                  fontFamily: tokens.fontFamily,
                   fontSize: 36,
                   fontWeight: 500,
-                  color: "#1A1A1A",
+                  color: tokens.foreground,
                   lineHeight: 1.3,
                 }}
               >

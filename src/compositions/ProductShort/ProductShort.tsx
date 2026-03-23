@@ -1,6 +1,7 @@
 import React from "react"
 import { AbsoluteFill, Series } from "remotion"
 import { ThemeContext } from "../ClaudeCodeTutorial/ThemeContext"
+import { getTheme } from "../ClaudeCodeTutorial/themes"
 import { ProductShortConfig } from "./schema"
 import { BenefitsScene } from "./scenes/BenefitsScene"
 import { CtaScene } from "./scenes/CtaScene"
@@ -10,7 +11,7 @@ import { PricingScene } from "./scenes/PricingScene"
 export const ProductShort: React.FC<ProductShortConfig> = (config) => {
   return (
     <ThemeContext.Provider value="linea-directa">
-      <AbsoluteFill style={{ background: "#FFFFFF" }}>
+      <AbsoluteFill style={{ background: getTheme("linea-directa").background }}>
         <Series>
           {config.scenes.map((scene, i) => {
             const durationInFrames = Math.ceil(scene.durationInSeconds * config.fps)

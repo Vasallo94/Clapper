@@ -8,6 +8,7 @@ import {
 } from "remotion"
 import { z } from "zod"
 import { ProductShortConfigSchema } from "../schema"
+import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
 
 type PricingSceneProps = Extract<
   z.infer<typeof ProductShortConfigSchema>["scenes"][number],
@@ -22,11 +23,12 @@ export const PricingScene: React.FC<PricingSceneProps> = ({
 }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
+  const tokens = useThemeTokens()
 
   const isDark = variant === "dark"
-  const bg = isDark ? "#CC3333" : "#FFFFFF"
-  const priceColor = isDark ? "#FFFFFF" : "#CC3333"
-  const textColor = isDark ? "rgba(255,255,255,0.85)" : "#888888"
+  const bg = isDark ? tokens.primary : tokens.background
+  const priceColor = isDark ? tokens.primaryForeground : tokens.primary
+  const textColor = isDark ? `${tokens.primaryForeground}d9` : tokens.foregroundMid
 
   const priceSpring = spring({
     frame,
@@ -64,7 +66,7 @@ export const PricingScene: React.FC<PricingSceneProps> = ({
             width: 400,
             height: 400,
             borderRadius: "50%",
-            border: "4px solid #CC3333",
+            border: `4px solid ${tokens.primary}`,
             opacity: 0.15,
           }}
         />
@@ -72,7 +74,7 @@ export const PricingScene: React.FC<PricingSceneProps> = ({
 
       <div
         style={{
-          fontFamily: "system-ui, sans-serif",
+          fontFamily: tokens.fontFamily,
           fontSize: 120,
           fontWeight: 900,
           color: priceColor,
@@ -85,7 +87,7 @@ export const PricingScene: React.FC<PricingSceneProps> = ({
       {period && (
         <div
           style={{
-            fontFamily: "system-ui, sans-serif",
+            fontFamily: tokens.fontFamily,
             fontSize: 36,
             color: textColor,
             opacity: detailSpring,
@@ -98,7 +100,7 @@ export const PricingScene: React.FC<PricingSceneProps> = ({
       {note && (
         <div
           style={{
-            fontFamily: "system-ui, sans-serif",
+            fontFamily: tokens.fontFamily,
             fontSize: 28,
             color: textColor,
             opacity: detailSpring,

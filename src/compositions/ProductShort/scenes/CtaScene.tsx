@@ -10,6 +10,7 @@ import { z } from "zod"
 import { ProductShortConfigSchema } from "../schema"
 import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
 import { PhoneMascot } from "../../ClaudeCodeTutorial/components/PhoneMascot"
+import { useSlideIn } from "../../ClaudeCodeTutorial/hooks/useSlideIn"
 
 type CtaSceneProps = Extract<
   z.infer<typeof ProductShortConfigSchema>["scenes"][number],
@@ -23,13 +24,7 @@ export const CtaScene: React.FC<CtaSceneProps> = ({ text, url }) => {
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
 
-  const ctaSpring = spring({
-    frame,
-    fps,
-    config: { damping: 200 },
-    durationInFrames: 20,
-  })
-  const ctaY = interpolate(ctaSpring, [0, 1], [30, 0])
+  const ctaAnim = useSlideIn({ distance: 30 })
 
   return (
     <AbsoluteFill
@@ -98,8 +93,8 @@ export const CtaScene: React.FC<CtaSceneProps> = ({ text, url }) => {
           fontWeight: 700,
           color: tokens.primary,
           textAlign: "center",
-          opacity: ctaSpring,
-          transform: `translateY(${ctaY}px)`,
+          opacity: ctaAnim.opacity,
+          transform: `translateY(${ctaAnim.y}px)`,
         }}
       >
         {text}
@@ -111,7 +106,7 @@ export const CtaScene: React.FC<CtaSceneProps> = ({ text, url }) => {
             fontFamily: tokens.fontFamily,
             fontSize: 28,
             color: tokens.foregroundMid,
-            opacity: ctaSpring,
+            opacity: ctaAnim.opacity,
           }}
         >
           {url}

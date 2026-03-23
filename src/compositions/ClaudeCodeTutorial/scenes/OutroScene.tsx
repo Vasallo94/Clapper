@@ -1,10 +1,11 @@
 // src/compositions/ClaudeCodeTutorial/scenes/OutroScene.tsx
 import React from "react"
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion"
 import { z } from "zod"
 import { TutorialConfigSchema } from "../schema"
 import { useThemeTokens } from "../themes"
 import { MascotWatermark } from "../components/MascotWatermark"
+import { useSlideIn } from "../hooks/useSlideIn"
 
 type OutroSceneProps = Extract<
   z.infer<typeof TutorialConfigSchema>["scenes"][number],
@@ -16,9 +17,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
 
-  const titleSpring = spring({ frame, fps, config: { damping: 200 }, durationInFrames: Math.ceil(fps * 0.8) })
-  const titleOpacity = interpolate(titleSpring, [0, 0.4], [0, 1], { extrapolateRight: "clamp" })
-  const titleY = interpolate(titleSpring, [0, 1], [30, 0])
+  const titleAnim = useSlideIn({ distance: 30, durationInFrames: Math.ceil(fps * 0.8) })
 
   return (
     <AbsoluteFill
@@ -38,8 +37,8 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
           fontSize: 48,
           fontWeight: 800,
           color: tokens.foreground,
-          opacity: titleOpacity,
-          transform: `translateY(${titleY}px)`,
+          opacity: titleAnim.opacity,
+          transform: `translateY(${titleAnim.y}px)`,
           textAlign: "center",
         }}
       >

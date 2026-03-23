@@ -9,15 +9,30 @@ import { calculateMetadata as calculateProductShortMetadata } from "./compositio
 import { ProductShortConfigSchema } from "./compositions/ProductShort/schema";
 
 const defaultTutorialProps = {
-  id: "default",
-  title: "Tutorial",
-  description: "",
+  id: "compact-command",
+  title: "El comando /compact",
+  description: "Cómo usar /compact para comprimir el contexto de Claude Code",
   fps: 30 as const,
   width: 1280 as const,
   height: 720 as const,
   theme: "linea-directa" as const,
   scenes: [
-    { type: "intro" as const, title: "Tutorial", durationInSeconds: 3 },
+    { type: "intro" as const, title: "El comando /compact", subtitle: "Comprime el contexto sin perder el hilo", durationInSeconds: 4 },
+    {
+      type: "terminal" as const,
+      title: "Uso básico",
+      lines: [
+        { kind: "command" as const, text: "claude" },
+        { kind: "claude" as const, text: "> Hola, ¿en qué puedo ayudarte hoy?" },
+        { kind: "blank" as const, text: "" },
+        { kind: "command" as const, text: "/compact" },
+        { kind: "output" as const, text: "  Comprimiendo contexto..." },
+        { kind: "output" as const, text: "✓ Contexto comprimido. Tokens: 1,200 → 340" },
+      ],
+      durationInSeconds: 8,
+    },
+    { type: "callout" as const, text: "/compact resume toda la conversación anterior en un resumen compacto. Ideal cuando el contexto está lleno pero quieres seguir trabajando.", position: "bottom" as const, background: "overlay" as const, durationInSeconds: 5 },
+    { type: "outro" as const, title: "Resumen", bullets: ["Usa /compact cuando el contexto esté casi lleno", "No pierdes el hilo — solo se comprime", "Puedes ver cuántos tokens ahorraste"], durationInSeconds: 6 },
   ],
 };
 

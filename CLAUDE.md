@@ -30,16 +30,22 @@ Five scene types defined in `schema.ts`: `intro`, `terminal`, `callout`, `outro`
 
 ### Terminal animation timing
 
-`TerminalScene` builds a timing map where each line has `startFrame` + `durationFrames`:
-- `command`: typed char-by-char (2 chars/frame)
-- `claude`: streaming effect (3 chars/frame, 12-frame gap)
-- `output`: instant reveal (4 frames)
+`TerminalScene` simulates a Claude Code CLI session. It renders user messages in bordered boxes ("You" label), Claude responses with orange "⏵ Claude" label, and tool outputs with orange left border. A status bar at the bottom shows model name, animated context bar, and cost.
+
+Timing map — each line has `startFrame` + `durationFrames`:
+- `command`: typewriter effect (0.5 chars/frame)
+- `claude`: streaming effect (1 char/frame, 18-frame gap between lines)
+- `output`: instant reveal (8 frames)
 - `blank`: spacer
 - `delayAfterMs` on any line adds pause before it appears
 
 ### Theme system
 
-`ThemeContext` provides `"default"` (dark, green accents) or `"linea-directa"` (white, red #CC3333, pixel phone mascot). Scene components read theme via `useTheme()` hook and branch styling.
+`ThemeContext` provides `"default"` (dark, green accents) or `"linea-directa"` (white bg, red #CC3333, PhoneMascot SVG). All design tokens are centralized in `themes.ts` via `ThemeTokens` type. Scene components read tokens via `useThemeTokens()` hook. Terminal scenes always use dark background regardless of theme.
+
+### PhoneMascot
+
+`components/PhoneMascot.tsx` — SVG mascot faithful to the real Línea Directa logo (button phone with 3×3 keypad, handset, cable, 4 wheels). Props: `scale`, `animation` (`"none"` | `"idle"` | `"ring"` | `"entry"` | `"dial"`). Entry animation chains roll-in → handset lift → idle breathing.
 
 ### Custom scene extension
 

@@ -58,13 +58,21 @@ El JSON debe ser válido según el schema en `src/compositions/ClaudeCodeTutoria
 ### Campo `theme`
 
 `"theme": "default" | "linea-directa"` — controla el branding de todas las escenas.
-- `"default"`: fondo oscuro, acentos verdes (estilo Claude Code)
-- `"linea-directa"`: fondo blanco, acentos rojos #CC3333, mascota pixel art
+- `"default"`: fondo oscuro, acentos verdes (estilo GitHub dark)
+- `"linea-directa"`: fondo blanco, acentos rojos #CC3333, PhoneMascot SVG (teléfono con ruedas). La terminal siempre usa fondo oscuro.
 
 ### Reglas para el tipo "terminal":
-- `kind: "command"` → lo que escribe el usuario (usa los comandos exactos del subagente)
-- `kind: "output"` → respuesta inmediata del sistema (aparece instantánea)
-- `kind: "claude"` → respuesta de Claude (aparece como streaming)
+
+La escena terminal simula la interfaz real de Claude Code CLI:
+- Mensajes del usuario en cajas bordeadas con etiqueta "You"
+- Respuestas de Claude con etiqueta naranja "⏵ Claude"
+- Outputs de herramientas con borde izquierdo naranja (verde si es ✓)
+- Barra de estado inferior con modelo, barra de contexto animada y coste
+
+Tipos de línea:
+- `kind: "command"` → lo que escribe el usuario, efecto máquina de escribir (0.5 chars/frame)
+- `kind: "output"` → respuesta del sistema con borde izquierdo (aparece instantánea)
+- `kind: "claude"` → respuesta de Claude con streaming (1 char/frame)
 - `kind: "blank"` → separador visual entre grupos de líneas
 - Usa `delayAfterMs` para pausas dramáticas (ej: 800ms antes de que aparezca el output)
 

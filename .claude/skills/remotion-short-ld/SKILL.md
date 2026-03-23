@@ -48,8 +48,10 @@ Escribe `shorts/[slug]/config.json` válido según `src/compositions/ProductShor
 
 ### Marca Línea Directa — Referencia:
 - **Color primario:** rojo #CC3333
+- **Color secundario:** verde #225050
 - **Claim:** "El valor de ser directo"
 - **Tono:** desenfadado, directo, con humor ("Tipo Directo")
+- **Mascota:** `PhoneMascot` (SVG del teléfono con ruedas). Animations: `"entry"` (intro), `"idle"` (breathing), `"dial"` (terminal), `"ring"` (attention)
 - **Productos:** coche, moto, hogar, salud, movilidad personal, mascotas, autónomos/pymes, antiokupación
 
 ## Paso 4: Renderizar

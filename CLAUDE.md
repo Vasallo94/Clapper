@@ -72,6 +72,7 @@ Key token groups:
 - **Never check theme name directly in scenes.** Use `useThemeTokens()` and read token values. The `isLD` / `useTheme()` pattern is deprecated.
 - **Scene prop types are exported from `schema.ts`.** Import `IntroSceneProps` etc. directly — don't use `Extract<z.infer<...>>`.
 - **Escaleta validation required.** All video generation skills must present a full escaleta (script) to the user via `AskUserQuestion` and obtain explicit approval before generating `config.json`. The iteration loop has no round limit. Research remains automatic.
+- **Default theme is `"linea-directa"`.** All video compositions must use `"linea-directa"` theme unless the user explicitly requests `"default"`. Never generate a config.json with `"theme": "default"` by default.
 
 ## Code style
 

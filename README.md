@@ -36,7 +36,7 @@ Escenas: `hero`, `benefits`, `pricing`, `cta`
 
 Cada composición sigue el mismo patrón:
 
-1. **Skill** (`/tutorial-generator`, `/short-ld`) — investiga, genera copy, escribe el config y renderiza
+1. **Skill** (`/tutorial-generator`, `/short-ld`) — investiga, genera copy, presenta escaleta para aprobación, escribe el config y renderiza
 2. **Config JSON** — fuente de verdad con las escenas y sus propiedades
 3. **Schema Zod** — valida el config en tiempo de render
 4. **Composición React** — renderiza las escenas secuencialmente con `<Series>`
@@ -89,7 +89,7 @@ shorts/[slug]/           # Configs + outputs de shorts
 ## Temas
 
 - `"default"` — fondo oscuro, acentos verdes (estilo Claude Code)
-- `"linea-directa"` — fondo blanco, acentos rojos #CC3333, mascota pixel art
+- `"linea-directa"` (por defecto) — fondo blanco, acentos rojos #CC3333, mascota SVG
 
 ## Añadir una nueva composición
 

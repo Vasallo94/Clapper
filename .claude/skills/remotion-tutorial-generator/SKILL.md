@@ -105,9 +105,10 @@ El JSON debe ser válido según el schema en `src/compositions/ClaudeCodeTutoria
 
 ### Campo `theme`
 
-`"theme": "default" | "linea-directa"` — controla el branding de todas las escenas.
-- `"default"`: fondo oscuro, acentos verdes (estilo GitHub dark)
-- `"linea-directa"`: fondo blanco, acentos rojos #CC3333, PhoneMascot SVG (teléfono con ruedas). La terminal siempre usa fondo oscuro.
+**Usa siempre `"theme": "linea-directa"`** salvo que el usuario pida explícitamente otro tema.
+
+- `"linea-directa"` (por defecto): fondo blanco, acentos rojos #CC3333, PhoneMascot SVG (teléfono con ruedas). La terminal siempre usa fondo oscuro.
+- `"default"`: fondo oscuro, acentos verdes (estilo GitHub dark). Solo si el usuario lo pide.
 
 ### Reglas para el tipo "terminal":
 

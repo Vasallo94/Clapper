@@ -29,7 +29,7 @@ El repo empezó como generador de tutoriales de Claude Code y evolucionó a una 
 
 - **Catálogo web** — página estática (Astro o similar) que liste todos los vídeos generados con preview y metadatos del config.
 - **CI/CD render** — GitHub Action que renderice automáticamente cuando se pushea un config.json nuevo.
-- **Extraer shared/** — cuando haya una 3ª composición, mover ThemeContext y PixelPhoneMascot a `src/shared/` para no depender de cross-imports entre composiciones.
+- **Extraer shared/** — parcialmente hecho: `createCalculateMetadata` extraído a `src/utils/`, `MascotWatermark` componetizado. Pendiente: mover ThemeContext y PhoneMascot a `src/shared/` cuando haya una 3ª composición (cross-import entre ProductShort y ClaudeCodeTutorial aún existe).
 - **Tests visuales** — snapshot testing con `@remotion/test` para detectar regresiones en los frames.
 
 ### Más productos Línea Directa

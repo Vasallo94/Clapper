@@ -10,6 +10,38 @@
 - Smoke test: `shorts/seguro-coche-demo/config.json`
 - README reescrito como plataforma multi-composición
 
+### PhoneMascot SVG y TerminalScene redesign
+
+- `PixelPhoneMascot` reemplazada por `PhoneMascot` SVG fiel al logo real de Línea Directa (teléfono con ruedas, auricular, cable, teclado 3×3)
+- Prop `darkBg` para outlines blancos sobre fondos oscuros (terminal)
+- `TerminalScene` rediseñada para simular la CLI real de Claude Code: cajas "You", etiqueta "⏵ Claude", barra de estado con modelo/contexto/coste
+- Fondo de terminal LD: gradiente radial cálido (`#2d1c22` → `#141014`)
+
+### Refactoring del sistema de tokens y componentes
+
+- Tokens de terminal cableados: `sceneBackground`, `labelColor`, `successColor`, `statusBarBg`, `borderColor`, `separatorColor`, `costColor`, `userMessageBg`, `userMessageBorder`
+- `MascotWatermark` — componente reutilizable para mascota en esquina (3 escenas)
+- `useSlideIn()` hook — reemplaza patrón spring+interpolate repetido en 5 escenas
+- `createCalculateMetadata<T>()` — factory genérica para ambas composiciones
+- Tipos de escena exportados desde `schema.ts` (`IntroSceneProps`, etc.)
+- `monoFontFamily` en tokens (eliminada carga separada de JetBrains Mono)
+- Todas las escenas de ProductShort tokenizadas (eliminados colores hardcodeados)
+- Eliminados tokens muertos: `backgroundAlt`, `secondaryForeground`, `primaryHover`, `primaryActive`, `terminal.cursor`
+- Eliminadas comprobaciones `isLD` / `useTheme()` en todas las escenas
+
+### Escaleta validation — flujo de aprobación de scripts
+
+- Nuevo paso en ambas skills: presentar escaleta completa al usuario via `AskUserQuestion` antes de generar config.json
+- Bucle sin límite de iteraciones hasta aprobación
+- `remotion-tutorial-generator`: Paso 4 (Escaleta) + Paso 3 (Copywriting) extraído como paso explícito
+- `remotion-short-ld`: Paso 3 (Escaleta) insertado entre Copywriting y Config
+- Regla global en `CLAUDE.md`: toda skill de vídeo debe validar la escaleta
+
+### Tema por defecto y tutorial /plugin
+
+- Tema `"linea-directa"` establecido como default obligatorio para todas las composiciones
+- Tutorial `/plugin` (54s, 7 escenas): descubrir, instalar y crear plugins de Claude Code
+
 ## 2026-03-22
 
 ### ClaudeCodeTutorial — Composición horizontal para tutoriales

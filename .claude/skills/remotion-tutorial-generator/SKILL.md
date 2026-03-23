@@ -43,17 +43,65 @@ Lanza un subagente con esta instrucción exacta:
 
 Usa la respuesta estructurada del subagente como fuente de verdad para los comandos y outputs del tutorial.
 
-## Paso 3: Genera config.json
+## Paso 3: Copywriting
 
-Con toda la información recopilada, escribe `tutorials/[slug]/config.json`.
-
-El JSON debe ser válido según el schema en `src/compositions/ClaudeCodeTutorial/schema.ts`.
+Con toda la información recopilada (research + demo), diseña el contenido del tutorial:
 
 ### Estructura mínima de un buen tutorial:
 1. `intro` (3-5s): título llamativo que explique qué va a aprender el usuario
 2. `terminal` (6-15s): demostración real del comando con líneas de tipo command, output, claude
 3. `callout` (3-5s): explicación del "por qué" o "cuándo usar" en lenguaje natural
 4. `outro` (4-8s): resumen con bullets accionables
+
+Decide la estructura, tema visual (default o linea-directa), tipos de escena y contenido narrativo. Este paso genera el contenido creativo pero NO escribe el config.json todavía.
+
+## Paso 4: Escaleta — Validación con el usuario
+
+Antes de generar el config.json, presenta la escaleta completa al usuario para su aprobación.
+
+### Formato de la escaleta
+
+Genera un bloque de texto con este formato y preséntalo usando `AskUserQuestion`:
+
+```
+## Script: [título del tutorial]
+
+**Escena 1 — intro ([duración]s)**
+  Título: "[título]"
+  Subtítulo: "[subtítulo]"
+
+**Escena 2 — terminal ([duración]s)**
+  > [command] texto del comando
+  [output] texto del output
+  [claude] respuesta de Claude
+  (líneas en blanco como separadores)
+
+**Escena 3 — callout ([duración]s)**
+  "[texto del callout]"
+  Posición: [top/bottom/right]
+
+**Escena 4 — outro ([duración]s)**
+  Título: "[título]"
+  • Bullet 1
+  • Bullet 2
+  • Bullet 3
+
+Duración total: ~[total]s
+```
+
+### Interacción
+
+Usa `AskUserQuestion` con dos opciones:
+- **Aprobar**: continuar al Paso 5 (genera config.json).
+- **Pedir cambios**: el usuario indica qué ajustar. Modifica la escaleta y vuelve a presentarla.
+
+El bucle no tiene límite de iteraciones. Repite hasta que el usuario apruebe.
+
+## Paso 5: Genera config.json
+
+Con la escaleta aprobada, escribe `tutorials/[slug]/config.json`.
+
+El JSON debe ser válido según el schema en `src/compositions/ClaudeCodeTutorial/schema.ts`.
 
 ### Campo `theme`
 
@@ -89,7 +137,7 @@ Tipos de línea:
 - La mascota en esquina se añade con `<MascotWatermark animation="..." />` — se auto-oculta en tema default
 - Fuente monoespaciada: usa `tokens.monoFontFamily` (no cargues JetBrains Mono por separado)
 
-## Paso 4: Renderizar
+## Paso 6: Renderizar
 
 Ejecuta:
 
@@ -103,7 +151,7 @@ npx remotion browser ensure
 npx tsx scripts/render.ts tutorials/[slug]/config.json
 ```
 
-## Paso 5: Resumen
+## Paso 7: Resumen
 
 Informa al usuario:
 - Escenas generadas (tipos y duraciones)

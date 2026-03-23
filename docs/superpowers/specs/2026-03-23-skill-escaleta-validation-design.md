@@ -15,12 +15,28 @@ Add an explicit escaleta validation step to all video generation skills, between
 
 ## Design
 
-### New step flow (both skills)
+### New step flow
+
+Each skill keeps its own research/content steps but shares the same validation gate before config generation.
+
+**remotion-tutorial-generator:**
 
 | Step | Name | Description |
 |------|------|-------------|
-| 1 | Research | Automatic parallel research (WebSearch, WebFetch, subagent). No user validation needed. |
-| 2 | Copywriting | Generate content from research data (headlines, benefits, terminal lines, etc.). |
+| 1 | Research | Automatic parallel research (WebSearch, WebFetch, Context7 MCP). |
+| 2 | Demo subagent | Launch subagent to capture real CLI commands and output (skip with `--no-demo`). |
+| 3 | Copywriting | Generate scene content from research + demo data. |
+| **4** | **Escaleta validation** | **Present full script to user via `AskUserQuestion`. Iterate until approved.** |
+| 5 | Generate config.json | Write validated content to `config.json`. |
+| 6 | Render | Run `npx tsx scripts/render.ts`. |
+| 7 | Summary | Report scenes, durations, output path. |
+
+**remotion-short-ld:**
+
+| Step | Name | Description |
+|------|------|-------------|
+| 1 | Research | Automatic parallel research (WebFetch lineadirecta.com, WebSearch). |
+| 2 | Copywriting | Generate headline, benefits, price, CTA from research data. |
 | **3** | **Escaleta validation** | **Present full script to user via `AskUserQuestion`. Iterate until approved.** |
 | 4 | Generate config.json | Write validated content to `config.json`. |
 | 5 | Render | Run `npx tsx scripts/render.ts`. |
@@ -64,6 +80,8 @@ Duración total: ~[total]s
 
 ### AskUserQuestion interaction
 
+`AskUserQuestion` is a built-in Claude Code tool for interactive prompting — not a custom tool to build.
+
 Present the escaleta with two options:
 - **Aprobar**: Proceed to config.json generation.
 - **Pedir cambios**: User provides feedback, Claude adjusts and re-presents.
@@ -81,6 +99,10 @@ Add to the "Critical constraints" section:
 1. `.claude/skills/remotion-tutorial-generator/SKILL.md` — insert Paso 3 (Escaleta), renumber subsequent steps.
 2. `.claude/skills/remotion-short-ld/SKILL.md` — insert Paso 3 (Escaleta), renumber subsequent steps.
 3. `CLAUDE.md` — add escaleta validation rule to Critical constraints.
+
+### Implementation note for remotion-tutorial-generator
+
+The current `remotion-tutorial-generator` has no separate "Copywriting" step — content generation is embedded within "Paso 3: Genera config.json". The implementation must extract copywriting into its own explicit step (Paso 3) so the escaleta can be presented before config.json is generated. For `remotion-short-ld`, Copywriting already exists as a separate Paso 2, so the insertion is simpler.
 
 ### What does NOT change
 

@@ -36,9 +36,50 @@ Con los datos del producto, genera:
 - **price + period**: precio real extraído o "Consulta tu precio"
 - **CTA text**: acción clara ("Calcula tu precio", "Pide presupuesto")
 
-## Paso 3: Genera config.json
+## Paso 3: Escaleta — Validación con el usuario
 
-Escribe `shorts/[slug]/config.json` válido según `src/compositions/ProductShort/schema.ts`.
+Antes de generar el config.json, presenta la escaleta completa al usuario para su aprobación.
+
+### Formato de la escaleta
+
+Genera un bloque de texto con este formato y preséntalo usando `AskUserQuestion`:
+
+```
+## Script: [nombre del producto]
+
+**Escena 1 — hero ([duración]s)**
+  Producto: [nombre]
+  Headline: "[headline]"
+
+**Escena 2 — benefits ([duración]s)**
+  Título: "[título]"
+  • [emoji] [texto beneficio 1]
+  • [emoji] [texto beneficio 2]
+  • [emoji] [texto beneficio 3]
+
+**Escena 3 — pricing ([duración]s)**
+  Precio: [precio]
+  Periodo: [periodo]
+  Variante: [light/dark]
+
+**Escena 4 — cta ([duración]s)**
+  CTA: "[texto]"
+  URL: [url]
+
+Duración total: ~[total]s
+```
+
+### Interacción
+
+Usa `AskUserQuestion` con dos opciones:
+- **Aprobar**: continuar al Paso 4 (genera config.json).
+- **Pedir cambios**: el usuario indica qué ajustar. Modifica la escaleta y vuelve a presentarla.
+
+El bucle no tiene límite de iteraciones. Repite hasta que el usuario apruebe.
+
+## Paso 4: Genera config.json
+
+Con la escaleta aprobada, escribe `shorts/[slug]/config.json` válido según `src/compositions/ProductShort/schema.ts`.
 
 ### Estructura recomendada (15-20s total):
 1. `hero` (3-5s): nombre del producto + headline en fondo rojo
@@ -54,7 +95,7 @@ Escribe `shorts/[slug]/config.json` válido según `src/compositions/ProductShor
 - **Mascota:** `PhoneMascot` (SVG del teléfono con ruedas). Animations: `"entry"` (intro), `"idle"` (breathing), `"dial"` (terminal), `"ring"` (attention)
 - **Productos:** coche, moto, hogar, salud, movilidad personal, mascotas, autónomos/pymes, antiokupación
 
-## Paso 4: Renderizar
+## Paso 5: Renderizar
 
 ```bash
 npx tsx scripts/render.ts shorts/[slug]/config.json
@@ -66,7 +107,7 @@ npx remotion browser ensure
 npx tsx scripts/render.ts shorts/[slug]/config.json
 ```
 
-## Paso 5: Resumen
+## Paso 6: Resumen
 
 Informa al usuario:
 - Escenas generadas (tipos y duraciones)

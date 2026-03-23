@@ -80,3 +80,10 @@ Informa al usuario:
 - **Todas las animaciones deben derivar de `useCurrentFrame()`** via `spring()` o `interpolate()`.
 - El `config.json` es el source of truth. Si el usuario quiere ajustes, edita el JSON y re-renderiza.
 - Los vídeos se guardan en `shorts/[slug]/output.mp4` (gitignored). Los `config.json` sí se commitean.
+
+## Reglas de código para escenas:
+- Importa el tipo de props desde `schema.ts` (`import type { HeroSceneProps } from "../schema"`) — no uses `Extract<...>`
+- Usa `useThemeTokens()` para todos los colores — nunca hardcodees `#CC3333`, `#FFFFFF`, `system-ui` etc.
+- Para animaciones "entra desde abajo", usa `useSlideIn()` de `hooks/useSlideIn.ts`
+- Colores de la marca están en tokens: `tokens.primary` (#CC3333), `tokens.primaryForeground` (#FFFFFF), `tokens.secondary` (#225050), `tokens.fontFamily` (Arial)
+- `PhoneMascot` acepta prop `darkBg` para outlines claros sobre fondos oscuros

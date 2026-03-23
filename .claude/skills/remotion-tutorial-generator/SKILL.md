@@ -82,6 +82,13 @@ Tipos de línea:
 3. Referencia en config.json con `"type": "custom", "componentId": "nombre-componente"`
 4. IMPORTANTE: Todas las animaciones deben derivar de `useCurrentFrame()`. Nunca CSS transitions.
 
+### Reglas de código para escenas:
+- Importa el tipo de props desde `schema.ts` (`import type { IntroSceneProps } from "../schema"`) — no uses `Extract<...>`
+- Usa `useThemeTokens()` para todos los colores y estilos — nunca compruebes el nombre del tema con `useTheme()` / `isLD`
+- Para animaciones "entra desde abajo", usa `useSlideIn()` de `hooks/useSlideIn.ts`
+- La mascota en esquina se añade con `<MascotWatermark animation="..." />` — se auto-oculta en tema default
+- Fuente monoespaciada: usa `tokens.monoFontFamily` (no cargues JetBrains Mono por separado)
+
 ## Paso 4: Renderizar
 
 Ejecuta:

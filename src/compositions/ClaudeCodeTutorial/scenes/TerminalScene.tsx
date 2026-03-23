@@ -10,6 +10,7 @@ import {
 import { loadFont } from "@remotion/google-fonts/JetBrainsMono"
 import { z } from "zod"
 import { TutorialConfigSchema, TerminalLine } from "../schema"
+import { useThemeTokens } from "../themes"
 
 const { fontFamily } = loadFont("normal", { weights: ["400", "700"] })
 
@@ -46,16 +47,13 @@ function buildLineTiming(lines: TerminalLine[], fps: number): LineWithTiming[] {
   })
 }
 
-const TerminalLineItem: React.FC<{ line: LineWithTiming; frame: number }> = ({ line, frame }) => {
+const TerminalLineItem: React.FC<{
+  line: LineWithTiming
+  frame: number
+  colors: Record<TerminalLine["kind"], string>
+}> = ({ line, frame, colors }) => {
   const localFrame = frame - line.startFrame
   if (localFrame < 0) return null
-
-  const colors: Record<TerminalLine["kind"], string> = {
-    command: "#7ee787",
-    output: "#c9d1d9",
-    claude: "#79c0ff",
-    blank: "transparent",
-  }
 
   let displayText = line.text
   if (line.kind === "command") {
@@ -87,6 +85,7 @@ const TerminalLineItem: React.FC<{ line: LineWithTiming; frame: number }> = ({ l
 export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
+  const tokens = useThemeTokens()
 
   const timedLines = useMemo(() => buildLineTiming(lines, fps), [lines, fps])
 
@@ -99,10 +98,17 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
     : true
   const cursorVisible = !lastCommandDone && Math.floor(frame / 15) % 2 === 0
 
+  const lineColors: Record<TerminalLine["kind"], string> = {
+    command: tokens.terminal.command,
+    output: tokens.terminal.output,
+    claude: tokens.terminal.claude,
+    blank: "transparent",
+  }
+
   return (
     <AbsoluteFill
       style={{
-        background: "#0d1117",
+        background: tokens.background,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -113,9 +119,9 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
       {title && (
         <div
           style={{
-            fontFamily: "system-ui, sans-serif",
+            fontFamily: tokens.fontFamily,
             fontSize: 18,
-            color: "#8b949e",
+            color: tokens.foregroundMid,
             marginBottom: 24,
             alignSelf: "flex-start",
             width: "90%",
@@ -130,7 +136,7 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
           width: "90%",
           borderRadius: 10,
           overflow: "hidden",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+          boxShadow: tokens.terminal.shadow,
           opacity: windowSpring,
           transform: `translateY(${windowY}px)`,
         }}
@@ -138,14 +144,14 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
         <div
           style={{
             height: 36,
-            background: "#21262d",
+            background: tokens.terminal.titleBar,
             display: "flex",
             alignItems: "center",
             paddingLeft: 14,
             gap: 8,
           }}
         >
-          {["#ff5f57", "#febc2e", "#28c840"].map((color, i) => (
+          {tokens.terminal.dots.map((color, i) => (
             <div
               key={i}
               style={{ width: 12, height: 12, borderRadius: "50%", background: color }}
@@ -155,9 +161,9 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
             style={{
               flex: 1,
               textAlign: "center",
-              fontFamily: "system-ui, sans-serif",
+              fontFamily: tokens.fontFamily,
               fontSize: 12,
-              color: "#6e7681",
+              color: tokens.terminal.titleText,
               marginRight: 52,
             }}
           >
@@ -167,7 +173,7 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
 
         <div
           style={{
-            background: "#0d1117",
+            background: tokens.terminal.bg,
             padding: "20px 24px",
             minHeight: 280,
             display: "flex",
@@ -175,14 +181,14 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
           }}
         >
           {timedLines.map((line, i) => (
-            <TerminalLineItem key={i} line={line} frame={frame} />
+            <TerminalLineItem key={i} line={line} frame={frame} colors={lineColors} />
           ))}
           {cursorVisible && (
             <div
               style={{
                 width: 8,
                 height: 18,
-                background: "#7ee787",
+                background: tokens.terminal.cursor,
                 display: "inline-block",
                 marginTop: 2,
               }}

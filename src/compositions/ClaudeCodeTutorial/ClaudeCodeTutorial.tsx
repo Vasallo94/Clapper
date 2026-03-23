@@ -2,6 +2,7 @@ import React from "react"
 import { AbsoluteFill, Series } from "remotion"
 import { TutorialConfig } from "./schema"
 import { ThemeContext } from "./ThemeContext"
+import { getTheme } from "./themes"
 import { IntroScene } from "./scenes/IntroScene"
 import { TerminalScene } from "./scenes/TerminalScene"
 import { CalloutScene } from "./scenes/CalloutScene"
@@ -9,7 +10,7 @@ import { OutroScene } from "./scenes/OutroScene"
 import { CustomScene } from "./scenes/CustomScene"
 
 export const ClaudeCodeTutorial: React.FC<TutorialConfig> = (config) => {
-  const bg = config.theme === "linea-directa" ? "#FFFFFF" : "#0d1117"
+  const bg = getTheme(config.theme ?? "default").background
   return (
     <ThemeContext.Provider value={config.theme ?? "default"}>
       <AbsoluteFill style={{ background: bg }}>

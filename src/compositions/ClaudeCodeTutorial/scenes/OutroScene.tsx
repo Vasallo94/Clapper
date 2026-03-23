@@ -4,6 +4,7 @@ import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } fr
 import { z } from "zod"
 import { TutorialConfigSchema } from "../schema"
 import { useTheme } from "../ThemeContext"
+import { useThemeTokens } from "../themes"
 import { PixelPhoneMascot } from "../components/PixelPhoneMascot"
 
 type OutroSceneProps = Extract<
@@ -15,6 +16,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const theme = useTheme()
+  const tokens = useThemeTokens()
   const isLD = theme === "linea-directa"
 
   const titleSpring = spring({ frame, fps, config: { damping: 200 }, durationInFrames: Math.ceil(fps * 0.8) })
@@ -24,7 +26,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
   return (
     <AbsoluteFill
       style={{
-        background: isLD ? "#FFFFFF" : "linear-gradient(135deg, #0d1117 0%, #161b22 100%)",
+        background: tokens.backgroundGradient,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -35,10 +37,10 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
     >
       <div
         style={{
-          fontFamily: "system-ui, sans-serif",
+          fontFamily: tokens.fontFamily,
           fontSize: 48,
           fontWeight: 800,
-          color: isLD ? "#1A1A1A" : "#f0f6fc",
+          color: tokens.foreground,
           opacity: titleOpacity,
           transform: `translateY(${titleY}px)`,
           textAlign: "center",
@@ -78,16 +80,16 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
                     width: 8,
                     height: 8,
                     borderRadius: "50%",
-                    background: isLD ? "#CC3333" : "#7ee787",
+                    background: tokens.primary,
                     flexShrink: 0,
                     marginTop: 8,
                   }}
                 />
                 <div
                   style={{
-                    fontFamily: "system-ui, sans-serif",
+                    fontFamily: tokens.fontFamily,
                     fontSize: 20,
-                    color: isLD ? "#555555" : "#8b949e",
+                    color: tokens.foregroundMid,
                     lineHeight: 1.5,
                   }}
                 >
@@ -102,9 +104,9 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
       <div
         style={{
           marginTop: 16,
-          fontFamily: "system-ui, sans-serif",
+          fontFamily: tokens.fontFamily,
           fontSize: 13,
-          color: isLD ? "#CC3333" : "#484f58",
+          color: isLD ? tokens.primary : tokens.foregroundLow,
           letterSpacing: 2,
           textTransform: "uppercase",
           opacity: interpolate(frame, [fps * 1.5, fps * 2], [0, 1], {
@@ -113,7 +115,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
           }),
         }}
       >
-        {isLD ? "Línea Directa · Claude Code" : "Claude Code Tutorials"}
+        {tokens.label}
       </div>
 
       {isLD && (

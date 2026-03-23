@@ -4,6 +4,7 @@ import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } fr
 import { z } from "zod"
 import { TutorialConfigSchema } from "../schema"
 import { useTheme } from "../ThemeContext"
+import { useThemeTokens } from "../themes"
 import { PixelPhoneMascot } from "../components/PixelPhoneMascot"
 
 type IntroSceneProps = Extract<
@@ -15,6 +16,7 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const theme = useTheme()
+  const tokens = useThemeTokens()
   const isLD = theme === "linea-directa"
 
   const titleSpring = spring({ frame, fps, config: { damping: 200 }, durationInFrames: fps })
@@ -35,10 +37,14 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
     extrapolateRight: "clamp",
   })
 
+  const lineBackground = isLD
+    ? tokens.primary
+    : `linear-gradient(90deg, ${tokens.primary}, ${tokens.secondary})`
+
   return (
     <AbsoluteFill
       style={{
-        background: isLD ? "#FFFFFF" : "linear-gradient(135deg, #0d1117 0%, #161b22 100%)",
+        background: tokens.backgroundGradient,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -54,24 +60,24 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
 
       <div
         style={{
-          fontFamily: "system-ui, sans-serif",
+          fontFamily: tokens.fontFamily,
           fontSize: 14,
           fontWeight: 600,
           letterSpacing: 4,
           textTransform: "uppercase",
-          color: isLD ? "#CC3333" : "#7ee787",
+          color: tokens.primary,
           opacity: titleOpacity,
         }}
       >
-        {isLD ? "Línea Directa · Claude Code" : "Claude Code · Tutorial"}
+        {tokens.label}
       </div>
 
       <div
         style={{
-          fontFamily: "system-ui, sans-serif",
+          fontFamily: tokens.fontFamily,
           fontSize: 56,
           fontWeight: 800,
-          color: isLD ? "#1A1A1A" : "#f0f6fc",
+          color: tokens.foreground,
           textAlign: "center",
           maxWidth: 900,
           lineHeight: 1.2,
@@ -86,7 +92,7 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
         style={{
           width: lineWidth,
           height: 2,
-          background: isLD ? "#CC3333" : "linear-gradient(90deg, #7ee787, #79c0ff)",
+          background: lineBackground,
           borderRadius: 1,
         }}
       />
@@ -94,9 +100,9 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
       {subtitle && (
         <div
           style={{
-            fontFamily: "system-ui, sans-serif",
+            fontFamily: tokens.fontFamily,
             fontSize: 22,
-            color: isLD ? "#888888" : "#8b949e",
+            color: tokens.foregroundMid,
             textAlign: "center",
             maxWidth: 700,
             opacity: subtitleOpacity,

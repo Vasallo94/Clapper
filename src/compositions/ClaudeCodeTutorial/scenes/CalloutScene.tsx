@@ -3,7 +3,7 @@ import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { z } from "zod"
 import { TutorialConfigSchema } from "../schema"
-import { useTheme } from "../ThemeContext"
+import { useThemeTokens } from "../themes"
 
 type CalloutSceneProps = Extract<
   z.infer<typeof TutorialConfigSchema>["scenes"][number],
@@ -29,8 +29,7 @@ export const CalloutScene: React.FC<CalloutSceneProps> = ({
 }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
-  const theme = useTheme()
-  const isLD = theme === "linea-directa"
+  const tokens = useThemeTokens()
 
   const enterSpring = spring({ frame, fps, config: { damping: 20, stiffness: 200 }, durationInFrames: Math.ceil(fps * 0.6) })
   const origin = ORIGIN[position]
@@ -39,15 +38,9 @@ export const CalloutScene: React.FC<CalloutSceneProps> = ({
   const opacity = interpolate(enterSpring, [0, 0.4], [0, 1], { extrapolateRight: "clamp" })
 
   const justify = position === "right" ? "flex-end" : "center"
-
   const align = ALIGN_MAP[position]
 
-  let bgColor: string
-  if (isLD) {
-    bgColor = "#FFFFFF"
-  } else {
-    bgColor = background === "overlay" ? "rgba(0,0,0,0.65)" : "#0d1117"
-  }
+  const bgColor = background === "overlay" ? tokens.overlay : tokens.background
 
   return (
     <AbsoluteFill
@@ -62,22 +55,22 @@ export const CalloutScene: React.FC<CalloutSceneProps> = ({
       <div
         style={{
           maxWidth: 640,
-          background: isLD ? "#FFFFFF" : "linear-gradient(135deg, #161b22 0%, #21262d 100%)",
-          border: isLD ? "1px solid #EFEFEF" : "1px solid #30363d",
-          borderLeft: isLD ? "4px solid #CC3333" : "4px solid #7ee787",
+          background: tokens.card.bgGradient,
+          border: `1px solid ${tokens.card.border}`,
+          borderLeft: `4px solid ${tokens.card.accentBorder}`,
           borderRadius: 10,
           padding: "28px 36px",
           opacity,
           transform: `translate(${tx}px, ${ty}px)`,
-          boxShadow: isLD ? "0 4px 20px rgba(0,0,0,0.08)" : "0 12px 40px rgba(0,0,0,0.5)",
+          boxShadow: tokens.card.shadow,
         }}
       >
         <div
           style={{
-            fontFamily: "system-ui, sans-serif",
+            fontFamily: tokens.fontFamily,
             fontSize: 22,
             lineHeight: 1.5,
-            color: isLD ? "#1A1A1A" : "#f0f6fc",
+            color: tokens.foreground,
             fontWeight: 500,
           }}
         >

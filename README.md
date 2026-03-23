@@ -1,6 +1,6 @@
-# Tutorial Video Generator
+# Remotion Video Platform
 
-Pipeline para generar vídeos educativos sobre features de Claude Code usando [Remotion](https://remotion.dev).
+Plataforma de generación de vídeos con [Remotion](https://remotion.dev), automatizada con skills de [Claude Code](https://claude.ai/code). Cada tipo de vídeo es una composición independiente con su propio schema, escenas y skill.
 
 ## Setup
 
@@ -8,52 +8,54 @@ Pipeline para generar vídeos educativos sobre features de Claude Code usando [R
 npm i
 ```
 
-## Generar un tutorial con Claude Code
+## Composiciones
 
-Este proyecto incluye una **skill de Claude Code** que automatiza todo el proceso: investigar la feature, generar el config JSON y renderizar el vídeo.
+### ClaudeCodeTutorial (1280×720, horizontal)
 
-### 1. Registrar la skill
-
-La skill ya está registrada en `.claude/skills/tutorial-generator`. Si clonas el repo, los symlinks deberían funcionar directamente. Si no, créalos:
-
-```bash
-mkdir -p .claude/skills
-ln -s ../../skills/tutorial-generator .claude/skills/tutorial-generator
-```
-
-### 2. Invocar la skill desde Claude Code
-
-Dentro de una sesión de Claude Code en este directorio:
+Vídeos educativos sobre features de Claude Code con terminal simulada, callouts y branding configurable.
 
 ```
 /tutorial-generator "explica el comando /plan"
 /tutorial-generator "cómo usar git worktrees en Claude Code"
-/tutorial-generator "https://docs.anthropic.com/..." "explica esta feature"
 ```
 
-Claude Code se encarga de:
-- Investigar la feature (Context7, web search)
-- Lanzar un subagente que documenta comandos y outputs reales
-- Generar `tutorials/[slug]/config.json` con las escenas
-- Renderizar el MP4 automáticamente
+Escenas: `intro`, `terminal`, `callout`, `outro`, `custom`
 
-### 3. Ajustar y re-renderizar
+### ProductShort (1080×1920, vertical 9:16)
 
-El `config.json` es la fuente de verdad. Si quieres cambiar algo, edita el JSON y:
+Shorts de marketing para productos de Línea Directa. Formato vertical para Instagram Reels, TikTok y LinkedIn.
 
-```bash
-npx tsx scripts/render.ts tutorials/[slug]/config.json
+```
+/short-ld "seguro de coche"
+/short-ld "seguro de mascotas" --headline "Desde 9€/mes"
 ```
 
-## Renderizado manual
+Escenas: `hero`, `benefits`, `pricing`, `cta`
 
-Si ya tienes un `config.json`, renderiza directamente:
+## Cómo funciona
+
+Cada composición sigue el mismo patrón:
+
+1. **Skill** (`/tutorial-generator`, `/short-ld`) — investiga, genera copy, escribe el config y renderiza
+2. **Config JSON** — fuente de verdad con las escenas y sus propiedades
+3. **Schema Zod** — valida el config en tiempo de render
+4. **Composición React** — renderiza las escenas secuencialmente con `<Series>`
+
+El `config.json` es lo único que necesitas editar para ajustar un vídeo. Re-renderiza con:
 
 ```bash
+npx tsx scripts/render.ts <ruta-al-config.json>
+```
+
+## Renderizado
+
+```bash
+# Tutorial
 npx tsx scripts/render.ts tutorials/plan-command/config.json
-```
 
-El vídeo se genera en `tutorials/[slug]/output.mp4`.
+# Short de producto
+npx tsx scripts/render.ts shorts/seguro-coche-demo/config.json
+```
 
 Si falla con error de Chromium:
 
@@ -61,17 +63,37 @@ Si falla con error de Chromium:
 npx remotion browser ensure
 ```
 
-## Temas
-
-Se configura con el campo `"theme"` en el config JSON:
-
-- `"default"` — fondo oscuro, acentos verdes (estilo Claude Code)
-- `"linea-directa"` — fondo blanco, acentos rojos #CC3333, mascota pixel art
-
-## Preview (Remotion Studio)
+## Preview
 
 ```bash
 npm run dev
 ```
 
-Abre el Studio en el navegador para previsualizar las composiciones sin renderizar a MP4.
+Abre Remotion Studio en el navegador para previsualizar cualquier composición sin renderizar a MP4.
+
+## Estructura
+
+```
+src/compositions/
+  ClaudeCodeTutorial/    # Composición horizontal (tutoriales)
+  ProductShort/          # Composición vertical (marketing shorts)
+
+skills/
+  tutorial-generator/    # Skill para /tutorial-generator
+  short-ld/              # Skill para /short-ld
+
+tutorials/[slug]/        # Configs + outputs de tutoriales
+shorts/[slug]/           # Configs + outputs de shorts
+```
+
+## Temas
+
+- `"default"` — fondo oscuro, acentos verdes (estilo Claude Code)
+- `"linea-directa"` — fondo blanco, acentos rojos #CC3333, mascota pixel art
+
+## Añadir una nueva composición
+
+1. Crea `src/compositions/NuevaComp/` con `schema.ts`, `calculateMetadata.ts`, componente principal y escenas
+2. Regístrala en `src/Root.tsx`
+3. Añade `"composition": "NuevaComp"` al campo del config JSON
+4. Crea una skill en `skills/nombre-skill/SKILL.md` + symlink en `.claude/skills/`

@@ -57,3 +57,9 @@ export const ProductShortConfigSchema = z.object({
 
 export type ProductShortConfig = z.infer<typeof ProductShortConfigSchema>
 export type ProductShortScene = z.infer<typeof ProductShortSceneSchema>
+
+// Scene prop types
+export type HeroSceneProps = z.infer<typeof HeroSceneSchema>
+export type BenefitsSceneProps = z.infer<typeof BenefitsSceneSchema>
+export type PricingSceneProps = z.infer<typeof PricingSceneSchema>
+export type CtaSceneProps = z.infer<typeof CtaSceneSchema>

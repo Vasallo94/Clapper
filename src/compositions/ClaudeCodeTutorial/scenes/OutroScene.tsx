@@ -1,16 +1,10 @@
 // src/compositions/ClaudeCodeTutorial/scenes/OutroScene.tsx
 import React from "react"
 import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion"
-import { z } from "zod"
-import { TutorialConfigSchema } from "../schema"
+import type { OutroSceneProps } from "../schema"
 import { useThemeTokens } from "../themes"
 import { MascotWatermark } from "../components/MascotWatermark"
 import { useSlideIn } from "../hooks/useSlideIn"
-
-type OutroSceneProps = Extract<
-  z.infer<typeof TutorialConfigSchema>["scenes"][number],
-  { type: "outro" }
->
 
 export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
   const frame = useCurrentFrame()

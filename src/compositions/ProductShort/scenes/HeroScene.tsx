@@ -1,15 +1,9 @@
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
-import { z } from "zod"
-import { ProductShortConfigSchema } from "../schema"
+import type { HeroSceneProps } from "../schema"
 import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
 import { PhoneMascot } from "../../ClaudeCodeTutorial/components/PhoneMascot"
 import { useSlideIn } from "../../ClaudeCodeTutorial/hooks/useSlideIn"
-
-type HeroSceneProps = Extract<
-  z.infer<typeof ProductShortConfigSchema>["scenes"][number],
-  { type: "hero" }
->
 
 export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle }) => {
   const frame = useCurrentFrame()

@@ -72,3 +72,10 @@ export const TutorialConfigSchema = z.object({
 export type TutorialConfig = z.infer<typeof TutorialConfigSchema>
 export type TerminalLine = z.infer<typeof TerminalLineSchema>
 export type ThemeName = TutorialConfig["theme"]
+
+// Scene prop types — use these instead of Extract<...> in scene components
+export type IntroSceneProps = z.infer<typeof IntroSceneSchema>
+export type TerminalSceneProps = z.infer<typeof TerminalSceneSchema>
+export type CalloutSceneProps = z.infer<typeof CalloutSceneSchema>
+export type OutroSceneProps = z.infer<typeof OutroSceneSchema>
+export type CustomSceneProps = z.infer<typeof CustomSceneSchema>

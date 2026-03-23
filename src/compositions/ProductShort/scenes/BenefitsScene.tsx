@@ -1,14 +1,8 @@
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
-import { z } from "zod"
-import { ProductShortConfigSchema } from "../schema"
+import type { BenefitsSceneProps } from "../schema"
 import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
 import { useSlideIn } from "../../ClaudeCodeTutorial/hooks/useSlideIn"
-
-type BenefitsSceneProps = Extract<
-  z.infer<typeof ProductShortConfigSchema>["scenes"][number],
-  { type: "benefits" }
->
 
 const STAGGER_FRAMES = 12
 

@@ -1,15 +1,5 @@
-import { CalculateMetadataFunction } from "remotion"
+// src/compositions/ProductShort/calculateMetadata.ts
+import { createCalculateMetadata } from "../../utils/calculateMetadata"
 import { ProductShortConfig } from "./schema"
 
-export const calculateMetadata: CalculateMetadataFunction<ProductShortConfig> = async ({
-  props,
-}) => {
-  const totalSeconds = props.scenes.reduce((sum, scene) => sum + scene.durationInSeconds, 0)
-
-  return {
-    durationInFrames: Math.ceil(totalSeconds * props.fps),
-    fps: props.fps,
-    width: props.width,
-    height: props.height,
-  }
-}
+export const calculateMetadata = createCalculateMetadata<ProductShortConfig>()

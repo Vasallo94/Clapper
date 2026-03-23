@@ -6,14 +6,8 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion"
-import { z } from "zod"
-import { ProductShortConfigSchema } from "../schema"
+import type { PricingSceneProps } from "../schema"
 import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
-
-type PricingSceneProps = Extract<
-  z.infer<typeof ProductShortConfigSchema>["scenes"][number],
-  { type: "pricing" }
->
 
 export const PricingScene: React.FC<PricingSceneProps> = ({
   price,

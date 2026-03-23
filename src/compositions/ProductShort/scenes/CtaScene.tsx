@@ -6,16 +6,10 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion"
-import { z } from "zod"
-import { ProductShortConfigSchema } from "../schema"
+import type { CtaSceneProps } from "../schema"
 import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
 import { PhoneMascot } from "../../ClaudeCodeTutorial/components/PhoneMascot"
 import { useSlideIn } from "../../ClaudeCodeTutorial/hooks/useSlideIn"
-
-type CtaSceneProps = Extract<
-  z.infer<typeof ProductShortConfigSchema>["scenes"][number],
-  { type: "cta" }
->
 
 const PULSE_COUNT = 3
 

@@ -1,15 +1,9 @@
 // src/compositions/ClaudeCodeTutorial/scenes/CalloutScene.tsx
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
-import { z } from "zod"
-import { TutorialConfigSchema } from "../schema"
+import type { CalloutSceneProps } from "../schema"
 import { useThemeTokens } from "../themes"
 import { MascotWatermark } from "../components/MascotWatermark"
-
-type CalloutSceneProps = Extract<
-  z.infer<typeof TutorialConfigSchema>["scenes"][number],
-  { type: "callout" }
->
 
 const ORIGIN: Record<"top" | "bottom" | "right", { x: number; y: number }> = {
   top: { x: 0, y: -30 },

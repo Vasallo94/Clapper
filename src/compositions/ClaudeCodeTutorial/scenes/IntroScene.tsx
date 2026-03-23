@@ -1,16 +1,10 @@
 // src/compositions/ClaudeCodeTutorial/scenes/IntroScene.tsx
 import React from "react"
 import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion"
-import { z } from "zod"
-import { TutorialConfigSchema } from "../schema"
+import type { IntroSceneProps } from "../schema"
 import { useThemeTokens } from "../themes"
 import { PhoneMascot } from "../components/PhoneMascot"
 import { useSlideIn } from "../hooks/useSlideIn"
-
-type IntroSceneProps = Extract<
-  z.infer<typeof TutorialConfigSchema>["scenes"][number],
-  { type: "intro" }
->
 
 export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
   const frame = useCurrentFrame()

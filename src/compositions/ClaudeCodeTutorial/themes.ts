@@ -1,12 +1,14 @@
 // src/compositions/ClaudeCodeTutorial/themes.ts
+import { loadFont } from "@remotion/google-fonts/JetBrainsMono"
 import { useTheme } from "./ThemeContext"
 import type { ThemeName } from "./schema"
+
+const { fontFamily: monoFont } = loadFont("normal", { weights: ["400", "700"] })
 
 export type ThemeTokens = {
   // Backgrounds
   background: string
   backgroundGradient: string
-  backgroundAlt: string
   // Foreground
   foreground: string
   foregroundMid: string
@@ -15,9 +17,9 @@ export type ThemeTokens = {
   primary: string
   primaryForeground: string
   secondary: string
-  secondaryForeground: string
   // Typography
   fontFamily: string
+  monoFontFamily: string
   // Terminal
   terminal: {
     sceneBackground: string
@@ -27,7 +29,6 @@ export type ThemeTokens = {
     command: string
     output: string
     claude: string
-    cursor: string
     shadow: string
     dots: [string, string, string]
     labelColor: string
@@ -67,15 +68,14 @@ export type ThemeTokens = {
 const defaultTheme: ThemeTokens = {
   background: "#0d1117",
   backgroundGradient: "linear-gradient(135deg, #0d1117 0%, #161b22 100%)",
-  backgroundAlt: "#161b22",
   foreground: "#f0f6fc",
   foregroundMid: "#8b949e",
   foregroundLow: "#484f58",
   primary: "#7ee787",
   primaryForeground: "#0d1117",
   secondary: "#79c0ff",
-  secondaryForeground: "#0d1117",
   fontFamily: "system-ui, sans-serif",
+  monoFontFamily: monoFont,
   terminal: {
     sceneBackground: "#0d1117",
     bg: "#0d1117",
@@ -84,7 +84,6 @@ const defaultTheme: ThemeTokens = {
     command: "#7ee787",
     output: "#c9d1d9",
     claude: "#79c0ff",
-    cursor: "#7ee787",
     shadow: "0 20px 60px rgba(0,0,0,0.6)",
     dots: ["#ff5f57", "#febc2e", "#28c840"],
     labelColor: "#8b949e",
@@ -119,15 +118,14 @@ const defaultTheme: ThemeTokens = {
 const lineaDirectaTheme: ThemeTokens = {
   background: "#FFFFFF",
   backgroundGradient: "#FFFFFF",
-  backgroundAlt: "#F7F7F7",
   foreground: "#1A1A1A",
   foregroundMid: "#888888",
   foregroundLow: "#555555",
   primary: "#CC3333",
   primaryForeground: "#FFFFFF",
   secondary: "#225050",
-  secondaryForeground: "#FFFFFF",
   fontFamily: "Arial, Helvetica, sans-serif",
+  monoFontFamily: monoFont,
   terminal: {
     sceneBackground: "radial-gradient(ellipse at 50% 60%, #2d1c22 0%, #141014 100%)",
     bg: "#0d0d0d",
@@ -136,7 +134,6 @@ const lineaDirectaTheme: ThemeTokens = {
     command: "#e0e0e0",
     output: "#d4d4d4",
     claude: "#C15F3C",
-    cursor: "#C15F3C",
     shadow: "0 8px 30px rgba(0,0,0,0.3)",
     dots: ["#ff5f57", "#febc2e", "#28c840"],
     labelColor: "#888888",

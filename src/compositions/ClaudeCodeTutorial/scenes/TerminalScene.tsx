@@ -7,23 +7,14 @@ import {
   useVideoConfig,
   spring,
 } from "remotion"
-import { loadFont } from "@remotion/google-fonts/JetBrainsMono"
-import { z } from "zod"
-import { TutorialConfigSchema, TerminalLine } from "../schema"
+import type { TerminalSceneProps, TerminalLine } from "../schema"
 import { useThemeTokens, type ThemeTokens } from "../themes"
 import { MascotWatermark } from "../components/MascotWatermark"
-
-const { fontFamily } = loadFont("normal", { weights: ["400", "700"] })
 
 const COMMAND_CHARS_PER_FRAME = 0.5
 const OUTPUT_REVEAL_FRAMES = 8
 const CLAUDE_LINE_GAP_FRAMES = 18
 const CLAUDE_CHARS_PER_FRAME = 1
-
-type TerminalSceneProps = Extract<
-  z.infer<typeof TutorialConfigSchema>["scenes"][number],
-  { type: "terminal" }
->
 
 type LineWithTiming = TerminalLine & {
   startFrame: number
@@ -52,9 +43,10 @@ type MessageProps = {
   line: LineWithTiming
   frame: number
   terminal: ThemeTokens["terminal"]
+  monoFont: string
 }
 
-const UserMessage: React.FC<MessageProps> = ({ line, frame, terminal }) => {
+const UserMessage: React.FC<MessageProps> = ({ line, frame, terminal, monoFont }) => {
   const localFrame = frame - line.startFrame
   if (localFrame < 0) return null
 
@@ -71,13 +63,13 @@ const UserMessage: React.FC<MessageProps> = ({ line, frame, terminal }) => {
         background: terminal.userMessageBg,
       }}
     >
-      <div style={{ color: terminal.labelColor, fontSize: 11, fontFamily, marginBottom: 4 }}>You</div>
-      <div style={{ color: terminal.command, fontFamily, fontSize: 14 }}>{displayText}</div>
+      <div style={{ color: terminal.labelColor, fontSize: 11, fontFamily: monoFont, marginBottom: 4 }}>You</div>
+      <div style={{ color: terminal.command, fontFamily: monoFont, fontSize: 14 }}>{displayText}</div>
     </div>
   )
 }
 
-const ClaudeMessage: React.FC<MessageProps> = ({ line, frame, terminal }) => {
+const ClaudeMessage: React.FC<MessageProps> = ({ line, frame, terminal, monoFont }) => {
   const localFrame = frame - line.startFrame
   if (localFrame < 0) return null
 
@@ -86,17 +78,17 @@ const ClaudeMessage: React.FC<MessageProps> = ({ line, frame, terminal }) => {
 
   return (
     <div style={{ padding: "4px 0" }}>
-      <div style={{ color: terminal.claude, fontSize: 11, fontFamily, marginBottom: 6, fontWeight: "bold" }}>
+      <div style={{ color: terminal.claude, fontSize: 11, fontFamily: monoFont, marginBottom: 6, fontWeight: "bold" }}>
         ⏵ Claude
       </div>
-      <div style={{ color: terminal.output, fontFamily, fontSize: 14, paddingLeft: 4 }}>
+      <div style={{ color: terminal.output, fontFamily: monoFont, fontSize: 14, paddingLeft: 4 }}>
         {displayText}
       </div>
     </div>
   )
 }
 
-const OutputMessage: React.FC<MessageProps> = ({ line, frame, terminal }) => {
+const OutputMessage: React.FC<MessageProps> = ({ line, frame, terminal, monoFont }) => {
   const localFrame = frame - line.startFrame
   if (localFrame < 0) return null
 
@@ -114,7 +106,7 @@ const OutputMessage: React.FC<MessageProps> = ({ line, frame, terminal }) => {
       <div
         style={{
           color: isSuccess ? terminal.successColor : terminal.labelColor,
-          fontFamily,
+          fontFamily: monoFont,
           fontSize: 12,
         }}
       >
@@ -204,7 +196,7 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
             style={{
               flex: 1,
               textAlign: "center",
-              fontFamily,
+              fontFamily: tokens.monoFontFamily,
               fontSize: 12,
               color: t.titleText,
               marginRight: 52,
@@ -226,13 +218,13 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
         >
           {timedLines.map((line, i) => {
             if (line.kind === "command") {
-              return <UserMessage key={i} line={line} frame={frame} terminal={t} />
+              return <UserMessage key={i} line={line} frame={frame} terminal={t} monoFont={tokens.monoFontFamily} />
             }
             if (line.kind === "claude") {
-              return <ClaudeMessage key={i} line={line} frame={frame} terminal={t} />
+              return <ClaudeMessage key={i} line={line} frame={frame} terminal={t} monoFont={tokens.monoFontFamily} />
             }
             if (line.kind === "output") {
-              return <OutputMessage key={i} line={line} frame={frame} terminal={t} />
+              return <OutputMessage key={i} line={line} frame={frame} terminal={t} monoFont={tokens.monoFontFamily} />
             }
             // blank
             if (frame >= line.startFrame) {
@@ -252,7 +244,7 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
             alignItems: "center",
             padding: "0 14px",
             gap: 12,
-            fontFamily,
+            fontFamily: tokens.monoFontFamily,
             fontSize: 11,
           }}
         >

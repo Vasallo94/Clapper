@@ -32,9 +32,9 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
 
-  const fileStagger = Math.ceil(fps * 0.15)
-  const expandStart = files.length * fileStagger + Math.ceil(fps * 0.5)
-  const contentRevealDuration = Math.ceil(fps * 1.5)
+  const fileStagger = Math.ceil(fps * 0.5)
+  const expandStart = files.length * fileStagger + Math.ceil(fps * 1)
+  const contentRevealDuration = Math.ceil(fps * 4)
 
   // Parse frontmatter vs body from fileContent
   const fmMatch = fileContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/)

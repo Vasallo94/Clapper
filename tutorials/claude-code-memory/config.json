@@ -28,7 +28,7 @@
         { "kind": "command", "text": "Perfecto, voy con HelioStar 100Ha + ASI432MM + Powermate 2x. Lo documento en mi vault." },
         { "kind": "claude", "text": "Buena elección. Es un setup equilibrado para solar: resolución, contraste y portabilidad para el día del eclipse." }
       ],
-      "durationInSeconds": 35
+      "durationInSeconds": 42
     },
     {
       "type": "custom",

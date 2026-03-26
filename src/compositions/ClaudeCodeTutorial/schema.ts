@@ -58,7 +58,7 @@ export const TutorialConfigSchema = z.object({
   fps: z.literal(30),
   width: z.literal(1280),
   height: z.literal(720),
-  theme: z.enum(["default", "linea-directa"]).default("default"),
+  theme: z.enum(["default", "linea-directa", "atom-dark"]).default("default"),
   scenes: z.array(SceneSchema).min(1),
   voiceover: z
     .object({

@@ -165,9 +165,60 @@ const lineaDirectaTheme: ThemeTokens = {
   accentLine: "#CC3333",
 }
 
+const atomDarkTheme: ThemeTokens = {
+  background: "#282c34",
+  backgroundGradient: "linear-gradient(135deg, #282c34 0%, #21252b 100%)",
+  foreground: "#abb2bf",
+  foregroundMid: "#636d83",
+  foregroundLow: "#4b5263",
+  primary: "#61afef",
+  primaryForeground: "#282c34",
+  secondary: "#c678dd",
+  fontFamily: "system-ui, sans-serif",
+  monoFontFamily: monoFont,
+  terminal: {
+    sceneBackground: "#21252b",
+    bg: "#282c34",
+    titleBar: "#21252b",
+    titleText: "#636d83",
+    command: "#98c379",
+    output: "#abb2bf",
+    claude: "#61afef",
+    shadow: "0 20px 60px rgba(0,0,0,0.5)",
+    dots: ["#e06c75", "#d19a66", "#98c379"],
+    labelColor: "#636d83",
+    successColor: "#98c379",
+    statusBarBg: "#21252b",
+    borderColor: "#3e4451",
+    separatorColor: "#3e4451",
+    costColor: "#4b5263",
+    userMessageBg: "#2c313a",
+    userMessageBorder: "#3e4451",
+  },
+  card: {
+    bg: "#2c313a",
+    bgGradient: "linear-gradient(135deg, #2c313a 0%, #282c34 100%)",
+    border: "#3e4451",
+    accentBorder: "#61afef",
+    shadow: "0 12px 40px rgba(0,0,0,0.4)",
+  },
+  mascot: {
+    show: false,
+    cornerScale: 0.5,
+    cornerOpacity: 0.7,
+    cornerBottom: 20,
+    cornerRight: 24,
+  },
+  overlay: "rgba(33,37,43,0.85)",
+  label: "Claude Code · Tutorial",
+  labelColor: "#636d83",
+  accentLine: "linear-gradient(90deg, #61afef, #c678dd)",
+}
+
 const themes: Record<ThemeName, ThemeTokens> = {
   default: defaultTheme,
   "linea-directa": lineaDirectaTheme,
+  "atom-dark": atomDarkTheme,
 }
 
 export function getTheme(name: ThemeName): ThemeTokens {

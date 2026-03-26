@@ -1,0 +1,136 @@
+{
+  "id": "claude-code-memory",
+  "title": "Claude Code recuerda quién eres",
+  "description": "Cómo funciona el sistema de memoria de Claude Code: CLAUDE.md, auto memory y auto dream",
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "theme": "atom-dark",
+  "scenes": [
+    {
+      "type": "intro",
+      "title": "Claude Code recuerda quién eres",
+      "subtitle": "Así funciona su sistema de memoria",
+      "durationInSeconds": 5
+    },
+    {
+      "type": "terminal",
+      "title": "Una conversación sobre telescopios solares",
+      "lines": [
+        { "kind": "command", "text": "Quiero preparar un setup de astrofotografía solar para el eclipse total de 2026 en España. ¿Qué telescopio me recomiendas?" },
+        { "kind": "blank", "text": "", "delayAfterMs": 800 },
+        { "kind": "claude", "text": "Para el eclipse total del 12 de agosto de 2026 en España, necesitas un telescopio solar dedicado con filtro H-Alpha." },
+        { "kind": "claude", "text": "Te recomiendo el DayStar HelioStar 100Ha — apertura de 100mm, filtro H-Alpha integrado, ideal para prominencias y cromosfera." },
+        { "kind": "blank", "text": "", "delayAfterMs": 400 },
+        { "kind": "claude", "text": "Para la cámara, la ZWO ASI432MM es excelente para solar: sensor monocromo, alta velocidad de captura, y buen rango dinámico." },
+        { "kind": "claude", "text": "Añade una Powermate 2x de TeleVue para aumentar la focal y capturar detalles en las manchas solares." },
+        { "kind": "blank", "text": "", "delayAfterMs": 600 },
+        { "kind": "command", "text": "Perfecto, voy con HelioStar 100Ha + ASI432MM + Powermate 2x. Lo documento en mi vault." },
+        { "kind": "claude", "text": "Buena elección. Es un setup equilibrado para solar: resolución, contraste y portabilidad para el día del eclipse." }
+      ],
+      "durationInSeconds": 35
+    },
+    {
+      "type": "custom",
+      "componentId": "file-explorer",
+      "durationInSeconds": 45,
+      "props": {
+        "rootPath": "~/.claude/projects/.../memory/",
+        "files": [
+          { "name": "memory", "type": "folder", "indent": 0 },
+          { "name": "MEMORY.md", "type": "file", "indent": 1 },
+          { "name": "user_astrophotography.md", "type": "file", "indent": 1, "isNew": true }
+        ],
+        "expandFile": "user_astrophotography.md",
+        "fileContent": "---\nname: Astrophotography hobby and equipment\ndescription: User does astrophotography, owns deep-sky setup, planning solar H-Alpha for 2026 eclipse\ntype: user\n---\nEnrique is an astrophotographer with a deep-sky setup\n(ZWO ASI2600MC AIR, FF80-APO refractor, ZWO AM5N mount).\n\nPlanning solar astrophotography for the total solar\neclipse on 2026-08-12 in Spain.\n\nChose HelioStar 100Ha + ASI432MM + Powermate 2x setup.\n\nPrefers practical, well-reasoned recommendations\nbacked by research.",
+        "calloutText": "Claude decidió guardar esto. Nadie se lo pidió."
+      }
+    },
+    {
+      "type": "custom",
+      "componentId": "block-diagram",
+      "durationInSeconds": 30,
+      "props": {
+        "title": "¿Cómo funciona la memoria de Claude Code?",
+        "layout": "horizontal",
+        "blocks": [
+          { "id": "claude-md", "title": "CLAUDE.md", "subtitle": "Instrucciones que tú escribes", "color": "#61afef" },
+          { "id": "auto-memory", "title": "Auto Memory", "subtitle": "Notas que Claude toma solo", "color": "#c678dd" },
+          { "id": "auto-dream", "title": "Auto Dream", "subtitle": "Consolidación automática", "color": "#d19a66" }
+        ],
+        "connections": [
+          { "from": "claude-md", "to": "auto-memory" },
+          { "from": "auto-memory", "to": "auto-dream" }
+        ]
+      }
+    },
+    {
+      "type": "callout",
+      "text": "CLAUDE.md — La versión manual. Archivos markdown donde TÚ le dices a Claude cómo comportarse. Tres alcances: global (~/.claude/), proyecto (./CLAUDE.md), y organización.",
+      "position": "top",
+      "background": "solid",
+      "durationInSeconds": 12
+    },
+    {
+      "type": "custom",
+      "componentId": "block-diagram",
+      "durationInSeconds": 30,
+      "props": {
+        "title": "4 tipos de memoria automática",
+        "layout": "grid",
+        "blocks": [
+          { "id": "user", "title": "user", "subtitle": "Es astrofotógrafo, prefiere recomendaciones con investigación", "color": "#61afef" },
+          { "id": "feedback", "title": "feedback", "subtitle": "No resumir al final de cada respuesta", "color": "#98c379" },
+          { "id": "project", "title": "project", "subtitle": "Merge freeze a partir del 5 de marzo", "color": "#c678dd" },
+          { "id": "reference", "title": "reference", "subtitle": "Los bugs se trackean en Linear proyecto INGEST", "color": "#d19a66" }
+        ]
+      }
+    },
+    {
+      "type": "custom",
+      "componentId": "file-explorer",
+      "durationInSeconds": 25,
+      "props": {
+        "rootPath": "~/.claude/projects/.../memory/",
+        "files": [
+          { "name": "memory", "type": "folder", "indent": 0 },
+          { "name": "MEMORY.md", "type": "file", "indent": 1 },
+          { "name": "user_astrophotography.md", "type": "file", "indent": 1 },
+          { "name": "feedback_no_summaries.md", "type": "file", "indent": 1 },
+          { "name": "project_merge_freeze.md", "type": "file", "indent": 1 }
+        ],
+        "expandFile": "MEMORY.md",
+        "fileContent": "- [Astrophotography hobby](user_astrophotography.md) — Deep-sky + solar setup, eclipse 2026\n- [No summaries](feedback_no_summaries.md) — Skip trailing response summaries\n- [Merge freeze](project_merge_freeze.md) — No merges after March 5",
+        "calloutText": "Claude lee este índice al empezar cada sesión. Si algo es relevante, abre el archivo completo."
+      }
+    },
+    {
+      "type": "custom",
+      "componentId": "flow-diagram",
+      "durationInSeconds": 75,
+      "props": {
+        "title": "Auto Dream — El sueño REM de Claude",
+        "introText": "Como el sueño REM consolida tu memoria del día, Auto Dream consolida las notas de Claude",
+        "showParticle": true,
+        "nodes": [
+          { "id": "orient", "title": "Orientación", "description": "Inventaría todos los archivos de memoria", "color": "#61afef" },
+          { "id": "signal", "title": "Recopilar señal", "description": "Busca correcciones, temas recurrentes", "color": "#98c379" },
+          { "id": "consolidate", "title": "Consolidación", "description": "Fusiona duplicados, convierte fechas, elimina obsoletos", "color": "#c678dd" },
+          { "id": "prune", "title": "Poda e indexado", "description": "Actualiza MEMORY.md, máx 200 líneas", "color": "#d19a66" }
+        ],
+        "outroText": "Se activa cuando: han pasado 24h desde la última ejecución + 5 sesiones completadas"
+      }
+    },
+    {
+      "type": "outro",
+      "title": "La memoria de Claude Code",
+      "bullets": [
+        "/memory — ver y editar archivos de memoria",
+        "/dream — forzar consolidación manual",
+        "/init — generar CLAUDE.md inicial",
+        "Sígueme para más sobre Claude Code"
+      ],
+      "durationInSeconds": 15
+    }
+  ]
+}

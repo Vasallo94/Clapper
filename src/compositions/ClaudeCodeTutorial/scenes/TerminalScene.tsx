@@ -116,6 +116,17 @@ const OutputMessage: React.FC<MessageProps> = ({ line, frame, terminal, monoFont
   )
 }
 
+// Approximate rendered height per line kind (px)
+const LINE_HEIGHT_MAP: Record<string, number> = {
+  command: 58, // bordered box + padding + margin
+  claude: 40, // label + text + spacing
+  output: 24, // single line + margin
+  blank: 12,
+}
+
+const CONTENT_AREA_HEIGHT = 420 // fixed visible height
+const CONTENT_PADDING = 40 // top + bottom padding
+
 export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
@@ -123,6 +134,22 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
   const t = tokens.terminal
 
   const timedLines = useMemo(() => buildLineTiming(lines, fps), [lines, fps])
+
+  // Calculate content scroll: estimate total height of visible lines
+  // and shift content up when it exceeds the visible area
+  const scrollY = useMemo(() => {
+    let totalHeight = 0
+    let visibleHeight = 0
+    for (const line of timedLines) {
+      const lineH = LINE_HEIGHT_MAP[line.kind] ?? 24
+      totalHeight += lineH
+      if (frame >= line.startFrame) {
+        visibleHeight += lineH
+      }
+    }
+    const overflow = visibleHeight - (CONTENT_AREA_HEIGHT - CONTENT_PADDING)
+    return overflow > 0 ? overflow : 0
+  }, [timedLines, frame])
 
   const windowSpring = spring({ frame, fps, config: { damping: 200 }, durationInFrames: 20 })
   const windowY = interpolate(windowSpring, [0, 1], [20, 0])
@@ -210,12 +237,19 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
         <div
           style={{
             background: t.bg,
-            padding: "20px 24px",
-            minHeight: 260,
-            display: "flex",
-            flexDirection: "column",
+            height: CONTENT_AREA_HEIGHT,
+            overflow: "hidden",
+            position: "relative",
           }}
         >
+          <div
+            style={{
+              padding: "20px 24px",
+              display: "flex",
+              flexDirection: "column",
+              transform: `translateY(${-scrollY}px)`,
+            }}
+          >
           {timedLines.map((line, i) => {
             if (line.kind === "command") {
               return <UserMessage key={i} line={line} frame={frame} terminal={t} monoFont={tokens.monoFontFamily} />
@@ -232,6 +266,7 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
             }
             return null
           })}
+          </div>
         </div>
 
         {/* Status bar */}

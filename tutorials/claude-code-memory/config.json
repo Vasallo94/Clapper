@@ -25,7 +25,7 @@
         { "kind": "claude", "text": "Para la cámara, la ZWO ASI432MM es excelente para solar: sensor monocromo, alta velocidad de captura, y buen rango dinámico." },
         { "kind": "claude", "text": "Añade una Powermate 2x de TeleVue para aumentar la focal y capturar detalles en las manchas solares." },
         { "kind": "blank", "text": "", "delayAfterMs": 600 },
-        { "kind": "command", "text": "Perfecto, voy con HelioStar 100Ha + ASI432MM + Powermate 2x. Lo documento en mi vault." },
+        { "kind": "command", "text": "Genial, le echaré un vistazo a la recomendación. HelioStar 100Ha + ASI432MM + Powermate 2x suena bien." },
         { "kind": "claude", "text": "Buena elección. Es un setup equilibrado para solar: resolución, contraste y portabilidad para el día del eclipse." }
       ],
       "durationInSeconds": 42

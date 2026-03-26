@@ -116,12 +116,29 @@ const OutputMessage: React.FC<MessageProps> = ({ line, frame, terminal, monoFont
   )
 }
 
-// Approximate rendered height per line kind (px)
-const LINE_HEIGHT_MAP: Record<string, number> = {
-  command: 58, // bordered box + padding + margin
-  claude: 40, // label + text + spacing
-  output: 24, // single line + margin
-  blank: 12,
+// Estimate rendered height of a line based on text length and word wrap
+// Terminal content width ≈ 90% of 1280 - padding = ~1060px usable
+// Mono font at 14px ≈ 8.4px/char → ~126 chars per visual line
+const CHARS_PER_VISUAL_LINE = 120
+const TEXT_LINE_HEIGHT = 21 // fontSize 14 * lineHeight ~1.5
+
+function estimateLineHeight(kind: string, text: string): number {
+  const wrappedLines = Math.max(1, Math.ceil(text.length / CHARS_PER_VISUAL_LINE))
+  switch (kind) {
+    case "command":
+      // bordered box: padding 10+10 + border 2 + marginBottom 16 + label 18
+      return wrappedLines * TEXT_LINE_HEIGHT + 56
+    case "claude":
+      // label 22 + padding 8 + text
+      return wrappedLines * TEXT_LINE_HEIGHT + 30
+    case "output":
+      // left border + padding + margin
+      return wrappedLines * TEXT_LINE_HEIGHT + 12
+    case "blank":
+      return 12
+    default:
+      return 24
+  }
 }
 
 const CONTENT_AREA_HEIGHT = 420 // fixed visible height
@@ -138,13 +155,10 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
   // Calculate content scroll: estimate total height of visible lines
   // and shift content up when it exceeds the visible area
   const scrollY = useMemo(() => {
-    let totalHeight = 0
     let visibleHeight = 0
     for (const line of timedLines) {
-      const lineH = LINE_HEIGHT_MAP[line.kind] ?? 24
-      totalHeight += lineH
       if (frame >= line.startFrame) {
-        visibleHeight += lineH
+        visibleHeight += estimateLineHeight(line.kind, line.text)
       }
     }
     const overflow = visibleHeight - (CONTENT_AREA_HEIGHT - CONTENT_PADDING)

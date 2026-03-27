@@ -1,5 +1,9 @@
 # CLAUDE.md
 
+## Project intention
+
+Pipeline de generación de videos educativos y promocionales con Remotion. Proyecto personal de Enrique Vasallo enfocado en tutoriales de Claude Code (LinkedIn) y demos de producto (Línea Directa). Los vídeos se generan programáticamente desde configs JSON, renderizados frame-by-frame con React.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Commands
@@ -33,6 +37,7 @@ Scene types are defined in each composition's `schema.ts`. Named prop types are 
 `TerminalScene` simulates a Claude Code CLI session. It renders user messages in bordered boxes ("You" label), Claude responses with orange "⏵ Claude" label, and tool outputs with orange left border. A status bar at the bottom shows model name, animated context bar, and cost. All colors come from `tokens.terminal.*`.
 
 Timing map — each line has `startFrame` + `durationFrames`:
+
 - `command`: typewriter effect (0.5 chars/frame)
 - `claude`: streaming effect (1 char/frame, 18-frame gap between lines)
 - `output`: instant reveal (8 frames)
@@ -44,6 +49,7 @@ Timing map — each line has `startFrame` + `durationFrames`:
 `ThemeContext` provides `"default"` (dark, green accents) or `"linea-directa"` (white bg, red #CC3333, PhoneMascot SVG). All design tokens are centralized in `themes.ts` via `ThemeTokens` type. Scene components read tokens via `useThemeTokens()` hook — never check theme name directly.
 
 Key token groups:
+
 - **terminal.\***: sceneBackground, bg, command, output, claude, labelColor, successColor, statusBarBg, borderColor, separatorColor, costColor, userMessageBg, userMessageBorder
 - **mascot.\***: show, cornerScale, cornerOpacity, cornerBottom, cornerRight
 - **card.\***: bg, bgGradient, border, accentBorder, shadow
@@ -76,6 +82,40 @@ Key token groups:
 
 ## Code style
 
-- Prettier: 2-space indent, no semicolons, bracket spacing
+- Prettier: 2-space indent, no semicolons, bracket spacing, printWidth 120
 - ESLint: `@remotion/eslint-config-flat`
 - TypeScript strict mode, `noUnusedLocals: true`
+
+## Operational instructions for the agent
+
+### Traceability (automatic)
+
+- **CHANGELOG.md**: BEFORE each commit, add an entry under `[Unreleased]` with the corresponding category (Added/Changed/Deprecated/Removed/Fixed/Security). Do not wait for the human to ask.
+- **FUTURE.md**: When the human mentions a future idea or improvement not being implemented now, log it in `FUTURE.md` with date and description. Ask priority if not obvious.
+- **docs/adr/**: When a relevant technical decision is made (library choice, design pattern, architecture change, trade-off), create a numbered ADR following Structured MADR. Document context, evaluated options with risks, decision and consequences.
+
+### Commit rules (Conventional Commits — enforced by commitlint)
+
+- Format: `type(scope): description` (imperative, ≤50 chars).
+- Valid types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert.
+- BREAKING CHANGE in footer or `!` after type.
+- Verify CHANGELOG is updated before committing.
+- One commit = one atomic logical change.
+
+### Quality gates
+
+- Do not push without passing pre-commit hooks (lint, typecheck, format).
+- Never commit .env files, credentials or PII.
+- Pre-commit runs: `lint-staged` (ESLint fix + Prettier) + `commitlint`.
+
+### Specs before code
+
+- Before implementing a feature, create/update spec in `_project_specs/features/`.
+- Include acceptance criteria and test cases.
+- On completion, move spec to `_project_specs/completed.md`.
+
+### ADR proactive
+
+- On any technical decision (library, pattern, trade-off, architecture change), create ADR in `docs/adr/`.
+- Structured MADR format with risk analysis and options.
+- Number consecutively (0000, 0001...).

@@ -18,12 +18,16 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
     "@remotion/bundler": "^4.0.438",
     "@remotion/eslint-config-flat": "4.0.438",
     "@remotion/renderer": "^4.0.438",
     "@types/react": "19.2.7",
     "@types/web": "0.0.166",
     "eslint": "^9.39.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "3.8.1",
     "tsx": "^4.21.0",
     "typescript": "5.9.3"
@@ -32,7 +36,17 @@
     "dev": "remotion studio",
     "build": "remotion bundle",
     "upgrade": "remotion upgrade",
-    "lint": "eslint src && tsc"
+    "lint": "eslint src && tsc",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
   },
   "sideEffects": [
     "*.css"

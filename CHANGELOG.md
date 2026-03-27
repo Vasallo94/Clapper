@@ -1,5 +1,30 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+Format based on [Keep a Changelog](https://keepachangelog.com/).
+
+## [Unreleased]
+
+### Added
+
+- Theme `atom-dark` (One Dark Pro palette) for personal videos
+- 3 custom scene components: `BlockDiagramScene`, `FileExplorerScene`, `FlowDiagramScene`
+- SVG icon components (`svg-icons.tsx`) replacing emoji characters
+- Terminal auto-scroll with fixed height container
+- Fade-in + slide entry animation on terminal messages
+- SVG triangle for Claude label (replacing unicode character)
+- Enterprise bootstrap: husky, lint-staged, commitlint, ADRs, specs structure
+
+### Changed
+
+- Font sizes increased across all scenes for mobile readability
+- Prettier config completed (semi: false, printWidth: 120, trailingComma, arrowParens)
+
+### Fixed
+
+- FlowDiagramScene orb animation rewritten with per-node cycle system
+- Terminal content overflow with estimateLineHeight() scroll calculation
+
 ## 2026-03-23
 
 ### ProductShort — Composición vertical para marketing

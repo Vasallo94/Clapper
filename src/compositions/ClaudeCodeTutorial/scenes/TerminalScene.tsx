@@ -1,12 +1,6 @@
 // src/compositions/ClaudeCodeTutorial/scenes/TerminalScene.tsx
 import React, { useMemo } from "react"
-import {
-  AbsoluteFill,
-  interpolate,
-  useCurrentFrame,
-  useVideoConfig,
-  spring,
-} from "remotion"
+import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig, spring } from "remotion"
 import type { TerminalSceneProps, TerminalLine } from "../schema"
 import { useThemeTokens, type ThemeTokens } from "../themes"
 import { MascotWatermark } from "../components/MascotWatermark"
@@ -46,12 +40,16 @@ type MessageProps = {
   monoFont: string
 }
 
+const ENTRY_FRAMES = 6
+
 const UserMessage: React.FC<MessageProps> = ({ line, frame, terminal, monoFont }) => {
   const localFrame = frame - line.startFrame
   if (localFrame < 0) return null
 
   const chars = Math.floor(localFrame * COMMAND_CHARS_PER_FRAME)
   const displayText = line.text.slice(0, chars)
+  const entryOpacity = interpolate(localFrame, [0, ENTRY_FRAMES], [0, 1], { extrapolateRight: "clamp" })
+  const entryY = interpolate(localFrame, [0, ENTRY_FRAMES], [8, 0], { extrapolateRight: "clamp" })
 
   return (
     <div
@@ -61,10 +59,12 @@ const UserMessage: React.FC<MessageProps> = ({ line, frame, terminal, monoFont }
         padding: "10px 14px",
         marginBottom: 16,
         background: terminal.userMessageBg,
+        opacity: entryOpacity,
+        transform: `translateY(${entryY}px)`,
       }}
     >
-      <div style={{ color: terminal.labelColor, fontSize: 11, fontFamily: monoFont, marginBottom: 4 }}>You</div>
-      <div style={{ color: terminal.command, fontFamily: monoFont, fontSize: 14 }}>{displayText}</div>
+      <div style={{ color: terminal.labelColor, fontSize: 13, fontFamily: monoFont, marginBottom: 4 }}>You</div>
+      <div style={{ color: terminal.command, fontFamily: monoFont, fontSize: 16 }}>{displayText}</div>
     </div>
   )
 }
@@ -75,15 +75,29 @@ const ClaudeMessage: React.FC<MessageProps> = ({ line, frame, terminal, monoFont
 
   const chars = Math.floor(localFrame * CLAUDE_CHARS_PER_FRAME)
   const displayText = line.text.slice(0, chars)
+  const entryOpacity = interpolate(localFrame, [0, ENTRY_FRAMES], [0, 1], { extrapolateRight: "clamp" })
+  const entryY = interpolate(localFrame, [0, ENTRY_FRAMES], [8, 0], { extrapolateRight: "clamp" })
 
   return (
-    <div style={{ padding: "4px 0" }}>
-      <div style={{ color: terminal.claude, fontSize: 11, fontFamily: monoFont, marginBottom: 6, fontWeight: "bold" }}>
-        ⏵ Claude
+    <div style={{ padding: "4px 0", opacity: entryOpacity, transform: `translateY(${entryY}px)` }}>
+      <div
+        style={{
+          color: terminal.claude,
+          fontSize: 13,
+          fontFamily: monoFont,
+          marginBottom: 6,
+          fontWeight: "bold",
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+        }}
+      >
+        <svg width="8" height="9" viewBox="0 0 8 9" style={{ flexShrink: 0 }}>
+          <polygon points="0,0 8,4.5 0,9" fill={terminal.claude} />
+        </svg>
+        Claude
       </div>
-      <div style={{ color: terminal.output, fontFamily: monoFont, fontSize: 14, paddingLeft: 4 }}>
-        {displayText}
-      </div>
+      <div style={{ color: terminal.output, fontFamily: monoFont, fontSize: 16, paddingLeft: 4 }}>{displayText}</div>
     </div>
   )
 }
@@ -107,7 +121,7 @@ const OutputMessage: React.FC<MessageProps> = ({ line, frame, terminal, monoFont
         style={{
           color: isSuccess ? terminal.successColor : terminal.labelColor,
           fontFamily: monoFont,
-          fontSize: 12,
+          fontSize: 14,
         }}
       >
         {line.text}
@@ -119,8 +133,8 @@ const OutputMessage: React.FC<MessageProps> = ({ line, frame, terminal, monoFont
 // Estimate rendered height of a line based on text length and word wrap
 // Terminal content width ≈ 90% of 1280 - padding = ~1060px usable
 // Mono font at 14px ≈ 8.4px/char → ~126 chars per visual line
-const CHARS_PER_VISUAL_LINE = 120
-const TEXT_LINE_HEIGHT = 21 // fontSize 14 * lineHeight ~1.5
+const CHARS_PER_VISUAL_LINE = 105
+const TEXT_LINE_HEIGHT = 24 // fontSize 16 * lineHeight ~1.5
 
 function estimateLineHeight(kind: string, text: string): number {
   const wrappedLines = Math.max(1, Math.ceil(text.length / CHARS_PER_VISUAL_LINE))
@@ -193,7 +207,7 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
         <div
           style={{
             fontFamily: tokens.fontFamily,
-            fontSize: 18,
+            fontSize: 22,
             color: t.labelColor,
             marginBottom: 24,
             alignSelf: "flex-start",
@@ -228,10 +242,7 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
           }}
         >
           {t.dots.map((color, i) => (
-            <div
-              key={i}
-              style={{ width: 12, height: 12, borderRadius: "50%", background: color }}
-            />
+            <div key={i} style={{ width: 12, height: 12, borderRadius: "50%", background: color }} />
           ))}
           <div
             style={{
@@ -264,22 +275,22 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
               transform: `translateY(${-scrollY}px)`,
             }}
           >
-          {timedLines.map((line, i) => {
-            if (line.kind === "command") {
-              return <UserMessage key={i} line={line} frame={frame} terminal={t} monoFont={tokens.monoFontFamily} />
-            }
-            if (line.kind === "claude") {
-              return <ClaudeMessage key={i} line={line} frame={frame} terminal={t} monoFont={tokens.monoFontFamily} />
-            }
-            if (line.kind === "output") {
-              return <OutputMessage key={i} line={line} frame={frame} terminal={t} monoFont={tokens.monoFontFamily} />
-            }
-            // blank
-            if (frame >= line.startFrame) {
-              return <div key={i} style={{ height: 12 }} />
-            }
-            return null
-          })}
+            {timedLines.map((line, i) => {
+              if (line.kind === "command") {
+                return <UserMessage key={i} line={line} frame={frame} terminal={t} monoFont={tokens.monoFontFamily} />
+              }
+              if (line.kind === "claude") {
+                return <ClaudeMessage key={i} line={line} frame={frame} terminal={t} monoFont={tokens.monoFontFamily} />
+              }
+              if (line.kind === "output") {
+                return <OutputMessage key={i} line={line} frame={frame} terminal={t} monoFont={tokens.monoFontFamily} />
+              }
+              // blank
+              if (frame >= line.startFrame) {
+                return <div key={i} style={{ height: 12 }} />
+              }
+              return null
+            })}
           </div>
         </div>
 

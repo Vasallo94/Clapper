@@ -1,12 +1,6 @@
 // src/compositions/ClaudeCodeTutorial/scenes/custom/FileExplorerScene.tsx
 import React from "react"
-import {
-  AbsoluteFill,
-  interpolate,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion"
+import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { useThemeTokens } from "../../themes"
 import { FolderIcon, MarkdownIcon, ChevronIcon } from "./svg-icons"
 
@@ -76,7 +70,7 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
         <div
           style={{
             fontFamily: tokens.monoFontFamily,
-            fontSize: 11,
+            fontSize: 13,
             color: tokens.foregroundMid,
             padding: "0 16px 12px",
             borderBottom: `1px solid ${tokens.card.border}`,
@@ -107,8 +101,7 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
 
           const Icon = file.type === "folder" ? FolderIcon : MarkdownIcon
           const nameColor = file.isNew ? tokens.primary : tokens.foreground
-          const bgHighlight =
-            isExpanded && frame >= expandStart ? `${tokens.primary}15` : "transparent"
+          const bgHighlight = isExpanded && frame >= expandStart ? `${tokens.primary}15` : "transparent"
 
           return (
             <div
@@ -120,19 +113,14 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
                 padding: "4px 16px",
                 paddingLeft: indent,
                 fontFamily: tokens.monoFontFamily,
-                fontSize: 13,
+                fontSize: 15,
                 color: nameColor,
                 opacity,
                 transform: `translateX(${x}px)`,
                 background: bgHighlight,
               }}
             >
-              <Icon
-                size={16}
-                color={
-                  file.type === "folder" ? tokens.primary : tokens.terminal.successColor
-                }
-              />
+              <Icon size={16} color={file.type === "folder" ? tokens.primary : tokens.terminal.successColor} />
               <span>{file.name}</span>
               {file.isNew && (
                 <span
@@ -161,15 +149,10 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
-          opacity: interpolate(
-            frame,
-            [expandStart, expandStart + Math.ceil(fps * 0.3)],
-            [0, 1],
-            {
-              extrapolateLeft: "clamp",
-              extrapolateRight: "clamp",
-            }
-          ),
+          opacity: interpolate(frame, [expandStart, expandStart + Math.ceil(fps * 0.3)], [0, 1], {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+          }),
         }}
       >
         {/* File tab */}
@@ -201,7 +184,7 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
           style={{
             padding: "20px 24px",
             fontFamily: tokens.monoFontFamily,
-            fontSize: 13,
+            fontSize: 15,
             lineHeight: 1.7,
             overflow: "hidden",
           }}
@@ -212,17 +195,11 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
               <div style={{ color: tokens.foregroundLow }}>---</div>
               {frontmatter.split("\n").map((line, li) => {
                 const totalFmLines = frontmatter.split("\n").length
-                const lineRevealFrame =
-                  expandStart + (li / totalFmLines) * contentRevealDuration * 0.5
-                const lineOpacity = interpolate(
-                  frame,
-                  [lineRevealFrame, lineRevealFrame + 6],
-                  [0, 1],
-                  {
-                    extrapolateLeft: "clamp",
-                    extrapolateRight: "clamp",
-                  }
-                )
+                const lineRevealFrame = expandStart + (li / totalFmLines) * contentRevealDuration * 0.5
+                const lineOpacity = interpolate(frame, [lineRevealFrame, lineRevealFrame + 6], [0, 1], {
+                  extrapolateLeft: "clamp",
+                  extrapolateRight: "clamp",
+                })
                 const colonIdx = line.indexOf(":")
                 const key = colonIdx > 0 ? line.slice(0, colonIdx + 1) : ""
                 const val = colonIdx > 0 ? line.slice(colonIdx + 1) : line
@@ -243,18 +220,11 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
               {body.split("\n").map((line, li) => {
                 const totalBodyLines = body.split("\n").length
                 const lineRevealFrame =
-                  expandStart +
-                  contentRevealDuration * 0.5 +
-                  (li / totalBodyLines) * contentRevealDuration * 0.5
-                const lineOpacity = interpolate(
-                  frame,
-                  [lineRevealFrame, lineRevealFrame + 6],
-                  [0, 1],
-                  {
-                    extrapolateLeft: "clamp",
-                    extrapolateRight: "clamp",
-                  }
-                )
+                  expandStart + contentRevealDuration * 0.5 + (li / totalBodyLines) * contentRevealDuration * 0.5
+                const lineOpacity = interpolate(frame, [lineRevealFrame, lineRevealFrame + 6], [0, 1], {
+                  extrapolateLeft: "clamp",
+                  extrapolateRight: "clamp",
+                })
                 return (
                   <div key={li} style={{ color: tokens.foreground, opacity: lineOpacity }}>
                     {line || "\u00A0"}
@@ -280,7 +250,7 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
             borderRadius: 10,
             padding: "16px 24px",
             fontFamily: tokens.fontFamily,
-            fontSize: 20,
+            fontSize: 24,
             color: tokens.foreground,
             fontWeight: 500,
             opacity: calloutSpring,

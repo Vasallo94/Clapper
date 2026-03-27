@@ -10,23 +10,44 @@
     {
       "type": "intro",
       "title": "Claude Code recuerda quién eres",
-      "subtitle": "Así funciona su sistema de memoria",
+      "subtitle": "Así funciona su sistema de memoria — por Enrique Vasallo",
       "durationInSeconds": 5
     },
     {
       "type": "terminal",
       "title": "Una conversación sobre telescopios solares",
       "lines": [
-        { "kind": "command", "text": "Quiero preparar un setup de astrofotografía solar para el eclipse total de 2026 en España. ¿Qué telescopio me recomiendas?" },
+        {
+          "kind": "command",
+          "text": "Quiero preparar un setup de astrofotografía solar para el eclipse total de 2026 en España. ¿Qué telescopio me recomiendas?"
+        },
         { "kind": "blank", "text": "", "delayAfterMs": 800 },
-        { "kind": "claude", "text": "Para el eclipse total del 12 de agosto de 2026 en España, necesitas un telescopio solar dedicado con filtro H-Alpha." },
-        { "kind": "claude", "text": "Te recomiendo el DayStar HelioStar 100Ha — apertura de 100mm, filtro H-Alpha integrado, ideal para prominencias y cromosfera." },
+        {
+          "kind": "claude",
+          "text": "Para el eclipse total del 12 de agosto de 2026 en España, necesitas un telescopio solar dedicado con filtro H-Alpha."
+        },
+        {
+          "kind": "claude",
+          "text": "Te recomiendo el DayStar HelioStar 100Ha — apertura de 100mm, filtro H-Alpha integrado, ideal para prominencias y cromosfera."
+        },
         { "kind": "blank", "text": "", "delayAfterMs": 400 },
-        { "kind": "claude", "text": "Para la cámara, la ZWO ASI432MM es excelente para solar: sensor monocromo, alta velocidad de captura, y buen rango dinámico." },
-        { "kind": "claude", "text": "Añade una Powermate 2x de TeleVue para aumentar la focal y capturar detalles en las manchas solares." },
+        {
+          "kind": "claude",
+          "text": "Para la cámara, la ZWO ASI432MM es excelente para solar: sensor monocromo, alta velocidad de captura, y buen rango dinámico."
+        },
+        {
+          "kind": "claude",
+          "text": "Añade una Powermate 2x de TeleVue para aumentar la focal y capturar detalles en las manchas solares."
+        },
         { "kind": "blank", "text": "", "delayAfterMs": 600 },
-        { "kind": "command", "text": "Genial, le echaré un vistazo a la recomendación. HelioStar 100Ha + ASI432MM + Powermate 2x suena bien." },
-        { "kind": "claude", "text": "Buena elección. Es un setup equilibrado para solar: resolución, contraste y portabilidad para el día del eclipse." }
+        {
+          "kind": "command",
+          "text": "Genial, le echaré un vistazo a la recomendación. HelioStar 100Ha + ASI432MM + Powermate 2x suena bien."
+        },
+        {
+          "kind": "claude",
+          "text": "Buena elección. Es un setup equilibrado para solar: resolución, contraste y portabilidad para el día del eclipse."
+        }
       ],
       "durationInSeconds": 42
     },
@@ -58,10 +79,7 @@
           { "id": "auto-memory", "title": "Auto Memory", "subtitle": "Notas que Claude toma solo", "color": "#c678dd" },
           { "id": "auto-dream", "title": "Auto Dream", "subtitle": "Consolidación automática", "color": "#d19a66" }
         ],
-        "connections": [
-          { "from": "claude-md", "to": "auto-memory" },
-          { "from": "auto-memory", "to": "auto-dream" }
-        ]
+        "connections": []
       }
     },
     {
@@ -79,10 +97,30 @@
         "title": "4 tipos de memoria automática",
         "layout": "grid",
         "blocks": [
-          { "id": "user", "title": "user", "subtitle": "Es astrofotógrafo, prefiere recomendaciones con investigación", "color": "#61afef" },
-          { "id": "feedback", "title": "feedback", "subtitle": "No resumir al final de cada respuesta", "color": "#98c379" },
-          { "id": "project", "title": "project", "subtitle": "Merge freeze a partir del 5 de marzo", "color": "#c678dd" },
-          { "id": "reference", "title": "reference", "subtitle": "Los bugs se trackean en Linear proyecto INGEST", "color": "#d19a66" }
+          {
+            "id": "user",
+            "title": "user",
+            "subtitle": "Es astrofotógrafo, prefiere recomendaciones con investigación",
+            "color": "#61afef"
+          },
+          {
+            "id": "feedback",
+            "title": "feedback",
+            "subtitle": "No resumir al final de cada respuesta",
+            "color": "#98c379"
+          },
+          {
+            "id": "project",
+            "title": "project",
+            "subtitle": "Merge freeze a partir del 5 de marzo",
+            "color": "#c678dd"
+          },
+          {
+            "id": "reference",
+            "title": "reference",
+            "subtitle": "Los bugs se trackean en Linear proyecto INGEST",
+            "color": "#d19a66"
+          }
         ]
       }
     },
@@ -113,10 +151,30 @@
         "introText": "Como el sueño REM consolida tu memoria del día, Auto Dream consolida las notas de Claude",
         "showParticle": true,
         "nodes": [
-          { "id": "orient", "title": "Orientación", "description": "Inventaría todos los archivos de memoria", "color": "#61afef" },
-          { "id": "signal", "title": "Recopilar señal", "description": "Busca correcciones, temas recurrentes", "color": "#98c379" },
-          { "id": "consolidate", "title": "Consolidación", "description": "Fusiona duplicados, convierte fechas, elimina obsoletos", "color": "#c678dd" },
-          { "id": "prune", "title": "Poda e indexado", "description": "Actualiza MEMORY.md, máx 200 líneas", "color": "#d19a66" }
+          {
+            "id": "orient",
+            "title": "Orientación",
+            "description": "Inventaría todos los archivos de memoria",
+            "color": "#61afef"
+          },
+          {
+            "id": "signal",
+            "title": "Recopilar señal",
+            "description": "Busca correcciones, temas recurrentes",
+            "color": "#98c379"
+          },
+          {
+            "id": "consolidate",
+            "title": "Consolidación",
+            "description": "Fusiona duplicados, convierte fechas, elimina obsoletos",
+            "color": "#c678dd"
+          },
+          {
+            "id": "prune",
+            "title": "Poda e indexado",
+            "description": "Actualiza MEMORY.md, máx 200 líneas",
+            "color": "#d19a66"
+          }
         ],
         "outroText": "Se activa cuando: han pasado 24h desde la última ejecución + 5 sesiones completadas"
       }
@@ -128,7 +186,7 @@
         "/memory — ver y editar archivos de memoria",
         "/dream — forzar consolidación manual",
         "/init — generar CLAUDE.md inicial",
-        "Sígueme para más sobre Claude Code"
+        "Enrique Vasallo — Sígueme para más sobre Claude Code"
       ],
       "durationInSeconds": 15
     }

@@ -1,11 +1,5 @@
 import React from "react"
-import {
-  AbsoluteFill,
-  interpolate,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion"
+import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { useThemeTokens } from "../../themes"
 
 interface Block {
@@ -38,8 +32,8 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
   const cols = isGrid ? 2 : blocks.length
   const staggerDelay = Math.ceil(fps * 0.3)
 
-  const blockWidth = isGrid ? 280 : 220
-  const blockGap = isGrid ? 24 : 40
+  const blockWidth = isGrid ? 320 : 260
+  const blockGap = isGrid ? 32 : 60
 
   return (
     <AbsoluteFill
@@ -57,7 +51,7 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
         <div
           style={{
             fontFamily: tokens.fontFamily,
-            fontSize: 28,
+            fontSize: 36,
             fontWeight: 700,
             color: tokens.foreground,
             opacity: interpolate(frame, [0, fps * 0.4], [0, 1], {
@@ -71,9 +65,7 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
 
       {/* SVG layer for connection lines */}
       {connections.length > 0 && !isGrid && (
-        <svg
-          style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }}
-        >
+        <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
           {connections.map((conn, ci) => {
             const fromIdx = blocks.findIndex((b) => b.id === conn.from)
             const toIdx = blocks.findIndex((b) => b.id === conn.to)
@@ -95,22 +87,25 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
 
             const currentX2 = interpolate(lineProgress, [0, 1], [x1, x2])
 
+            const arrowSize = 10
+
             return (
               <g key={ci}>
+                {/* Line */}
                 <line
-                  x1={x1 + 4}
+                  x1={x1 + 8}
                   y1={y}
-                  x2={currentX2 - 4}
+                  x2={currentX2 - arrowSize - 4}
                   y2={y}
-                  stroke={tokens.foregroundLow}
+                  stroke={tokens.foregroundMid}
                   strokeWidth={2}
-                  strokeDasharray="6 4"
                 />
-                {lineProgress > 0.9 && (
+                {/* Arrowhead */}
+                {lineProgress > 0.8 && (
                   <polygon
-                    points={`${x2 - 4},${y - 5} ${x2 - 4},${y + 5} ${x2 + 2},${y}`}
-                    fill={tokens.foregroundLow}
-                    opacity={interpolate(lineProgress, [0.9, 1], [0, 1])}
+                    points={`${x2 - 4},${y} ${x2 - arrowSize - 4},${y - arrowSize} ${x2 - arrowSize - 4},${y + arrowSize}`}
+                    fill={tokens.foregroundMid}
+                    opacity={interpolate(lineProgress, [0.8, 1], [0, 1])}
                   />
                 )}
               </g>
@@ -158,7 +153,7 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
               <div
                 style={{
                   fontFamily: tokens.fontFamily,
-                  fontSize: 18,
+                  fontSize: 22,
                   fontWeight: 700,
                   color: block.color,
                   marginBottom: 8,
@@ -169,7 +164,7 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
               <div
                 style={{
                   fontFamily: tokens.fontFamily,
-                  fontSize: 14,
+                  fontSize: 17,
                   color: tokens.foregroundMid,
                   lineHeight: 1.5,
                 }}

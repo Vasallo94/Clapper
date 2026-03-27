@@ -6,6 +6,7 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "@google/genai": "^1.46.0",
     "@remotion/cli": "4.0.438",
     "@remotion/google-fonts": "^4.0.438",
     "@remotion/paths": "^4.0.438",

@@ -190,5 +190,22 @@
       ],
       "durationInSeconds": 15
     }
-  ]
+  ],
+  "voiceover": {
+    "enabled": true,
+    "provider": "gemini",
+    "voiceId": "Orus",
+    "language": "es-ES",
+    "scenes": {
+      "0": "Claude Code recuerda quién eres. Te cuento cómo funciona su sistema de memoria.",
+      "1": "Imagina que le preguntas a Claude sobre astrofotografía solar. Le cuentas que quieres preparar un setup para el eclipse total de 2026 en España. Claude no solo te responde con una recomendación genérica. Te sugiere un telescopio solar específico, una cámara planetaria concreta, y hasta el accesorio para aumentar la focal. Una conversación normal, como tantas otras. Pero lo que pasa después es lo interesante.",
+      "2": "Sin que nadie se lo pida, Claude decide que esta conversación merece ser recordada. Crea un archivo markdown con tu perfil: que eres astrofotógrafo, que ya tienes equipo de cielo profundo, que estás planificando el eclipse. Incluye las decisiones que tomaste y tus preferencias. La próxima vez que hables con Claude, en cualquier proyecto, ya sabe quién eres. No tienes que repetirte. No tienes que dar contexto. Claude te conoce.",
+      "3": "El sistema de memoria de Claude Code tiene tres pilares fundamentales. Primero, CLAUDE punto md: instrucciones que tú escribes explícitamente. Segundo, Auto Memory: notas que Claude toma por su cuenta cuando detecta información valiosa. Y tercero, Auto Dream: un proceso automático que consolida y limpia toda esa memoria periódicamente.",
+      "4": "CLAUDE punto md es la versión manual. Archivos markdown donde tú defines las reglas del juego. Funciona a tres niveles: global, de proyecto, y de organización.",
+      "5": "Auto Memory organiza sus notas en cuatro categorías. User captura quién eres: tu rol, tus conocimientos, tus preferencias. Feedback registra correcciones: qué hacer y qué no hacer. Project guarda contexto temporal del trabajo en curso, como plazos o decisiones de equipo. Y Reference almacena enlaces a sistemas externos donde vive la información actualizada.",
+      "6": "Cada vez que Claude arranca una sesión, lo primero que hace es leer el índice MEMORY punto md. Es una lista de enlaces a todos los archivos de memoria. Si detecta que alguno es relevante para lo que estás haciendo, lo abre y lo usa como contexto. Es como un índice de un libro: rápido de escanear, con acceso directo al detalle.",
+      "7": "Y ahora lo más fascinante. Auto Dream. Funciona como el sueño REM en tu cerebro. Mientras duermes, tu cerebro consolida los recuerdos del día, descarta lo irrelevante y refuerza lo importante. Claude hace exactamente lo mismo. Primero, orientación: inventaría todos los archivos de memoria que existen. Después, recopila señal: busca correcciones del usuario, temas que se repiten, patrones. Luego viene la consolidación: fusiona memorias duplicadas, convierte fechas relativas a absolutas, y elimina las que ya no son válidas. Finalmente, poda e indexado: actualiza el índice MEMORY punto md y se asegura de que no supere las doscientas líneas. Este proceso se activa automáticamente cuando han pasado veinticuatro horas desde la última ejecución y se han completado al menos cinco sesiones.",
+      "8": "Usa barra memory para explorar tus archivos de memoria. Barra dream para forzar una consolidación manual. Y barra init para generar tu primer CLAUDE punto md. Sígueme para más contenido sobre Claude Code."
+    }
+  }
 }

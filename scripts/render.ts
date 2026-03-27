@@ -5,6 +5,7 @@ import { bundle } from "@remotion/bundler"
 import { renderMedia, selectComposition } from "@remotion/renderer"
 import { enableTailwind } from "@remotion/tailwind-v4"
 import { readFileSync } from "fs"
+import { execFileSync } from "child_process"
 import path from "path"
 
 const configPath = process.argv[2]
@@ -16,6 +17,13 @@ if (!configPath) {
 async function main() {
   const config = JSON.parse(readFileSync(configPath, "utf-8"))
   const outputPath = path.join(path.dirname(configPath), "output.mp4")
+
+  if (config.voiceover?.enabled) {
+    console.log("🎙️  Generating voiceover...")
+    execFileSync("npx", ["tsx", "scripts/generate-voiceover.ts", configPath], {
+      stdio: "inherit",
+    })
+  }
 
   console.log("📦 Bundling composition...")
   const bundleLocation = await bundle({

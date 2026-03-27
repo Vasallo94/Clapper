@@ -63,7 +63,9 @@ export const TutorialConfigSchema = z.object({
   voiceover: z
     .object({
       enabled: z.literal(true),
+      provider: z.enum(["gemini", "elevenlabs"]).default("gemini"),
       voiceId: z.string(),
+      language: z.string().optional(),
       scenes: z.record(z.string(), z.string()),
     })
     .optional(),

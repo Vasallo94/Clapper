@@ -14,6 +14,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Fade-in + slide entry animation on terminal messages
 - SVG triangle for Claude label (replacing unicode character)
 - Enterprise bootstrap: husky, lint-staged, commitlint, ADRs, specs structure
+- Gemini 2.5 Flash TTS voiceover integration (`scripts/generate-voiceover.ts`)
+- `<Audio>` component in ClaudeCodeTutorial for per-scene voiceover playback
+- Voiceover auto-generation step in render pipeline (`scripts/render.ts`)
+- Schema fields `provider` and `language` in voiceover config
+- Spanish narration for claude-code-memory tutorial (9 scenes, voice: Orus)
+- Custom Claude Code hooks: config validator, render reminder, voiceover cost tracker
 
 ### Changed
 

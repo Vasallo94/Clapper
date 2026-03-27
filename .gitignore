@@ -12,3 +12,5 @@ tutorials/*/output.mp4
 shorts/*/output.mp4
 public/voiceover/
 .superpowers/
+.claude/hooks/
+.claude/voiceover-usage.log

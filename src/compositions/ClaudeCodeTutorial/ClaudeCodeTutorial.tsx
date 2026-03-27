@@ -1,5 +1,5 @@
 import React from "react"
-import { AbsoluteFill, Series } from "remotion"
+import { AbsoluteFill, Audio, Series, staticFile } from "remotion"
 import { TutorialConfig } from "./schema"
 import { ThemeContext } from "./ThemeContext"
 import { getTheme } from "./themes"
@@ -19,6 +19,9 @@ export const ClaudeCodeTutorial: React.FC<TutorialConfig> = (config) => {
             const durationInFrames = Math.ceil(scene.durationInSeconds * config.fps)
             return (
               <Series.Sequence key={i} durationInFrames={durationInFrames}>
+                {config.voiceover?.enabled && config.voiceover.scenes[String(i)] && (
+                  <Audio src={staticFile(`voiceover/${config.id}/${i}.mp3`)} />
+                )}
                 {scene.type === "intro" && <IntroScene {...scene} />}
                 {scene.type === "terminal" && <TerminalScene {...scene} />}
                 {scene.type === "callout" && <CalloutScene {...scene} />}

@@ -28,6 +28,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Beat-driven animation timing across all scene components
 - ADR 0001 (pixel logo pipeline) and ADR 0002 (editorial direction model)
 - Tutorial claude-code-memory V2 with narrative brief, beats, and pixel logo
+- Sound design pipeline: `scripts/generate-sound-design.ts` with ElevenLabs SFX V2 + Music API
+- `src/utils/audioMix.ts` — ducking, SFX trigger/end frame, volume utilities
+- Music bed `<Audio>` with dynamic ducking in ClaudeCodeTutorial and ProductShort compositions
+- Per-scene SFX `<Audio>` with trigger-type mapping (scene-start, beat, typewriter, reveal, transition, accent-line)
+- `SoundDesignSchema`, `SfxEntrySchema`, `MusicBedSchema` in direction.ts
+- `transitionMs` field in TimingSchema for scene transition silence gaps
+- `sound-engineer` skill — 5-step workflow for automated sound design with human approval gates
+- Music-aware rules in `remotion-director` skill (narrative pauses, transition heuristics, beat gaps)
+- Agent pipeline principle in CLAUDE.md and AGENTS.md: automate execution, not criteria
 
 ### Changed
 

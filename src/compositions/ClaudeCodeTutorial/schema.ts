@@ -1,6 +1,11 @@
 // src/compositions/ClaudeCodeTutorial/schema.ts
 import { z } from "zod"
-import { BriefSchema, DirectionSceneFieldsSchema, VoiceoverConfigSchema } from "../../utils/direction"
+import {
+  BriefSchema,
+  DirectionSceneFieldsSchema,
+  SoundDesignSchema,
+  VoiceoverConfigSchema,
+} from "../../utils/direction"
 
 const PixelLogoSchema = z.object({
   enabled: z.boolean().default(true),
@@ -80,6 +85,7 @@ export const TutorialConfigSchema = z.object({
   brief: BriefSchema.optional(),
   scenes: z.array(SceneSchema).min(1),
   voiceover: VoiceoverConfigSchema.optional(),
+  soundDesign: SoundDesignSchema.optional(),
 })
 
 export type TutorialConfig = z.infer<typeof TutorialConfigSchema>

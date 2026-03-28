@@ -2,7 +2,11 @@
 
 ## Project intention
 
-Pipeline de generación de videos educativos y promocionales con Remotion. Proyecto personal de Enrique Vasallo enfocado en tutoriales de Codex (LinkedIn) y demos de producto (Línea Directa). Los vídeos se generan programáticamente desde configs JSON, renderizados frame-by-frame con React.
+Pipeline de generación de videos educativos y promocionales con Remotion, **totalmente automatizado por agentes de IA**. Proyecto personal de Enrique Vasallo enfocado en tutoriales de Codex (LinkedIn) y demos de producto (Línea Directa). Los vídeos se generan programáticamente desde configs JSON, renderizados frame-by-frame con React.
+
+**Principio clave: automatizar la ejecución, no el criterio.** Las skills proponen decisiones creativas (escaleta, carta de sonido) via `AskUserQuestion` e iteran hasta aprobación del humano. El trabajo técnico (llamadas API, generación de archivos, renderizado) es totalmente automático. El humano nunca toca config.json manualmente.
+
+**Cadena de agentes:** `tutorial-generator → director → sound-engineer → render`
 
 This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
 

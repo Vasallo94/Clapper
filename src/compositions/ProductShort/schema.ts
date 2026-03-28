@@ -1,6 +1,11 @@
 // src/compositions/ProductShort/schema.ts
 import { z } from "zod"
-import { BriefSchema, DirectionSceneFieldsSchema, VoiceoverConfigSchema } from "../../utils/direction"
+import {
+  BriefSchema,
+  DirectionSceneFieldsSchema,
+  SoundDesignSchema,
+  VoiceoverConfigSchema,
+} from "../../utils/direction"
 
 const HeroSceneSchema = z
   .object({
@@ -59,6 +64,7 @@ export const ProductShortConfigSchema = z.object({
   brief: BriefSchema.optional(),
   scenes: z.array(ProductShortSceneSchema).min(1),
   voiceover: VoiceoverConfigSchema.optional(),
+  soundDesign: SoundDesignSchema.optional(),
 })
 
 export type ProductShortConfig = z.infer<typeof ProductShortConfigSchema>

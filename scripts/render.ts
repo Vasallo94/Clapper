@@ -35,6 +35,13 @@ async function main() {
     })
   }
 
+  if (config.soundDesign?.enabled) {
+    console.log("🔊 Generating sound design...")
+    execFileSync("npx", ["tsx", "scripts/generate-sound-design.ts", configPath], {
+      stdio: "inherit",
+    })
+  }
+
   console.log("📦 Bundling composition...")
   const bundleLocation = await bundle({
     entryPoint: path.resolve("./src/index.ts"),

@@ -32,6 +32,19 @@ Usa esta skill cuando ya existe un draft de `config.json` y hay que convertirlo 
 - El final necesita `tailHoldMs` suficiente para CTA o marca
 - `brief` debe existir antes de considerar una pieza “dirigida”
 
+## Reglas music-aware (cuando habra soundDesign)
+
+Estas reglas se aplican siempre, ya que el sound-engineer actuara despues del director:
+
+- **Pausas narrativas**: Asegurar al menos una pausa de voz de 800ms+ cada 15-20 segundos. Aqui la musica “respira” y el espectador procesa informacion.
+- **Transiciones entre escenas**: Asignar `transitionMs` en el timing de cada escena:
+  - 0ms: corte duro (raro, alta energia)
+  - 300-600ms: transicion estandar (mismo hilo narrativo)
+  - 800-1200ms: pausa de respiracion (antes de reveal o cambio de tema)
+  - 1200-1500ms: pausa dramatica (antes de climax o insight clave)
+- **Gaps entre beats**: Dejar 200-400ms de silencio entre beats narrados consecutivos. No todo necesita narracion — la musica debe oirse en esos huecos.
+- **Transicion como narrativa**: El silencio entre escenas es una herramienta de storytelling. Una pausa larga antes de “Y ahi entendi que el sistema tiene tres capas” construye anticipacion. La musica sube durante la pausa, luego baja cuando la voz regresa.
+
 ## Modelo que debes producir
 
 ### Root
@@ -50,6 +63,7 @@ Usa esta skill cuando ya existe un draft de `config.json` y hay que convertirlo 
 - `timing.audioStartMs`
 - `timing.tailHoldMs`
 - `timing.minVisualHoldMs`
+- `timing.transitionMs` — silencio antes de esta escena (0-1500ms, para que la musica respire)
 - `beats[]`
 
 ### Beat

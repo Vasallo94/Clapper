@@ -5,13 +5,20 @@ import type { OutroSceneProps } from "../schema"
 import { useThemeTokens } from "../themes"
 import { MascotWatermark } from "../components/MascotWatermark"
 import { useSlideIn } from "../hooks/useSlideIn"
+import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
 
-export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
+export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets, timing, beats }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
 
-  const titleAnim = useSlideIn({ distance: 30, durationInFrames: Math.ceil(fps * 0.8) })
+  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
+  const titleAnim = useSlideIn({ distance: 30, delay: motionStartFrame, durationInFrames: Math.ceil(fps * 0.8) })
+  const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
+  const labelStartFrame =
+    beatStartFrames && beatStartFrames.length > 0
+      ? beatStartFrames[beatStartFrames.length - 1] + Math.ceil(fps * 0.35)
+      : motionStartFrame + Math.ceil(fps * 1.5)
 
   return (
     <AbsoluteFill
@@ -42,18 +49,17 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
       {bullets && bullets.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 700 }}>
           {bullets.map((bullet, i) => {
-            const bulletOpacity = interpolate(
-              frame,
-              [fps * (0.5 + i * 0.25), fps * (0.9 + i * 0.25)],
-              [0, 1],
-              { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-            )
-            const bulletX = interpolate(
-              frame,
-              [fps * (0.5 + i * 0.25), fps * (0.9 + i * 0.25)],
-              [-20, 0],
-              { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-            )
+            const beatStart =
+              beatStartFrames?.[Math.min(i, Math.max(0, (beatStartFrames?.length ?? 1) - 1))] ??
+              motionStartFrame + Math.ceil(fps * (0.5 + i * 0.25))
+            const bulletOpacity = interpolate(frame, [beatStart, beatStart + Math.ceil(fps * 0.4)], [0, 1], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            })
+            const bulletX = interpolate(frame, [beatStart, beatStart + Math.ceil(fps * 0.4)], [-20, 0], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            })
             return (
               <div
                 key={i}
@@ -78,8 +84,9 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
                 <div
                   style={{
                     fontFamily: tokens.fontFamily,
-                    fontSize: 20,
-                    color: tokens.foregroundMid,
+                    fontSize: 22,
+                    color: tokens.foreground,
+                    opacity: 0.78,
                     lineHeight: 1.5,
                   }}
                 >
@@ -99,7 +106,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
           color: tokens.labelColor,
           letterSpacing: 2,
           textTransform: "uppercase",
-          opacity: interpolate(frame, [fps * 1.5, fps * 2], [0, 1], {
+          opacity: interpolate(frame, [labelStartFrame, labelStartFrame + Math.ceil(fps * 0.5)], [0, 1], {
             extrapolateLeft: "clamp",
             extrapolateRight: "clamp",
           }),

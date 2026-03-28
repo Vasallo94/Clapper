@@ -4,17 +4,19 @@ import type { HeroSceneProps } from "../schema"
 import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
 import { PhoneMascot } from "../../ClaudeCodeTutorial/components/PhoneMascot"
 import { useSlideIn } from "../../ClaudeCodeTutorial/hooks/useSlideIn"
+import { getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
 
-export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle }) => {
+export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle, timing }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
+  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
 
-  const titleAnim = useSlideIn({ distance: 60 })
-  const subtitleAnim = useSlideIn({ distance: 30, delay: 8 })
+  const titleAnim = useSlideIn({ distance: 60, delay: motionStartFrame })
+  const subtitleAnim = useSlideIn({ distance: 30, delay: motionStartFrame + 8 })
 
   const mascotSpring = spring({
-    frame: Math.max(0, frame - 4),
+    frame: Math.max(0, frame - motionStartFrame - 4),
     fps,
     config: { damping: 12, mass: 0.8 },
     durationInFrames: 30,

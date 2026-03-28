@@ -1,23 +1,14 @@
 import React from "react"
-import {
-  AbsoluteFill,
-  interpolate,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion"
+import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import type { PricingSceneProps } from "../schema"
 import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
+import { getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
 
-export const PricingScene: React.FC<PricingSceneProps> = ({
-  price,
-  period,
-  note,
-  variant,
-}) => {
+export const PricingScene: React.FC<PricingSceneProps> = ({ price, period, note, variant, timing }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
+  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
 
   const isDark = variant === "dark"
   const bg = isDark ? tokens.primary : tokens.background
@@ -25,7 +16,7 @@ export const PricingScene: React.FC<PricingSceneProps> = ({
   const textColor = isDark ? `${tokens.primaryForeground}d9` : tokens.foregroundMid
 
   const priceSpring = spring({
-    frame,
+    frame: Math.max(0, frame - motionStartFrame),
     fps,
     config: { damping: 10, mass: 0.6 },
     durationInFrames: 25,
@@ -33,7 +24,7 @@ export const PricingScene: React.FC<PricingSceneProps> = ({
   const priceScale = interpolate(priceSpring, [0, 1], [0.3, 1])
 
   const detailSpring = spring({
-    frame: Math.max(0, frame - 10),
+    frame: Math.max(0, frame - motionStartFrame - 10),
     fps,
     config: { damping: 200 },
     durationInFrames: 20,

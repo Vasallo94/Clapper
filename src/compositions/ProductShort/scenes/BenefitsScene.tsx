@@ -3,15 +3,17 @@ import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } fr
 import type { BenefitsSceneProps } from "../schema"
 import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
 import { useSlideIn } from "../../ClaudeCodeTutorial/hooks/useSlideIn"
+import { getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
 
 const STAGGER_FRAMES = 12
 
-export const BenefitsScene: React.FC<BenefitsSceneProps> = ({ title, items }) => {
+export const BenefitsScene: React.FC<BenefitsSceneProps> = ({ title, items, timing }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
+  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
 
-  const titleAnim = useSlideIn()
+  const titleAnim = useSlideIn({ delay: motionStartFrame })
 
   return (
     <AbsoluteFill
@@ -53,7 +55,7 @@ export const BenefitsScene: React.FC<BenefitsSceneProps> = ({ title, items }) =>
       <div style={{ display: "flex", flexDirection: "column", gap: 36, paddingLeft: 24 }}>
         {items.map((item, idx) => {
           const itemSpring = spring({
-            frame: Math.max(0, frame - (idx + 1) * STAGGER_FRAMES),
+            frame: Math.max(0, frame - motionStartFrame - (idx + 1) * STAGGER_FRAMES),
             fps,
             config: { damping: 200 },
             durationInFrames: 20,

@@ -1,24 +1,20 @@
 import React from "react"
-import {
-  AbsoluteFill,
-  interpolate,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion"
+import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import type { CtaSceneProps } from "../schema"
 import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
 import { PhoneMascot } from "../../ClaudeCodeTutorial/components/PhoneMascot"
 import { useSlideIn } from "../../ClaudeCodeTutorial/hooks/useSlideIn"
+import { getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
 
 const PULSE_COUNT = 3
 
-export const CtaScene: React.FC<CtaSceneProps> = ({ text, url }) => {
+export const CtaScene: React.FC<CtaSceneProps> = ({ text, url, timing }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
+  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
 
-  const ctaAnim = useSlideIn({ distance: 30 })
+  const ctaAnim = useSlideIn({ distance: 30, delay: motionStartFrame })
 
   return (
     <AbsoluteFill
@@ -45,17 +41,13 @@ export const CtaScene: React.FC<CtaSceneProps> = ({ text, url }) => {
         {Array.from({ length: PULSE_COUNT }).map((_, i) => {
           const pulseDelay = i * 8
           const pulseSpring = spring({
-            frame: Math.max(0, frame - pulseDelay),
+            frame: Math.max(0, frame - motionStartFrame - pulseDelay),
             fps,
             config: { damping: 30, mass: 1.5 },
             durationInFrames: 40,
           })
           const pulseScale = interpolate(pulseSpring, [0, 1], [0.2, 1])
-          const pulseOpacity = interpolate(
-            pulseSpring,
-            [0, 0.5, 1],
-            [0, 0.3, 0],
-          )
+          const pulseOpacity = interpolate(pulseSpring, [0, 0.5, 1], [0, 0.3, 0])
 
           return (
             <div

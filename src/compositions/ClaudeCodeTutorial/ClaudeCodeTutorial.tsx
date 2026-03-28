@@ -1,5 +1,5 @@
 import React from "react"
-import { AbsoluteFill, Audio, Series, staticFile } from "remotion"
+import { AbsoluteFill, Audio, Sequence, Series, staticFile } from "remotion"
 import { TutorialConfig } from "./schema"
 import { ThemeContext } from "./ThemeContext"
 import { getTheme } from "./themes"
@@ -8,6 +8,13 @@ import { TerminalScene } from "./scenes/TerminalScene"
 import { CalloutScene } from "./scenes/CalloutScene"
 import { OutroScene } from "./scenes/OutroScene"
 import { CustomScene } from "./scenes/CustomScene"
+import {
+  getMergedBeats,
+  getMergedTiming,
+  getSceneAudioDelayMs,
+  getVoiceoverText,
+  msToFrames,
+} from "../../utils/direction"
 
 export const ClaudeCodeTutorial: React.FC<TutorialConfig> = (config) => {
   const bg = getTheme(config.theme ?? "default").background
@@ -16,17 +23,29 @@ export const ClaudeCodeTutorial: React.FC<TutorialConfig> = (config) => {
       <AbsoluteFill style={{ background: bg }}>
         <Series>
           {config.scenes.map((scene, i) => {
-            const durationInFrames = Math.ceil(scene.durationInSeconds * config.fps)
+            const voiceScene = config.voiceover?.scenes[String(i)]
+            const timing = getMergedTiming(scene.timing, voiceScene)
+            const beats = getMergedBeats(scene.beats, voiceScene)
+            const directedScene = {
+              ...scene,
+              ...(timing ? { timing } : {}),
+              ...(beats ? { beats } : {}),
+            }
+            const durationInFrames = Math.ceil(directedScene.durationInSeconds * config.fps)
+            const audioDelayFrames = msToFrames(getSceneAudioDelayMs(timing), config.fps)
+            const hasVoiceover = config.voiceover?.enabled && Boolean(getVoiceoverText(voiceScene))
             return (
               <Series.Sequence key={i} durationInFrames={durationInFrames}>
-                {config.voiceover?.enabled && config.voiceover.scenes[String(i)] && (
-                  <Audio src={staticFile(`voiceover/${config.id}/${i}.mp3`)} />
+                {hasVoiceover && (
+                  <Sequence from={audioDelayFrames}>
+                    <Audio src={staticFile(`voiceover/${config.id}/${i}.mp3`)} />
+                  </Sequence>
                 )}
-                {scene.type === "intro" && <IntroScene {...scene} />}
-                {scene.type === "terminal" && <TerminalScene {...scene} />}
-                {scene.type === "callout" && <CalloutScene {...scene} />}
-                {scene.type === "outro" && <OutroScene {...scene} />}
-                {scene.type === "custom" && <CustomScene {...scene} />}
+                {directedScene.type === "intro" && <IntroScene {...directedScene} />}
+                {directedScene.type === "terminal" && <TerminalScene {...directedScene} />}
+                {directedScene.type === "callout" && <CalloutScene {...directedScene} />}
+                {directedScene.type === "outro" && <OutroScene {...directedScene} />}
+                {directedScene.type === "custom" && <CustomScene {...directedScene} />}
               </Series.Sequence>
             )
           })}

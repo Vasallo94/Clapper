@@ -7,6 +7,8 @@ import { enableTailwind } from "@remotion/tailwind-v4"
 import { readFileSync } from "fs"
 import { execFileSync } from "child_process"
 import path from "path"
+import type { Beat, Timing } from "../src/utils/direction"
+import { hasExplicitDirection } from "../src/utils/direction"
 
 const configPath = process.argv[2]
 if (!configPath) {
@@ -17,6 +19,14 @@ if (!configPath) {
 async function main() {
   const config = JSON.parse(readFileSync(configPath, "utf-8"))
   const outputPath = path.join(path.dirname(configPath), "output.mp4")
+  const directedScenes =
+    config.scenes?.filter((scene: { timing?: Timing; beats?: Beat[] }) =>
+      hasExplicitDirection(scene.timing, scene.beats),
+    ).length ?? 0
+
+  if (config.voiceover?.enabled && (!config.brief || directedScenes === 0)) {
+    console.warn("⚠️  No clear director pass detected. Consider adding brief/timing/beats before final render.")
+  }
 
   if (config.voiceover?.enabled) {
     console.log("🎙️  Generating voiceover...")

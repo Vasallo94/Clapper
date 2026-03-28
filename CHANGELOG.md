@@ -20,16 +20,27 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Schema fields `provider` and `language` in voiceover config
 - Spanish narration for claude-code-memory tutorial (9 scenes, voice: Orus)
 - Custom Claude Code hooks: config validator, render reminder, voiceover cost tracker
+- Editorial direction model (`src/utils/direction.ts`): Brief, Timing, Beats, VoiceoverConfig schemas
+- `remotion-director` skill for refining timing/beats on existing configs
+- Pixel logo pipeline: `generate-pixel-logo.ts`, PixelLogo component, PixelLogoPreview composition
+- Dual TTS support (Gemini + ElevenLabs) with per-scene overrides in `generate-voiceover.ts`
+- Dynamic scene duration from measured audio length in `calculateMetadata.ts`
+- Beat-driven animation timing across all scene components
+- ADR 0001 (pixel logo pipeline) and ADR 0002 (editorial direction model)
+- Tutorial claude-code-memory V2 with narrative brief, beats, and pixel logo
 
 ### Changed
 
 - Font sizes increased across all scenes for mobile readability
 - Prettier config completed (semi: false, printWidth: 120, trailingComma, arrowParens)
+- All scene schemas merged with `DirectionSceneFieldsSchema` (timing + beats fields)
+- Skills `remotion-tutorial-generator` and `remotion-short-ld` updated with editorial brief step
 
 ### Fixed
 
 - FlowDiagramScene orb animation rewritten with per-node cycle system
 - Terminal content overflow with estimateLineHeight() scroll calculation
+- FlowDiagramScene: fixed broken indentation in arrow generation, removed IIFE pattern, fixed `frame` vs `localFrame` bug in outro
 
 ## 2026-03-23
 

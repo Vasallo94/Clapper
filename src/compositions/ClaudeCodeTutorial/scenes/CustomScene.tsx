@@ -1,13 +1,16 @@
 // src/compositions/ClaudeCodeTutorial/scenes/CustomScene.tsx
 import React from "react"
 import { customSceneRegistry } from "../customSceneRegistry"
+import type { Beat, Timing } from "../../../utils/direction"
 
 interface CustomSceneProps {
   componentId: string
   props?: Record<string, unknown>
+  timing?: Timing
+  beats?: Beat[]
 }
 
-export const CustomScene: React.FC<CustomSceneProps> = ({ componentId, props = {} }) => {
+export const CustomScene: React.FC<CustomSceneProps> = ({ componentId, props = {}, timing, beats }) => {
   const Component = customSceneRegistry[componentId]
   if (!Component) {
     return (
@@ -28,5 +31,5 @@ export const CustomScene: React.FC<CustomSceneProps> = ({ componentId, props = {
       </div>
     )
   }
-  return <Component {...props} />
+  return <Component {...props} timing={timing} beats={beats} />
 }

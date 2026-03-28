@@ -4,11 +4,14 @@ import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig, spring } fr
 import type { TerminalSceneProps, TerminalLine } from "../schema"
 import { useThemeTokens, type ThemeTokens } from "../themes"
 import { MascotWatermark } from "../components/MascotWatermark"
+import { getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
 
-const COMMAND_CHARS_PER_FRAME = 0.5
+const COMMAND_CHARS_PER_FRAME = 0.75
 const OUTPUT_REVEAL_FRAMES = 8
-const CLAUDE_LINE_GAP_FRAMES = 18
-const CLAUDE_CHARS_PER_FRAME = 1
+const CLAUDE_LINE_GAP_FRAMES = 10
+// Claude should feel decisively faster than the human so the narration can carry
+// more ideas without spending too much timeline on terminal typing.
+const CLAUDE_CHARS_PER_FRAME = 3.2
 
 type LineWithTiming = TerminalLine & {
   startFrame: number
@@ -155,14 +158,16 @@ function estimateLineHeight(kind: string, text: string): number {
   }
 }
 
-const CONTENT_AREA_HEIGHT = 420 // fixed visible height
+const CONTENT_AREA_HEIGHT = 456 // fixed visible height
 const CONTENT_PADDING = 40 // top + bottom padding
 
-export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) => {
+export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines, timing }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
   const t = tokens.terminal
+  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
+  const localFrame = Math.max(0, frame - motionStartFrame)
 
   const timedLines = useMemo(() => buildLineTiming(lines, fps), [lines, fps])
 
@@ -171,25 +176,24 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
   const scrollY = useMemo(() => {
     let visibleHeight = 0
     for (const line of timedLines) {
-      if (frame >= line.startFrame) {
+      if (localFrame >= line.startFrame) {
         visibleHeight += estimateLineHeight(line.kind, line.text)
       }
     }
     const overflow = visibleHeight - (CONTENT_AREA_HEIGHT - CONTENT_PADDING)
     return overflow > 0 ? overflow : 0
-  }, [timedLines, frame])
+  }, [timedLines, localFrame])
 
-  const windowSpring = spring({ frame, fps, config: { damping: 200 }, durationInFrames: 20 })
+  const windowSpring = spring({ frame: localFrame, fps, config: { damping: 200 }, durationInFrames: 20 })
   const windowY = interpolate(windowSpring, [0, 1], [20, 0])
 
   // Context bar animation
-  const contextPercent = interpolate(frame, [0, fps * 3], [12, 34], {
+  const contextPercent = interpolate(localFrame, [0, fps * 3], [12, 34], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   })
   const filledBlocks = Math.round(contextPercent / 5)
   const contextBar = "█".repeat(filledBlocks) + "░".repeat(20 - filledBlocks)
-
   const isDarkScene = t.sceneBackground !== tokens.background
 
   return (
@@ -207,9 +211,10 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
         <div
           style={{
             fontFamily: tokens.fontFamily,
-            fontSize: 22,
-            color: t.labelColor,
-            marginBottom: 24,
+            fontSize: 26,
+            fontWeight: 700,
+            color: isDarkScene ? t.output : tokens.foreground,
+            marginBottom: 22,
             alignSelf: "flex-start",
             width: "90%",
           }}
@@ -277,16 +282,22 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
           >
             {timedLines.map((line, i) => {
               if (line.kind === "command") {
-                return <UserMessage key={i} line={line} frame={frame} terminal={t} monoFont={tokens.monoFontFamily} />
+                return (
+                  <UserMessage key={i} line={line} frame={localFrame} terminal={t} monoFont={tokens.monoFontFamily} />
+                )
               }
               if (line.kind === "claude") {
-                return <ClaudeMessage key={i} line={line} frame={frame} terminal={t} monoFont={tokens.monoFontFamily} />
+                return (
+                  <ClaudeMessage key={i} line={line} frame={localFrame} terminal={t} monoFont={tokens.monoFontFamily} />
+                )
               }
               if (line.kind === "output") {
-                return <OutputMessage key={i} line={line} frame={frame} terminal={t} monoFont={tokens.monoFontFamily} />
+                return (
+                  <OutputMessage key={i} line={line} frame={localFrame} terminal={t} monoFont={tokens.monoFontFamily} />
+                )
               }
               // blank
-              if (frame >= line.startFrame) {
+              if (localFrame >= line.startFrame) {
                 return <div key={i} style={{ height: 12 }} />
               }
               return null

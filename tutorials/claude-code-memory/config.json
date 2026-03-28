@@ -1,124 +1,216 @@
 {
   "id": "claude-code-memory",
-  "title": "Claude Code recuerda quién eres",
-  "description": "Cómo funciona el sistema de memoria de Claude Code: CLAUDE.md, auto memory y auto dream",
+  "title": "El día que Claude recordó mis telescopios",
+  "description": "La memoria de Claude Code explicada desde una anécdota real de astrofotografía solar",
   "fps": 30,
   "width": 1280,
   "height": 720,
   "theme": "atom-dark",
+  "brief": {
+    "platform": "linkedin",
+    "audience": "Desarrolladores y gente técnica curiosa por Claude Code, agentes y productividad real",
+    "goal": "Entender por qué la memoria de Claude Code cambia la siguiente sesión y distinguir la parte manual de la automática",
+    "promise": "Verás el momento real en el que Claude decidió recordar mi contexto sin que yo se lo pidiera",
+    "tone": "personal-didactic",
+    "cta": "Abrir /memory, probar /dream, crear CLAUDE.md con /init y seguir la cuenta para más contenido",
+    "hookStrategy": "surprise-first"
+  },
   "scenes": [
     {
       "type": "intro",
-      "title": "Claude Code recuerda quién eres",
-      "subtitle": "Así funciona su sistema de memoria — por Enrique Vasallo",
+      "title": "El día que Claude recordó mis telescopios",
+      "subtitle": "Y yo no le había pedido que recordara nada",
+      "pixelLogo": {
+        "enabled": true,
+        "scale": 3.4,
+        "animation": "glint"
+      },
+      "beats": [
+        {
+          "id": "opening-lockup",
+          "startMs": 0,
+          "endMs": 1400,
+          "narration": "",
+          "visual": "Logo, título y subtítulo quedan presentes antes de que empiece la voz",
+          "animation": "hold",
+          "emphasis": "medium"
+        },
+        {
+          "id": "hook-mystery",
+          "startMs": 1650,
+          "endMs": 3350,
+          "narration": "El otro día Claude recordó mis telescopios sin que yo se lo pidiera.",
+          "visual": "La línea de acento y el logo hacen el primer gesto fuerte",
+          "animation": "accent-reveal",
+          "emphasis": "high"
+        },
+        {
+          "id": "hook-payoff",
+          "startMs": 3450,
+          "endMs": 4900,
+          "narration": "Y eso me obligó a entender cómo funciona su memoria.",
+          "visual": "El subtítulo se asienta y convierte la sorpresa en promesa didáctica",
+          "animation": "subtitle-settle",
+          "emphasis": "medium"
+        }
+      ],
       "durationInSeconds": 5
     },
     {
       "type": "terminal",
-      "title": "Una conversación sobre telescopios solares",
+      "title": "La conversación que lo provocó",
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 150,
+        "tailHoldMs": 450,
+        "minVisualHoldMs": 600
+      },
       "lines": [
         {
           "kind": "command",
-          "text": "Quiero preparar un setup de astrofotografía solar para el eclipse total de 2026 en España. ¿Qué telescopio me recomiendas?"
-        },
-        { "kind": "blank", "text": "", "delayAfterMs": 800 },
-        {
-          "kind": "claude",
-          "text": "Para el eclipse total del 12 de agosto de 2026 en España, necesitas un telescopio solar dedicado con filtro H-Alpha."
+          "text": "Estoy preparando equipo solar para el eclipse total del 12 de agosto de 2026 en España. Tengo un FF80-APO y quiero acertar con el setup H-alpha. ¿Qué combinación te parece sensata?"
         },
         {
           "kind": "claude",
-          "text": "Te recomiendo el DayStar HelioStar 100Ha — apertura de 100mm, filtro H-Alpha integrado, ideal para prominencias y cromosfera."
+          "text": "Para detalle solar, me iría a un HelioStar 100Ha con una ASI432MM. Si luego quieres más focal, una Powermate 2x encaja muy bien."
         },
-        { "kind": "blank", "text": "", "delayAfterMs": 400 },
-        {
-          "kind": "claude",
-          "text": "Para la cámara, la ZWO ASI432MM es excelente para solar: sensor monocromo, alta velocidad de captura, y buen rango dinámico."
-        },
-        {
-          "kind": "claude",
-          "text": "Añade una Powermate 2x de TeleVue para aumentar la focal y capturar detalles en las manchas solares."
-        },
-        { "kind": "blank", "text": "", "delayAfterMs": 600 },
         {
           "kind": "command",
-          "text": "Genial, le echaré un vistazo a la recomendación. HelioStar 100Ha + ASI432MM + Powermate 2x suena bien."
+          "text": "Perfecto. Suelo preferir recomendaciones prácticas y bien justificadas."
         },
         {
           "kind": "claude",
-          "text": "Buena elección. Es un setup equilibrado para solar: resolución, contraste y portabilidad para el día del eclipse."
+          "text": "Entonces esa combinación te encaja. Me quedo con ese criterio y con el setup elegido para futuras sesiones."
         }
       ],
-      "durationInSeconds": 42
+      "durationInSeconds": 12
     },
     {
       "type": "custom",
       "componentId": "file-explorer",
-      "durationInSeconds": 45,
+      "durationInSeconds": 12,
+      "timing": {
+        "leadInMs": 150,
+        "audioStartMs": 100,
+        "tailHoldMs": 650,
+        "minVisualHoldMs": 800
+      },
       "props": {
-        "rootPath": "~/.claude/projects/.../memory/",
+        "rootPath": "~/.claude/projects/solar-eclipse/memory/",
         "files": [
           { "name": "memory", "type": "folder", "indent": 0 },
           { "name": "MEMORY.md", "type": "file", "indent": 1 },
           { "name": "user_astrophotography.md", "type": "file", "indent": 1, "isNew": true }
         ],
         "expandFile": "user_astrophotography.md",
-        "fileContent": "---\nname: Astrophotography hobby and equipment\ndescription: User does astrophotography, owns deep-sky setup, planning solar H-Alpha for 2026 eclipse\ntype: user\n---\nEnrique is an astrophotographer with a deep-sky setup\n(ZWO ASI2600MC AIR, FF80-APO refractor, ZWO AM5N mount).\n\nPlanning solar astrophotography for the total solar\neclipse on 2026-08-12 in Spain.\n\nChose HelioStar 100Ha + ASI432MM + Powermate 2x setup.\n\nPrefers practical, well-reasoned recommendations\nbacked by research.",
-        "calloutText": "Claude decidió guardar esto. Nadie se lo pidió."
+        "fileContent": "---\nname: Astrophotography hobby and equipment\ndescription: Deep-sky setup, Bortle 3 skies, solar eclipse 2026 plan, practical research-backed preferences\ntype: user\n---\nEnrique uses an ASI2600MC AIR, FF80-APO and AM5N.\nShoots from Bortle 3 skies.\n\nPlanning solar H-alpha for the 2026 eclipse in Spain.\nChose HelioStar 100Ha + ASI432MM + Powermate 2x.\n\nPrefers practical, research-backed recommendations.",
+        "calloutText": "Esto no lo escribí yo. Claude decidió que ese contexto merecía sobrevivir a la sesión."
       }
     },
     {
       "type": "custom",
       "componentId": "block-diagram",
-      "durationInSeconds": 30,
+      "durationInSeconds": 10,
+      "timing": {
+        "leadInMs": 250,
+        "audioStartMs": 150,
+        "tailHoldMs": 500,
+        "minVisualHoldMs": 700
+      },
+      "beats": [
+        {
+          "id": "layers-title",
+          "startMs": 250,
+          "endMs": 850,
+          "narration": "Ahí entendí que el sistema tiene tres capas.",
+          "visual": "Aparece el título para pasar de anécdota a arquitectura",
+          "animation": "title-hold",
+          "emphasis": "medium"
+        },
+        {
+          "id": "layer-claude-md",
+          "startMs": 950,
+          "endMs": 1850,
+          "narration": "CLAUDE punto md, que escribes tú.",
+          "visual": "Entra el bloque manual y queda claro el origen humano",
+          "animation": "reveal-block",
+          "emphasis": "medium"
+        },
+        {
+          "id": "layer-auto-memory",
+          "startMs": 2000,
+          "endMs": 3250,
+          "narration": "Auto Memory, que decide qué señal merece recordarse.",
+          "visual": "Entra Auto Memory y se dibuja la conexión con la parte manual",
+          "animation": "reveal-block-link",
+          "emphasis": "high"
+        },
+        {
+          "id": "layer-auto-dream",
+          "startMs": 3400,
+          "endMs": 4700,
+          "narration": "Y Auto Dream, que mantiene todo limpio con el tiempo.",
+          "visual": "Entra Auto Dream y se completa la cadena visual",
+          "animation": "reveal-block-link",
+          "emphasis": "high"
+        }
+      ],
       "props": {
-        "title": "¿Cómo funciona la memoria de Claude Code?",
+        "title": "Lo que había detrás",
         "layout": "horizontal",
         "blocks": [
-          { "id": "claude-md", "title": "CLAUDE.md", "subtitle": "Instrucciones que tú escribes", "color": "#61afef" },
-          { "id": "auto-memory", "title": "Auto Memory", "subtitle": "Notas que Claude toma solo", "color": "#c678dd" },
-          { "id": "auto-dream", "title": "Auto Dream", "subtitle": "Consolidación automática", "color": "#d19a66" }
+          { "id": "claude-md", "title": "CLAUDE.md", "subtitle": "Reglas que escribes tú", "color": "#61afef" },
+          {
+            "id": "auto-memory",
+            "title": "Auto Memory",
+            "subtitle": "Notas que Claude decide guardar",
+            "color": "#c678dd"
+          },
+          { "id": "auto-dream", "title": "Auto Dream", "subtitle": "Consolida y poda", "color": "#d19a66" }
         ],
-        "connections": []
+        "connections": [
+          { "from": "claude-md", "to": "auto-memory" },
+          { "from": "auto-memory", "to": "auto-dream" }
+        ]
       }
     },
     {
       "type": "callout",
-      "text": "CLAUDE.md — La versión manual. Archivos markdown donde TÚ le dices a Claude cómo comportarse. Tres alcances: global (~/.claude/), proyecto (./CLAUDE.md), y organización.",
+      "text": "Importante: esa nota no era CLAUDE.md. CLAUDE.md es la parte manual, donde tú dejas reglas, preferencias o contexto estable.",
       "position": "top",
-      "background": "solid",
-      "durationInSeconds": 12
+      "background": "overlay",
+      "durationInSeconds": 7
     },
     {
       "type": "custom",
       "componentId": "block-diagram",
-      "durationInSeconds": 30,
+      "durationInSeconds": 9,
       "props": {
-        "title": "4 tipos de memoria automática",
+        "title": "Qué señales suele guardar",
         "layout": "grid",
         "blocks": [
           {
             "id": "user",
             "title": "user",
-            "subtitle": "Es astrofotógrafo, prefiere recomendaciones con investigación",
+            "subtitle": "Quién eres y cómo prefieres decidir",
             "color": "#61afef"
           },
           {
             "id": "feedback",
             "title": "feedback",
-            "subtitle": "No resumir al final de cada respuesta",
+            "subtitle": "Qué repetir y qué evitar",
             "color": "#98c379"
           },
           {
             "id": "project",
             "title": "project",
-            "subtitle": "Merge freeze a partir del 5 de marzo",
+            "subtitle": "Decisiones y estado del trabajo actual",
             "color": "#c678dd"
           },
           {
             "id": "reference",
             "title": "reference",
-            "subtitle": "Los bugs se trackean en Linear proyecto INGEST",
+            "subtitle": "Dónde vive la verdad actualizada",
             "color": "#d19a66"
           }
         ]
@@ -127,85 +219,214 @@
     {
       "type": "custom",
       "componentId": "file-explorer",
-      "durationInSeconds": 25,
+      "durationInSeconds": 9,
+      "timing": {
+        "leadInMs": 150,
+        "audioStartMs": 100,
+        "tailHoldMs": 500,
+        "minVisualHoldMs": 700
+      },
       "props": {
-        "rootPath": "~/.claude/projects/.../memory/",
+        "rootPath": "~/.claude/projects/solar-eclipse/memory/",
         "files": [
           { "name": "memory", "type": "folder", "indent": 0 },
           { "name": "MEMORY.md", "type": "file", "indent": 1 },
           { "name": "user_astrophotography.md", "type": "file", "indent": 1 },
           { "name": "feedback_no_summaries.md", "type": "file", "indent": 1 },
-          { "name": "project_merge_freeze.md", "type": "file", "indent": 1 }
+          { "name": "project_release_freeze.md", "type": "file", "indent": 1 }
         ],
         "expandFile": "MEMORY.md",
-        "fileContent": "- [Astrophotography hobby](user_astrophotography.md) — Deep-sky + solar setup, eclipse 2026\n- [No summaries](feedback_no_summaries.md) — Skip trailing response summaries\n- [Merge freeze](project_merge_freeze.md) — No merges after March 5",
-        "calloutText": "Claude lee este índice al empezar cada sesión. Si algo es relevante, abre el archivo completo."
+        "fileContent": "- [Astrophotography hobby](user_astrophotography.md) — Bortle 3, solar setup, recommendation style\n- [No trailing summaries](feedback_no_summaries.md) — Prefer direct answers\n- [Release freeze](project_release_freeze.md) — Dates and active restrictions",
+        "calloutText": "Claude empieza por este índice corto y solo abre el detalle cuando tu nueva pregunta lo necesita."
       }
     },
     {
       "type": "custom",
       "componentId": "flow-diagram",
-      "durationInSeconds": 75,
+      "durationInSeconds": 12,
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 100,
+        "tailHoldMs": 700,
+        "minVisualHoldMs": 700
+      },
       "props": {
-        "title": "Auto Dream — El sueño REM de Claude",
-        "introText": "Como el sueño REM consolida tu memoria del día, Auto Dream consolida las notas de Claude",
+        "title": "Auto Dream limpia la memoria",
+        "introText": "Cuando se acumulan notas de muchas sesiones, Claude también tiene que dormir.",
         "showParticle": true,
         "nodes": [
           {
             "id": "orient",
             "title": "Orientación",
-            "description": "Inventaría todos los archivos de memoria",
+            "description": "Lee qué memorias existen",
             "color": "#61afef"
           },
           {
             "id": "signal",
-            "title": "Recopilar señal",
-            "description": "Busca correcciones, temas recurrentes",
+            "title": "Señal",
+            "description": "Busca patrones y correcciones",
             "color": "#98c379"
           },
           {
             "id": "consolidate",
             "title": "Consolidación",
-            "description": "Fusiona duplicados, convierte fechas, elimina obsoletos",
+            "description": "Fusiona y actualiza lo importante",
             "color": "#c678dd"
           },
           {
             "id": "prune",
-            "title": "Poda e indexado",
-            "description": "Actualiza MEMORY.md, máx 200 líneas",
+            "title": "Poda",
+            "description": "Elimina ruido y reindexa",
             "color": "#d19a66"
           }
         ],
-        "outroText": "Se activa cuando: han pasado 24h desde la última ejecución + 5 sesiones completadas"
+        "outroText": "Es la capa que evita duplicados, obsolescencia y ruido entre sesiones."
       }
     },
     {
       "type": "outro",
-      "title": "La memoria de Claude Code",
-      "bullets": [
-        "/memory — ver y editar archivos de memoria",
-        "/dream — forzar consolidación manual",
-        "/init — generar CLAUDE.md inicial",
-        "Enrique Vasallo — Sígueme para más sobre Claude Code"
+      "title": "Qué probar ahora",
+      "timing": {
+        "leadInMs": 250,
+        "audioStartMs": 200,
+        "tailHoldMs": 1000,
+        "minVisualHoldMs": 700
+      },
+      "beats": [
+        {
+          "id": "cta-memory",
+          "startMs": 450,
+          "endMs": 1500,
+          "narration": "Mira barra memory para ver qué sabe.",
+          "visual": "Entra el primer bullet con /memory",
+          "animation": "bullet-reveal",
+          "emphasis": "medium"
+        },
+        {
+          "id": "cta-dream",
+          "startMs": 1600,
+          "endMs": 2550,
+          "narration": "Prueba barra dream para consolidarlo.",
+          "visual": "Entra el bullet de /dream",
+          "animation": "bullet-reveal",
+          "emphasis": "medium"
+        },
+        {
+          "id": "cta-init",
+          "startMs": 2650,
+          "endMs": 3600,
+          "narration": "Y barra init para escribir la parte manual.",
+          "visual": "Entra el bullet de /init",
+          "animation": "bullet-reveal",
+          "emphasis": "medium"
+        },
+        {
+          "id": "cta-follow",
+          "startMs": 3750,
+          "endMs": 5200,
+          "narration": "Si te interesa Claude Code, sígueme para más vídeos.",
+          "visual": "Entra el último bullet y se deja respiración final de marca",
+          "animation": "bullet-reveal",
+          "emphasis": "high"
+        }
       ],
-      "durationInSeconds": 15
+      "bullets": [
+        "/memory para inspeccionar qué ha guardado",
+        "/dream para consolidarlo manualmente",
+        "/init para escribir tu CLAUDE.md",
+        "Si te interesa Claude Code, sígueme"
+      ],
+      "durationInSeconds": 8
     }
   ],
   "voiceover": {
     "enabled": true,
-    "provider": "gemini",
-    "voiceId": "Orus",
-    "language": "es-ES",
+    "provider": "elevenlabs",
+    "voiceId": "JBFqnCBsd6RMkjVDRZzb",
+    "language": "es",
+    "elevenlabs": {
+      "modelId": "eleven_multilingual_v2",
+      "outputFormat": "mp3_44100_128",
+      "seed": 42,
+      "applyTextNormalization": "auto",
+      "voiceSettings": {
+        "stability": 0.38,
+        "similarityBoost": 0.8,
+        "style": 0.22,
+        "useSpeakerBoost": true,
+        "speed": 1.03
+      }
+    },
     "scenes": {
-      "0": "Claude Code recuerda quién eres. Te cuento cómo funciona su sistema de memoria.",
-      "1": "Imagina que le preguntas a Claude sobre astrofotografía solar. Le cuentas que quieres preparar un setup para el eclipse total de 2026 en España. Claude no solo te responde con una recomendación genérica. Te sugiere un telescopio solar específico, una cámara planetaria concreta, y hasta el accesorio para aumentar la focal. Una conversación normal, como tantas otras. Pero lo que pasa después es lo interesante.",
-      "2": "Sin que nadie se lo pida, Claude decide que esta conversación merece ser recordada. Crea un archivo markdown con tu perfil: que eres astrofotógrafo, que ya tienes equipo de cielo profundo, que estás planificando el eclipse. Incluye las decisiones que tomaste y tus preferencias. La próxima vez que hables con Claude, en cualquier proyecto, ya sabe quién eres. No tienes que repetirte. No tienes que dar contexto. Claude te conoce.",
-      "3": "El sistema de memoria de Claude Code tiene tres pilares fundamentales. Primero, CLAUDE punto md: instrucciones que tú escribes explícitamente. Segundo, Auto Memory: notas que Claude toma por su cuenta cuando detecta información valiosa. Y tercero, Auto Dream: un proceso automático que consolida y limpia toda esa memoria periódicamente.",
-      "4": "CLAUDE punto md es la versión manual. Archivos markdown donde tú defines las reglas del juego. Funciona a tres niveles: global, de proyecto, y de organización.",
-      "5": "Auto Memory organiza sus notas en cuatro categorías. User captura quién eres: tu rol, tus conocimientos, tus preferencias. Feedback registra correcciones: qué hacer y qué no hacer. Project guarda contexto temporal del trabajo en curso, como plazos o decisiones de equipo. Y Reference almacena enlaces a sistemas externos donde vive la información actualizada.",
-      "6": "Cada vez que Claude arranca una sesión, lo primero que hace es leer el índice MEMORY punto md. Es una lista de enlaces a todos los archivos de memoria. Si detecta que alguno es relevante para lo que estás haciendo, lo abre y lo usa como contexto. Es como un índice de un libro: rápido de escanear, con acceso directo al detalle.",
-      "7": "Y ahora lo más fascinante. Auto Dream. Funciona como el sueño REM en tu cerebro. Mientras duermes, tu cerebro consolida los recuerdos del día, descarta lo irrelevante y refuerza lo importante. Claude hace exactamente lo mismo. Primero, orientación: inventaría todos los archivos de memoria que existen. Después, recopila señal: busca correcciones del usuario, temas que se repiten, patrones. Luego viene la consolidación: fusiona memorias duplicadas, convierte fechas relativas a absolutas, y elimina las que ya no son válidas. Finalmente, poda e indexado: actualiza el índice MEMORY punto md y se asegura de que no supere las doscientas líneas. Este proceso se activa automáticamente cuando han pasado veinticuatro horas desde la última ejecución y se han completado al menos cinco sesiones.",
-      "8": "Usa barra memory para explorar tus archivos de memoria. Barra dream para forzar una consolidación manual. Y barra init para generar tu primer CLAUDE punto md. Sígueme para más contenido sobre Claude Code."
+      "0": {
+        "text": "El otro día Claude recordó mis telescopios sin que yo le pidiera guardar nada. Y eso me obligó a entender cómo funciona su memoria.",
+        "leadInMs": 1300,
+        "audioStartMs": 450,
+        "tailHoldMs": 700,
+        "elevenlabs": {
+          "voiceSettings": {
+            "stability": 0.34,
+            "style": 0.26
+          },
+          "nextText": "Todo empezó en una conversación normal sobre astrofotografía solar."
+        }
+      },
+      "1": {
+        "text": "Todo empezó en una conversación normal sobre astrofotografía solar. Yo estaba preparando el eclipse de 2026 y Claude me ayudó a aterrizar el setup.",
+        "leadInMs": 200,
+        "audioStartMs": 150,
+        "tailHoldMs": 450,
+        "elevenlabs": {
+          "previousText": "El otro día Claude recordó mis telescopios sin que yo le pidiera guardar nada.",
+          "nextText": "Lo raro vino después."
+        }
+      },
+      "2": {
+        "text": "Lo raro vino después. Claude creó por su cuenta una memoria sobre mí. Guardó mi equipo, que observo desde cielos Bortle 3, el setup elegido y hasta el tipo de recomendaciones que prefiero.",
+        "leadInMs": 150,
+        "audioStartMs": 100,
+        "tailHoldMs": 650,
+        "elevenlabs": {
+          "previousText": "Todo empezó en una conversación normal sobre astrofotografía solar.",
+          "nextText": "Y ahí entendí que el sistema tiene tres capas."
+        }
+      },
+      "3": {
+        "text": "Y ahí entendí que el sistema tiene tres capas. CLAUDE punto md, que escribes tú. Auto Memory, que decide qué señal merece recordarse. Y Auto Dream, que mantiene todo limpio con el tiempo.",
+        "leadInMs": 250,
+        "audioStartMs": 150,
+        "tailHoldMs": 500
+      },
+      "4": {
+        "text": "Importante: esa nota no era CLAUDE punto md. CLAUDE punto md es la parte manual, donde tú dejas reglas, preferencias o contexto estable.",
+        "tailHoldMs": 450
+      },
+      "5": {
+        "text": "En mi caso era una memoria de tipo user. Pero Claude también puede guardar feedback, contexto de proyecto y referencias a otros sistemas.",
+        "tailHoldMs": 450
+      },
+      "6": {
+        "text": "Para no cargar todo cada vez, empieza por MEMORY punto md, un índice corto. Solo si tu nueva pregunta toca ese tema, abre el archivo completo.",
+        "leadInMs": 150,
+        "audioStartMs": 100,
+        "tailHoldMs": 500
+      },
+      "7": {
+        "text": "Y como estas notas se acumulan, Auto Dream actúa como sueño REM. Fusiona duplicados, poda lo obsoleto y deja el índice limpio para la siguiente sesión.",
+        "leadInMs": 200,
+        "audioStartMs": 100,
+        "tailHoldMs": 700,
+        "elevenlabs": {
+          "voiceSettings": {
+            "stability": 0.42,
+            "style": 0.18
+          }
+        }
+      },
+      "8": {
+        "text": "La idea importante es esta: Claude no empieza siempre totalmente desde cero. Mira barra memory, prueba barra dream, usa barra init para escribir la parte manual, y si te interesa Claude Code, sígueme.",
+        "tailHoldMs": 1000
+      }
     }
   }
 }

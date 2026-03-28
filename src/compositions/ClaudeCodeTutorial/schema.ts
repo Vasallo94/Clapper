@@ -1,12 +1,22 @@
 // src/compositions/ClaudeCodeTutorial/schema.ts
 import { z } from "zod"
+import { BriefSchema, DirectionSceneFieldsSchema, VoiceoverConfigSchema } from "../../utils/direction"
 
-const IntroSceneSchema = z.object({
-  type: z.literal("intro"),
-  title: z.string(),
-  subtitle: z.string().optional(),
-  durationInSeconds: z.number().min(1).max(30),
+const PixelLogoSchema = z.object({
+  enabled: z.boolean().default(true),
+  scale: z.number().min(1).max(12).optional(),
+  animation: z.enum(["none", "build", "glint", "pulse"]).optional(),
 })
+
+const IntroSceneSchema = z
+  .object({
+    type: z.literal("intro"),
+    title: z.string(),
+    subtitle: z.string().optional(),
+    pixelLogo: PixelLogoSchema.optional(),
+    durationInSeconds: z.number().min(1).max(30),
+  })
+  .merge(DirectionSceneFieldsSchema)
 
 const TerminalLineSchema = z.object({
   kind: z.enum(["command", "output", "claude", "blank"]),
@@ -14,34 +24,42 @@ const TerminalLineSchema = z.object({
   delayAfterMs: z.number().int().min(0).optional(),
 })
 
-const TerminalSceneSchema = z.object({
-  type: z.literal("terminal"),
-  title: z.string().optional(),
-  lines: z.array(TerminalLineSchema).min(1),
-  durationInSeconds: z.number().min(2).max(120),
-})
+const TerminalSceneSchema = z
+  .object({
+    type: z.literal("terminal"),
+    title: z.string().optional(),
+    lines: z.array(TerminalLineSchema).min(1),
+    durationInSeconds: z.number().min(2).max(120),
+  })
+  .merge(DirectionSceneFieldsSchema)
 
-const CalloutSceneSchema = z.object({
-  type: z.literal("callout"),
-  text: z.string(),
-  position: z.enum(["top", "bottom", "right"]),
-  background: z.enum(["overlay", "solid"]).default("overlay"),
-  durationInSeconds: z.number().min(1).max(15),
-})
+const CalloutSceneSchema = z
+  .object({
+    type: z.literal("callout"),
+    text: z.string(),
+    position: z.enum(["top", "bottom", "right"]),
+    background: z.enum(["overlay", "solid"]).default("overlay"),
+    durationInSeconds: z.number().min(1).max(15),
+  })
+  .merge(DirectionSceneFieldsSchema)
 
-const OutroSceneSchema = z.object({
-  type: z.literal("outro"),
-  title: z.string(),
-  bullets: z.array(z.string()).optional(),
-  durationInSeconds: z.number().min(2).max(20),
-})
+const OutroSceneSchema = z
+  .object({
+    type: z.literal("outro"),
+    title: z.string(),
+    bullets: z.array(z.string()).optional(),
+    durationInSeconds: z.number().min(2).max(20),
+  })
+  .merge(DirectionSceneFieldsSchema)
 
-const CustomSceneSchema = z.object({
-  type: z.literal("custom"),
-  componentId: z.string(),
-  durationInSeconds: z.number().min(1).max(120),
-  props: z.record(z.string(), z.any()).optional(),
-})
+const CustomSceneSchema = z
+  .object({
+    type: z.literal("custom"),
+    componentId: z.string(),
+    durationInSeconds: z.number().min(1).max(120),
+    props: z.record(z.string(), z.any()).optional(),
+  })
+  .merge(DirectionSceneFieldsSchema)
 
 const SceneSchema = z.union([
   IntroSceneSchema,
@@ -59,16 +77,9 @@ export const TutorialConfigSchema = z.object({
   width: z.literal(1280),
   height: z.literal(720),
   theme: z.enum(["default", "linea-directa", "atom-dark"]).default("default"),
+  brief: BriefSchema.optional(),
   scenes: z.array(SceneSchema).min(1),
-  voiceover: z
-    .object({
-      enabled: z.literal(true),
-      provider: z.enum(["gemini", "elevenlabs"]).default("gemini"),
-      voiceId: z.string(),
-      language: z.string().optional(),
-      scenes: z.record(z.string(), z.string()),
-    })
-    .optional(),
+  voiceover: VoiceoverConfigSchema.optional(),
 })
 
 export type TutorialConfig = z.infer<typeof TutorialConfigSchema>

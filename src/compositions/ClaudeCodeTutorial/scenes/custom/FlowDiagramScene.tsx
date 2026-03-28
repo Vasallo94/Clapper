@@ -2,6 +2,8 @@
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { useThemeTokens } from "../../themes"
+import type { Timing } from "../../../../utils/direction"
+import { getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
 
 interface FlowNode {
   id: string
@@ -16,6 +18,7 @@ interface FlowDiagramProps {
   outroText?: string
   showParticle?: boolean
   title?: string
+  timing?: Timing
 }
 
 const NODE_WIDTH = 270
@@ -31,10 +34,12 @@ const NODE_CYCLE_DURATION = 2.0 // seconds per node
 
 export const FlowDiagramScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as FlowDiagramProps
-  const { nodes = [], introText, outroText, showParticle = true, title } = props
+  const { nodes = [], introText, outroText, showParticle = true, title, timing } = props
   const frame = useCurrentFrame()
   const { fps, width, height } = useVideoConfig()
   const tokens = useThemeTokens()
+  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
+  const localFrame = Math.max(0, frame - motionStartFrame)
 
   const NODE_Y = height / 2 - NODE_HEIGHT / 2
 
@@ -55,7 +60,7 @@ export const FlowDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =>
 
   // Intro text animation
   const introOpacity = introText
-    ? interpolate(frame, [0, Math.ceil(fps * 0.4), introEnd - Math.ceil(fps * 0.3), introEnd], [0, 1, 1, 0], {
+    ? interpolate(localFrame, [0, Math.ceil(fps * 0.4), introEnd - Math.ceil(fps * 0.3), introEnd], [0, 1, 1, 0], {
         extrapolateLeft: "clamp",
         extrapolateRight: "clamp",
       })
@@ -63,7 +68,7 @@ export const FlowDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =>
 
   // Outro text animation
   const outroSpring = spring({
-    frame: Math.max(0, frame - outroStart),
+    frame: Math.max(0, localFrame - outroStart),
     fps,
     config: { damping: 20, stiffness: 180 },
     durationInFrames: Math.ceil(fps * 0.5),
@@ -78,8 +83,8 @@ export const FlowDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =>
   let orbColor: string | null = null
   let orbOpacity = 0
 
-  if (showParticle && frame >= orbStart && frame < orbEnd) {
-    const orbFrame = frame - orbStart
+  if (showParticle && localFrame >= orbStart && localFrame < orbEnd) {
+    const orbFrame = localFrame - orbStart
     const currentNodeIdx = Math.min(Math.floor(orbFrame / cycleDuration), nodes.length - 1)
     const cycleFrame = orbFrame - currentNodeIdx * cycleDuration
     const cycleProgress = cycleFrame / cycleDuration
@@ -117,10 +122,10 @@ export const FlowDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =>
 
   // Compute per-node glow intensity
   function getNodeGlow(nodeIndex: number): { glowIntensity: number; glowColor: string } {
-    if (!showParticle || frame < orbStart || frame >= orbEnd) {
+    if (!showParticle || localFrame < orbStart || localFrame >= orbEnd) {
       return { glowIntensity: 0, glowColor: nodes[nodeIndex]?.color ?? tokens.primary }
     }
-    const orbFrame = frame - orbStart
+    const orbFrame = localFrame - orbStart
     const currentNodeIdx = Math.min(Math.floor(orbFrame / cycleDuration), nodes.length - 1)
     const cycleFrame = orbFrame - currentNodeIdx * cycleDuration
     const cycleProgress = cycleFrame / cycleDuration
@@ -172,7 +177,9 @@ export const FlowDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =>
             fontSize: 32,
             fontWeight: 700,
             color: tokens.foreground,
-            opacity: interpolate(frame, [nodesStart, nodesStart + Math.ceil(fps * 0.4)], [0, 1], {
+            textAlign: "center",
+            maxWidth: 920,
+            opacity: interpolate(localFrame, [nodesStart, nodesStart + Math.ceil(fps * 0.4)], [0, 1], {
               extrapolateRight: "clamp",
             }),
           }}
@@ -231,31 +238,44 @@ export const FlowDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =>
           if (i >= nodes.length - 1) return null
           const x1 = startX + i * (NODE_WIDTH + NODE_GAP) + NODE_WIDTH
           const x2 = startX + (i + 1) * (NODE_WIDTH + NODE_GAP)
-
-          const lineDelay = nodesEnd
-          const lineProgress = interpolate(frame, [lineDelay, lineDelay + Math.ceil(fps * 0.6)], [0, 1], {
+          const lineDelay = nodesStart + (i + 1) * nodeStagger + Math.ceil(fps * 0.18)
+          const lineProgress = spring({
+            frame: Math.max(0, localFrame - lineDelay),
+            fps,
+            config: { damping: 200 },
+            durationInFrames: Math.ceil(fps * 0.45),
+          })
+          const currentX2 = interpolate(lineProgress, [0, 1], [x1 + 4, x2 - 4], {
             extrapolateLeft: "clamp",
             extrapolateRight: "clamp",
           })
-          const currentX2 = x1 + (x2 - x1) * lineProgress
+          const lineOpacity = interpolate(lineProgress, [0, 0.08, 1], [0, 1, 1], {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+          })
+
+          if (lineProgress <= 0.01 || currentX2 <= x1 + 6) {
+            return null
+          }
 
           return (
-            <g key={i}>
+            <g key={i} opacity={lineOpacity}>
               <line
                 x1={x1 + 4}
                 y1={nodeCenter}
-                x2={currentX2 - 4}
+                x2={currentX2}
                 y2={nodeCenter}
-                stroke={tokens.foregroundLow}
+                stroke={tokens.foregroundMid}
                 strokeWidth={2}
                 strokeDasharray="6 4"
+                strokeLinecap="round"
               />
             </g>
           )
         })}
 
         {/* Orb with glow */}
-        {orbX !== null && orbY !== null && orbColor && orbOpacity > 0 && (
+        {localFrame >= orbStart && orbX !== null && orbY !== null && orbColor && orbOpacity > 0 && (
           <>
             <circle cx={orbX} cy={orbY} r={18} fill={orbColor} opacity={orbOpacity * 0.2} />
             <circle cx={orbX} cy={orbY} r={10} fill={orbColor} opacity={orbOpacity * 0.5} />
@@ -277,7 +297,7 @@ export const FlowDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =>
         {nodes.map((node, i) => {
           const delay = nodesStart + i * nodeStagger
           const s = spring({
-            frame: Math.max(0, frame - delay),
+            frame: Math.max(0, localFrame - delay),
             fps,
             config: { damping: 20, stiffness: 180 },
             durationInFrames: Math.ceil(fps * 0.5),
@@ -286,13 +306,9 @@ export const FlowDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =>
           const opacity = interpolate(s, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
 
           const { glowIntensity, glowColor } = getNodeGlow(i)
-          const isVisited =
-            frame >= orbStart &&
-            (() => {
-              const orbFrame = frame - orbStart
-              const currentNodeIdx = Math.min(Math.floor(orbFrame / cycleDuration), nodes.length - 1)
-              return i <= currentNodeIdx
-            })()
+          const orbFrame = localFrame - orbStart
+          const currentOrbNode = Math.min(Math.floor(orbFrame / cycleDuration), nodes.length - 1)
+          const isVisited = localFrame >= orbStart && i <= currentOrbNode
           const borderColor = isVisited || glowIntensity > 0.1 ? node.color : tokens.card.border
           const glowShadow =
             glowIntensity > 0
@@ -333,7 +349,8 @@ export const FlowDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =>
                 style={{
                   fontFamily: tokens.fontFamily,
                   fontSize: 15,
-                  color: tokens.foregroundMid,
+                  color: tokens.foreground,
+                  opacity: 0.72,
                   lineHeight: 1.4,
                 }}
               >
@@ -345,13 +362,15 @@ export const FlowDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =>
       </div>
 
       {/* Outro callout */}
-      {outroText && frame >= outroStart && (
+      {outroText && localFrame >= outroStart && (
         <div
           style={{
             position: "absolute",
             bottom: 60,
             left: 80,
             right: 80,
+            maxWidth: 1040,
+            margin: "0 auto",
             background: `${tokens.card.bg}ee`,
             border: `1px solid ${tokens.card.border}`,
             borderLeft: `4px solid ${tokens.primary}`,

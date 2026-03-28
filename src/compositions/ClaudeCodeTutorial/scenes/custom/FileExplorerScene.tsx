@@ -3,6 +3,8 @@ import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { useThemeTokens } from "../../themes"
 import { FolderIcon, MarkdownIcon, ChevronIcon } from "./svg-icons"
+import type { Timing } from "../../../../utils/direction"
+import { getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
 
 interface FileEntry {
   name: string
@@ -17,14 +19,17 @@ interface FileExplorerProps {
   expandFile: string
   fileContent: string
   calloutText?: string
+  timing?: Timing
 }
 
 export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as FileExplorerProps
-  const { rootPath, files = [], expandFile, fileContent = "", calloutText } = props
+  const { rootPath, files = [], expandFile, fileContent = "", calloutText, timing } = props
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
+  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
+  const localFrame = Math.max(0, frame - motionStartFrame)
 
   const fileStagger = Math.ceil(fps * 0.5)
   const expandStart = files.length * fileStagger + Math.ceil(fps * 1)
@@ -38,7 +43,7 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
   // Callout animation
   const calloutDelay = expandStart + contentRevealDuration + Math.ceil(fps * 0.3)
   const calloutSpring = spring({
-    frame: Math.max(0, frame - calloutDelay),
+    frame: Math.max(0, localFrame - calloutDelay),
     fps,
     config: { damping: 20, stiffness: 180 },
     durationInFrames: Math.ceil(fps * 0.5),
@@ -70,7 +75,7 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
         <div
           style={{
             fontFamily: tokens.monoFontFamily,
-            fontSize: 13,
+            fontSize: 14,
             color: tokens.foregroundMid,
             padding: "0 16px 12px",
             borderBottom: `1px solid ${tokens.card.border}`,
@@ -88,7 +93,7 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
         {files.map((file, i) => {
           const delay = i * fileStagger
           const s = spring({
-            frame: Math.max(0, frame - delay),
+            frame: Math.max(0, localFrame - delay),
             fps,
             config: { damping: 200 },
             durationInFrames: Math.ceil(fps * 0.3),
@@ -101,7 +106,7 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
 
           const Icon = file.type === "folder" ? FolderIcon : MarkdownIcon
           const nameColor = file.isNew ? tokens.primary : tokens.foreground
-          const bgHighlight = isExpanded && frame >= expandStart ? `${tokens.primary}15` : "transparent"
+          const bgHighlight = isExpanded && localFrame >= expandStart ? `${tokens.primary}15` : "transparent"
 
           return (
             <div
@@ -113,7 +118,7 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
                 padding: "4px 16px",
                 paddingLeft: indent,
                 fontFamily: tokens.monoFontFamily,
-                fontSize: 15,
+                fontSize: 16,
                 color: nameColor,
                 opacity,
                 transform: `translateX(${x}px)`,
@@ -149,7 +154,7 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
-          opacity: interpolate(frame, [expandStart, expandStart + Math.ceil(fps * 0.3)], [0, 1], {
+          opacity: interpolate(localFrame, [expandStart, expandStart + Math.ceil(fps * 0.3)], [0, 1], {
             extrapolateLeft: "clamp",
             extrapolateRight: "clamp",
           }),
@@ -184,8 +189,8 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
           style={{
             padding: "20px 24px",
             fontFamily: tokens.monoFontFamily,
-            fontSize: 15,
-            lineHeight: 1.7,
+            fontSize: 16,
+            lineHeight: 1.6,
             overflow: "hidden",
           }}
         >
@@ -196,7 +201,7 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
               {frontmatter.split("\n").map((line, li) => {
                 const totalFmLines = frontmatter.split("\n").length
                 const lineRevealFrame = expandStart + (li / totalFmLines) * contentRevealDuration * 0.5
-                const lineOpacity = interpolate(frame, [lineRevealFrame, lineRevealFrame + 6], [0, 1], {
+                const lineOpacity = interpolate(localFrame, [lineRevealFrame, lineRevealFrame + 6], [0, 1], {
                   extrapolateLeft: "clamp",
                   extrapolateRight: "clamp",
                 })
@@ -221,7 +226,7 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
                 const totalBodyLines = body.split("\n").length
                 const lineRevealFrame =
                   expandStart + contentRevealDuration * 0.5 + (li / totalBodyLines) * contentRevealDuration * 0.5
-                const lineOpacity = interpolate(frame, [lineRevealFrame, lineRevealFrame + 6], [0, 1], {
+                const lineOpacity = interpolate(localFrame, [lineRevealFrame, lineRevealFrame + 6], [0, 1], {
                   extrapolateLeft: "clamp",
                   extrapolateRight: "clamp",
                 })
@@ -241,16 +246,16 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
         <div
           style={{
             position: "absolute",
-            bottom: 48,
-            left: 48,
-            right: 48,
+            bottom: 40,
+            left: 40,
+            maxWidth: 880,
             background: `${tokens.card.bg}ee`,
             border: `1px solid ${tokens.card.border}`,
             borderLeft: `4px solid ${tokens.primary}`,
             borderRadius: 10,
-            padding: "16px 24px",
+            padding: "16px 22px",
             fontFamily: tokens.fontFamily,
-            fontSize: 24,
+            fontSize: 22,
             color: tokens.foreground,
             fontWeight: 500,
             opacity: calloutSpring,

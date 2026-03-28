@@ -19,11 +19,16 @@ El repo empezó como generador de tutoriales de Claude Code y evolucionó a una 
 - **Social clip genérico** — formato cuadrado (1080×1080) para posts de redes sociales que no sean shorts. Carruseles animados, quotes, datos destacados.
 - **Comparativa** — side-by-side de dos productos o antes/después. Útil para marketing y para tutoriales.
 
+### Video meta-educacional: "Cómo hicimos este repo con IA"
+
+Video autoreferencial que documente el proceso de crear este mismo repositorio de generación de videos, mostrando cómo se ha construido todo mediante direcciones y conversaciones con agentes de IA. Cubriría desde la idea inicial hasta las composiciones, skills, el modelo de dirección editorial, y cómo cada feature nació de un prompt. Formato educacional para LinkedIn mostrando el workflow real humano-agente.
+
 ### Mejoras a composiciones existentes
 
 - **Voiceover con ElevenLabs** — flag `--voiceover` ya definido en el schema de tutorial-generator pero no implementado. Generar narración TTS y sincronizar con escenas.
 - **Transiciones entre escenas** — actualmente es corte directo. Usar `@remotion/transitions` para fades, wipes o slides.
 - **Música de fondo** — añadir pista de audio con volumen bajo que se duck durante voiceover.
+- **Pixel logo hero variant** — crear una segunda versión del sprite del logo en `96x144`, con limpieza manual adicional en barba, humo y gafas para planos grandes o intros de marca.
 
 ### Infraestructura
 

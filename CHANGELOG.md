@@ -41,6 +41,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - FlowDiagramScene orb animation rewritten with per-node cycle system
 - Terminal content overflow with estimateLineHeight() scroll calculation
 - FlowDiagramScene: fixed broken indentation in arrow generation, removed IIFE pattern, fixed `frame` vs `localFrame` bug in outro
+- BlockDiagramScene: fixed beat-to-block mapping (beat[0] is title, not first block) and connection timing (now appears after all blocks with stagger)
 
 ## 2026-03-23
 

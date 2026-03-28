@@ -42,6 +42,8 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
   const rowWidth = isGrid ? cols * blockWidth + blockGap : blocks.length * blockWidth + (blocks.length - 1) * blockGap
   const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
   const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
+  // When title exists, beat[0] is the title beat — blocks start from beat[1]
+  const beatOffset = title && beatStartFrames && beatStartFrames.length > blocks.length ? 1 : 0
 
   return (
     <AbsoluteFill
@@ -106,9 +108,11 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
               const x1 = fromIdx * (blockWidth + blockGap) + blockWidth
               const x2 = toIdx * (blockWidth + blockGap)
 
-              const lineDelay =
-                beatStartFrames?.[blocks.length + ci] ??
-                motionStartFrame + Math.max(fromIdx, toIdx) * staggerDelay + Math.ceil(fps * 0.5)
+              // Connections appear after all blocks: last block delay + offset + stagger per connection
+              const lastBlockBeatIdx = blocks.length - 1 + beatOffset
+              const lastBlockFrame =
+                beatStartFrames?.[lastBlockBeatIdx] ?? motionStartFrame + (blocks.length - 1) * staggerDelay
+              const lineDelay = lastBlockFrame + Math.ceil(fps * 0.5) + ci * Math.ceil(fps * 0.4)
               const lineProgress = spring({
                 frame: Math.max(0, frame - lineDelay),
                 fps,
@@ -154,7 +158,7 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
         )}
 
         {blocks.map((block, i) => {
-          const delay = beatStartFrames?.[i] ?? motionStartFrame + i * staggerDelay
+          const delay = beatStartFrames?.[i + beatOffset] ?? motionStartFrame + i * staggerDelay
           const s = spring({
             frame: Math.max(0, frame - delay),
             fps,

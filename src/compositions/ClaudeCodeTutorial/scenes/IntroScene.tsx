@@ -14,27 +14,30 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle, pixelLo
 
   const configuredMotionStart = msToFrames(getSceneMotionDelayMs(timing), fps)
   const firstNarratedBeat = beats?.find((beat) => beat.narration.trim())
-  const primaryMotionStart = firstNarratedBeat ? getBeatStartFrame(firstNarratedBeat, fps) : configuredMotionStart
-  const motionFrame = Math.max(0, frame - primaryMotionStart)
+  const accentStart = firstNarratedBeat ? getBeatStartFrame(firstNarratedBeat, fps) : configuredMotionStart
 
+  // Lockup: title, subtitle, and logo animate in immediately on scene entry
   const lockupOpacity = interpolate(frame, [0, Math.ceil(fps * 0.16)], [0, 1], {
     extrapolateRight: "clamp",
   })
   const titleSpring = spring({
-    frame: motionFrame,
+    frame,
     fps,
     config: { damping: 18, stiffness: 110 },
     durationInFrames: Math.ceil(fps * 0.7),
   })
   const titleY = interpolate(titleSpring, [0, 1], [18, 0])
   const subtitleSpring = spring({
-    frame: Math.max(0, motionFrame - Math.ceil(fps * 0.14)),
+    frame: Math.max(0, frame - Math.ceil(fps * 0.14)),
     fps,
     config: { damping: 20, stiffness: 120 },
     durationInFrames: Math.ceil(fps * 0.55),
   })
   const subtitleY = interpolate(subtitleSpring, [0, 1], [14, 0])
-  const lineWidth = interpolate(motionFrame, [0, Math.ceil(fps * 0.5)], [0, 120], {
+
+  // Accent line waits for the first narrated beat
+  const accentFrame = Math.max(0, frame - accentStart)
+  const lineWidth = interpolate(accentFrame, [0, Math.ceil(fps * 0.5)], [0, 120], {
     extrapolateRight: "clamp",
   })
 
@@ -75,7 +78,7 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle, pixelLo
           </div>
           {logoAnimation !== "none" && (
             <div style={{ position: "absolute", inset: 0 }}>
-              <PixelLogo scale={logoScale} animation={logoAnimation} delayFrames={primaryMotionStart} />
+              <PixelLogo scale={logoScale} animation={logoAnimation} delayFrames={accentStart} />
             </div>
           )}
         </div>

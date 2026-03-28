@@ -131,7 +131,7 @@
           "id": "layer-claude-md",
           "startMs": 950,
           "endMs": 1850,
-          "narration": "CLAUDE punto md, que escribes tú.",
+          "narration": "CLAUDE.md, que escribes tú.",
           "visual": "Entra el bloque manual y queda claro el origen humano",
           "animation": "reveal-block",
           "emphasis": "medium"
@@ -297,7 +297,7 @@
           "id": "cta-memory",
           "startMs": 450,
           "endMs": 1500,
-          "narration": "Mira barra memory para ver qué sabe.",
+          "narration": "Mira /memory para ver qué sabe.",
           "visual": "Entra el primer bullet con /memory",
           "animation": "bullet-reveal",
           "emphasis": "medium"
@@ -306,7 +306,7 @@
           "id": "cta-dream",
           "startMs": 1600,
           "endMs": 2550,
-          "narration": "Prueba barra dream para consolidarlo.",
+          "narration": "Prueba /dream para consolidarlo.",
           "visual": "Entra el bullet de /dream",
           "animation": "bullet-reveal",
           "emphasis": "medium"
@@ -315,7 +315,7 @@
           "id": "cta-init",
           "startMs": 2650,
           "endMs": 3600,
-          "narration": "Y barra init para escribir la parte manual.",
+          "narration": "Y /init para escribir la parte manual.",
           "visual": "Entra el bullet de /init",
           "animation": "bullet-reveal",
           "emphasis": "medium"
@@ -342,7 +342,7 @@
   "voiceover": {
     "enabled": true,
     "provider": "elevenlabs",
-    "voiceId": "JBFqnCBsd6RMkjVDRZzb",
+    "voiceId": "y6WtESLj18d0diFRruBs",
     "language": "es",
     "elevenlabs": {
       "modelId": "eleven_multilingual_v2",
@@ -392,13 +392,13 @@
         }
       },
       "3": {
-        "text": "Y ahí entendí que el sistema tiene tres capas. CLAUDE punto md, que escribes tú. Auto Memory, que decide qué señal merece recordarse. Y Auto Dream, que mantiene todo limpio con el tiempo.",
+        "text": "Y ahí entendí que el sistema tiene tres capas. CLAUDE.md, que escribes tú. Auto Memory, que decide qué señal merece recordarse. Y Auto Dream, que mantiene todo limpio con el tiempo.",
         "leadInMs": 250,
         "audioStartMs": 150,
         "tailHoldMs": 500
       },
       "4": {
-        "text": "Importante: esa nota no era CLAUDE punto md. CLAUDE punto md es la parte manual, donde tú dejas reglas, preferencias o contexto estable.",
+        "text": "Importante: esa nota no era CLAUDE.md. CLAUDE.md es la parte manual, donde tú dejas reglas, preferencias o contexto estable.",
         "tailHoldMs": 450
       },
       "5": {
@@ -406,7 +406,7 @@
         "tailHoldMs": 450
       },
       "6": {
-        "text": "Para no cargar todo cada vez, empieza por MEMORY punto md, un índice corto. Solo si tu nueva pregunta toca ese tema, abre el archivo completo.",
+        "text": "Para no cargar todo cada vez, empieza por MEMORY.md, un índice corto. Solo si tu nueva pregunta toca ese tema, abre el archivo completo.",
         "leadInMs": 150,
         "audioStartMs": 100,
         "tailHoldMs": 500
@@ -424,9 +424,46 @@
         }
       },
       "8": {
-        "text": "La idea importante es esta: Claude no empieza siempre totalmente desde cero. Mira barra memory, prueba barra dream, usa barra init para escribir la parte manual, y si te interesa Claude Code, sígueme.",
+        "text": "La idea importante es esta: Claude no empieza siempre totalmente desde cero. Mira /memory, prueba /dream, usa /init para escribir la parte manual, y si te interesa Claude Code, sígueme.",
         "tailHoldMs": 1000
       }
     }
+  },
+  "subtitles": {
+    "enabled": true,
+    "style": "karaoke",
+    "fontSize": 32,
+    "position": "bottom"
+  },
+  "soundDesign": {
+    "enabled": true,
+    "musicBed": {
+      "libraryId": "lofi-tech-2-loop",
+      "volume": -18,
+      "duckingVolume": -26,
+      "fadeInMs": 2000,
+      "fadeOutMs": 3000,
+      "duckingFadeMs": 400
+    },
+    "sfx": [
+      {
+        "id": "epic-intro",
+        "prompt": "Deep cinematic braam building from a low sub-bass drone, layered rising whooshes with metallic resonance, culminating in a powerful reverberant impact boom. Dramatic, epic, large hall acoustics, no music, no voice",
+        "durationMs": 4000,
+        "trigger": "scene-start",
+        "sceneTypes": ["intro"],
+        "loop": false,
+        "volume": -8
+      },
+      {
+        "id": "keyboard",
+        "prompt": "soft mechanical keyboard typing in quiet room, cherry mx switches, gentle ASMR clicks, no background noise",
+        "durationMs": 8000,
+        "trigger": "typewriter",
+        "sceneTypes": ["terminal"],
+        "loop": true,
+        "volume": -14
+      }
+    ]
   }
 }

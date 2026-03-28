@@ -74,6 +74,13 @@ const SceneSchema = z.union([
   CustomSceneSchema,
 ])
 
+const SubtitlesConfigSchema = z.object({
+  enabled: z.boolean().default(true),
+  style: z.enum(["karaoke", "chunks"]).default("karaoke"),
+  fontSize: z.number().min(16).max(64).default(32),
+  position: z.enum(["bottom", "top"]).default("bottom"),
+})
+
 export const TutorialConfigSchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -86,6 +93,7 @@ export const TutorialConfigSchema = z.object({
   scenes: z.array(SceneSchema).min(1),
   voiceover: VoiceoverConfigSchema.optional(),
   soundDesign: SoundDesignSchema.optional(),
+  subtitles: SubtitlesConfigSchema.optional(),
 })
 
 export type TutorialConfig = z.infer<typeof TutorialConfigSchema>

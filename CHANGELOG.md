@@ -37,8 +37,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - `sound-engineer` skill — 5-step workflow for automated sound design with human approval gates
 - Music-aware rules in `remotion-director` skill (narrative pauses, transition heuristics, beat gaps)
 - Agent pipeline principle in CLAUDE.md and AGENTS.md: automate execution, not criteria
+- Karaoke subtitles: word-by-word synchronized captions via ElevenLabs `/with-timestamps` endpoint
+- `KaraokeSubtitles` component with chunked word display and highlight animation
+- `SubtitlesConfigSchema` in `schema.ts` (enabled, style, fontSize, position)
+- `LogoWatermark` component: PixelLogo with procedural smoke particles for non-mascot themes
+- `SmokeParticles` component: deterministic particle system using seeded PRNG
+- Seamless music loop (`lofi-tech-2-loop.mp3`) via ffmpeg crossfade
 
 ### Changed
+
+- LogoWatermark now renders per-scene (inside Series.Sequence) and is hidden during intro scenes
+- Voiceover text uses literal `.md` and `/command` instead of spelled-out "punto md" / "barra command" so subtitles display correctly
+- Voiceover script now uses ElevenLabs `/with-timestamps` endpoint, saves word-level `.timestamps.json` per scene
+- Music bed no longer requires `loop` — crossfaded track is longer than video duration
+- Voice changed to David Martin (Calm) `y6WtESLj18d0diFRruBs` for Spanish peninsular narration
+- SFX reduced to keyboard + new epic cinematic intro braam
 
 - Font sizes increased across all scenes for mobile readability
 - Prettier config completed (semi: false, printWidth: 120, trailingComma, arrowParens)

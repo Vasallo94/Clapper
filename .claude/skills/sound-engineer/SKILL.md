@@ -133,15 +133,25 @@ Reporta:
 
 ## Prompts de SFX recomendados
 
-Estos prompts producen buenos resultados con la SFX API V2:
+Mejores practicas para prompts de ElevenLabs SFX V2:
+
+- Ser especifico: material, entorno acustico, distancia
+- Describir el arco temporal: "building from... culminating in..."
+- Usar terminologia de audio: braam, drone, impact, riser, whoosh
+- Anadir exclusiones: "no music, no voice" para evitar elementos no deseados
+- Mencionar espacio acustico: "large hall", "small room", "outdoor"
+
+Prompts que producen buenos resultados:
 
 - **Teclado**: `"soft mechanical keyboard typing in quiet room, cherry mx switches, gentle ASMR clicks, no background noise"`
+- **Epic intro**: `"Deep cinematic braam building from a low sub-bass drone, layered rising whooshes with metallic resonance, culminating in a powerful reverberant impact boom. Dramatic, epic, large hall acoustics, no music, no voice"`
 - **Swoosh**: `"subtle digital UI swoosh, soft, clean, short, modern interface sound"`
 - **Chime**: `"gentle digital notification chime, minimal, single note, warm tone, UI sound"`
 - **Whoosh**: `"soft particle whoosh traveling left to right, digital, ethereal, short"`
 - **Click carpeta**: `"soft mouse click on folder, minimal UI interaction sound, clean"`
 - **Tono atencion**: `"subtle attention tone, two soft notes ascending, warm, non-intrusive"`
 - **Stinger cierre**: `"short musical stinger, lofi ending tag, warm, 2 seconds, fade out"`
+- **Tension riser**: `"Dark atmospheric tension riser with eerie metallic drones, building to a deep cinematic braam impact with long reverb tail, suspenseful, no music, no voice"`
 
 ## Volumenes recomendados
 
@@ -150,6 +160,7 @@ Estos prompts producen buenos resultados con la SFX API V2:
 | Music bed (normal)  | -18 dB  | Audible pero no distrae     |
 | Music bed (ducking) | -26 dB  | Apenas perceptible bajo voz |
 | Teclado ASMR        | -14 dB  | Presente, textura           |
+| Epic intro          | -8 dB   | Impacto fuerte al inicio    |
 | Chimes/clicks       | -15 dB  | Puntual, no agresivo        |
 | Swoosh/whoosh       | -16 dB  | Ambiental                   |
 | Stinger             | -10 dB  | Cierre con presencia        |

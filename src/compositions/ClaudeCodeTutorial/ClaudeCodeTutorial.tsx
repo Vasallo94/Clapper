@@ -1,5 +1,14 @@
 import React from "react"
-import { AbsoluteFill, Audio, Sequence, Series, staticFile, useVideoConfig } from "remotion"
+import {
+  AbsoluteFill,
+  Audio,
+  continueRender,
+  delayRender,
+  Sequence,
+  Series,
+  staticFile,
+  useVideoConfig,
+} from "remotion"
 import { TutorialConfig } from "./schema"
 import { ThemeContext } from "./ThemeContext"
 import { getTheme } from "./themes"
@@ -8,6 +17,8 @@ import { TerminalScene } from "./scenes/TerminalScene"
 import { CalloutScene } from "./scenes/CalloutScene"
 import { OutroScene } from "./scenes/OutroScene"
 import { CustomScene } from "./scenes/CustomScene"
+import { KaraokeSubtitles, type WordTimestamp } from "./components/KaraokeSubtitles"
+import { LogoWatermark } from "./components/LogoWatermark"
 import {
   getMergedBeats,
   getMergedTiming,
@@ -18,9 +29,47 @@ import {
 import { computeMusicVolume, dbToLinear, getSceneSfxEntries, sfxEndFrame, sfxTriggerFrame } from "../../utils/audioMix"
 import type { SceneAudioInfo } from "../../utils/audioMix"
 
+function useTimestamps(configId: string, sceneCount: number, enabled: boolean): (WordTimestamp[] | null)[] {
+  const [timestamps, setTimestamps] = React.useState<(WordTimestamp[] | null)[]>(() =>
+    Array.from({ length: sceneCount }, () => null),
+  )
+  const [handle] = React.useState(() => (enabled ? delayRender("Loading subtitle timestamps") : null))
+
+  React.useEffect(() => {
+    if (!enabled) return
+
+    const loadAll = async () => {
+      const results: (WordTimestamp[] | null)[] = []
+      for (let i = 0; i < sceneCount; i++) {
+        try {
+          const url = staticFile(`voiceover/${configId}/${i}.timestamps.json`)
+          const res = await fetch(url)
+          if (res.ok) {
+            results.push(await res.json())
+          } else {
+            results.push(null)
+          }
+        } catch {
+          results.push(null)
+        }
+      }
+      setTimestamps(results)
+      if (handle !== null) continueRender(handle)
+    }
+
+    loadAll()
+  }, [configId, sceneCount, enabled, handle])
+
+  return timestamps
+}
+
 export const ClaudeCodeTutorial: React.FC<TutorialConfig> = (config) => {
   const bg = getTheme(config.theme ?? "default").background
+  const theme = getTheme(config.theme ?? "default")
   const { durationInFrames: totalDurationInFrames } = useVideoConfig()
+
+  const subtitlesEnabled = config.subtitles?.enabled !== false && Boolean(config.voiceover?.enabled)
+  const sceneTimestamps = useTimestamps(config.id, config.scenes.length, subtitlesEnabled)
 
   // Pre-compute scene info for audio mixing
   const sceneInfos: {
@@ -62,6 +111,8 @@ export const ClaudeCodeTutorial: React.FC<TutorialConfig> = (config) => {
     cumulativeFrames += durationInFrames
   }
 
+  const showLogoWatermark = !theme.mascot.show
+
   return (
     <ThemeContext.Provider value={config.theme ?? "default"}>
       <AbsoluteFill style={{ background: bg }}>
@@ -71,7 +122,6 @@ export const ClaudeCodeTutorial: React.FC<TutorialConfig> = (config) => {
             volume={(f) =>
               computeMusicVolume(f, sceneAudioInfos, config.soundDesign!.musicBed!, config.fps, totalDurationInFrames)
             }
-            loop
           />
         )}
         <Series>
@@ -104,6 +154,15 @@ export const ClaudeCodeTutorial: React.FC<TutorialConfig> = (config) => {
                 {directedScene.type === "callout" && <CalloutScene {...directedScene} />}
                 {directedScene.type === "outro" && <OutroScene {...directedScene} />}
                 {directedScene.type === "custom" && <CustomScene {...directedScene} />}
+                {subtitlesEnabled && sceneTimestamps[i] && (
+                  <KaraokeSubtitles
+                    timestamps={sceneTimestamps[i]!}
+                    audioDelayFrames={audioDelayFrames}
+                    position={config.subtitles?.position ?? "bottom"}
+                    fontSize={config.subtitles?.fontSize ?? 32}
+                  />
+                )}
+                {showLogoWatermark && directedScene.type !== "intro" && <LogoWatermark />}
               </Series.Sequence>
             )
           })}

@@ -157,6 +157,38 @@ function getSceneElevenLabsOptions(scene?: VoiceoverScene): ElevenLabsOptions {
   }) as ElevenLabsOptions
 }
 
+type WordTimestamp = {
+  word: string
+  start: number
+  end: number
+}
+
+function charactersToWordTimestamps(characters: string[], startTimes: number[], endTimes: number[]): WordTimestamp[] {
+  const words: WordTimestamp[] = []
+  let currentWord = ""
+  let wordStart = -1
+
+  for (let i = 0; i < characters.length; i++) {
+    const char = characters[i]
+    if (char === " " || char === "\n" || char === "\t") {
+      if (currentWord.length > 0) {
+        words.push({ word: currentWord, start: wordStart, end: endTimes[i - 1] })
+        currentWord = ""
+        wordStart = -1
+      }
+    } else {
+      if (wordStart < 0) wordStart = startTimes[i]
+      currentWord += char
+    }
+  }
+
+  if (currentWord.length > 0 && wordStart >= 0) {
+    words.push({ word: currentWord, start: wordStart, end: endTimes[characters.length - 1] })
+  }
+
+  return words
+}
+
 async function generateWithElevenLabs(text: string, mp3Path: string, scene?: VoiceoverScene) {
   const options = getSceneElevenLabsOptions(scene)
   const searchParams = new URLSearchParams()
@@ -165,44 +197,65 @@ async function generateWithElevenLabs(text: string, mp3Path: string, scene?: Voi
     searchParams.set("enable_logging", String(options.enableLogging))
   }
 
-  const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?${searchParams.toString()}`, {
-    method: "POST",
-    headers: {
-      Accept: "audio/mpeg",
-      "Content-Type": "application/json",
-      "xi-api-key": elevenLabsApiKey as string,
+  const response = await fetch(
+    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/with-timestamps?${searchParams.toString()}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "xi-api-key": elevenLabsApiKey as string,
+      },
+      body: JSON.stringify({
+        text,
+        model_id: options.modelId || "eleven_multilingual_v2",
+        language_code: options.languageCode || languageCode,
+        seed: options.seed,
+        apply_text_normalization: options.applyTextNormalization,
+        previous_text: options.previousText,
+        next_text: options.nextText,
+        pronunciation_dictionary_locators: options.pronunciationDictionaries?.map((dictionary) => ({
+          pronunciation_dictionary_id: dictionary.id,
+          version_id: dictionary.versionId,
+        })),
+        voice_settings: options.voiceSettings
+          ? compactObject({
+              stability: options.voiceSettings.stability,
+              similarity_boost: options.voiceSettings.similarityBoost,
+              style: options.voiceSettings.style,
+              use_speaker_boost: options.voiceSettings.useSpeakerBoost,
+              speed: options.voiceSettings.speed,
+            })
+          : undefined,
+      }),
     },
-    body: JSON.stringify({
-      text,
-      model_id: options.modelId || "eleven_multilingual_v2",
-      language_code: options.languageCode || languageCode,
-      seed: options.seed,
-      apply_text_normalization: options.applyTextNormalization,
-      previous_text: options.previousText,
-      next_text: options.nextText,
-      pronunciation_dictionary_locators: options.pronunciationDictionaries?.map((dictionary) => ({
-        pronunciation_dictionary_id: dictionary.id,
-        version_id: dictionary.versionId,
-      })),
-      voice_settings: options.voiceSettings
-        ? compactObject({
-            stability: options.voiceSettings.stability,
-            similarity_boost: options.voiceSettings.similarityBoost,
-            style: options.voiceSettings.style,
-            use_speaker_boost: options.voiceSettings.useSpeakerBoost,
-            speed: options.voiceSettings.speed,
-          })
-        : undefined,
-    }),
-  })
+  )
 
   if (!response.ok) {
     const errorText = await response.text()
     throw new Error(`ElevenLabs error ${response.status}: ${errorText}`)
   }
 
-  const audioBuffer = Buffer.from(await response.arrayBuffer())
+  const result = (await response.json()) as {
+    audio_base64: string
+    alignment: {
+      characters: string[]
+      character_start_times_seconds: number[]
+      character_end_times_seconds: number[]
+    }
+  }
+
+  const audioBuffer = Buffer.from(result.audio_base64, "base64")
   writeFileSync(mp3Path, audioBuffer)
+
+  const wordTimestamps = charactersToWordTimestamps(
+    result.alignment.characters,
+    result.alignment.character_start_times_seconds,
+    result.alignment.character_end_times_seconds,
+  )
+
+  const timestampsPath = mp3Path.replace(/\.mp3$/, ".timestamps.json")
+  writeFileSync(timestampsPath, JSON.stringify(wordTimestamps, null, 2))
+  console.log(`  📝 Timestamps saved (${wordTimestamps.length} words)`)
 }
 
 async function generateScene(sceneIndex: string, text: string, sceneValue?: VoiceoverScene) {

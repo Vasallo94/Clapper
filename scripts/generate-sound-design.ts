@@ -138,8 +138,11 @@ async function generateMusicBed(fingerprints: Fingerprints) {
 
     console.log(`🎵 Generating music bed: "${musicBed.customPrompt.slice(0, 60)}..."`)
 
+    const musicUrl = new URL("https://api.elevenlabs.io/v1/music")
+    musicUrl.searchParams.set("output_format", "mp3_44100_128")
+
     const response = await fetchWithRetry(
-      "https://api.elevenlabs.io/v1/music/compose",
+      musicUrl.toString(),
       {
         method: "POST",
         headers: {
@@ -148,10 +151,8 @@ async function generateMusicBed(fingerprints: Fingerprints) {
         },
         body: JSON.stringify({
           prompt: musicBed.customPrompt,
-          duration_seconds: totalDurationSeconds + 5,
-          mode: "instrumental",
-          loudness: -14,
-          quality: "high",
+          music_length_ms: (totalDurationSeconds + 5) * 1000,
+          force_instrumental: true,
         }),
       },
       "music-bed",
@@ -195,8 +196,11 @@ async function generateSfx(fingerprints: Fingerprints) {
 
     console.log(`  🔊 SFX ${sfx.id}: "${sfx.prompt.slice(0, 60)}..."`)
 
+    const sfxUrl = new URL("https://api.elevenlabs.io/v1/sound-generation")
+    sfxUrl.searchParams.set("output_format", "mp3_44100_128")
+
     const response = await fetchWithRetry(
-      "https://api.elevenlabs.io/v1/text-to-sound-effects/convert",
+      sfxUrl.toString(),
       {
         method: "POST",
         headers: {
@@ -207,7 +211,6 @@ async function generateSfx(fingerprints: Fingerprints) {
           text: sfx.prompt,
           ...(sfx.durationMs ? { duration_seconds: sfx.durationMs / 1000 } : {}),
           ...(sfx.loop ? { loop: true } : {}),
-          output_format: "mp3_44100_128",
         }),
       },
       `sfx-${sfx.id}`,
@@ -225,11 +228,30 @@ async function main() {
 
   const fingerprints = loadFingerprints()
 
-  await generateMusicBed(fingerprints)
-  await generateSfx(fingerprints)
+  const warnings: string[] = []
+
+  try {
+    await generateMusicBed(fingerprints)
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    warnings.push(`Music bed failed: ${msg}`)
+    console.warn(`⚠️  Music bed generation failed (continuing with SFX): ${msg}`)
+  }
+
+  try {
+    await generateSfx(fingerprints)
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    warnings.push(`SFX generation failed: ${msg}`)
+    console.warn(`⚠️  SFX generation failed: ${msg}`)
+  }
 
   saveFingerprints(fingerprints)
 
+  if (warnings.length > 0) {
+    console.log(`\n⚠️  Completed with ${warnings.length} warning(s):`)
+    warnings.forEach((w) => console.log(`   - ${w}`))
+  }
   console.log(`\n✅ Sound design files saved to ${outputDir}`)
 }
 

@@ -29,6 +29,7 @@ Video autoreferencial que documente el proceso de crear este mismo repositorio d
 - **Transiciones entre escenas** — actualmente es corte directo. Usar `@remotion/transitions` para fades, wipes o slides.
 - **Música de fondo** — añadir pista de audio con volumen bajo que se duck durante voiceover.
 - **Pixel logo hero variant** — crear una segunda versión del sprite del logo en `96x144`, con limpieza manual adicional en barba, humo y gafas para planos grandes o intros de marca.
+- **Animación de humo real en pixel art (GIF sprite sheet)** — el humo del logo debe moverse orgánicamente como un GIF de pixel art real: crear varios frames del sprite con el humo en distintas posiciones/formas y ciclarlos. No superponer partículas encima del logo estático. Approach: diseñar 4-6 frames de humo en el propio sprite `64×96`, exportar como sprite sheet, y reproducirlos con `useCurrentFrame()` + frame hold. (2026-03-28)
 
 ### Infraestructura
 

@@ -29,6 +29,13 @@
       "durationInSeconds": 10
     },
     {
+      "type": "callout",
+      "text": "Monitor lanza un proceso en background. Cada linea de stdout se convierte en un evento que despierta a Claude. Silencio = 0 tokens.",
+      "position": "bottom",
+      "background": "overlay",
+      "durationInSeconds": 5
+    },
+    {
       "type": "outro",
       "title": "Monitor en Claude Code",
       "bullets": [

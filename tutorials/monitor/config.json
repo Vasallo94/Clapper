@@ -36,6 +36,21 @@
       "durationInSeconds": 5
     },
     {
+      "type": "terminal",
+      "title": "Demo — Atrapa el primer fallo",
+      "lines": [
+        { "kind": "command", "text": "monitorea los tests, avisa si algo falla y abre el archivo" },
+        { "kind": "blank", "text": "" },
+        { "kind": "claude", "text": "Lanzo monitor sobre pytest filtrando FAILED y ERROR..." },
+        { "kind": "output", "text": "[Monitor activo: pytest --tb=short | grep -E \"FAILED|ERROR\"]" },
+        { "kind": "blank", "text": "", "delayAfterMs": 1200 },
+        { "kind": "output", "text": "FAILED tests/api/test_auth.py::test_token_expiry" },
+        { "kind": "blank", "text": "" },
+        { "kind": "claude", "text": "Fallo en test_token_expiry. Abro el archivo y propongo el fix." }
+      ],
+      "durationInSeconds": 12
+    },
+    {
       "type": "outro",
       "title": "Monitor en Claude Code",
       "bullets": [

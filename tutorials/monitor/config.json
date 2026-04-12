@@ -70,8 +70,8 @@
       "title": "Monitor en Claude Code",
       "bullets": [
         "Monitor = eventos, no polling",
-        "stdout → notificacion instantanea a Claude",
-        "persistent: true para toda la sesion",
+        "stdout → notificación instantánea a Claude",
+        "persistent: true para toda la sesión",
         "timeout_ms para procesos acotados"
       ],
       "durationInSeconds": 6

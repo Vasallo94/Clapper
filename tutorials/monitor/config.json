@@ -1,0 +1,28 @@
+{
+  "id": "monitor",
+  "title": "/monitor — Deja de hacer polling",
+  "description": "Como usar el Monitor tool de Claude Code para reaccionar a eventos en vez de hacer polling",
+  "theme": "linea-directa",
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "scenes": [
+    {
+      "type": "intro",
+      "title": "/monitor",
+      "subtitle": "Deja de hacer polling, empieza a reaccionar",
+      "durationInSeconds": 4
+    },
+    {
+      "type": "outro",
+      "title": "Monitor en Claude Code",
+      "bullets": [
+        "Monitor = eventos, no polling",
+        "stdout → notificacion instantanea a Claude",
+        "persistent: true para toda la sesion",
+        "timeout_ms para procesos acotados"
+      ],
+      "durationInSeconds": 6
+    }
+  ]
+}

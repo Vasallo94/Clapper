@@ -14,6 +14,21 @@
       "durationInSeconds": 4
     },
     {
+      "type": "terminal",
+      "title": "El problema con /loop",
+      "lines": [
+        { "kind": "command", "text": "/loop 2m \"avisa si falla algun test\"" },
+        { "kind": "blank", "text": "" },
+        { "kind": "output", "text": "[llamada 1/4 — sin fallos]" },
+        { "kind": "output", "text": "[llamada 2/4 — sin fallos]" },
+        { "kind": "output", "text": "[llamada 3/4 — sin fallos]" },
+        { "kind": "output", "text": "[llamada 4/4 — FALLO detectado]", "delayAfterMs": 600 },
+        { "kind": "blank", "text": "" },
+        { "kind": "claude", "text": "3 llamadas API desperdiciadas antes de detectar el fallo." }
+      ],
+      "durationInSeconds": 10
+    },
+    {
       "type": "outro",
       "title": "Monitor en Claude Code",
       "bullets": [

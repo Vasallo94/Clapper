@@ -51,6 +51,21 @@
       "durationInSeconds": 12
     },
     {
+      "type": "terminal",
+      "title": "Demo — Reacciona al review del PR",
+      "lines": [
+        { "kind": "command", "text": "avisa cuando llegue un review en el PR #142" },
+        { "kind": "blank", "text": "" },
+        { "kind": "claude", "text": "Lanzo monitor con polling cada 30s sobre el PR..." },
+        { "kind": "output", "text": "[Monitor activo — polling gh pr view 142 cada 30s]" },
+        { "kind": "blank", "text": "", "delayAfterMs": 1200 },
+        { "kind": "output", "text": "NEW_REVIEW: \"Este endpoint necesita validacion de input\"" },
+        { "kind": "blank", "text": "" },
+        { "kind": "claude", "text": "Review recibido. Implemento la validacion ahora." }
+      ],
+      "durationInSeconds": 12
+    },
+    {
       "type": "outro",
       "title": "Monitor en Claude Code",
       "bullets": [

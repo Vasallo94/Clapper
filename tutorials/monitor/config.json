@@ -431,15 +431,6 @@
         "volume": -14
       },
       {
-        "id": "callout-tone",
-        "prompt": "subtle attention tone, two soft notes ascending, warm, non-intrusive, minimal UI sound",
-        "durationMs": 1500,
-        "trigger": "scene-start",
-        "sceneTypes": ["callout"],
-        "loop": false,
-        "volume": -15
-      },
-      {
         "id": "outro-stinger",
         "prompt": "short musical stinger, lofi ending tag, warm, 2 seconds, fade out",
         "durationMs": 2000,

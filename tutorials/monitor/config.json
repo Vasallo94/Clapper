@@ -1,7 +1,7 @@
 {
   "id": "monitor",
   "title": "/monitor — Deja de hacer polling",
-  "description": "Como usar el Monitor tool de Claude Code para reaccionar a eventos en vez de hacer polling",
+  "description": "Cómo usar el Monitor tool de Claude Code para reaccionar a eventos en vez de hacer polling",
   "theme": "linea-directa",
   "fps": 30,
   "width": 1280,

@@ -7,6 +7,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- 7 custom scene components for animated presentations: `CodeBlockScene`, `SplitScreenScene`, `IconGridScene`, `BigNumberScene`, `ComparisonTableScene`, `SectionTitleScene`, `BulletSlideScene`
+- 13 SVG icon components in `svg-icons.tsx`: CheckIcon, CrossIcon, TerminalIcon, CloudIcon, CodeIcon, ShieldIcon, GearIcon, UserIcon, BookIcon, LightbulbIcon, ArrowRightIcon, LayersIcon, LinkIcon
+- Vertex AI service account auth for Gemini TTS (`GOOGLE_APPLICATION_CREDENTIALS`)
+- `findFfmpeg()` helper in `generate-voiceover.ts` — auto-discovers Remotion's bundled ffmpeg
+- Gemini 3.1 Flash TTS Preview model support (`gemini-3.1-flash-tts-preview`)
+- Tutorial `skills-claude-code` (14 scenes, ~97s): Skills de Claude Code para desarrolladores LDA
+- `.gitignore` patterns for service account key files
+
+### Changed
+
+- `generate-voiceover.ts`: dual auth (Vertex AI service account + API key), upgraded TTS model
+- `render.ts`: added `shell: true` to child process calls for Windows compatibility
+
 - Theme `atom-dark` (One Dark Pro palette) for personal videos
 - 3 custom scene components: `BlockDiagramScene`, `FileExplorerScene`, `FlowDiagramScene`
 - SVG icon components (`svg-icons.tsx`) replacing emoji characters

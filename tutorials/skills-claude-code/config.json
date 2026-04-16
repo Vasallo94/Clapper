@@ -1,0 +1,690 @@
+{
+  "id": "skills-claude-code",
+  "composition": "ClaudeCodeTutorial",
+  "theme": "linea-directa",
+  "brief": {
+    "platform": "LinkedIn",
+    "audience": "Desarrolladores de Línea Directa adoptando Claude Code",
+    "goal": "Que el equipo entienda qué son las Skills, cómo funcionan y cómo crearlas",
+    "promise": "En 90 segundos sabrás crear Skills que conviertan a Claude Code en un especialista de tu equipo",
+    "tone": "Profesional y cercano, sin jerga innecesaria",
+    "cta": "Crea tu primera Skill hoy",
+    "hookStrategy": "Comparación directa Commands vs Skills para mostrar el salto de calidad"
+  },
+  "voiceover": {
+    "enabled": true,
+    "provider": "gemini",
+    "voiceId": "Orus",
+    "language": "es-ES",
+    "scenes": {
+      "0": {
+        "text": "Skills en Claude Code. [short pause] Enseña a tu agente nuevos superpoderes."
+      },
+      "1": {
+        "text": "Antes usábamos Commands: un fichero Markdown suelto que invocabas manualmente. Ahora, Skills lo cambian todo."
+      },
+      "2": {
+        "text": "Commands eran ficheros sueltos, solo manuales, sin metadatos ni recursos. [short pause] Skills son carpetas completas con auto-invocación, frontmatter YAML, y scripts bundled."
+      },
+      "3": {
+        "text": "Cómo funcionan."
+      },
+      "4": {
+        "text": "Las Skills viven en el filesystem. Una carpeta dentro de punto claude barra skills, con un SKILL punto MD dentro."
+      },
+      "5": {
+        "text": "Los dos campos clave del frontmatter son name y description. [short pause] La description es lo que Claude usa para decidir cuándo activar la skill automáticamente."
+      },
+      "6": {
+        "text": "La carga es progresiva. Primero, Claude solo lee los metadatos: cien tokens. Al dispararse, carga las instrucciones. Y solo bajo demanda accede a scripts, schemas y recursos adicionales."
+      },
+      "7": {
+        "text": "Crear una skill es inmediato. Creas la carpeta, le dices a Claude qué quieres, y ya puedes invocarla. [short pause] Así de simple."
+      },
+      "8": {
+        "text": "Patrones reales."
+      },
+      "9": {
+        "text": "Hay cuatro patrones principales. Workflow, con pasos y gates de aprobación. Knowledge base, como un índice de documentación. API reference, con comandos listos para copiar. Y governance, con reglas que se auto-invocan."
+      },
+      "10": {
+        "text": "Las skills de proyecto van en el repo, compartidas con todo el equipo vía git. Las personales van en tu máquina, para tus preferencias y atajos."
+      },
+      "11": {
+        "text": "Y lo más potente: las skills pueden invocar otras skills, creando pipelines completos de automatización."
+      },
+      "12": {
+        "text": "Una skill no es solo un prompt. Puede incluir instrucciones en Markdown, scripts ejecutables, schemas de bases de datos, templates reutilizables, y referencias a MCP servers."
+      },
+      "13": {
+        "text": "Recuerda: SKILL punto MD con frontmatter YAML en punto claude barra skills. Carga progresiva en tres niveles. De proyecto para el equipo, personales para ti. Y encadena skills para workflows complejos. [medium pause] Crea tu primera skill hoy."
+      }
+    }
+  },
+  "scenes": [
+    {
+      "type": "intro",
+      "title": "Skills en Claude Code",
+      "subtitle": "Enseña a tu agente nuevos superpoderes",
+      "pixelLogo": { "enabled": false },
+      "durationInSeconds": 4,
+      "timing": {
+        "leadInMs": 600,
+        "audioStartMs": 600,
+        "tailHoldMs": 300
+      },
+      "beats": [
+        {
+          "id": "title",
+          "startMs": 600,
+          "narration": "Skills en Claude Code",
+          "visual": "Título spring-in con accent line",
+          "animation": "spring"
+        },
+        {
+          "id": "subtitle",
+          "startMs": 1800,
+          "narration": "Enseña a tu agente nuevos superpoderes",
+          "visual": "Subtítulo fade-in",
+          "animation": "fade"
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "text": "Antes usábamos Commands: un fichero Markdown suelto que invocabas manualmente. Ahora, Skills lo cambian todo.",
+      "position": "bottom",
+      "background": "solid",
+      "durationInSeconds": 5,
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 400,
+        "tailHoldMs": 400,
+        "transitionMs": 300
+      },
+      "beats": [
+        {
+          "id": "context",
+          "startMs": 400,
+          "narration": "Antes usábamos Commands",
+          "visual": "Card aparece desde abajo",
+          "animation": "spring"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "split-screen",
+      "durationInSeconds": 8,
+      "props": {
+        "left": {
+          "label": "Commands",
+          "icon": "cross",
+          "items": [
+            "Un fichero .md suelto",
+            "Solo invocación manual con /",
+            "Sin metadatos ni auto-detección",
+            "Sin recursos adjuntos"
+          ],
+          "accent": "#cc3333"
+        },
+        "right": {
+          "label": "Skills",
+          "icon": "check",
+          "items": [
+            "Carpeta con SKILL.md + recursos",
+            "Auto-invocación por descripción",
+            "Frontmatter YAML con metadatos",
+            "Scripts, schemas, templates bundled"
+          ],
+          "accent": "#28c840"
+        }
+      },
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 400,
+        "tailHoldMs": 400,
+        "transitionMs": 400
+      },
+      "beats": [
+        { "id": "title", "startMs": 0, "visual": "Scene start" },
+        {
+          "id": "panels",
+          "startMs": 400,
+          "narration": "Commands eran ficheros sueltos",
+          "visual": "Paneles entran desde los lados",
+          "animation": "spring"
+        },
+        { "id": "left-1", "startMs": 800, "narration": "solo manuales", "visual": "Primer bullet izquierdo" },
+        { "id": "left-2", "startMs": 1200, "visual": "Segundo bullet izquierdo" },
+        {
+          "id": "left-3",
+          "startMs": 1600,
+          "narration": "sin metadatos ni recursos",
+          "visual": "Tercer bullet izquierdo"
+        },
+        { "id": "left-4", "startMs": 2000, "visual": "Cuarto bullet izquierdo" },
+        {
+          "id": "right-1",
+          "startMs": 3200,
+          "narration": "Skills son carpetas completas",
+          "visual": "Primer bullet derecho"
+        },
+        { "id": "right-2", "startMs": 3800, "narration": "con auto-invocación", "visual": "Segundo bullet derecho" },
+        { "id": "right-3", "startMs": 4400, "narration": "frontmatter YAML", "visual": "Tercer bullet derecho" },
+        { "id": "right-4", "startMs": 5000, "narration": "y scripts bundled", "visual": "Cuarto bullet derecho" }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "section-title",
+      "durationInSeconds": 3,
+      "props": {
+        "title": "Cómo Funcionan",
+        "number": "01"
+      },
+      "timing": {
+        "leadInMs": 100,
+        "audioStartMs": 300,
+        "tailHoldMs": 300,
+        "transitionMs": 800
+      },
+      "beats": [
+        { "id": "number", "startMs": 100, "visual": "Número aparece", "animation": "spring" },
+        {
+          "id": "title",
+          "startMs": 300,
+          "narration": "Cómo funcionan",
+          "visual": "Título spring-in",
+          "animation": "spring"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "file-explorer",
+      "durationInSeconds": 8,
+      "props": {
+        "rootPath": ".claude/skills/",
+        "files": [
+          { "name": "mi-primera-skill/", "type": "folder", "indent": 0 },
+          { "name": "SKILL.md", "type": "file", "indent": 1, "isNew": true },
+          { "name": "remotion-tutorial-generator/", "type": "folder", "indent": 0 },
+          { "name": "SKILL.md", "type": "file", "indent": 1 },
+          { "name": "sound-engineer/", "type": "folder", "indent": 0 },
+          { "name": "SKILL.md", "type": "file", "indent": 1 }
+        ],
+        "expandFile": "SKILL.md",
+        "fileContent": "---\nname: deploy-checker\ndescription: Valida que el deploy cumple las reglas de seguridad del equipo.\n---\n\n# Deploy Checker\n\n## Pasos\n1. Leer el manifiesto\n2. Verificar reglas\n3. Reportar resultado"
+      },
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 400,
+        "tailHoldMs": 300,
+        "transitionMs": 400
+      },
+      "beats": [
+        {
+          "id": "tree",
+          "startMs": 400,
+          "narration": "Las Skills viven en el filesystem",
+          "visual": "Árbol de archivos se revela",
+          "animation": "stagger"
+        },
+        {
+          "id": "content",
+          "startMs": 3000,
+          "narration": "con un SKILL.md dentro",
+          "visual": "Contenido se expande",
+          "animation": "reveal"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "code-block",
+      "durationInSeconds": 8,
+      "props": {
+        "title": "Anatomía de un SKILL.md",
+        "language": "yaml",
+        "code": "---\nname: deploy-checker\ndescription: Valida que el deploy cumple\n  las reglas de seguridad del equipo.\n  Usa cuando el usuario pida revisar\n  un deploy o antes de push a prod.\n---\n\n# Deploy Checker\n\n## Pasos\n1. Leer el manifiesto de deploy\n2. Verificar reglas de seguridad\n3. Reportar resultado",
+        "highlightLines": [2, 3, 4, 5, 6]
+      },
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 400,
+        "tailHoldMs": 400,
+        "transitionMs": 400
+      },
+      "beats": [
+        { "id": "title", "startMs": 200, "visual": "Título aparece", "animation": "fade" },
+        {
+          "id": "code-reveal",
+          "startMs": 400,
+          "narration": "Los dos campos clave son name y description",
+          "visual": "Código se revela línea a línea",
+          "animation": "reveal"
+        },
+        {
+          "id": "highlight",
+          "startMs": 3500,
+          "narration": "La description es lo que Claude usa para auto-invocar",
+          "visual": "Líneas 2-6 brillan con glow",
+          "animation": "glow",
+          "emphasis": "high"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "flow-diagram",
+      "durationInSeconds": 10,
+      "props": {
+        "title": "Carga Progresiva",
+        "nodes": [
+          { "id": "metadata", "title": "Metadata", "description": "Siempre cargada (~100 tokens)", "color": "#61afef" },
+          {
+            "id": "instructions",
+            "title": "Instrucciones",
+            "description": "Al dispararse la skill",
+            "color": "#c678dd"
+          },
+          {
+            "id": "resources",
+            "title": "Recursos",
+            "description": "Bajo demanda (scripts, schemas)",
+            "color": "#98c379"
+          }
+        ],
+        "showParticle": true
+      },
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 400,
+        "tailHoldMs": 500,
+        "transitionMs": 600
+      },
+      "beats": [
+        { "id": "title", "startMs": 200, "visual": "Título aparece" },
+        {
+          "id": "node-1",
+          "startMs": 800,
+          "narration": "Primero Claude solo lee los metadatos",
+          "visual": "Nodo Metadata entra",
+          "animation": "spring"
+        },
+        {
+          "id": "node-2",
+          "startMs": 2800,
+          "narration": "Al dispararse, carga las instrucciones",
+          "visual": "Nodo Instrucciones entra",
+          "animation": "spring"
+        },
+        {
+          "id": "node-3",
+          "startMs": 5000,
+          "narration": "Y solo bajo demanda accede a recursos",
+          "visual": "Nodo Recursos entra",
+          "animation": "spring"
+        },
+        { "id": "particle", "startMs": 7000, "visual": "Orbe viaja entre nodos", "animation": "particle" }
+      ]
+    },
+    {
+      "type": "terminal",
+      "title": "Creando tu primera Skill",
+      "durationInSeconds": 10,
+      "lines": [
+        { "kind": "command", "text": "mkdir .claude/skills/deploy-checker" },
+        { "kind": "blank", "text": "" },
+        { "kind": "command", "text": "Crea una skill que valide los deploys antes de push a producción" },
+        { "kind": "claude", "text": "Voy a crear la skill deploy-checker con las reglas de seguridad del equipo..." },
+        { "kind": "output", "text": "✓ .claude/skills/deploy-checker/SKILL.md creado", "delayAfterMs": 600 },
+        { "kind": "output", "text": "✓ Frontmatter con name y description configurado" },
+        { "kind": "blank", "text": "" },
+        { "kind": "command", "text": "/deploy-checker", "delayAfterMs": 800 },
+        { "kind": "claude", "text": "Analizando el deploy actual... Verificando 5 reglas de seguridad..." },
+        { "kind": "output", "text": "✓ Deploy cumple todas las reglas. Listo para push.", "delayAfterMs": 600 }
+      ],
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 400,
+        "tailHoldMs": 400,
+        "transitionMs": 400
+      },
+      "beats": [
+        {
+          "id": "mkdir",
+          "startMs": 400,
+          "narration": "Crear una skill es inmediato",
+          "visual": "Comando mkdir",
+          "animation": "typewriter"
+        },
+        {
+          "id": "create",
+          "startMs": 2000,
+          "narration": "Creas la carpeta, le dices a Claude qué quieres",
+          "visual": "Claude crea la skill",
+          "animation": "typewriter"
+        },
+        {
+          "id": "invoke",
+          "startMs": 5500,
+          "narration": "y ya puedes invocarla",
+          "visual": "Invocación con /deploy-checker",
+          "animation": "typewriter"
+        },
+        {
+          "id": "result",
+          "startMs": 7500,
+          "narration": "Así de simple",
+          "visual": "Output con check verde",
+          "animation": "reveal"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "section-title",
+      "durationInSeconds": 3,
+      "props": {
+        "title": "Patrones Reales",
+        "number": "02"
+      },
+      "timing": {
+        "leadInMs": 100,
+        "audioStartMs": 300,
+        "tailHoldMs": 300,
+        "transitionMs": 800
+      },
+      "beats": [
+        { "id": "number", "startMs": 100, "visual": "Número aparece", "animation": "spring" },
+        {
+          "id": "title",
+          "startMs": 300,
+          "narration": "Patrones reales",
+          "visual": "Título spring-in",
+          "animation": "spring"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "icon-grid",
+      "durationInSeconds": 8,
+      "props": {
+        "title": "4 Patrones de Skills",
+        "columns": 4,
+        "items": [
+          {
+            "icon": "terminal",
+            "title": "Workflow",
+            "description": "Pasos numerados con herramientas y gates de aprobación",
+            "accent": "#61afef"
+          },
+          {
+            "icon": "book",
+            "title": "Knowledge Base",
+            "description": "Índice con referencias a docs especializados",
+            "accent": "#c678dd"
+          },
+          {
+            "icon": "code",
+            "title": "API Reference",
+            "description": "Comandos copy-paste con manejo de errores",
+            "accent": "#98c379"
+          },
+          {
+            "icon": "shield",
+            "title": "Governance",
+            "description": "Reglas del equipo con auto-invocación",
+            "accent": "#d19a66"
+          }
+        ]
+      },
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 400,
+        "tailHoldMs": 400,
+        "transitionMs": 400
+      },
+      "beats": [
+        { "id": "title", "startMs": 200, "narration": "Hay cuatro patrones principales", "visual": "Título aparece" },
+        {
+          "id": "workflow",
+          "startMs": 1000,
+          "narration": "Workflow, con pasos y gates",
+          "visual": "Card Workflow entra",
+          "animation": "spring"
+        },
+        {
+          "id": "knowledge",
+          "startMs": 2200,
+          "narration": "Knowledge base",
+          "visual": "Card Knowledge Base entra",
+          "animation": "spring"
+        },
+        {
+          "id": "api",
+          "startMs": 3400,
+          "narration": "API reference",
+          "visual": "Card API Reference entra",
+          "animation": "spring"
+        },
+        {
+          "id": "governance",
+          "startMs": 4600,
+          "narration": "Y governance con auto-invocación",
+          "visual": "Card Governance entra",
+          "animation": "spring"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "split-screen",
+      "durationInSeconds": 7,
+      "props": {
+        "left": {
+          "label": "Proyecto",
+          "icon": "folder",
+          "items": [".claude/skills/ en el repo", "Compartidas con el equipo vía git", "Versionadas y revisables en PR"]
+        },
+        "right": {
+          "label": "Personales",
+          "icon": "user",
+          "items": ["~/.claude/skills/ en tu máquina", "Solo para ti, cross-proyecto", "Tus preferencias y atajos"]
+        }
+      },
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 400,
+        "tailHoldMs": 400,
+        "transitionMs": 400
+      },
+      "beats": [
+        { "id": "title", "startMs": 0, "visual": "Scene start" },
+        {
+          "id": "panels",
+          "startMs": 400,
+          "narration": "Las skills de proyecto van en el repo",
+          "visual": "Paneles entran",
+          "animation": "spring"
+        },
+        { "id": "left-1", "startMs": 800, "visual": "Primer bullet izquierdo" },
+        { "id": "left-2", "startMs": 1200, "narration": "compartidas con todo el equipo", "visual": "Segundo bullet" },
+        { "id": "left-3", "startMs": 1600, "visual": "Tercer bullet" },
+        {
+          "id": "right-1",
+          "startMs": 2800,
+          "narration": "Las personales van en tu máquina",
+          "visual": "Primer bullet derecho"
+        },
+        { "id": "right-2", "startMs": 3400, "narration": "para tus preferencias y atajos", "visual": "Segundo bullet" },
+        { "id": "right-3", "startMs": 3800, "visual": "Tercer bullet" }
+      ]
+    },
+    {
+      "type": "terminal",
+      "title": "Encadenando Skills",
+      "durationInSeconds": 8,
+      "lines": [
+        { "kind": "command", "text": "/remotion-tutorial-generator \"explica hooks\"" },
+        { "kind": "claude", "text": "Usando skill remotion-tutorial-generator..." },
+        { "kind": "output", "text": "  Paso 6: Invocando remotion-director...", "delayAfterMs": 500 },
+        { "kind": "output", "text": "  Paso 7: Invocando sound-engineer..." },
+        { "kind": "output", "text": "  Paso 8: Renderizando video final..." },
+        { "kind": "output", "text": "✓ Tutorial generado en tutorials/hooks/output.mp4", "delayAfterMs": 600 }
+      ],
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 400,
+        "tailHoldMs": 400,
+        "transitionMs": 400
+      },
+      "beats": [
+        {
+          "id": "invoke",
+          "startMs": 400,
+          "narration": "las skills pueden invocar otras skills",
+          "visual": "Comando con /skill",
+          "animation": "typewriter"
+        },
+        {
+          "id": "cascade",
+          "startMs": 2500,
+          "narration": "creando pipelines completos",
+          "visual": "Cascade de pasos",
+          "animation": "reveal"
+        },
+        {
+          "id": "done",
+          "startMs": 5500,
+          "narration": "de automatización",
+          "visual": "Output con check",
+          "animation": "reveal"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "bullet-slide",
+      "durationInSeconds": 6,
+      "props": {
+        "title": "Qué puedes meter en una Skill",
+        "items": [
+          { "icon": "file", "text": "Instrucciones en Markdown" },
+          { "icon": "code", "text": "Scripts ejecutables (Python, Bash, TS)" },
+          { "icon": "layers", "text": "Schemas de bases de datos y APIs" },
+          { "icon": "folder", "text": "Templates y ejemplos reutilizables" },
+          { "icon": "link", "text": "Referencias a MCP servers" }
+        ]
+      },
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 400,
+        "tailHoldMs": 300,
+        "transitionMs": 600
+      },
+      "beats": [
+        {
+          "id": "title",
+          "startMs": 200,
+          "narration": "Una skill no es solo un prompt",
+          "visual": "Título spring-in",
+          "animation": "spring"
+        },
+        {
+          "id": "item-1",
+          "startMs": 1000,
+          "narration": "instrucciones en Markdown",
+          "visual": "Primer item entra",
+          "animation": "slide"
+        },
+        {
+          "id": "item-2",
+          "startMs": 1800,
+          "narration": "scripts ejecutables",
+          "visual": "Segundo item",
+          "animation": "slide"
+        },
+        {
+          "id": "item-3",
+          "startMs": 2600,
+          "narration": "schemas de bases de datos",
+          "visual": "Tercer item",
+          "animation": "slide"
+        },
+        {
+          "id": "item-4",
+          "startMs": 3400,
+          "narration": "templates reutilizables",
+          "visual": "Cuarto item",
+          "animation": "slide"
+        },
+        {
+          "id": "item-5",
+          "startMs": 4200,
+          "narration": "y referencias a MCP servers",
+          "visual": "Quinto item",
+          "animation": "slide"
+        }
+      ]
+    },
+    {
+      "type": "outro",
+      "title": "Skills: Lo Esencial",
+      "durationInSeconds": 7,
+      "bullets": [
+        "SKILL.md con frontmatter YAML en .claude/skills/",
+        "Carga progresiva: metadata → instrucciones → recursos",
+        "Proyecto para el equipo, personales para ti",
+        "Encadena skills para workflows complejos"
+      ],
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 400,
+        "tailHoldMs": 2000,
+        "transitionMs": 600
+      },
+      "beats": [
+        { "id": "title", "startMs": 200, "narration": "Recuerda", "visual": "Título spring-in", "animation": "spring" },
+        {
+          "id": "bullet-1",
+          "startMs": 800,
+          "narration": "SKILL.md con frontmatter YAML",
+          "visual": "Primer bullet entra",
+          "animation": "slide"
+        },
+        {
+          "id": "bullet-2",
+          "startMs": 1800,
+          "narration": "Carga progresiva en tres niveles",
+          "visual": "Segundo bullet",
+          "animation": "slide"
+        },
+        {
+          "id": "bullet-3",
+          "startMs": 2800,
+          "narration": "Proyecto para el equipo, personales para ti",
+          "visual": "Tercer bullet",
+          "animation": "slide"
+        },
+        {
+          "id": "bullet-4",
+          "startMs": 3800,
+          "narration": "Encadena skills para workflows complejos",
+          "visual": "Cuarto bullet",
+          "animation": "slide"
+        },
+        {
+          "id": "cta",
+          "startMs": 5000,
+          "narration": "Crea tu primera skill hoy",
+          "visual": "Hold de marca",
+          "animation": "fade"
+        }
+      ]
+    }
+  ]
+}

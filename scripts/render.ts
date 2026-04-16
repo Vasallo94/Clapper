@@ -32,6 +32,7 @@ async function main() {
     console.log("🎙️  Generating voiceover...")
     execFileSync("npx", ["tsx", "scripts/generate-voiceover.ts", configPath], {
       stdio: "inherit",
+      shell: true,
     })
   }
 
@@ -39,6 +40,7 @@ async function main() {
     console.log("🔊 Generating sound design...")
     execFileSync("npx", ["tsx", "scripts/generate-sound-design.ts", configPath], {
       stdio: "inherit",
+      shell: true,
     })
   }
 

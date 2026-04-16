@@ -13,6 +13,24 @@ import {
   type VoiceoverScene,
 } from "../src/utils/direction"
 
+function findFfmpeg(): string {
+  // Try system ffmpeg first, then Remotion's bundled copy
+  try {
+    execFileSync("ffmpeg", ["-version"], { stdio: "pipe" })
+    return "ffmpeg"
+  } catch {
+    const remotionFfmpeg = path.resolve("node_modules/@remotion/compositor-win32-x64-msvc/ffmpeg.exe")
+    if (existsSync(remotionFfmpeg)) return remotionFfmpeg
+    // Fallback for other platforms
+    const compositorGlob = path.resolve("node_modules/@remotion/compositor-")
+    for (const suffix of ["linux-x64-gnu", "darwin-arm64", "darwin-x64"]) {
+      const candidate = `${compositorGlob}${suffix}/ffmpeg`
+      if (existsSync(candidate)) return candidate
+    }
+    throw new Error("ffmpeg not found. Install ffmpeg or run: npx remotion browser ensure")
+  }
+}
+
 const configPath = process.argv[2]
 if (!configPath) {
   console.error("Usage: npx tsx scripts/generate-voiceover.ts <path-to-config.json>")
@@ -55,19 +73,39 @@ const outDir = path.resolve("public", "voiceover", config.id)
 mkdirSync(outDir, { recursive: true })
 
 const geminiApiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
+const googleCredentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS
 const elevenLabsApiKey = process.env.ELEVENLABS_API_KEY
 
-if (provider === "gemini" && !geminiApiKey) {
-  console.error("❌ Set GOOGLE_AI_API_KEY or GEMINI_API_KEY environment variable")
-  process.exit(1)
+// Resolve GOOGLE_APPLICATION_CREDENTIALS to absolute path for google-auth-library
+if (googleCredentialsPath) {
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = path.resolve(googleCredentialsPath)
+}
+
+let ai: GoogleGenAI | null = null
+
+if (provider === "gemini") {
+  if (googleCredentialsPath && existsSync(path.resolve(googleCredentialsPath))) {
+    const saContent = JSON.parse(readFileSync(path.resolve(googleCredentialsPath), "utf-8"))
+    const projectId = saContent.project_id
+    if (projectId) {
+      ai = new GoogleGenAI({ vertexai: true, project: projectId, location: "us-central1" })
+      console.log(`🔑 Using Vertex AI with service account (project: ${projectId})`)
+    }
+  }
+  if (!ai && geminiApiKey) {
+    ai = new GoogleGenAI({ apiKey: geminiApiKey })
+    console.log("🔑 Using Google AI Studio with API key")
+  }
+  if (!ai) {
+    console.error("❌ Set GOOGLE_APPLICATION_CREDENTIALS (service account) or GOOGLE_AI_API_KEY")
+    process.exit(1)
+  }
 }
 
 if (provider === "elevenlabs" && !elevenLabsApiKey) {
   console.error("❌ Set ELEVENLABS_API_KEY environment variable")
   process.exit(1)
 }
-
-const ai = geminiApiKey ? new GoogleGenAI({ apiKey: geminiApiKey }) : null
 
 async function generateWithGemini(sceneIndex: string, text: string, mp3Path: string) {
   if (!ai) {
@@ -79,8 +117,8 @@ async function generateWithGemini(sceneIndex: string, text: string, mp3Path: str
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       response = await ai.models.generateContent({
-        model: "gemini-2.5-flash-preview-tts",
-        contents: [{ parts: [{ text }] }],
+        model: "gemini-3.1-flash-tts-preview",
+        contents: [{ role: "user", parts: [{ text }] }],
         config: {
           responseModalities: ["AUDIO"],
           speechConfig: {
@@ -114,7 +152,8 @@ async function generateWithGemini(sceneIndex: string, text: string, mp3Path: str
 
   writeFileSync(pcmPath, pcmBuffer)
 
-  execFileSync("ffmpeg", ["-f", "s16le", "-ar", "24000", "-ac", "1", "-i", pcmPath, "-y", mp3Path], {
+  const ffmpegPath = findFfmpeg()
+  execFileSync(ffmpegPath, ["-f", "s16le", "-ar", "24000", "-ac", "1", "-i", pcmPath, "-y", mp3Path], {
     stdio: "pipe",
   })
 

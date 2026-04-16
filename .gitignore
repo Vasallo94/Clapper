@@ -14,3 +14,9 @@ public/voiceover/
 .superpowers/
 .claude/hooks/
 .claude/voiceover-usage.log
+
+# Service account keys — NEVER commit
+*_sa.json
+*-sa.json
+*.credentials.json
+service-account*.json

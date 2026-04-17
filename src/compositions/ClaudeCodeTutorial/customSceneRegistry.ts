@@ -19,12 +19,16 @@ import { CountdownScene } from "./scenes/custom/CountdownScene"
 import { FileExplorerScene } from "./scenes/custom/FileExplorerScene"
 import { FlowDiagramScene } from "./scenes/custom/FlowDiagramScene"
 import { IconGridScene } from "./scenes/custom/IconGridScene"
+import { LogoWallScene } from "./scenes/custom/LogoWallScene"
+import { MediaCardScene } from "./scenes/custom/MediaCardScene"
 import { ProblemSolutionScene } from "./scenes/custom/ProblemSolutionScene"
 import { ProgressBarsScene } from "./scenes/custom/ProgressBarsScene"
 import { QuoteScene } from "./scenes/custom/QuoteScene"
 import { SplitScreenScene } from "./scenes/custom/SplitScreenScene"
 import { StatRevealScene } from "./scenes/custom/StatRevealScene"
+import { StepListScene } from "./scenes/custom/StepListScene"
 import { TimelineScene } from "./scenes/custom/TimelineScene"
+import { TwoColumnTextScene } from "./scenes/custom/TwoColumnTextScene"
 
 export const customSceneRegistry: Record<string, FC<Record<string, unknown>>> = {
   "annotated-image": AnnotatedImageScene,
@@ -49,4 +53,8 @@ export const customSceneRegistry: Record<string, FC<Record<string, unknown>>> = 
   "split-screen": SplitScreenScene,
   "stat-reveal": StatRevealScene,
   timeline: TimelineScene,
+  "media-card": MediaCardScene,
+  "logo-wall": LogoWallScene,
+  "two-column-text": TwoColumnTextScene,
+  "step-list": StepListScene,
 }

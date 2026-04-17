@@ -177,7 +177,7 @@
     },
     {
       "type": "custom",
-      "componentId": "section-title",
+      "componentId": "chapter-card",
       "durationInSeconds": 3,
       "props": {
         "title": "Cómo Funcionan",
@@ -385,7 +385,7 @@
     },
     {
       "type": "custom",
-      "componentId": "section-title",
+      "componentId": "chapter-card",
       "durationInSeconds": 3,
       "props": {
         "title": "Patrones Reales",

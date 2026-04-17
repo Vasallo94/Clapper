@@ -5,8 +5,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+
+- `ProblemSolutionScene`, `BeforeAfterScene`: replaced hardcoded `#ff5050`/`#50ff78` colors with `tokens.terminal.labelColor`/`tokens.terminal.successColor`
+- `ApiRequestScene`: replaced hardcoded panel background, Request/Response label colors, and status color with theme tokens (`tokens.terminal.bg`, `tokens.terminal.successColor`, `tokens.terminal.claude`, `tokens.primary`)
+- `BrowserMockupScene`: replaced hardcoded chrome bar, traffic light dots, and URL bar colors with `tokens.terminal.titleBar`, `tokens.terminal.dots[*]`, and `tokens.terminal.bg`
+- `CountdownScene`: fixed beat index collision — boxes now stagger correctly when beats are provided (`boxesStartFrame + i * step` instead of `beats[1] + i * step` overwriting per-item with same value)
+- `BarChartScene`: added missing `<MascotWatermark animation="idle" />` for theme consistency
+
 ### Added
 
+- 4 presentation scene components: `MediaCardScene`, `LogoWallScene`, `TwoColumnTextScene`, `StepListScene`
+- 4 demo/technical scene components: `BrowserMockupScene`, `ApiRequestScene`, `CodeDiffScene`, `AnnotatedImageScene`
 - 7 custom scene components for animated presentations: `CodeBlockScene`, `SplitScreenScene`, `IconGridScene`, `BigNumberScene`, `ComparisonTableScene`, `SectionTitleScene`, `BulletSlideScene`
 - 13 SVG icon components in `svg-icons.tsx`: CheckIcon, CrossIcon, TerminalIcon, CloudIcon, CodeIcon, ShieldIcon, GearIcon, UserIcon, BookIcon, LightbulbIcon, ArrowRightIcon, LayersIcon, LinkIcon
 - Vertex AI service account auth for Gemini TTS (`GOOGLE_APPLICATION_CREDENTIALS`)

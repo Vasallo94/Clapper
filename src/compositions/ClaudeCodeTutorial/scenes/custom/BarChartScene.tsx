@@ -1,6 +1,7 @@
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { useThemeTokens } from "../../themes"
+import { MascotWatermark } from "../../components/MascotWatermark"
 import type { Beat, Timing } from "../../../../utils/direction"
 import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
 
@@ -162,6 +163,7 @@ export const BarChartScene: React.FC<Record<string, unknown>> = (rawProps) => {
           }}
         />
       </div>
+      <MascotWatermark animation="idle" />
     </AbsoluteFill>
   )
 }

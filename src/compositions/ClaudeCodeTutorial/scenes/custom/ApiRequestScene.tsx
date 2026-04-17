@@ -34,7 +34,7 @@ export const ApiRequestScene: React.FC<Record<string, unknown>> = (rawProps) => 
   const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
 
   const methodColor = METHOD_COLORS[method] ?? tokens.primary
-  const statusColor = responseStatus < 400 ? "#50ff78" : "#ff5f57"
+  const statusColor = responseStatus < 400 ? tokens.terminal.successColor : tokens.primary
 
   // Title
   const titleDelay = beatStartFrames?.[0] ?? motionStartFrame
@@ -80,7 +80,7 @@ export const ApiRequestScene: React.FC<Record<string, unknown>> = (rawProps) => 
 
   const panelStyle: React.CSSProperties = {
     flex: 1,
-    background: "#0d1117",
+    background: tokens.terminal.bg,
     border: `1px solid ${tokens.card.border}`,
     borderRadius: 8,
     padding: 14,
@@ -151,7 +151,16 @@ export const ApiRequestScene: React.FC<Record<string, unknown>> = (rawProps) => 
             >
               {method}
             </div>
-            <div style={{ fontSize: 10, color: "#50ff78", textTransform: "uppercase", letterSpacing: 1 }}>Request</div>
+            <div
+              style={{
+                fontSize: 10,
+                color: tokens.terminal.successColor,
+                textTransform: "uppercase",
+                letterSpacing: 1,
+              }}
+            >
+              Request
+            </div>
           </div>
           {renderLines(reqLines, reqDelay, reqDuration)}
         </div>
@@ -189,7 +198,9 @@ export const ApiRequestScene: React.FC<Record<string, unknown>> = (rawProps) => 
             >
               {responseStatus}
             </div>
-            <div style={{ fontSize: 10, color: "#58a6ff", textTransform: "uppercase", letterSpacing: 1 }}>Response</div>
+            <div style={{ fontSize: 10, color: tokens.terminal.claude, textTransform: "uppercase", letterSpacing: 1 }}>
+              Response
+            </div>
           </div>
           {renderLines(resLines.slice(1), resDelay + 6, resDuration)}
         </div>

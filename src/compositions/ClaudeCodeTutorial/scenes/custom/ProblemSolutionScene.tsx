@@ -22,8 +22,8 @@ export const ProblemSolutionScene: React.FC<Record<string, unknown>> = (rawProps
   const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
   const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
 
-  const problemColor = "#ff5050"
-  const solutionColor = "#50ff78"
+  const problemColor = tokens.terminal.labelColor
+  const solutionColor = tokens.terminal.successColor
 
   // Title
   const titleDelay = beatStartFrames?.[0] ?? motionStartFrame

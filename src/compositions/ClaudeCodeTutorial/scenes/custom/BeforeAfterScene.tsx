@@ -36,8 +36,8 @@ export const BeforeAfterScene: React.FC<Record<string, unknown>> = (rawProps) =>
   const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
   const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
 
-  const leftColor = leftAccent ?? "#ff5050"
-  const rightColor = rightAccent ?? "#50ff78"
+  const leftColor = leftAccent ?? tokens.terminal.labelColor
+  const rightColor = rightAccent ?? tokens.terminal.successColor
 
   // Title
   const titleDelay = beatStartFrames?.[0] ?? motionStartFrame

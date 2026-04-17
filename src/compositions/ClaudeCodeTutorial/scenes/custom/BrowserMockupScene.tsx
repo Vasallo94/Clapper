@@ -166,7 +166,7 @@ export const BrowserMockupScene: React.FC<Record<string, unknown>> = (rawProps) 
         {/* Browser chrome */}
         <div
           style={{
-            background: "#2a2a2a",
+            background: tokens.terminal.titleBar,
             padding: "8px 14px",
             display: "flex",
             alignItems: "center",
@@ -174,14 +174,14 @@ export const BrowserMockupScene: React.FC<Record<string, unknown>> = (rawProps) 
           }}
         >
           <div style={{ display: "flex", gap: 6 }}>
-            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57" }} />
-            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e" }} />
-            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840" }} />
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: tokens.terminal.dots[0] }} />
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: tokens.terminal.dots[1] }} />
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: tokens.terminal.dots[2] }} />
           </div>
           <div
             style={{
               flex: 1,
-              background: "#1a1a1a",
+              background: tokens.terminal.bg,
               borderRadius: 4,
               padding: "5px 12px",
               fontSize: 12,

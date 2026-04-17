@@ -81,7 +81,8 @@ export const CountdownScene: React.FC<Record<string, unknown>> = (rawProps) => {
 
       <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
         {segments.map((seg, i) => {
-          const boxDelay = beatStartFrames?.[1] ?? motionStartFrame + Math.ceil(fps * 0.15) + i * Math.ceil(fps * 0.1)
+          const boxesStartFrame = beatStartFrames?.[1] ?? motionStartFrame + Math.ceil(fps * 0.15)
+          const boxDelay = boxesStartFrame + i * Math.ceil(fps * 0.1)
           const boxSpring = spring({
             frame: Math.max(0, frame - boxDelay),
             fps,

@@ -3,13 +3,17 @@
 // must be registered here with a static import. NO dynamic imports.
 
 import { type FC } from "react"
+import { AnnotatedImageScene } from "./scenes/custom/AnnotatedImageScene"
+import { ApiRequestScene } from "./scenes/custom/ApiRequestScene"
 import { BarChartScene } from "./scenes/custom/BarChartScene"
 import { BeforeAfterScene } from "./scenes/custom/BeforeAfterScene"
 import { BigNumberScene } from "./scenes/custom/BigNumberScene"
 import { BlockDiagramScene } from "./scenes/custom/BlockDiagramScene"
+import { BrowserMockupScene } from "./scenes/custom/BrowserMockupScene"
 import { BulletSlideScene } from "./scenes/custom/BulletSlideScene"
 import { ChapterCardScene } from "./scenes/custom/ChapterCardScene"
 import { CodeBlockScene } from "./scenes/custom/CodeBlockScene"
+import { CodeDiffScene } from "./scenes/custom/CodeDiffScene"
 import { ComparisonTableScene } from "./scenes/custom/ComparisonTableScene"
 import { CountdownScene } from "./scenes/custom/CountdownScene"
 import { FileExplorerScene } from "./scenes/custom/FileExplorerScene"
@@ -23,13 +27,17 @@ import { StatRevealScene } from "./scenes/custom/StatRevealScene"
 import { TimelineScene } from "./scenes/custom/TimelineScene"
 
 export const customSceneRegistry: Record<string, FC<Record<string, unknown>>> = {
+  "annotated-image": AnnotatedImageScene,
+  "api-request": ApiRequestScene,
   "bar-chart": BarChartScene,
   "before-after": BeforeAfterScene,
   "big-number": BigNumberScene,
   "block-diagram": BlockDiagramScene,
+  "browser-mockup": BrowserMockupScene,
   "bullet-slide": BulletSlideScene,
   "chapter-card": ChapterCardScene,
   "code-block": CodeBlockScene,
+  "code-diff": CodeDiffScene,
   "comparison-table": ComparisonTableScene,
   countdown: CountdownScene,
   "file-explorer": FileExplorerScene,

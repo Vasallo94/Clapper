@@ -5,6 +5,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- Monorepo directory scaffold: `packages/render-service/`, `packages/agent/`, `packages/web/` with placeholder `.gitkeep` files
+- `scripts/validate-config.ts` — CLI validation tool that parses a config JSON against `TutorialConfigSchema` or `ProductShortConfigSchema` and exits with code 0 (valid) or 1 (invalid)
+
 ### Fixed
 
 - `ProblemSolutionScene`, `BeforeAfterScene`: replaced hardcoded `#ff5050`/`#50ff78` colors with `tokens.terminal.labelColor`/`tokens.terminal.successColor`

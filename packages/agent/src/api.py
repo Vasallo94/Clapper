@@ -1,8 +1,16 @@
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load .env from project root
+_ROOT_DIR = Path(__file__).resolve().parent.parent.parent.parent
+load_dotenv(_ROOT_DIR / ".env")
+
+# Resolve GOOGLE_APPLICATION_CREDENTIALS relative to project root
+_creds = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "")
+if _creds and not Path(_creds).is_absolute():
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(_ROOT_DIR / _creds)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

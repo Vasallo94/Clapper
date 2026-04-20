@@ -15,7 +15,7 @@ def load_prompt(name: str) -> str:
 
 def create_video_agent():
     """Create the DeepAgents video generation agent."""
-    model = os.environ.get("LLM_MODEL", "google_genai:gemini-2.5-pro")
+    model = os.environ.get("LLM_MODEL", "google_vertexai:gemini-2.5-pro")
     checkpointer = MemorySaver()
 
     agent = create_deep_agent(

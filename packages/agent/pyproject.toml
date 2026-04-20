@@ -7,6 +7,7 @@ dependencies = [
     "deepagents>=0.1.0",
     "langgraph>=0.4.0",
     "langchain>=0.3.0",
+    "langchain-google-vertexai>=2.0.0",
     "fastapi>=0.115.0",
     "uvicorn>=0.34.0",
     "httpx>=0.28.0",

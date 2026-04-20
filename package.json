@@ -38,7 +38,8 @@
     "build": "remotion bundle",
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc",
-    "prepare": "husky"
+    "prepare": "husky",
+    "generate:catalog": "npx tsx scripts/generate-scene-catalog.ts"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

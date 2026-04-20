@@ -13,6 +13,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- `scripts/generate-scene-catalog.ts` — TypeScript script that reads `customSceneRegistry.ts` and generates `src/shared/scene-catalog.json` with machine-readable catalog of all 26 custom scenes plus builtin scenes for both compositions
+- `npm run generate:catalog` script for catalog generation
+
 - Monorepo directory scaffold: `packages/render-service/`, `packages/agent/`, `packages/web/` with placeholder `.gitkeep` files
 - `scripts/validate-config.ts` — CLI validation tool that parses a config JSON against `TutorialConfigSchema` or `ProductShortConfigSchema` and exits with code 0 (valid) or 1 (invalid)
 - Render service Express bridge (`packages/render-service/`) with 4 HTTP endpoints: `/api/validate` (Zod schema validation), `/api/render` (async job submission), `/api/render/:id/status` (progress tracking), `/api/audio/library` (music track listing)

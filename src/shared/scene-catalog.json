@@ -1,0 +1,143 @@
+{
+  "generatedAt": "2026-04-20T15:06:06.463Z",
+  "scenes": {
+    "tutorial": {
+      "builtin": ["intro", "terminal", "callout", "outro"],
+      "custom": [
+        {
+          "componentId": "annotated-image",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: annotated-image"
+        },
+        {
+          "componentId": "api-request",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: api-request"
+        },
+        {
+          "componentId": "bar-chart",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: bar-chart"
+        },
+        {
+          "componentId": "before-after",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: before-after"
+        },
+        {
+          "componentId": "big-number",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: big-number"
+        },
+        {
+          "componentId": "block-diagram",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: block-diagram"
+        },
+        {
+          "componentId": "browser-mockup",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: browser-mockup"
+        },
+        {
+          "componentId": "bullet-slide",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: bullet-slide"
+        },
+        {
+          "componentId": "chapter-card",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: chapter-card"
+        },
+        {
+          "componentId": "code-block",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: code-block"
+        },
+        {
+          "componentId": "code-diff",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: code-diff"
+        },
+        {
+          "componentId": "comparison-table",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: comparison-table"
+        },
+        {
+          "componentId": "countdown",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: countdown"
+        },
+        {
+          "componentId": "file-explorer",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: file-explorer"
+        },
+        {
+          "componentId": "flow-diagram",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: flow-diagram"
+        },
+        {
+          "componentId": "icon-grid",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: icon-grid"
+        },
+        {
+          "componentId": "problem-solution",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: problem-solution"
+        },
+        {
+          "componentId": "progress-bars",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: progress-bars"
+        },
+        {
+          "componentId": "quote",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: quote"
+        },
+        {
+          "componentId": "split-screen",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: split-screen"
+        },
+        {
+          "componentId": "stat-reveal",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: stat-reveal"
+        },
+        {
+          "componentId": "timeline",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: timeline"
+        },
+        {
+          "componentId": "media-card",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: media-card"
+        },
+        {
+          "componentId": "logo-wall",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: logo-wall"
+        },
+        {
+          "componentId": "two-column-text",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: two-column-text"
+        },
+        {
+          "componentId": "step-list",
+          "composition": "ClaudeCodeTutorial",
+          "description": "Custom scene: step-list"
+        }
+      ]
+    },
+    "productShort": {
+      "builtin": ["hero", "benefits", "pricing", "cta"]
+    }
+  }
+}

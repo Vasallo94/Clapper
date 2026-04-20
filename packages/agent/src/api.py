@@ -53,6 +53,25 @@ class ResumeRequest(BaseModel):
     decision: dict
 
 
+def _normalize_content(content) -> str:
+    """Normalize LangChain message content to a plain string.
+
+    Content can be a string or a list of content blocks like
+    [{"type": "text", "text": "..."}, ...]. Extract text from all blocks.
+    """
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for block in content:
+            if isinstance(block, dict) and block.get("type") == "text":
+                parts.append(block.get("text", ""))
+            elif isinstance(block, str):
+                parts.append(block)
+        return "\n".join(parts)
+    return str(content)
+
+
 def _extract_response(result, thread_id: str) -> dict:
     """Extract a response dict from an agent invoke result."""
     if result.interrupts:
@@ -64,7 +83,7 @@ def _extract_response(result, thread_id: str) -> dict:
         }
 
     messages = result.value.get("messages", [])
-    content = messages[-1].content if messages else ""
+    content = _normalize_content(messages[-1].content) if messages else ""
     return {
         "type": "message",
         "content": content,

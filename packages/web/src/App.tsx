@@ -2,12 +2,14 @@ import { useState } from "react"
 import type { ChatMessage } from "./types"
 import { sendMessage, resumeCheckpoint } from "./api"
 import { ChatWindow } from "./components/ChatWindow"
+import { useAgentStream } from "./hooks/useAgentStream"
 
 export default function App() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
   const [threadId, setThreadId] = useState<string>()
   const [loading, setLoading] = useState(false)
+  const stream = useAgentStream(threadId ?? null)
 
   const addMessage = (role: ChatMessage["role"], content: string, checkpoint?: ChatMessage["checkpoint"]): string => {
     const id = crypto.randomUUID()
@@ -95,6 +97,10 @@ export default function App() {
         onApprove={handleApprove}
         onRequestChanges={handleRequestChanges}
         loading={loading}
+        activeAgent={stream.activeAgent}
+        renderProgress={stream.renderProgress}
+        streamStatus={stream.status}
+        streamError={stream.error}
       />
 
       <div style={{ padding: 12, borderTop: "1px solid #ddd", display: "flex", gap: 8 }}>

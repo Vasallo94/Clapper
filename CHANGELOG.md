@@ -7,6 +7,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- `packages/web/src/hooks/useAgentStream.ts`: EventSource hook for consuming SSE stream from agent API, tracks active agent, render progress, checkpoint states, and error conditions
+- `packages/web/src/components/SubagentBadge.tsx`: Visual indicator for active subagent with emoji labels (researcher, copywriter, scene_creator, director, sound_engineer)
+- `packages/web/src/components/SoundChartCard.tsx`: Approval UI for sound chart checkpoint showing music bed and SFX entries table
+- `packages/web/src/components/RenderProgress.tsx`: Progress bar for render status with percentage display
+- `packages/web/src/components/ErrorBanner.tsx`: Error message banner for stream connection errors
+- Stream event types in `packages/web/src/types.ts`: `StreamEvent`, `SoundChartData`, `AgentStreamStatus` for SSE type safety
+
 - `packages/agent/tests/test_orchestrator.py`: integration tests validating orchestrator wiring, prompt file existence, skills availability, and subagent factory return types
 - `packages/agent/src/subagents/scene_creator/`: Scene Creator CompiledSubAgent with deterministic lint-register-validate graph loop using LangGraph StateGraph, plus `write_scene`/`read_scene` tools
 - `packages/agent/src/subagents/`: researcher, director, copywriter, sound_engineer SubAgent definitions with factory functions

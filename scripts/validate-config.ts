@@ -8,8 +8,21 @@ if (!configPath) {
   process.exit(2)
 }
 
-const raw = JSON.parse(readFileSync(configPath, "utf-8"))
-const schema = raw.composition === "ProductShort" ? ProductShortConfigSchema : TutorialConfigSchema
+let raw: unknown
+try {
+  raw = JSON.parse(readFileSync(configPath, "utf-8"))
+} catch (e) {
+  console.log(JSON.stringify({ valid: false, errors: [{ message: `Invalid JSON: ${(e as Error).message}` }] }))
+  process.exit(1)
+}
+
+const config = raw as Record<string, unknown>
+if (config.composition !== undefined && config.composition !== "ProductShort") {
+  console.log(JSON.stringify({ valid: false, errors: [{ message: `Unknown composition: "${config.composition}"` }] }))
+  process.exit(1)
+}
+
+const schema = config.composition === "ProductShort" ? ProductShortConfigSchema : TutorialConfigSchema
 const result = schema.safeParse(raw)
 
 if (result.success) {

@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 
@@ -16,6 +17,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from langgraph.types import Command
 from pydantic import BaseModel
+from starlette.responses import StreamingResponse
 
 from .agent import create_video_agent
 
@@ -130,3 +132,48 @@ async def get_history(thread_id: str):
         return {"thread_id": thread_id, "messages": messages}
     except Exception:
         return {"thread_id": thread_id, "messages": []}
+
+
+@app.get("/api/chat/{thread_id}/stream")
+async def stream_chat(thread_id: str):
+    """SSE endpoint for real-time agent progress."""
+    agent = _get_agent()
+    config = {"configurable": {"thread_id": thread_id}}
+
+    async def event_generator():
+        try:
+            async for event in agent.astream(
+                None,
+                config=config,
+                stream_mode=["updates", "custom"],
+                version="v2",
+            ):
+                event_data = {}
+                if isinstance(event, dict):
+                    if "ns" in event:
+                        agent_name = event.get("ns", ["orchestrator"])[-1] if event.get("ns") else "orchestrator"
+                        event_data = {
+                            "type": "agent_status",
+                            "agent": agent_name,
+                            "status": "running",
+                        }
+                    elif "type" in event:
+                        event_data = event
+
+                if event_data:
+                    yield f"data: {json.dumps(event_data)}\n\n"
+
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+        except Exception as e:
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )

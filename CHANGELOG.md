@@ -9,6 +9,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 - Monorepo directory scaffold: `packages/render-service/`, `packages/agent/`, `packages/web/` with placeholder `.gitkeep` files
 - `scripts/validate-config.ts` — CLI validation tool that parses a config JSON against `TutorialConfigSchema` or `ProductShortConfigSchema` and exits with code 0 (valid) or 1 (invalid)
+- Render service Express bridge (`packages/render-service/`) with 4 HTTP endpoints: `/api/validate` (Zod schema validation), `/api/render` (async job submission), `/api/render/:id/status` (progress tracking), `/api/audio/library` (music track listing)
 
 ### Fixed
 

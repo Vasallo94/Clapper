@@ -11,6 +11,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - `scripts/validate-config.ts` — CLI validation tool that parses a config JSON against `TutorialConfigSchema` or `ProductShortConfigSchema` and exits with code 0 (valid) or 1 (invalid)
 - Render service Express bridge (`packages/render-service/`) with 4 HTTP endpoints: `/api/validate` (Zod schema validation), `/api/render` (async job submission), `/api/render/:id/status` (progress tracking), `/api/audio/library` (music track listing)
 - Agent project (`packages/agent/`) with `pyproject.toml`, LangGraph/httpx dependencies, and three tools: `present_escaleta()` (LangGraph interrupt for human approval), `submit_render()`, `check_render_status()` (HTTP wrappers for render-service)
+- LangGraph ReAct agent (`packages/agent/src/agent.py`) with system prompt from `copywriter.md`, three tools, and MemorySaver checkpointer
+- FastAPI application (`packages/agent/src/api.py`) with 3 endpoints: `POST /api/chat` (new message or resume thread), `POST /api/chat/resume` (resume after checkpoint), `GET /api/chat/:threadId` (message history)
+- Agent API tests (`packages/agent/tests/test_api.py`) with skip marker for LLM-dependent tests and lazy agent initialization to avoid import failures
 
 ### Fixed
 

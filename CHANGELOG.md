@@ -14,6 +14,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - LangGraph ReAct agent (`packages/agent/src/agent.py`) with system prompt from `copywriter.md`, three tools, and MemorySaver checkpointer
 - FastAPI application (`packages/agent/src/api.py`) with 3 endpoints: `POST /api/chat` (new message or resume thread), `POST /api/chat/resume` (resume after checkpoint), `GET /api/chat/:threadId` (message history)
 - Agent API tests (`packages/agent/tests/test_api.py`) with skip marker for LLM-dependent tests and lazy agent initialization to avoid import failures
+- React frontend (`packages/web/`) with Vite, TypeScript, and React 19 — chat interface with escaleta checkpoint cards, approve/request-changes workflow, and API client for agent endpoints
 
 ### Fixed
 

@@ -9,8 +9,9 @@ const app = express()
 app.use(cors())
 app.use(express.json({ limit: "10mb" }))
 
-const ROOT_DIR = path.resolve(__dirname, "../../..")
-const JOBS_DIR = path.resolve(__dirname, "../jobs")
+// Resolve project root relative to this file (packages/render-service/src/server.ts -> root)
+const ROOT_DIR = process.env.ROOT_DIR || path.resolve(__dirname, "../../..")
+const JOBS_DIR = path.resolve(ROOT_DIR, "packages/render-service/jobs")
 
 interface RenderJob {
   status: "validating" | "rendering" | "done" | "error"
@@ -40,10 +41,12 @@ app.post("/api/validate", (req, res) => {
 
   child.on("close", (code) => {
     try {
-      const result = JSON.parse(stdout)
+      // Extract JSON from stdout — npx on Windows may prepend extra output
+      const jsonMatch = stdout.match(/(\{[\s\S]*\})\s*$/)
+      const result = JSON.parse(jsonMatch ? jsonMatch[1] : stdout)
       res.status(code === 0 ? 200 : 400).json(result)
     } catch {
-      res.status(500).json({ error: "Validation script error", details: stderr })
+      res.status(500).json({ error: "Validation script error", details: stderr || stdout })
     }
   })
 })
@@ -73,9 +76,10 @@ app.post("/api/render", (req, res) => {
       const job = jobs.get(jobId)!
       job.status = "error"
       try {
-        job.error = JSON.stringify(JSON.parse(valOut).errors)
+        const jsonMatch = valOut.match(/(\{[\s\S]*\})\s*$/)
+        job.error = JSON.stringify(JSON.parse(jsonMatch ? jsonMatch[1] : valOut).errors)
       } catch {
-        job.error = "Config validation failed"
+        job.error = valOut || "Config validation failed"
       }
       return
     }

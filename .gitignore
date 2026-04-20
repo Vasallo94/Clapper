@@ -20,3 +20,10 @@ public/voiceover/
 *-sa.json
 *.credentials.json
 service-account*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+*.egg-info/

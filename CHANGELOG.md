@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- `packages/agent/src/subagents/scene_creator/`: Scene Creator CompiledSubAgent with deterministic lint-register-validate graph loop using LangGraph StateGraph, plus `write_scene`/`read_scene` tools
 - `packages/agent/src/subagents/`: researcher, director, copywriter, sound_engineer SubAgent definitions with factory functions
 - Comprehensive subagent tests: `tests/test_subagents.py` validates all 4 subagent definitions, tool assignments, and interrupt usage
 - `packages/agent/src/tools/` package: split monolithic `tools.py` into `render.py`, `research.py`, `catalog.py`, `sound.py` modules

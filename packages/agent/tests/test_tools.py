@@ -11,16 +11,15 @@ class TestSubmitRender:
             return_value=httpx.Response(200, json={"jobId": "abc-123"})
         )
         result = submit_render(
-            {
-                "id": "test",
-                "title": "Test",
-                "description": "Test",
-                "fps": 30,
-                "width": 1280,
-                "height": 720,
-                "theme": "linea-directa",
-                "scenes": [{"type": "intro", "title": "Hello", "durationInSeconds": 3}],
-            }
+            id="test",
+            title="Test",
+            description="Test",
+            fps=30,
+            width=1280,
+            height=720,
+            theme="linea-directa",
+            composition="Tutorial",
+            scenes=[{"type": "intro", "title": "Hello", "durationInSeconds": 3}],
         )
         assert result == {"jobId": "abc-123"}
 
@@ -29,8 +28,8 @@ class TestSubmitRender:
         respx.post("http://localhost:3100/api/render").mock(
             return_value=httpx.Response(200, json={"jobId": "abc-123"})
         )
-        # Even invalid configs are accepted by the tool — validation happens in render-service
-        result = submit_render({"bad": True})
+        # Minimal call — validation happens in render-service
+        result = submit_render(id="bad", scenes=[])
         assert "jobId" in result
 
 

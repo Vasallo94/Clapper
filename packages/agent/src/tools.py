@@ -30,18 +30,48 @@ def present_escaleta(scenes: list[dict], brief: dict) -> dict:
     return decision
 
 
-def submit_render(config: dict) -> dict:
+def submit_render(
+    id: str,
+    scenes: list[dict],
+    title: str = "",
+    description: str = "",
+    fps: int = 30,
+    width: int = 1080,
+    height: int = 1920,
+    theme: str = "linea-directa",
+    composition: str = "ProductShort",
+    product: str = "",
+    headline: str = "",
+) -> dict:
     """Submit a complete video config for rendering.
 
     The render service validates the config against Zod schemas before starting.
     Returns a job ID for tracking, or error details if validation fails.
 
     Args:
-        config: Complete video config dict (id, title, fps, scenes, etc.).
+        id: Kebab-case video identifier.
+        scenes: List of scene dicts with type, durationInSeconds, and scene-specific fields.
+        title: Video title (required for tutorials).
+        description: One-line description (required for tutorials).
+        fps: Frames per second (always 30).
+        width: Video width in pixels.
+        height: Video height in pixels.
+        theme: Theme name (always "linea-directa" unless specified).
+        composition: "ProductShort" for vertical shorts, omit for tutorials.
+        product: Product name (ProductShort only).
+        headline: Marketing headline (ProductShort only).
 
     Returns:
         Dict with "jobId" on success, or error details on failure.
     """
+    config: dict = {"id": id, "fps": fps, "width": width, "height": height, "theme": theme, "scenes": scenes}
+    if composition == "ProductShort":
+        config["composition"] = composition
+        config["product"] = product
+        config["headline"] = headline
+    else:
+        config["title"] = title
+        config["description"] = description
     response = httpx.post(f"{RENDER_SERVICE_URL}/api/render", json=config, timeout=30.0)
     return response.json()
 

@@ -1,4 +1,5 @@
 import os
+import time
 
 import httpx
 from langgraph.types import interrupt
@@ -95,8 +96,6 @@ def check_render_status(job_id: str) -> dict:
         Dict with status (done/error/rendering), progress (0-100),
         and optionally output (file path) or error message.
     """
-    import time
-
     deadline = time.time() + 300  # 5 minute timeout
     while time.time() < deadline:
         response = httpx.get(f"{RENDER_SERVICE_URL}/api/render/{job_id}/status", timeout=10.0)

@@ -1,7 +1,7 @@
 import pytest
 import httpx
 import respx
-from src.tools import present_escaleta, submit_render, check_render_status
+from src.tools.render import present_escaleta, submit_render, check_render_status
 
 
 class TestSubmitRender:

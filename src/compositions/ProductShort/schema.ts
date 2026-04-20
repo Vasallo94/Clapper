@@ -1,11 +1,6 @@
 // src/compositions/ProductShort/schema.ts
 import { z } from "zod"
-import {
-  BriefSchema,
-  DirectionSceneFieldsSchema,
-  SoundDesignSchema,
-  VoiceoverConfigSchema,
-} from "../../utils/direction"
+import { BriefSchema, DirectionSceneFieldsSchema, SoundDesignSchema, VoiceoverConfigSchema } from "../../shared/schemas"
 
 const HeroSceneSchema = z
   .object({

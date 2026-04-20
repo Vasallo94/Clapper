@@ -1,11 +1,6 @@
 // src/compositions/ClaudeCodeTutorial/schema.ts
 import { z } from "zod"
-import {
-  BriefSchema,
-  DirectionSceneFieldsSchema,
-  SoundDesignSchema,
-  VoiceoverConfigSchema,
-} from "../../utils/direction"
+import { BriefSchema, DirectionSceneFieldsSchema, SoundDesignSchema, VoiceoverConfigSchema } from "../../shared/schemas"
 
 const PixelLogoSchema = z.object({
   enabled: z.boolean().default(true),

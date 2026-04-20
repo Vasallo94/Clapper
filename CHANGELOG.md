@@ -7,9 +7,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- `packages/agent/src/subagents/`: researcher, director, copywriter, sound_engineer SubAgent definitions with factory functions
+- Comprehensive subagent tests: `tests/test_subagents.py` validates all 4 subagent definitions, tool assignments, and interrupt usage
 - `packages/agent/src/tools/` package: split monolithic `tools.py` into `render.py`, `research.py`, `catalog.py`, `sound.py` modules
 - `packages/agent/src/orchestrator.py`: multi-agent orchestrator scaffold with researcher, copywriter, director, sound_engineer subagents
-- `packages/agent/src/subagents/` package placeholder for Tasks 6-8
 - Agent prompts: `orchestrator.md`, `researcher.md`, `director.md`, `sound_engineer.md`, `scene_creator.md`
 - Agent skills: `best_practices.md`, `brand_guidelines.md`, `scene_catalog.md`
 - New tools: `web_search`, `web_fetch`, `scrape_product` (research), `query_scene_catalog` (catalog), `present_sound_chart`, `list_audio_library`, `generate_audio` (sound)

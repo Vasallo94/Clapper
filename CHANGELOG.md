@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- `packages/agent/tests/test_orchestrator.py`: integration tests validating orchestrator wiring, prompt file existence, skills availability, and subagent factory return types
 - `packages/agent/src/subagents/scene_creator/`: Scene Creator CompiledSubAgent with deterministic lint-register-validate graph loop using LangGraph StateGraph, plus `write_scene`/`read_scene` tools
 - `packages/agent/src/subagents/`: researcher, director, copywriter, sound_engineer SubAgent definitions with factory functions
 - Comprehensive subagent tests: `tests/test_subagents.py` validates all 4 subagent definitions, tool assignments, and interrupt usage
@@ -18,6 +19,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- `packages/agent/src/orchestrator.py`: replaced inline subagent definitions with factory functions from `src/subagents/` — cleaner, tested independently, no duplicate code
 - Extracted `CompositionShell` component (`src/shared/CompositionShell.tsx`) and `precomputeScenes` function (`src/shared/useScenePrecomputation.ts`) — eliminates ~80 lines of duplicated precomputation + Series/Sequence/Audio rendering boilerplate from both compositions
 - `ClaudeCodeTutorial.tsx` reduced from 173 to 84 lines using `CompositionShell` with `renderScene`/`renderOverlay` callbacks
 - `ProductShort.tsx` reduced from 109 to 24 lines using `CompositionShell` with `musicLoop` flag

@@ -26,42 +26,25 @@ def create_model(name: str | None = None):
 
 def create_video_orchestrator():
     """Create the multi-agent video orchestrator."""
-    from .tools.catalog import query_scene_catalog
-    from .tools.render import present_escaleta
-    from .tools.research import scrape_product, web_fetch, web_search
-    from .tools.sound import generate_audio, list_audio_library, present_sound_chart
+    from .subagents import (
+        create_copywriter,
+        create_director,
+        create_researcher,
+        create_sound_engineer,
+    )
 
     model = create_model()
-    flash_model = create_model("gemini-3.1-flash")
     checkpointer = MemorySaver()
 
     subagents = [
-        {
-            "name": "researcher",
-            "description": "Searches the web for product info, documentation, and competitive data.",
-            "system_prompt": load_prompt("researcher"),
-            "tools": [web_search, web_fetch, scrape_product],
-            "model": flash_model,
-        },
-        {
-            "name": "copywriter",
-            "description": "Generates video escaleta and config.json with human approval checkpoint.",
-            "system_prompt": load_prompt("copywriter"),
-            "tools": [present_escaleta, query_scene_catalog],
-        },
-        {
-            "name": "director",
-            "description": "Polishes timing, narrative beats, and audio/visual synchronization.",
-            "system_prompt": load_prompt("director"),
-            "tools": [],
-        },
-        {
-            "name": "sound_engineer",
-            "description": "Designs music bed and SFX with human approval checkpoint.",
-            "system_prompt": load_prompt("sound_engineer"),
-            "tools": [present_sound_chart, generate_audio, list_audio_library],
-        },
+        create_researcher(),
+        create_copywriter(),
+        create_director(),
+        create_sound_engineer(),
     ]
+
+    # TODO: Add scene_creator when CompiledSubAgent integration is verified
+    # scene_creator = create_scene_creator()
 
     agent = create_deep_agent(
         model=model,

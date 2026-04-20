@@ -6,19 +6,22 @@ from langgraph.types import interrupt
 RENDER_SERVICE_URL = os.environ.get("RENDER_SERVICE_URL", "http://localhost:3100")
 
 
-def present_escaleta(scenes: list[dict], brief: dict) -> dict:
+def present_escaleta(scenes: list[dict], brief: dict) -> str:
     """Present a video escaleta (scene breakdown) to the user for approval.
 
     Call this after generating a scene list. Pauses execution and waits for the
-    user to approve, request changes, or reject. Returns the user's decision.
+    user to approve, request changes, or reject.
+
+    IMPORTANT: When the return value contains "approved": true, you MUST immediately
+    call submit_render with the approved scenes. Do NOT call present_escaleta again.
 
     Args:
         scenes: List of scene dicts matching the Remotion config schema.
         brief: Dict with keys: platform, audience, goal, promise, tone, cta, hookStrategy.
 
     Returns:
-        Dict with the user's decision, e.g. {"approved": True} or
-        {"approved": False, "feedback": "Make the intro shorter"}.
+        A string describing the user's decision. If approved, call submit_render next.
+        If not approved, revise the scenes based on feedback and call present_escaleta again.
     """
     decision = interrupt(
         {
@@ -27,7 +30,10 @@ def present_escaleta(scenes: list[dict], brief: dict) -> dict:
             "scenes": scenes,
         }
     )
-    return decision
+    if isinstance(decision, dict) and decision.get("approved"):
+        return "APPROVED — The user approved the escaleta. Now call submit_render immediately with the complete video config."
+    feedback = decision.get("feedback", "") if isinstance(decision, dict) else str(decision)
+    return f"CHANGES REQUESTED — The user wants changes: {feedback}. Revise the scenes and call present_escaleta again."
 
 
 def submit_render(

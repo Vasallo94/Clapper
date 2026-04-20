@@ -1,7 +1,7 @@
 // src/compositions/ClaudeCodeTutorial/scenes/custom/FlowDiagramScene.tsx
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
-import { useThemeTokens } from "../../themes"
+import { useThemeTokens } from "../../../../shared/themes"
 import type { Timing } from "../../../../utils/direction"
 import { getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
 

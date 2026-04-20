@@ -2,8 +2,8 @@
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import type { CalloutSceneProps } from "../schema"
-import { useThemeTokens } from "../themes"
-import { MascotWatermark } from "../components/MascotWatermark"
+import { useThemeTokens } from "../../../shared/themes"
+import { MascotWatermark } from "../../../shared/components/MascotWatermark"
 
 const ORIGIN: Record<"top" | "bottom" | "right", { x: number; y: number }> = {
   top: { x: 0, y: -30 },
@@ -17,16 +17,17 @@ const ALIGN_MAP: Record<"top" | "bottom" | "right", string> = {
   right: "center",
 }
 
-export const CalloutScene: React.FC<CalloutSceneProps> = ({
-  text,
-  position,
-  background,
-}) => {
+export const CalloutScene: React.FC<CalloutSceneProps> = ({ text, position, background }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
 
-  const enterSpring = spring({ frame, fps, config: { damping: 20, stiffness: 200 }, durationInFrames: Math.ceil(fps * 0.6) })
+  const enterSpring = spring({
+    frame,
+    fps,
+    config: { damping: 20, stiffness: 200 },
+    durationInFrames: Math.ceil(fps * 0.6),
+  })
   const origin = ORIGIN[position]
   const tx = interpolate(enterSpring, [0, 1], [origin.x, 0])
   const ty = interpolate(enterSpring, [0, 1], [origin.y, 0])

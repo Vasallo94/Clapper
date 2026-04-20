@@ -1,7 +1,7 @@
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import type { PricingSceneProps } from "../schema"
-import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
+import { useThemeTokens } from "../../../shared/themes"
 import { getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
 
 export const PricingScene: React.FC<PricingSceneProps> = ({ price, period, note, variant, timing }) => {

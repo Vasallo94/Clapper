@@ -1,8 +1,8 @@
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import type { BenefitsSceneProps } from "../schema"
-import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
-import { useSlideIn } from "../../ClaudeCodeTutorial/hooks/useSlideIn"
+import { useThemeTokens } from "../../../shared/themes"
+import { useSlideIn } from "../../../shared/hooks/useSlideIn"
 import { getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
 
 const STAGGER_FRAMES = 12

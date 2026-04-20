@@ -1,6 +1,6 @@
 import React from "react"
 import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion"
-import { PixelLogo } from "../ClaudeCodeTutorial/components/pixel-art/PixelLogo"
+import { PixelLogo } from "../../shared/components/pixel-art/PixelLogo"
 
 export const PixelLogoPreview: React.FC = () => {
   const frame = useCurrentFrame()

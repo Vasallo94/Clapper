@@ -1,9 +1,9 @@
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import type { CtaSceneProps } from "../schema"
-import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
-import { PhoneMascot } from "../../ClaudeCodeTutorial/components/PhoneMascot"
-import { useSlideIn } from "../../ClaudeCodeTutorial/hooks/useSlideIn"
+import { useThemeTokens } from "../../../shared/themes"
+import { PhoneMascot } from "../../../shared/components/PhoneMascot"
+import { useSlideIn } from "../../../shared/hooks/useSlideIn"
 import { getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
 
 const PULSE_COUNT = 3

@@ -2,9 +2,9 @@
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import type { IntroSceneProps } from "../schema"
-import { useThemeTokens } from "../themes"
-import { PhoneMascot } from "../components/PhoneMascot"
-import { PixelLogo } from "../components/pixel-art/PixelLogo"
+import { useThemeTokens } from "../../../shared/themes"
+import { PhoneMascot } from "../../../shared/components/PhoneMascot"
+import { PixelLogo } from "../../../shared/components/pixel-art/PixelLogo"
 import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
 
 export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle, pixelLogo, timing, beats }) => {

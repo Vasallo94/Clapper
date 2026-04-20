@@ -10,10 +10,7 @@ interface MascotWatermarkProps {
   darkBg?: boolean
 }
 
-export const MascotWatermark: React.FC<MascotWatermarkProps> = ({
-  animation = "idle",
-  darkBg = false,
-}) => {
+export const MascotWatermark: React.FC<MascotWatermarkProps> = ({ animation = "idle", darkBg = false }) => {
   const tokens = useThemeTokens()
 
   if (!tokens.mascot.show) return null
@@ -27,11 +24,7 @@ export const MascotWatermark: React.FC<MascotWatermarkProps> = ({
         opacity: tokens.mascot.cornerOpacity,
       }}
     >
-      <PhoneMascot
-        scale={tokens.mascot.cornerScale}
-        animation={animation}
-        darkBg={darkBg}
-      />
+      <PhoneMascot scale={tokens.mascot.cornerScale} animation={animation} darkBg={darkBg} />
     </div>
   )
 }

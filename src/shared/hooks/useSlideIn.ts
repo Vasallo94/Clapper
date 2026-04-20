@@ -18,12 +18,7 @@ export function useSlideIn(options: SlideInOptions = {}): SlideInResult {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
 
-  const {
-    distance = 30,
-    delay = 0,
-    durationInFrames = 20,
-    damping = 200,
-  } = options
+  const { distance = 30, delay = 0, durationInFrames = 20, damping = 200 } = options
 
   const delayedFrame = Math.max(0, frame - delay)
 

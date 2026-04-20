@@ -10,15 +10,14 @@ import {
   useVideoConfig,
 } from "remotion"
 import { TutorialConfig } from "./schema"
-import { ThemeContext } from "./ThemeContext"
-import { getTheme } from "./themes"
+import { ThemeContext, getTheme } from "../../shared/themes"
 import { IntroScene } from "./scenes/IntroScene"
 import { TerminalScene } from "./scenes/TerminalScene"
 import { CalloutScene } from "./scenes/CalloutScene"
 import { OutroScene } from "./scenes/OutroScene"
 import { CustomScene } from "./scenes/CustomScene"
-import { KaraokeSubtitles, type WordTimestamp } from "./components/KaraokeSubtitles"
-import { LogoWatermark } from "./components/LogoWatermark"
+import { KaraokeSubtitles, type WordTimestamp } from "../../shared/components/KaraokeSubtitles"
+import { LogoWatermark } from "../../shared/components/LogoWatermark"
 import {
   getMergedBeats,
   getMergedTiming,

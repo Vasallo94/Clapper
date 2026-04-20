@@ -1,7 +1,9 @@
 // src/compositions/ClaudeCodeTutorial/themes.ts
 import { loadFont } from "@remotion/google-fonts/JetBrainsMono"
 import { useTheme } from "./ThemeContext"
-import type { ThemeName } from "./schema"
+import type { ThemeName } from "../../compositions/ClaudeCodeTutorial/schema"
+
+export type { ThemeName }
 
 const { fontFamily: monoFont } = loadFont("normal", { weights: ["400", "700"] })
 

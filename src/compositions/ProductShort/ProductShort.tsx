@@ -1,7 +1,6 @@
 import React from "react"
 import { AbsoluteFill, Audio, Sequence, Series, staticFile, useVideoConfig } from "remotion"
-import { ThemeContext } from "../ClaudeCodeTutorial/ThemeContext"
-import { getTheme } from "../ClaudeCodeTutorial/themes"
+import { ThemeContext, getTheme } from "../../shared/themes"
 import { ProductShortConfig } from "./schema"
 import { BenefitsScene } from "./scenes/BenefitsScene"
 import { CtaScene } from "./scenes/CtaScene"

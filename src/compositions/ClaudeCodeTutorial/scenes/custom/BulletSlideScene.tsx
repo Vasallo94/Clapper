@@ -1,7 +1,7 @@
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
-import { useThemeTokens } from "../../themes"
-import { MascotWatermark } from "../../components/MascotWatermark"
+import { useThemeTokens } from "../../../../shared/themes"
+import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
 import {
   TerminalIcon,
   CloudIcon,

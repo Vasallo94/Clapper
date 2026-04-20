@@ -1,7 +1,7 @@
 import React from "react"
 import { AbsoluteFill, Img, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
-import { useThemeTokens } from "../../themes"
-import { MascotWatermark } from "../../components/MascotWatermark"
+import { useThemeTokens } from "../../../../shared/themes"
+import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
 import type { Beat, Timing } from "../../../../utils/direction"
 import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
 

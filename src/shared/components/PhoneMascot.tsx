@@ -11,11 +11,7 @@ interface PhoneMascotProps {
   darkBg?: boolean
 }
 
-export const PhoneMascot: React.FC<PhoneMascotProps> = ({
-  scale = 1,
-  animation = "none",
-  darkBg = false,
-}) => {
+export const PhoneMascot: React.FC<PhoneMascotProps> = ({ scale = 1, animation = "none", darkBg = false }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
 
@@ -28,14 +24,10 @@ export const PhoneMascot: React.FC<PhoneMascotProps> = ({
     ? spring({ frame, fps, config: { damping: 14, stiffness: 80 }, durationInFrames: entryDuration })
     : 1
   const entryX = isEntry ? interpolate(entryProgress, [0, 1], [-160, 0]) : 0
-  const entryOpacity = isEntry
-    ? interpolate(entryProgress, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-    : 1
+  const entryOpacity = isEntry ? interpolate(entryProgress, [0, 0.3], [0, 1], { extrapolateRight: "clamp" }) : 1
 
   // Entry wheels rotate during slide
-  const entryWheelRotation = isEntry
-    ? interpolate(entryProgress, [0, 1], [-360, 0])
-    : 0
+  const entryWheelRotation = isEntry ? interpolate(entryProgress, [0, 1], [-360, 0]) : 0
 
   // Phase 2: Handset lifts (after entry completes, ~1.2s to ~2.2s)
   const liftStart = entryDuration
@@ -54,22 +46,14 @@ export const PhoneMascot: React.FC<PhoneMascotProps> = ({
   const isIdle = animation === "idle" || isInIdlePhase
   const idleSource = animation === "idle" ? frame : idleFrame
   const idleCycle = isIdle ? (idleSource % (fps * 2)) / (fps * 2) : 0
-  const idleScale = isIdle
-    ? interpolate(Math.sin(idleCycle * Math.PI * 2), [-1, 1], [0.98, 1.02])
-    : 1
+  const idleScale = isIdle ? interpolate(Math.sin(idleCycle * Math.PI * 2), [-1, 1], [0.98, 1.02]) : 1
 
   // --- RING animation: handset vibrates + body shakes ---
   const isRing = animation === "ring"
-  const ringCycle = isRing ? (frame % 4) : 0
-  const ringShakeY = isRing
-    ? interpolate(ringCycle, [0, 1, 2, 3], [-2.5, 2.5, -2, 2])
-    : 0
-  const ringShakeX = isRing
-    ? interpolate(ringCycle, [0, 1, 2, 3], [1.5, -1.5, 1, -1])
-    : 0
-  const bodyShake = isRing
-    ? interpolate(ringCycle, [0, 1, 2, 3], [-0.5, 0.5, -0.3, 0.3])
-    : 0
+  const ringCycle = isRing ? frame % 4 : 0
+  const ringShakeY = isRing ? interpolate(ringCycle, [0, 1, 2, 3], [-2.5, 2.5, -2, 2]) : 0
+  const ringShakeX = isRing ? interpolate(ringCycle, [0, 1, 2, 3], [1.5, -1.5, 1, -1]) : 0
+  const bodyShake = isRing ? interpolate(ringCycle, [0, 1, 2, 3], [-0.5, 0.5, -0.3, 0.3]) : 0
 
   // --- DIAL animation: button flash sequence ---
   const isDial = animation === "dial"
@@ -83,16 +67,10 @@ export const PhoneMascot: React.FC<PhoneMascotProps> = ({
   const handsetX = ringShakeX
 
   // --- Root transform ---
-  const rootTransform = [
-    `translateX(${entryX}px)`,
-    `scale(${idleScale})`,
-    `translateX(${bodyShake}px)`,
-  ].join(" ")
+  const rootTransform = [`translateX(${entryX}px)`, `scale(${idleScale})`, `translateX(${bodyShake}px)`].join(" ")
 
   // --- Wheel rotation (entry or ring) ---
-  const wheelRotation = entryWheelRotation + (isRing
-    ? interpolate(ringCycle, [0, 1, 2, 3], [-3, 3, -2, 2])
-    : 0)
+  const wheelRotation = entryWheelRotation + (isRing ? interpolate(ringCycle, [0, 1, 2, 3], [-3, 3, -2, 2]) : 0)
 
   // Outline colors adapt to background
   const outline = darkBg ? "#FFFFFF" : "#1A1A1A"
@@ -103,9 +81,15 @@ export const PhoneMascot: React.FC<PhoneMascotProps> = ({
   const h = 200 * scale
 
   const buttons = [
-    { x: 66, y: 56 }, { x: 90, y: 56 }, { x: 114, y: 56 },
-    { x: 66, y: 74 }, { x: 90, y: 74 }, { x: 114, y: 74 },
-    { x: 66, y: 92 }, { x: 90, y: 92 }, { x: 114, y: 92 },
+    { x: 66, y: 56 },
+    { x: 90, y: 56 },
+    { x: 114, y: 56 },
+    { x: 66, y: 74 },
+    { x: 90, y: 74 },
+    { x: 114, y: 74 },
+    { x: 66, y: 92 },
+    { x: 90, y: 92 },
+    { x: 114, y: 92 },
   ]
 
   return (
@@ -119,10 +103,28 @@ export const PhoneMascot: React.FC<PhoneMascotProps> = ({
       }}
     >
       {/* Rear wheels */}
-      <rect x="16" y="112" width="22" height="30" rx="4" fill="#1A1A1A"
-        stroke={darkBg ? "#FFFFFF" : "none"} strokeWidth={darkBg ? 1 : 0} strokeOpacity={darkBg ? 0.2 : 0} />
-      <rect x="162" y="112" width="22" height="30" rx="4" fill="#1A1A1A"
-        stroke={darkBg ? "#FFFFFF" : "none"} strokeWidth={darkBg ? 1 : 0} strokeOpacity={darkBg ? 0.2 : 0} />
+      <rect
+        x="16"
+        y="112"
+        width="22"
+        height="30"
+        rx="4"
+        fill="#1A1A1A"
+        stroke={darkBg ? "#FFFFFF" : "none"}
+        strokeWidth={darkBg ? 1 : 0}
+        strokeOpacity={darkBg ? 0.2 : 0}
+      />
+      <rect
+        x="162"
+        y="112"
+        width="22"
+        height="30"
+        rx="4"
+        fill="#1A1A1A"
+        stroke={darkBg ? "#FFFFFF" : "none"}
+        strokeWidth={darkBg ? 1 : 0}
+        strokeOpacity={darkBg ? 0.2 : 0}
+      />
       <rect x="20" y="121" width="14" height="12" rx="2" fill="#666" />
       <rect x="166" y="121" width="14" height="12" rx="2" fill="#666" />
 
@@ -161,13 +163,40 @@ export const PhoneMascot: React.FC<PhoneMascotProps> = ({
       {/* Handset group (lifts on entry, vibrates on ring) */}
       <g transform={`translate(${handsetX}, ${handsetY})`}>
         {/* Earpieces */}
-        <rect x="38" y="14" width="36" height="26" rx="13" fill="#1A1A1A"
-          stroke={darkBg ? "#FFFFFF" : "none"} strokeWidth={darkBg ? 1 : 0} strokeOpacity={darkBg ? 0.3 : 0} />
-        <rect x="124" y="14" width="36" height="26" rx="13" fill="#1A1A1A"
-          stroke={darkBg ? "#FFFFFF" : "none"} strokeWidth={darkBg ? 1 : 0} strokeOpacity={darkBg ? 0.3 : 0} />
+        <rect
+          x="38"
+          y="14"
+          width="36"
+          height="26"
+          rx="13"
+          fill="#1A1A1A"
+          stroke={darkBg ? "#FFFFFF" : "none"}
+          strokeWidth={darkBg ? 1 : 0}
+          strokeOpacity={darkBg ? 0.3 : 0}
+        />
+        <rect
+          x="124"
+          y="14"
+          width="36"
+          height="26"
+          rx="13"
+          fill="#1A1A1A"
+          stroke={darkBg ? "#FFFFFF" : "none"}
+          strokeWidth={darkBg ? 1 : 0}
+          strokeOpacity={darkBg ? 0.3 : 0}
+        />
         {/* Bar */}
-        <rect x="66" y="14" width="66" height="14" rx="4" fill="#1A1A1A"
-          stroke={darkBg ? "#FFFFFF" : "none"} strokeWidth={darkBg ? 1 : 0} strokeOpacity={darkBg ? 0.3 : 0} />
+        <rect
+          x="66"
+          y="14"
+          width="66"
+          height="14"
+          rx="4"
+          fill="#1A1A1A"
+          stroke={darkBg ? "#FFFFFF" : "none"}
+          strokeWidth={darkBg ? 1 : 0}
+          strokeOpacity={darkBg ? 0.3 : 0}
+        />
       </g>
 
       {/* Cable coil (stretches when handset lifts) */}
@@ -191,13 +220,31 @@ export const PhoneMascot: React.FC<PhoneMascotProps> = ({
 
       {/* Front wheels */}
       <g transform={`rotate(${wheelRotation}, 24, 136)`}>
-        <rect x="10" y="118" width="28" height="36" rx="6" fill="#1A1A1A"
-          stroke={darkBg ? "#FFFFFF" : "none"} strokeWidth={darkBg ? 1 : 0} strokeOpacity={darkBg ? 0.2 : 0} />
+        <rect
+          x="10"
+          y="118"
+          width="28"
+          height="36"
+          rx="6"
+          fill="#1A1A1A"
+          stroke={darkBg ? "#FFFFFF" : "none"}
+          strokeWidth={darkBg ? 1 : 0}
+          strokeOpacity={darkBg ? 0.2 : 0}
+        />
         <rect x="16" y="128" width="16" height="16" rx="3" fill="#666" />
       </g>
       <g transform={`rotate(${wheelRotation}, 176, 136)`}>
-        <rect x="162" y="118" width="28" height="36" rx="6" fill="#1A1A1A"
-          stroke={darkBg ? "#FFFFFF" : "none"} strokeWidth={darkBg ? 1 : 0} strokeOpacity={darkBg ? 0.2 : 0} />
+        <rect
+          x="162"
+          y="118"
+          width="28"
+          height="36"
+          rx="6"
+          fill="#1A1A1A"
+          stroke={darkBg ? "#FFFFFF" : "none"}
+          strokeWidth={darkBg ? 1 : 0}
+          strokeOpacity={darkBg ? 0.2 : 0}
+        />
         <rect x="168" y="128" width="16" height="16" rx="3" fill="#666" />
       </g>
 

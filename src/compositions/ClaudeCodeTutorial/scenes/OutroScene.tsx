@@ -2,9 +2,9 @@
 import React from "react"
 import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion"
 import type { OutroSceneProps } from "../schema"
-import { useThemeTokens } from "../themes"
-import { MascotWatermark } from "../components/MascotWatermark"
-import { useSlideIn } from "../hooks/useSlideIn"
+import { useThemeTokens } from "../../../shared/themes"
+import { MascotWatermark } from "../../../shared/components/MascotWatermark"
+import { useSlideIn } from "../../../shared/hooks/useSlideIn"
 import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
 
 export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets, timing, beats }) => {

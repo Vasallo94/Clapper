@@ -1,7 +1,7 @@
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
-import { useThemeTokens } from "../../themes"
-import { MascotWatermark } from "../../components/MascotWatermark"
+import { useThemeTokens } from "../../../../shared/themes"
+import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
 import type { Beat, Timing } from "../../../../utils/direction"
 import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
 
@@ -77,21 +77,22 @@ function tokenizeLine(line: string, language: string): Token[] {
 }
 
 function getTokenColor(type: TokenType, tokens: ReturnType<typeof useThemeTokens>): string {
+  // All colors must work on dark terminal.bg — never use page-level foreground tokens here
   switch (type) {
     case "key":
-      return tokens.secondary
+      return tokens.terminal.claude
     case "value":
-      return tokens.foreground
+      return tokens.terminal.output
     case "comment":
-      return tokens.foregroundLow
+      return tokens.terminal.labelColor
     case "string":
-      return tokens.primary
+      return tokens.terminal.command
     case "punctuation":
-      return tokens.foregroundMid
+      return tokens.terminal.costColor
     case "heading":
-      return tokens.primary
+      return tokens.terminal.command
     default:
-      return tokens.foreground
+      return tokens.terminal.output
   }
 }
 
@@ -106,7 +107,7 @@ export const CodeBlockScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const localFrame = Math.max(0, frame - motionStartFrame)
 
   const lines = code.split("\n")
-  const revealDuration = Math.ceil(fps * 3)
+  const revealDuration = Math.ceil(fps * 1.5)
   const lineGap = revealDuration / Math.max(lines.length, 1)
 
   // Card entrance
@@ -205,8 +206,8 @@ export const CodeBlockScene: React.FC<Record<string, unknown>> = (rawProps) => {
             })
 
             const isHighlighted = highlightLines.includes(li + 1)
-            const highlightOpacity = isHighlighted
-              ? interpolate(localFrame, [lineRevealFrame + 10, lineRevealFrame + 20], [0, 0.15], {
+            const highlightProgress = isHighlighted
+              ? interpolate(localFrame, [lineRevealFrame + 10, lineRevealFrame + 20], [0, 1], {
                   extrapolateLeft: "clamp",
                   extrapolateRight: "clamp",
                 })
@@ -220,10 +221,9 @@ export const CodeBlockScene: React.FC<Record<string, unknown>> = (rawProps) => {
                 style={{
                   display: "flex",
                   alignItems: "baseline",
-                  padding: "1px 24px 1px 0",
+                  padding: "2px 24px 2px 0",
                   opacity: lineOpacity,
-                  background: isHighlighted ? `${tokens.primary}` : "transparent",
-                  backgroundColor: `rgba(${isHighlighted ? "255,255,255" : "0,0,0"},${highlightOpacity})`,
+                  background: isHighlighted ? `${tokens.primary}18` : "transparent",
                   position: "relative",
                 }}
               >
@@ -232,7 +232,7 @@ export const CodeBlockScene: React.FC<Record<string, unknown>> = (rawProps) => {
                   style={{
                     fontFamily: tokens.monoFontFamily,
                     fontSize: 14,
-                    color: tokens.terminal.costColor,
+                    color: tokens.terminal.labelColor,
                     width: 48,
                     textAlign: "right",
                     paddingRight: 16,
@@ -253,10 +253,7 @@ export const CodeBlockScene: React.FC<Record<string, unknown>> = (rawProps) => {
                       bottom: 0,
                       width: 3,
                       background: tokens.primary,
-                      opacity: interpolate(localFrame, [lineRevealFrame + 10, lineRevealFrame + 20], [0, 1], {
-                        extrapolateLeft: "clamp",
-                        extrapolateRight: "clamp",
-                      }),
+                      opacity: highlightProgress,
                     }}
                   />
                 )}

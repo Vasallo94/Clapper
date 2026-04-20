@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from langchain.agents import create_agent
+from deepagents import create_deep_agent
 from langgraph.checkpoint.memory import MemorySaver
 
 from .tools import check_render_status, present_escaleta, submit_render
@@ -14,11 +14,11 @@ def load_prompt(name: str) -> str:
 
 
 def create_video_agent():
-    """Create the LangGraph video generation agent."""
+    """Create the DeepAgents video generation agent."""
     model = os.environ.get("LLM_MODEL", "google_genai:gemini-2.5-pro")
     checkpointer = MemorySaver()
 
-    agent = create_agent(
+    agent = create_deep_agent(
         model=model,
         tools=[present_escaleta, submit_render, check_render_status],
         system_prompt=load_prompt("copywriter"),

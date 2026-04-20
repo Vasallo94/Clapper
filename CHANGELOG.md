@@ -5,6 +5,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+
+- Extracted `CompositionShell` component (`src/shared/CompositionShell.tsx`) and `precomputeScenes` function (`src/shared/useScenePrecomputation.ts`) — eliminates ~80 lines of duplicated precomputation + Series/Sequence/Audio rendering boilerplate from both compositions
+- `ClaudeCodeTutorial.tsx` reduced from 173 to 84 lines using `CompositionShell` with `renderScene`/`renderOverlay` callbacks
+- `ProductShort.tsx` reduced from 109 to 24 lines using `CompositionShell` with `musicLoop` flag
+
 ### Added
 
 - Monorepo directory scaffold: `packages/render-service/`, `packages/agent/`, `packages/web/` with placeholder `.gitkeep` files

@@ -47,9 +47,9 @@ def test_sound_engineer_definition():
     defn = create_sound_engineer()
     assert defn["name"] == "sound_engineer"
     tool_names = [t.__name__ for t in defn["tools"]]
-    assert "present_sound_chart" in tool_names
-    assert "generate_audio" in tool_names
     assert "list_audio_library" in tool_names
+    assert "copy_library_track" in tool_names
+    assert len(defn["tools"]) == 2
 
 
 def test_present_sound_chart_uses_interrupt():

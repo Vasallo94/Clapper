@@ -1,12 +1,12 @@
 from ..orchestrator import load_prompt
-from ..tools.sound import generate_audio, list_audio_library, present_sound_chart
+from ..tools.sound import copy_library_track, list_audio_library
 
 
 def create_sound_engineer() -> dict:
     """Create the sound engineer SubAgent definition."""
     return {
         "name": "sound_engineer",
-        "description": "Designs music bed and SFX with human approval checkpoint.",
+        "description": "Prepares music bed and SFX audio assets from library.",
         "system_prompt": load_prompt("sound_engineer"),
-        "tools": [present_sound_chart, generate_audio, list_audio_library],
+        "tools": [list_audio_library, copy_library_track],
     }

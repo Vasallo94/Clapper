@@ -1,20 +1,25 @@
 import type { ChatMessage } from "../types"
+import { theme } from "../theme"
 
 export function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user"
 
   return (
-    <div style={{ display: "flex", justifyContent: isUser ? "flex-end" : "flex-start", marginBottom: 12 }}>
+    <div
+      className="animate-slide-in"
+      style={{ display: "flex", justifyContent: isUser ? "flex-end" : "flex-start", marginBottom: 12 }}
+    >
       <div
         style={{
-          maxWidth: "75%",
+          maxWidth: "80%",
           padding: "10px 14px",
-          borderRadius: 12,
-          backgroundColor: isUser ? "#CC3333" : "#f0f0f0",
-          color: isUser ? "#fff" : "#1a1a1a",
+          borderRadius: isUser ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
+          backgroundColor: isUser ? theme.colors.accent.primary : theme.colors.bg.elevated,
+          color: isUser ? "#fff" : theme.colors.text.primary,
           fontSize: 14,
-          lineHeight: 1.5,
+          lineHeight: 1.6,
           whiteSpace: "pre-wrap",
+          border: isUser ? "none" : `1px solid ${theme.colors.border.default}`,
         }}
       >
         {message.content}

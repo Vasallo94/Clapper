@@ -1,14 +1,30 @@
-import React from "react"
+import { theme } from "../theme"
 
-interface Props {
-  progress: number
-}
-
-export const RenderProgress: React.FC<Props> = ({ progress }) => (
-  <div style={{ margin: "8px 0" }}>
-    <div style={{ fontSize: 13, color: "#555", marginBottom: 4 }}>Renderizando... {progress}%</div>
-    <div style={{ width: "100%", height: 8, backgroundColor: "#e0e0e0", borderRadius: 4, overflow: "hidden" }}>
-      <div style={{ width: `${progress}%`, height: "100%", backgroundColor: "#CC3333", borderRadius: 4 }} />
+export function RenderProgress({ progress }: { progress: number }) {
+  return (
+    <div className="animate-fade-in" style={{ margin: "12px 0" }}>
+      <div style={{ fontSize: 12, color: theme.colors.text.secondary, marginBottom: 6, fontFamily: theme.fonts.mono }}>
+        render: {progress}%
+      </div>
+      <div
+        style={{
+          width: "100%",
+          height: 4,
+          backgroundColor: theme.colors.border.default,
+          borderRadius: 2,
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            width: `${progress}%`,
+            height: "100%",
+            backgroundColor: theme.colors.accent.primary,
+            borderRadius: 2,
+            transition: "width 0.5s ease-in-out",
+          }}
+        />
+      </div>
     </div>
-  </div>
-)
+  )
+}

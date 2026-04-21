@@ -1,10 +1,12 @@
 export type MessageRole = "user" | "assistant"
+export type CheckpointType = "escaleta" | "sound_chart"
 
 export interface ChatMessage {
   id: string
   role: MessageRole
   content: string
-  checkpoint?: CheckpointData
+  checkpoint?: CheckpointData | SoundChartData
+  checkpointType?: CheckpointType
 }
 
 export interface CheckpointData {
@@ -24,30 +26,8 @@ export interface ScenePreview {
 export interface ChatResponse {
   type: "message" | "checkpoint"
   content?: string
-  data?: CheckpointData
-  thread_id: string
-}
-
-export type StreamEventType =
-  | "agent_status"
-  | "escaleta_checkpoint"
-  | "sound_chart_checkpoint"
-  | "render_progress"
-  | "scene_creator_step"
-  | "message"
-  | "done"
-  | "error"
-
-export interface StreamEvent {
-  type: StreamEventType
-  agent?: string
-  status?: string
   data?: CheckpointData | SoundChartData
-  progress?: number
-  step?: string
-  attempt?: number
-  message?: string
-  content?: string
+  thread_id: string
 }
 
 export interface SoundChartData {
@@ -67,4 +47,23 @@ export interface SoundChartData {
   }>
 }
 
-export type AgentStreamStatus = "idle" | "streaming" | "checkpoint" | "done" | "error"
+export type PipelineStageId =
+  | "idle"
+  | "orchestrator"
+  | "researcher"
+  | "copywriter"
+  | "escaleta_review"
+  | "director"
+  | "sound_engineer"
+  | "sound_review"
+  | "rendering"
+  | "done"
+  | "error"
+
+export interface PipelineEvent {
+  id: string
+  timestamp: Date
+  stage: PipelineStageId
+  message: string
+  type: "info" | "checkpoint" | "success" | "error"
+}

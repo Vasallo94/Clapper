@@ -7,12 +7,29 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
-- `packages/web/src/hooks/useAgentStream.ts`: EventSource hook for consuming SSE stream from agent API, tracks active agent, render progress, checkpoint states, and error conditions
-- `packages/web/src/components/SubagentBadge.tsx`: Visual indicator for active subagent with emoji labels (researcher, copywriter, scene_creator, director, sound_engineer)
-- `packages/web/src/components/SoundChartCard.tsx`: Approval UI for sound chart checkpoint showing music bed and SFX entries table
-- `packages/web/src/components/RenderProgress.tsx`: Progress bar for render status with percentage display
-- `packages/web/src/components/ErrorBanner.tsx`: Error message banner for stream connection errors
-- Stream event types in `packages/web/src/types.ts`: `StreamEvent`, `SoundChartData`, `AgentStreamStatus` for SSE type safety
+- Mission Control dark theme UI: 2-panel layout (sidebar with pipeline stepper + event log, main chat panel), DM Sans + JetBrains Mono fonts, CSS animations
+- `packages/web/src/components/AppLayout.tsx`, `Sidebar.tsx`, `PipelineStepper.tsx`, `EventLog.tsx`, `Header.tsx`, `InputBar.tsx`, `ChatThread.tsx`: new layout components
+- `packages/web/src/hooks/usePipelineTracker.ts`: pipeline state machine derived from POST responses (replaces SSE-based useAgentStream)
+- `packages/web/src/theme.ts`: centralized design tokens (colors, fonts, spacing)
+
+### Changed
+
+- `scripts/generate-sound-design.ts`: migrate from ElevenLabs to Google Lyria 3 for music bed and SFX generation, with ElevenLabs as optional fallback and local audio library support
+- `packages/web/src/components/SoundChartCard.tsx`: dark theme, `disabled` prop, feedback textarea pattern matching CheckpointCard
+- `packages/web/src/components/CheckpointCard.tsx`, `MessageBubble.tsx`, `SubagentBadge.tsx`, `RenderProgress.tsx`, `ErrorBanner.tsx`: dark theme styling
+- `packages/web/src/App.tsx`: replaced useAgentStream with usePipelineTracker, fixed checkpoint type discrimination (escaleta vs sound_chart), added sound chart approve/reject handlers
+- `packages/web/src/types.ts`: added `CheckpointType`, `PipelineStageId`, `PipelineEvent`; removed SSE-specific types
+
+### Removed
+
+- `packages/web/src/hooks/useAgentStream.ts`: replaced by usePipelineTracker (SSE endpoint incompatible with POST invoke)
+- `packages/web/src/components/ChatWindow.tsx`: replaced by ChatThread with SoundChartCard integration
+
+### Fixed
+
+- Blank screen after escaleta approval: frontend now distinguishes `sound_chart_checkpoint` from `escaleta_checkpoint` and renders the correct card
+- `SoundChartCard` was defined but never integrated into the chat view
+- `stream.connect()` was never called (architectural fix: removed SSE in favor of POST-derived pipeline tracking)
 
 - `packages/agent/tests/test_orchestrator.py`: integration tests validating orchestrator wiring, prompt file existence, skills availability, and subagent factory return types
 - `packages/agent/src/subagents/scene_creator/`: Scene Creator CompiledSubAgent with deterministic lint-register-validate graph loop using LangGraph StateGraph, plus `write_scene`/`read_scene` tools

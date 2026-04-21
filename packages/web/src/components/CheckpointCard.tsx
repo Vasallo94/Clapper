@@ -1,5 +1,6 @@
 import { useState } from "react"
 import type { CheckpointData } from "../types"
+import { theme } from "../theme"
 
 interface Props {
   data: CheckpointData
@@ -11,99 +12,143 @@ interface Props {
 export function CheckpointCard({ data, onApprove, onRequestChanges, disabled }: Props) {
   const [feedback, setFeedback] = useState("")
   const [showFeedback, setShowFeedback] = useState(false)
-
   const totalDuration = data.scenes.reduce((sum, s) => sum + (s.durationInSeconds || 0), 0)
 
   return (
     <div
+      className="animate-card-reveal"
       style={{
-        border: "2px solid #CC3333",
-        borderRadius: 12,
-        padding: 16,
+        border: `1px solid ${theme.colors.border.accent}`,
+        borderRadius: theme.radius.lg,
+        padding: theme.spacing.lg,
         margin: "12px 0",
-        backgroundColor: "#fff",
+        backgroundColor: theme.colors.bg.elevated,
       }}
     >
-      <h3 style={{ margin: "0 0 8px", fontSize: 16, color: "#CC3333" }}>Escaleta propuesta</h3>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+        <div style={{ width: 3, height: 18, backgroundColor: theme.colors.accent.primary, borderRadius: 2 }} />
+        <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: theme.colors.text.primary }}>
+          Escaleta propuesta
+        </h3>
+      </div>
 
       {data.brief && (
-        <div style={{ fontSize: 12, color: "#666", marginBottom: 12 }}>
-          <strong>Plataforma:</strong> {data.brief.platform} | <strong>Audiencia:</strong> {data.brief.audience} |{" "}
-          <strong>Tono:</strong> {data.brief.tone}
+        <div
+          style={{
+            fontSize: 12,
+            color: theme.colors.text.secondary,
+            marginBottom: 12,
+            padding: "8px 10px",
+            backgroundColor: theme.colors.bg.primary,
+            borderRadius: theme.radius.sm,
+            fontFamily: theme.fonts.mono,
+          }}
+        >
+          <span style={{ color: theme.colors.text.muted }}>plataforma:</span> {data.brief.platform}
+          {" | "}
+          <span style={{ color: theme.colors.text.muted }}>audiencia:</span> {data.brief.audience}
+          {" | "}
+          <span style={{ color: theme.colors.text.muted }}>tono:</span> {data.brief.tone}
         </div>
       )}
 
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, marginBottom: 12 }}>
         <thead>
-          <tr style={{ borderBottom: "1px solid #ddd", textAlign: "left" }}>
-            <th style={{ padding: "4px 8px" }}>#</th>
-            <th style={{ padding: "4px 8px" }}>Tipo</th>
-            <th style={{ padding: "4px 8px" }}>Contenido</th>
-            <th style={{ padding: "4px 8px" }}>Duracion</th>
+          <tr style={{ borderBottom: `1px solid ${theme.colors.border.default}` }}>
+            {["#", "Tipo", "Contenido", "Dur."].map((h, i) => (
+              <th
+                key={h}
+                style={{
+                  padding: "6px 8px",
+                  textAlign: i === 3 ? "right" : "left",
+                  color: theme.colors.text.muted,
+                  fontWeight: 500,
+                  fontSize: 11,
+                  textTransform: "uppercase" as const,
+                  letterSpacing: "0.05em",
+                }}
+              >
+                {h}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
           {data.scenes.map((scene, i) => (
-            <tr key={i} style={{ borderBottom: "1px solid #eee" }}>
-              <td style={{ padding: "4px 8px" }}>{i + 1}</td>
-              <td style={{ padding: "4px 8px" }}>{scene.type}</td>
-              <td style={{ padding: "4px 8px" }}>{scene.title || scene.text || "-"}</td>
-              <td style={{ padding: "4px 8px" }}>{scene.durationInSeconds}s</td>
+            <tr key={i} style={{ borderBottom: `1px solid ${theme.colors.border.subtle}` }}>
+              <td
+                style={{
+                  padding: "6px 8px",
+                  fontFamily: theme.fonts.mono,
+                  color: theme.colors.text.muted,
+                  fontSize: 12,
+                }}
+              >
+                {String(i + 1).padStart(2, "0")}
+              </td>
+              <td
+                style={{
+                  padding: "6px 8px",
+                  color: theme.colors.accent.primary,
+                  fontFamily: theme.fonts.mono,
+                  fontSize: 12,
+                }}
+              >
+                {scene.type}
+              </td>
+              <td style={{ padding: "6px 8px", color: theme.colors.text.primary }}>
+                {scene.title || scene.text || "-"}
+              </td>
+              <td
+                style={{
+                  padding: "6px 8px",
+                  textAlign: "right",
+                  fontFamily: theme.fonts.mono,
+                  color: theme.colors.text.secondary,
+                  fontSize: 12,
+                }}
+              >
+                {scene.durationInSeconds}s
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <div style={{ fontSize: 13, color: "#666", marginBottom: 12 }}>
-        <strong>Duracion total:</strong> {totalDuration}s
+      <div style={{ fontSize: 12, color: theme.colors.text.secondary, marginBottom: 14, fontFamily: theme.fonts.mono }}>
+        total: {totalDuration}s / {data.scenes.length} escenas
       </div>
 
       <div style={{ display: "flex", gap: 8 }}>
-        <button
-          onClick={onApprove}
-          disabled={disabled}
-          style={{
-            padding: "8px 16px",
-            backgroundColor: "#22c55e",
-            color: "#fff",
-            border: "none",
-            borderRadius: 6,
-            cursor: disabled ? "not-allowed" : "pointer",
-            fontSize: 13,
-          }}
-        >
+        <button onClick={onApprove} disabled={disabled} style={btnStyle(theme.colors.status.success, disabled)}>
           Aprobar
         </button>
         <button
           onClick={() => setShowFeedback(!showFeedback)}
           disabled={disabled}
-          style={{
-            padding: "8px 16px",
-            backgroundColor: "#f59e0b",
-            color: "#fff",
-            border: "none",
-            borderRadius: 6,
-            cursor: disabled ? "not-allowed" : "pointer",
-            fontSize: 13,
-          }}
+          style={btnStyle(theme.colors.status.warning, disabled)}
         >
           Pedir cambios
         </button>
       </div>
 
       {showFeedback && (
-        <div style={{ marginTop: 8 }}>
+        <div style={{ marginTop: 10 }}>
           <textarea
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
             placeholder="Describe los cambios que quieres..."
             style={{
               width: "100%",
-              padding: 8,
-              borderRadius: 6,
-              border: "1px solid #ddd",
+              padding: 10,
+              borderRadius: theme.radius.md,
+              border: `1px solid ${theme.colors.border.default}`,
+              backgroundColor: theme.colors.bg.primary,
+              color: theme.colors.text.primary,
               fontSize: 13,
               minHeight: 60,
+              resize: "vertical",
+              fontFamily: theme.fonts.sans,
             }}
           />
           <button
@@ -113,16 +158,7 @@ export function CheckpointCard({ data, onApprove, onRequestChanges, disabled }: 
               setShowFeedback(false)
             }}
             disabled={disabled || !feedback.trim()}
-            style={{
-              marginTop: 4,
-              padding: "6px 12px",
-              backgroundColor: "#CC3333",
-              color: "#fff",
-              border: "none",
-              borderRadius: 6,
-              cursor: disabled || !feedback.trim() ? "not-allowed" : "pointer",
-              fontSize: 13,
-            }}
+            style={{ ...btnStyle(theme.colors.accent.primary, disabled || !feedback.trim()), marginTop: 6 }}
           >
             Enviar feedback
           </button>
@@ -130,4 +166,19 @@ export function CheckpointCard({ data, onApprove, onRequestChanges, disabled }: 
       )}
     </div>
   )
+}
+
+function btnStyle(bg: string, disabled?: boolean): React.CSSProperties {
+  return {
+    padding: "7px 16px",
+    backgroundColor: bg,
+    color: "#fff",
+    border: "none",
+    borderRadius: 6,
+    cursor: disabled ? "not-allowed" : "pointer",
+    fontSize: 13,
+    fontWeight: 500,
+    opacity: disabled ? 0.5 : 1,
+    transition: "opacity 150ms",
+  }
 }

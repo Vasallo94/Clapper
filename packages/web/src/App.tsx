@@ -1,20 +1,58 @@
 import { useState } from "react"
-import type { ChatMessage } from "./types"
-import { sendMessage, resumeCheckpoint } from "./api"
-import { ChatWindow } from "./components/ChatWindow"
-import { useAgentStream } from "./hooks/useAgentStream"
+import type { ChatMessage, CheckpointData, CheckpointType, SoundChartData } from "./types"
+import { resumeCheckpoint, sendMessage } from "./api"
+import { usePipelineTracker } from "./hooks/usePipelineTracker"
+import { AppLayout } from "./components/AppLayout"
+import { Sidebar } from "./components/Sidebar"
+import { Header } from "./components/Header"
+import { ChatThread } from "./components/ChatThread"
+import { InputBar } from "./components/InputBar"
 
 export default function App() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
   const [threadId, setThreadId] = useState<string>()
   const [loading, setLoading] = useState(false)
-  const stream = useAgentStream(threadId ?? null)
+  const pipeline = usePipelineTracker()
 
-  const addMessage = (role: ChatMessage["role"], content: string, checkpoint?: ChatMessage["checkpoint"]): string => {
+  const addMessage = (
+    role: ChatMessage["role"],
+    content: string,
+    checkpoint?: CheckpointData | SoundChartData,
+    checkpointType?: CheckpointType,
+  ) => {
     const id = crypto.randomUUID()
-    setMessages((prev) => [...prev, { id, role, content, checkpoint }])
+    setMessages((prev) => [...prev, { id, role, content, checkpoint, checkpointType }])
     return id
+  }
+
+  const handleResponse = (res: Awaited<ReturnType<typeof sendMessage>>) => {
+    setThreadId(res.thread_id)
+    if (res.type === "checkpoint" && res.data) {
+      const isSoundChart = (res.data as SoundChartData).type === "sound_chart_checkpoint"
+      if (isSoundChart) {
+        pipeline.advance("sound_review", "Carta de sonido generada")
+        addMessage(
+          "assistant",
+          "He preparado una propuesta de carta de sonido:",
+          res.data as SoundChartData,
+          "sound_chart",
+        )
+      } else {
+        pipeline.advance("escaleta_review", "Escaleta generada")
+        addMessage("assistant", "He preparado una propuesta de escaleta:", res.data as CheckpointData, "escaleta")
+      }
+    } else {
+      const content = res.content?.trim() || "Proceso completado."
+      pipeline.advance("done", "Pipeline completado")
+      addMessage("assistant", content)
+    }
+  }
+
+  const handleError = (err: unknown) => {
+    const msg = err instanceof Error ? err.message : "Error desconocido"
+    pipeline.advance("error", msg)
+    addMessage("assistant", `Error: ${msg}`)
   }
 
   const handleSend = async () => {
@@ -22,19 +60,16 @@ export default function App() {
     if (!text || loading) return
     setInput("")
     addMessage("user", text)
+    pipeline.reset()
+    pipeline.advance("orchestrator", "Mensaje recibido: " + text.slice(0, 60))
+    pipeline.advance("researcher", "Investigando...")
     setLoading(true)
 
     try {
       const res = await sendMessage(text, threadId)
-      setThreadId(res.thread_id)
-
-      if (res.type === "checkpoint") {
-        addMessage("assistant", "He preparado una propuesta de escaleta:", res.data)
-      } else {
-        addMessage("assistant", res.content || "")
-      }
+      handleResponse(res)
     } catch (err) {
-      addMessage("assistant", `Error: ${err instanceof Error ? err.message : "Unknown error"}`)
+      handleError(err)
     } finally {
       setLoading(false)
     }
@@ -43,17 +78,14 @@ export default function App() {
   const handleApprove = async () => {
     if (!threadId || loading) return
     addMessage("user", "Aprobado")
+    pipeline.advance("director", "Escaleta aprobada. Director trabajando...")
     setLoading(true)
 
     try {
       const res = await resumeCheckpoint(threadId, { approved: true })
-      if (res.type === "checkpoint") {
-        addMessage("assistant", "Nuevo checkpoint:", res.data)
-      } else {
-        addMessage("assistant", res.content || "")
-      }
+      handleResponse(res)
     } catch (err) {
-      addMessage("assistant", `Error: ${err instanceof Error ? err.message : "Unknown error"}`)
+      handleError(err)
     } finally {
       setLoading(false)
     }
@@ -62,72 +94,69 @@ export default function App() {
   const handleRequestChanges = async (feedback: string) => {
     if (!threadId || loading) return
     addMessage("user", `Cambios solicitados: ${feedback}`)
+    pipeline.advance("copywriter", "Revisando escaleta con feedback...")
     setLoading(true)
 
     try {
       const res = await resumeCheckpoint(threadId, { approved: false, feedback })
-      if (res.type === "checkpoint") {
-        addMessage("assistant", "Escaleta revisada:", res.data)
-      } else {
-        addMessage("assistant", res.content || "")
-      }
+      handleResponse(res)
     } catch (err) {
-      addMessage("assistant", `Error: ${err instanceof Error ? err.message : "Unknown error"}`)
+      handleError(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSoundApprove = async () => {
+    if (!threadId || loading) return
+    addMessage("user", "Sonido aprobado")
+    pipeline.advance("rendering", "Generando audio y renderizando...")
+    setLoading(true)
+
+    try {
+      const res = await resumeCheckpoint(threadId, { approved: true })
+      handleResponse(res)
+    } catch (err) {
+      handleError(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSoundRequestChanges = async (feedback: string) => {
+    if (!threadId || loading) return
+    addMessage("user", `Ajustes de sonido: ${feedback}`)
+    pipeline.advance("sound_engineer", "Revisando carta de sonido...")
+    setLoading(true)
+
+    try {
+      const res = await resumeCheckpoint(threadId, { approved: false, feedback })
+      handleResponse(res)
+    } catch (err) {
+      handleError(err)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", maxWidth: 720, margin: "0 auto" }}>
-      <header
-        style={{
-          padding: "12px 16px",
-          borderBottom: "2px solid #CC3333",
-          fontSize: 18,
-          fontWeight: 600,
-          color: "#CC3333",
-        }}
-      >
-        Video Generator
-      </header>
-
-      <ChatWindow
-        messages={messages}
-        onApprove={handleApprove}
-        onRequestChanges={handleRequestChanges}
-        loading={loading}
-        activeAgent={stream.activeAgent}
-        renderProgress={stream.renderProgress}
-        streamStatus={stream.status}
-        streamError={stream.error}
-      />
-
-      <div style={{ padding: 12, borderTop: "1px solid #ddd", display: "flex", gap: 8 }}>
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder="Describe el video que necesitas..."
-          disabled={loading}
-          style={{ flex: 1, padding: "10px 14px", borderRadius: 8, border: "1px solid #ddd", fontSize: 14 }}
-        />
-        <button
-          onClick={handleSend}
-          disabled={loading || !input.trim()}
-          style={{
-            padding: "10px 20px",
-            backgroundColor: "#CC3333",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            cursor: loading || !input.trim() ? "not-allowed" : "pointer",
-            fontSize: 14,
-          }}
-        >
-          Enviar
-        </button>
-      </div>
-    </div>
+    <AppLayout
+      sidebar={<Sidebar currentStage={pipeline.state.currentStage} events={pipeline.state.events} />}
+      main={
+        <>
+          <Header />
+          <ChatThread
+            messages={messages}
+            onApprove={handleApprove}
+            onRequestChanges={handleRequestChanges}
+            onSoundApprove={handleSoundApprove}
+            onSoundRequestChanges={handleSoundRequestChanges}
+            loading={loading}
+            loadingLabel={pipeline.getLoadingLabel()}
+          />
+          <InputBar value={input} onChange={setInput} onSend={handleSend} disabled={loading} />
+        </>
+      }
+    />
   )
 }

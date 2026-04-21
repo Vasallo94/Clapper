@@ -1,34 +1,37 @@
-import React from "react"
+import { theme } from "../theme"
 
-const AGENT_LABELS: Record<string, { label: string; emoji: string }> = {
-  researcher: { label: "Investigando", emoji: "🔍" },
-  copywriter: { label: "Escribiendo", emoji: "✍️" },
-  scene_creator: { label: "Creando escena", emoji: "🎨" },
-  director: { label: "Dirigiendo", emoji: "🎬" },
-  sound_engineer: { label: "Diseñando sonido", emoji: "🎵" },
+const AGENT_LABELS: Record<string, string> = {
+  researcher: "Investigando",
+  copywriter: "Escribiendo guion",
+  scene_creator: "Creando escena",
+  director: "Dirigiendo",
+  sound_engineer: "Disenando sonido",
 }
 
-interface Props {
-  agentName: string
-}
+export function SubagentBadge({ agentName }: { agentName: string }) {
+  const label = AGENT_LABELS[agentName] ?? agentName
 
-export const SubagentBadge: React.FC<Props> = ({ agentName }) => {
-  const info = AGENT_LABELS[agentName] ?? { label: agentName, emoji: "⚙️" }
   return (
     <div
+      className="animate-fade-in"
       style={{
         display: "inline-flex",
         alignItems: "center",
-        gap: 6,
-        padding: "4px 12px",
-        borderRadius: 16,
-        backgroundColor: "#f0f0f0",
+        gap: 8,
+        padding: "6px 14px",
+        borderRadius: 20,
+        backgroundColor: theme.colors.accent.primaryMuted,
+        border: `1px solid ${theme.colors.accent.primary}`,
         fontSize: 13,
-        color: "#555",
+        color: theme.colors.accent.primary,
+        fontWeight: 500,
       }}
     >
-      <span>{info.emoji}</span>
-      <span>{info.label}...</span>
+      <span
+        className="animate-pulse"
+        style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: theme.colors.accent.primary }}
+      />
+      <span>{label}...</span>
     </div>
   )
 }

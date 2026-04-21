@@ -57,3 +57,20 @@ def test_present_sound_chart_uses_interrupt():
 
     source = inspect.getsource(present_sound_chart)
     assert "interrupt(" in source
+
+
+def test_audio_planner_definition():
+    from src.subagents.audio_planner import create_audio_planner
+
+    defn = create_audio_planner()
+    assert defn["name"] == "audio_planner"
+    tool_names = [t.__name__ for t in defn["tools"]]
+    assert "present_audio_chart" in tool_names
+    assert "list_audio_library" in tool_names
+    assert len(defn["tools"]) == 2
+
+
+def test_audio_planner_exported():
+    from src.subagents import create_audio_planner
+
+    assert callable(create_audio_planner)

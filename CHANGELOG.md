@@ -24,6 +24,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Agent skills: `best_practices.md`, `brand_guidelines.md`, `scene_catalog.md`
 - New tools: `web_search`, `web_fetch`, `scrape_product` (research), `query_scene_catalog` (catalog), `present_sound_chart`, `list_audio_library`, `generate_audio` (sound)
 
+### Fixed
+
+- `packages/agent/src/orchestrator.py`: fix Gemini 3.1 authentication — load Vertex AI service account credentials explicitly, correct model IDs to `gemini-3.1-pro-preview` / `gemini-3.1-flash-lite-preview`, and default location to `global` (preview models unavailable in regional endpoints)
+
 ### Changed
 
 - `packages/agent/src/orchestrator.py`: replaced inline subagent definitions with factory functions from `src/subagents/` — cleaner, tested independently, no duplicate code

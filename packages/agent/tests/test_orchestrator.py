@@ -5,7 +5,18 @@ def test_all_prompts_exist():
     """All prompt files must exist."""
     from pathlib import Path
     prompts_dir = Path(__file__).parent.parent / "prompts"
-    required = ["orchestrator.md", "copywriter.md", "researcher.md", "director.md", "sound_engineer.md", "scene_creator.md"]
+    required = [
+        "orchestrator.md",
+        "copywriter.md",
+        "researcher.md",
+        "director.md",
+        "sound_engineer.md",
+        "scene_creator.md",
+        "audio_planner.md",
+        "voice_generator.md",
+        "validator.md",
+        "reviewer.md",
+    ]
     for name in required:
         assert (prompts_dir / name).exists(), f"Missing prompt: {name}"
 

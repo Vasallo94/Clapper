@@ -93,3 +93,79 @@ class TestPresentDirection:
         )
         assert "CHANGES REQUESTED" in result
         assert "More pauses" in result
+
+
+class TestPresentAudioChart:
+    def test_present_audio_chart_uses_interrupt(self):
+        import inspect
+        from src.tools.sound import present_audio_chart
+
+        source = inspect.getsource(present_audio_chart)
+        assert "interrupt(" in source
+
+    def test_present_audio_chart_approved(self, monkeypatch):
+        import src.tools.sound as sound_mod
+        monkeypatch.setattr(sound_mod, "interrupt", lambda v: {"approved": True})
+        from src.tools.sound import present_audio_chart
+
+        result = present_audio_chart(
+            voiceover={"provider": "gemini", "voiceId": "Orus", "scenes": {}},
+            sound_design={"musicBed": {"libraryId": "lofi-tech"}, "sfx": []},
+        )
+        assert "APPROVED" in result
+
+    def test_present_audio_chart_feedback(self, monkeypatch):
+        import src.tools.sound as sound_mod
+        monkeypatch.setattr(sound_mod, "interrupt", lambda v: {"approved": False, "feedback": "Change voice"})
+        from src.tools.sound import present_audio_chart
+
+        result = present_audio_chart(
+            voiceover={"provider": "gemini", "voiceId": "Orus", "scenes": {}},
+            sound_design={"musicBed": {"libraryId": "lofi-tech"}, "sfx": []},
+        )
+        assert "CHANGES REQUESTED" in result
+        assert "Change voice" in result
+
+
+class TestCopyLibraryTrack:
+    def test_copy_music_bed(self, tmp_path, monkeypatch):
+        import src.tools.sound as sound_mod
+        monkeypatch.setattr(sound_mod, "PROJECT_ROOT", tmp_path)
+
+        library_dir = tmp_path / "public" / "audio" / "library"
+        library_dir.mkdir(parents=True)
+        (library_dir / "lofi-tech.mp3").write_bytes(b"fake-mp3-data")
+
+        from src.tools.sound import copy_library_track
+
+        result = copy_library_track("lofi-tech", "my-video", "music-bed")
+        assert "Copied" in result
+
+        dest = tmp_path / "public" / "audio" / "my-video" / "music-bed.mp3"
+        assert dest.exists()
+        assert dest.read_bytes() == b"fake-mp3-data"
+
+    def test_copy_sfx(self, tmp_path, monkeypatch):
+        import src.tools.sound as sound_mod
+        monkeypatch.setattr(sound_mod, "PROJECT_ROOT", tmp_path)
+
+        library_dir = tmp_path / "public" / "audio" / "library"
+        library_dir.mkdir(parents=True)
+        (library_dir / "sfx-swoosh.mp3").write_bytes(b"swoosh-data")
+
+        from src.tools.sound import copy_library_track
+
+        result = copy_library_track("sfx-swoosh", "my-video", "sfx-swoosh")
+        assert "Copied" in result
+
+    def test_copy_track_not_found(self, tmp_path, monkeypatch):
+        import src.tools.sound as sound_mod
+        monkeypatch.setattr(sound_mod, "PROJECT_ROOT", tmp_path)
+
+        library_dir = tmp_path / "public" / "audio" / "library"
+        library_dir.mkdir(parents=True)
+
+        from src.tools.sound import copy_library_track
+
+        result = copy_library_track("nonexistent", "my-video", "music-bed")
+        assert "not found" in result.lower()

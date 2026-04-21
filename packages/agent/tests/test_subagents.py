@@ -91,3 +91,35 @@ def test_voice_generator_exported():
     from src.subagents import create_voice_generator
 
     assert callable(create_voice_generator)
+
+
+def test_validator_definition():
+    from src.subagents.validator import create_validator
+
+    defn = create_validator()
+    assert defn["name"] == "validator"
+    tool_names = [t.__name__ for t in defn["tools"]]
+    assert "validate_config" in tool_names
+    assert len(defn["tools"]) == 1
+
+
+def test_reviewer_definition():
+    from src.subagents.reviewer import create_reviewer
+
+    defn = create_reviewer()
+    assert defn["name"] == "reviewer"
+    tool_names = [t.__name__ for t in defn["tools"]]
+    assert "review_render" in tool_names
+    assert len(defn["tools"]) == 1
+
+
+def test_validator_exported():
+    from src.subagents import create_validator
+
+    assert callable(create_validator)
+
+
+def test_reviewer_exported():
+    from src.subagents import create_reviewer
+
+    assert callable(create_reviewer)

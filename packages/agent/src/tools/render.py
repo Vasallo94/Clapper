@@ -94,7 +94,7 @@ def submit_render(
     Returns:
         Dict with "jobId" on success, or error details on failure.
     """
-    config: dict = {"id": id, "fps": fps, "width": width, "height": height, "theme": theme, "scenes": scenes}
+    config: dict = {"id": id, "fps": fps, "width": width, "height": height, "theme": theme, "scenes": scenes, "_skipAudioGeneration": True}
     if composition == "ProductShort":
         config["composition"] = composition
         config["product"] = product

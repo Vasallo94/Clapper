@@ -1,3 +1,4 @@
+import json
 import pytest
 import httpx
 import respx
@@ -31,6 +32,15 @@ class TestSubmitRender:
         # Minimal call — validation happens in render-service
         result = submit_render(id="bad", scenes=[])
         assert "jobId" in result
+
+    @respx.mock
+    def test_submit_render_includes_skip_audio_flag(self):
+        route = respx.post("http://localhost:3100/api/render").mock(
+            return_value=httpx.Response(200, json={"jobId": "abc-123"})
+        )
+        submit_render(id="test", scenes=[{"type": "intro", "durationInSeconds": 3}])
+        request_body = json.loads(route.calls[0].request.content)
+        assert request_body["_skipAudioGeneration"] is True
 
 
 class TestCheckRenderStatus:

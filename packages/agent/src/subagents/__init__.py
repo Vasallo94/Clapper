@@ -4,3 +4,4 @@ from .director import create_director
 from .researcher import create_researcher
 from .scene_creator import create_scene_creator
 from .sound_engineer import create_sound_engineer
+from .voice_generator import create_voice_generator

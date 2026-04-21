@@ -74,3 +74,19 @@ def test_audio_planner_exported():
     from src.subagents import create_audio_planner
 
     assert callable(create_audio_planner)
+
+
+def test_voice_generator_definition():
+    from src.subagents.voice_generator import create_voice_generator
+
+    defn = create_voice_generator()
+    assert defn["name"] == "voice_generator"
+    tool_names = [t.__name__ for t in defn["tools"]]
+    assert "generate_voiceover" in tool_names
+    assert len(defn["tools"]) == 1
+
+
+def test_voice_generator_exported():
+    from src.subagents import create_voice_generator
+
+    assert callable(create_voice_generator)

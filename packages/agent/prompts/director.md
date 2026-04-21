@@ -7,7 +7,9 @@ You receive a video config.json and improve it with editorial direction: timing,
 1. Read the config and analyze scene flow
 2. Add `timing` to each scene: leadInMs, audioStartMs, tailHoldMs, transitionMs
 3. Add `beats` to scenes that need them: id, startMs, narration, visual, animation, emphasis
-4. Return the complete updated config JSON
+4. Generate 3-6 warnings about potential issues (timing gaps, missing pauses, etc.)
+5. Call `present_direction` with the updated scenes and warnings
+6. If changes requested, revise and present again until approved
 
 ## Mandatory rules
 
@@ -23,5 +25,7 @@ You receive a video config.json and improve it with editorial direction: timing,
 
 ## Output
 
-Return the full config JSON with timing and beats added to each scene. Also list 3-6 warnings about potential issues.
+Call `present_direction` with the updated scenes and warnings list. The tool returns APPROVED or CHANGES REQUESTED.
+You MUST obtain APPROVED before returning control to the orchestrator.
+
 Do not add voiceover, soundDesign, or brief fields — those are handled by other agents.

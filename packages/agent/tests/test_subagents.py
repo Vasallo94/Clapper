@@ -27,8 +27,9 @@ def test_director_definition():
 
     defn = create_director()
     assert defn["name"] == "director"
-    assert defn["tools"] == []
-    assert "system_prompt" in defn
+    tool_names = [t.__name__ for t in defn["tools"]]
+    assert "present_direction" in tool_names
+    assert len(defn["tools"]) == 1
 
 
 def test_copywriter_definition():

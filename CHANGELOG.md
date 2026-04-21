@@ -7,6 +7,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- `packages/agent/src/tools/voice.py`: `generate_voiceover` tool wrapping Gemini TTS script for voice generation
+- `packages/agent/tests/test_tools_voice.py`: TDD test suite for voiceover tool
 - Mission Control dark theme UI: 2-panel layout (sidebar with pipeline stepper + event log, main chat panel), DM Sans + JetBrains Mono fonts, CSS animations
 - `packages/web/src/components/AppLayout.tsx`, `Sidebar.tsx`, `PipelineStepper.tsx`, `EventLog.tsx`, `Header.tsx`, `InputBar.tsx`, `ChatThread.tsx`: new layout components
 - `packages/web/src/hooks/usePipelineTracker.ts`: pipeline state machine derived from POST responses (replaces SSE-based useAgentStream)

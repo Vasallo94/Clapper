@@ -7,8 +7,28 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
-- `packages/agent/src/tools/voice.py`: `generate_voiceover` tool wrapping Gemini TTS script for voice generation
-- `packages/agent/tests/test_tools_voice.py`: TDD test suite for voiceover tool
+- DeepAgent graph redesign: 3-subgraph architecture (creative, production, delivery) with 6 human checkpoints
+- `voice_generator` subagent for Gemini TTS voiceover generation
+- `audio_planner` subagent with unified audio chart checkpoint (CP3) — presents voice + music + SFX together
+- `validator` subagent for config coherence checks against disk assets (scene registry, voiceover MP3s, library tracks)
+- `reviewer` subagent for post-render MP4 verification via ffprobe (duration, audio, file size)
+- `present_direction` tool for director timing/beats checkpoint (CP2)
+- `present_audio_chart` tool for unified audio approval
+- `present_custom_scene` tool for scene creator code review (CP4)
+- `generate_voiceover` tool wrapping Gemini TTS script
+- `copy_library_track` tool for library-only sound design
+- `validate_config` tool for pre-render asset verification
+- `review_render` tool for post-render ffprobe inspection
+- `--skip-audio-generation` flag in render script for agent pipeline
+
+### Changed
+
+- Orchestrator reorganized from 4-agent flat pipeline to 3 subgraphs with 8 subagents
+- Director now has human checkpoint (CP2) for timing/beats approval
+- Sound engineer operates in library-only mode (API generation disabled, uses `copy_library_track`)
+- Scene creator includes `present_custom_scene` for human review of generated React components
+- `submit_render` passes `_skipAudioGeneration` flag to render service
+- Pipeline has 6 human checkpoints: escaleta (CP1), direction (CP2), audio chart (CP3), custom scenes (CP4), validator warnings (CP5), review (CP6)
 - Mission Control dark theme UI: 2-panel layout (sidebar with pipeline stepper + event log, main chat panel), DM Sans + JetBrains Mono fonts, CSS animations
 - `packages/web/src/components/AppLayout.tsx`, `Sidebar.tsx`, `PipelineStepper.tsx`, `EventLog.tsx`, `Header.tsx`, `InputBar.tsx`, `ChatThread.tsx`: new layout components
 - `packages/web/src/hooks/usePipelineTracker.ts`: pipeline state machine derived from POST responses (replaces SSE-based useAgentStream)

@@ -30,6 +30,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Blank screen after escaleta approval: frontend now distinguishes `sound_chart_checkpoint` from `escaleta_checkpoint` and renders the correct card
 - `SoundChartCard` was defined but never integrated into the chat view
 - `stream.connect()` was never called (architectural fix: removed SSE in favor of POST-derived pipeline tracking)
+- Orchestrator agent loop: agent re-dispatched researcher after render completion due to missing stop conditions in prompt. Added explicit STOP CONDITIONS section and "never re-dispatch" rule to `prompts/orchestrator.md`. Added `_pipeline_complete` flag in `check_render_status` docstring to reinforce termination.
 
 - `packages/agent/tests/test_orchestrator.py`: integration tests validating orchestrator wiring, prompt file existence, skills availability, and subagent factory return types
 - `packages/agent/src/subagents/scene_creator/`: Scene Creator CompiledSubAgent with deterministic lint-register-validate graph loop using LangGraph StateGraph, plus `write_scene`/`read_scene` tools

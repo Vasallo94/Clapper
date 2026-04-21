@@ -84,10 +84,10 @@ def submit_render(
 
 
 def check_render_status(job_id: str) -> dict:
-    """Check the status of a render job. Waits up to 5 minutes for completion.
+    """Check the status of a render job. Polls until terminal state (max 5 min).
 
-    This function polls the render service every 5 seconds until the job
-    reaches a terminal state (done or error) or the timeout expires.
+    After this returns, the pipeline is COMPLETE. Do not call any other tools
+    or dispatch any agents — just report the result to the user.
 
     Args:
         job_id: The job ID returned by submit_render.
@@ -96,11 +96,13 @@ def check_render_status(job_id: str) -> dict:
         Dict with status (done/error/rendering), progress (0-100),
         and optionally output (file path) or error message.
     """
-    deadline = time.time() + 300  # 5 minute timeout
+    deadline = time.time() + 300
     while time.time() < deadline:
         response = httpx.get(f"{RENDER_SERVICE_URL}/api/render/{job_id}/status", timeout=10.0)
         result = response.json()
         if result.get("status") in ("done", "error"):
+            result["_pipeline_complete"] = True
             return result
         time.sleep(5)
+    result["_pipeline_complete"] = True
     return result

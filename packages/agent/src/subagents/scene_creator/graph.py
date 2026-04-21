@@ -41,6 +41,7 @@ def create_scene_creator():
     DeepAgents CompiledSubAgent API.
     """
     from ...orchestrator import create_model, load_prompt
+    from ...tools.scene import present_custom_scene
     from .tools import read_scene, write_scene
 
     graph = create_scene_creator_graph()
@@ -50,6 +51,6 @@ def create_scene_creator():
         "description": "Creates new custom Remotion scene components. Validates via lint + bundle compilation.",
         "graph": graph,
         "system_prompt": load_prompt("scene_creator"),
-        "tools": [write_scene, read_scene],
+        "tools": [write_scene, read_scene, present_custom_scene],
         "model": create_model(),
     }

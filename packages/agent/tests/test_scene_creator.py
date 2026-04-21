@@ -57,4 +57,8 @@ def test_scene_creator_definition():
     assert defn["name"] == "scene_creator"
     assert "graph" in defn
     assert "tools" in defn
-    assert len(defn["tools"]) == 2
+    tool_names = [t.__name__ for t in defn["tools"]]
+    assert "write_scene" in tool_names
+    assert "read_scene" in tool_names
+    assert "present_custom_scene" in tool_names
+    assert len(defn["tools"]) == 3

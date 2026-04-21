@@ -37,6 +37,29 @@ def present_escaleta(scenes: list[dict], brief: dict) -> str:
     return f"CHANGES REQUESTED — The user wants changes: {feedback}. Revise the scenes and call present_escaleta again."
 
 
+def present_direction(scenes: list[dict], warnings: list[str]) -> str:
+    """Present the director's timing and beats for approval.
+
+    Shows the user the timing (leadInMs, audioStartMs, tailHoldMs, transitionMs)
+    and beats added to each scene by the director agent.
+
+    Args:
+        scenes: List of scene dicts with timing and beats fields added.
+        warnings: List of director warnings about potential issues.
+    """
+    decision = interrupt(
+        {
+            "type": "direction_checkpoint",
+            "scenes": scenes,
+            "warnings": warnings,
+        }
+    )
+    if isinstance(decision, dict) and decision.get("approved"):
+        return "APPROVED — The user approved the direction. Proceed to audio planning."
+    feedback = decision.get("feedback", "") if isinstance(decision, dict) else str(decision)
+    return f"CHANGES REQUESTED — {feedback}. Revise timing/beats and call present_direction again."
+
+
 def submit_render(
     id: str,
     scenes: list[dict],

@@ -61,3 +61,35 @@ class TestCheckRenderStatus:
         result = check_render_status("done-456")
         assert result["status"] == "done"
         assert result["output"] == "/path/to/output.mp4"
+
+
+class TestPresentDirection:
+    def test_present_direction_uses_interrupt(self):
+        import inspect
+        from src.tools.render import present_direction
+
+        source = inspect.getsource(present_direction)
+        assert "interrupt(" in source
+
+    def test_present_direction_returns_approved(self, monkeypatch):
+        import src.tools.render as render_mod
+        monkeypatch.setattr(render_mod, "interrupt", lambda v: {"approved": True})
+        from src.tools.render import present_direction
+
+        result = present_direction(
+            scenes=[{"type": "intro", "durationInSeconds": 3, "timing": {"leadInMs": 300}}],
+            warnings=["Intro has no leadInMs"],
+        )
+        assert "APPROVED" in result
+
+    def test_present_direction_returns_feedback(self, monkeypatch):
+        import src.tools.render as render_mod
+        monkeypatch.setattr(render_mod, "interrupt", lambda v: {"approved": False, "feedback": "More pauses"})
+        from src.tools.render import present_direction
+
+        result = present_direction(
+            scenes=[{"type": "intro", "durationInSeconds": 3}],
+            warnings=[],
+        )
+        assert "CHANGES REQUESTED" in result
+        assert "More pauses" in result

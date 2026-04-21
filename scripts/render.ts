@@ -19,6 +19,7 @@ if (!configPath) {
 async function main() {
   const config = JSON.parse(readFileSync(configPath, "utf-8"))
   const outputPath = path.join(path.dirname(configPath), "output.mp4")
+  const skipAudio = process.argv.includes("--skip-audio-generation")
   const directedScenes =
     config.scenes?.filter((scene: { timing?: Timing; beats?: Beat[] }) =>
       hasExplicitDirection(scene.timing, scene.beats),
@@ -28,7 +29,7 @@ async function main() {
     console.warn("⚠️  No clear director pass detected. Consider adding brief/timing/beats before final render.")
   }
 
-  if (config.voiceover?.enabled) {
+  if (config.voiceover?.enabled && !skipAudio) {
     console.log("🎙️  Generating voiceover...")
     execFileSync("npx", ["tsx", "scripts/generate-voiceover.ts", configPath], {
       stdio: "inherit",
@@ -36,7 +37,7 @@ async function main() {
     })
   }
 
-  if (config.soundDesign?.enabled) {
+  if (config.soundDesign?.enabled && !skipAudio) {
     console.log("🔊 Generating sound design...")
     execFileSync("npx", ["tsx", "scripts/generate-sound-design.ts", configPath], {
       stdio: "inherit",

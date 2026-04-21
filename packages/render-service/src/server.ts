@@ -88,7 +88,10 @@ app.post("/api/render", (req, res) => {
     const job = jobs.get(jobId)!
     job.status = "rendering"
 
-    const renderChild = spawn("npx", ["tsx", "scripts/render.ts", configPath], {
+    const renderArgs = ["tsx", "scripts/render.ts", configPath]
+    if (req.body._skipAudioGeneration) renderArgs.push("--skip-audio-generation")
+
+    const renderChild = spawn("npx", renderArgs, {
       cwd: ROOT_DIR,
       shell: true,
     })

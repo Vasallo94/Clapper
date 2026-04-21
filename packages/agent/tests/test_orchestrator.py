@@ -48,15 +48,29 @@ def test_create_model():
 def test_subagent_factories_all_return_dicts():
     """All subagent factory functions should return dicts with required keys."""
     from src.subagents import (
+        create_audio_planner,
         create_copywriter,
         create_director,
         create_researcher,
+        create_reviewer,
         create_sound_engineer,
+        create_validator,
+        create_voice_generator,
     )
 
-    for factory in [create_researcher, create_copywriter, create_director, create_sound_engineer]:
+    factories = [
+        create_researcher,
+        create_copywriter,
+        create_director,
+        create_audio_planner,
+        create_voice_generator,
+        create_sound_engineer,
+        create_validator,
+        create_reviewer,
+    ]
+    for factory in factories:
         defn = factory()
-        assert isinstance(defn, dict)
+        assert isinstance(defn, dict), f"{factory.__name__} did not return a dict"
         assert "name" in defn
         assert "description" in defn
         assert "system_prompt" in defn

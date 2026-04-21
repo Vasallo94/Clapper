@@ -48,26 +48,34 @@ def create_model(name: str | None = None):
 
 
 def create_video_orchestrator():
-    """Create the multi-agent video orchestrator."""
+    """Create the multi-agent video orchestrator with 3 subgraphs."""
     from .subagents import (
+        create_audio_planner,
         create_copywriter,
         create_director,
         create_researcher,
+        create_reviewer,
         create_sound_engineer,
+        create_validator,
+        create_voice_generator,
     )
 
     model = create_model()
     checkpointer = MemorySaver()
 
     subagents = [
+        # Creative subgraph
         create_researcher(),
         create_copywriter(),
         create_director(),
+        # Production subgraph
+        create_audio_planner(),
+        create_voice_generator(),
         create_sound_engineer(),
+        create_validator(),
+        # Delivery subgraph
+        create_reviewer(),
     ]
-
-    # TODO: Add scene_creator when CompiledSubAgent integration is verified
-    # scene_creator = create_scene_creator()
 
     agent = create_deep_agent(
         model=model,

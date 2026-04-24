@@ -1,4 +1,4 @@
-from langgraph.types import interrupt
+from ._checkpoint import checkpoint_interrupt
 
 
 def present_custom_scene(component_id: str, code: str) -> str:
@@ -11,14 +11,8 @@ def present_custom_scene(component_id: str, code: str) -> str:
         component_id: Kebab-case component identifier (e.g. 'data-table').
         code: Full TypeScript/React source code for the component.
     """
-    decision = interrupt(
-        {
-            "type": "custom_scene_checkpoint",
-            "component_id": component_id,
-            "code": code,
-        }
+    return checkpoint_interrupt(
+        {"type": "custom_scene_checkpoint", "component_id": component_id, "code": code},
+        "The user approved the custom scene. Proceed with registration and validation.",
+        "Revise the component code and call present_custom_scene again.",
     )
-    if isinstance(decision, dict) and decision.get("approved"):
-        return "APPROVED — The user approved the custom scene. Proceed with registration and validation."
-    feedback = decision.get("feedback", "") if isinstance(decision, dict) else str(decision)
-    return f"CHANGES REQUESTED — {feedback}. Revise the component code and call present_custom_scene again."

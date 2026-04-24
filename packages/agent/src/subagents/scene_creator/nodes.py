@@ -1,8 +1,8 @@
 import subprocess
-from pathlib import Path
 from typing import TypedDict
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
+from ...config import PROJECT_ROOT
+
 REGISTRY_PATH = PROJECT_ROOT / "src" / "compositions" / "ClaudeCodeTutorial" / "customSceneRegistry.ts"
 
 
@@ -14,6 +14,15 @@ class SceneCreatorState(TypedDict):
     lint_error: str
     bundle_error: str
     status: str  # "generating" | "linting" | "registering" | "validating" | "done" | "error"
+
+
+def init_node(state: SceneCreatorState) -> dict:
+    return {
+        "attempt": state.get("attempt", 0),
+        "max_attempts": state.get("max_attempts", 3),
+        "lint_error": state.get("lint_error", ""),
+        "bundle_error": state.get("bundle_error", ""),
+    }
 
 
 def lint_node(state: SceneCreatorState) -> dict:

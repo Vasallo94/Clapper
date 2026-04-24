@@ -1,6 +1,15 @@
-import { useState } from "react"
-import type { ChatMessage, CheckpointData, CheckpointType, SoundChartData } from "./types"
-import { resumeCheckpoint, sendMessage } from "./api"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import type {
+  AgentSummary,
+  ChatMessage,
+  ChatResponse,
+  CheckpointData,
+  CheckpointType,
+  DirectionData,
+  SoundChartData,
+} from "./types"
+import { createThread } from "./api"
+import { useAgentStream } from "./hooks/useAgentStream"
 import { usePipelineTracker } from "./hooks/usePipelineTracker"
 import { AppLayout } from "./components/AppLayout"
 import { Sidebar } from "./components/Sidebar"
@@ -12,25 +21,48 @@ export default function App() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
   const [threadId, setThreadId] = useState<string>()
-  const [loading, setLoading] = useState(false)
   const pipeline = usePipelineTracker()
 
-  const addMessage = (
-    role: ChatMessage["role"],
-    content: string,
-    checkpoint?: CheckpointData | SoundChartData,
-    checkpointType?: CheckpointType,
-  ) => {
-    const id = crypto.randomUUID()
-    setMessages((prev) => [...prev, { id, role, content, checkpoint, checkpointType }])
-    return id
-  }
+  const handleAgentComplete = useCallback((summary: AgentSummary) => {
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        role: "agent" as const,
+        content: summary.name,
+        agentSummary: summary,
+      },
+    ])
+  }, [])
 
-  const handleResponse = (res: Awaited<ReturnType<typeof sendMessage>>) => {
+  const stream = useAgentStream(pipeline.advanceFromStream, handleAgentComplete)
+
+  const addMessage = useCallback(
+    (
+      role: ChatMessage["role"],
+      content: string,
+      checkpoint?: ChatMessage["checkpoint"],
+      checkpointType?: CheckpointType,
+    ) => {
+      const id = crypto.randomUUID()
+      setMessages((prev) => [...prev, { id, role, content, checkpoint, checkpointType }])
+      return id
+    },
+    [],
+  )
+
+  const lastProcessedResult = useRef<ChatResponse | null>(null)
+  const lastProcessedError = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (!stream.result || stream.result === lastProcessedResult.current) return
+    lastProcessedResult.current = stream.result
+    const res = stream.result
     setThreadId(res.thread_id)
+
     if (res.type === "checkpoint" && res.data) {
-      const isSoundChart = (res.data as SoundChartData).type === "sound_chart_checkpoint"
-      if (isSoundChart) {
+      const cpType = (res.data as Record<string, unknown>).type as string
+      if (cpType === "sound_chart_checkpoint") {
         pipeline.advance("sound_review", "Carta de sonido generada")
         addMessage(
           "assistant",
@@ -38,106 +70,74 @@ export default function App() {
           res.data as SoundChartData,
           "sound_chart",
         )
-      } else {
+      } else if (cpType === "direction_checkpoint") {
+        pipeline.advance("director", "Direccion editorial lista")
+        addMessage(
+          "assistant",
+          "El director ha preparado el timing y beats narrativos:",
+          res.data as DirectionData,
+          "direction",
+        )
+      } else if (cpType === "escaleta_checkpoint") {
         pipeline.advance("escaleta_review", "Escaleta generada")
         addMessage("assistant", "He preparado una propuesta de escaleta:", res.data as CheckpointData, "escaleta")
+      } else {
+        pipeline.advance("escaleta_review", `Checkpoint: ${cpType}`)
+        addMessage("assistant", `Checkpoint recibido (${cpType}):`, res.data as Record<string, unknown>, "generic")
       }
-    } else {
+    } else if (res.type === "message") {
       const content = res.content?.trim() || "Proceso completado."
       pipeline.advance("done", "Pipeline completado")
       addMessage("assistant", content)
     }
-  }
+  }, [stream.result, addMessage, pipeline])
 
-  const handleError = (err: unknown) => {
-    const msg = err instanceof Error ? err.message : "Error desconocido"
-    pipeline.advance("error", msg)
-    addMessage("assistant", `Error: ${msg}`)
-  }
+  useEffect(() => {
+    const err = stream.streamState.error
+    if (!err || err === lastProcessedError.current) return
+    lastProcessedError.current = err
+    pipeline.advance("error", err)
+  }, [stream.streamState.error, pipeline])
 
   const handleSend = async () => {
     const text = input.trim()
-    if (!text || loading) return
+    if (!text || stream.isStreaming) return
     setInput("")
     addMessage("user", text)
+    stream.resetStream()
     pipeline.reset()
     pipeline.advance("orchestrator", "Mensaje recibido: " + text.slice(0, 60))
-    pipeline.advance("researcher", "Investigando...")
-    setLoading(true)
 
-    try {
-      const res = await sendMessage(text, threadId)
-      handleResponse(res)
-    } catch (err) {
-      handleError(err)
-    } finally {
-      setLoading(false)
-    }
+    const tid = threadId ?? (await createThread())
+    setThreadId(tid)
+    stream.startStream(tid, text)
   }
 
-  const handleApprove = async () => {
-    if (!threadId || loading) return
-    addMessage("user", "Aprobado")
-    pipeline.advance("director", "Escaleta aprobada. Director trabajando...")
-    setLoading(true)
+  const createCheckpointHandlers = useCallback(
+    (approvedMessage: string, feedbackPrefix: string) => ({
+      onApprove: () => {
+        if (!threadId || stream.isStreaming) return
+        addMessage("user", approvedMessage)
+        stream.resumeStream(threadId, { approved: true })
+      },
+      onRequestChanges: (feedback: string) => {
+        if (!threadId || stream.isStreaming) return
+        addMessage("user", `${feedbackPrefix}: ${feedback}`)
+        stream.resumeStream(threadId, { approved: false, feedback })
+      },
+    }),
+    [threadId, stream, addMessage],
+  )
 
-    try {
-      const res = await resumeCheckpoint(threadId, { approved: true })
-      handleResponse(res)
-    } catch (err) {
-      handleError(err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleRequestChanges = async (feedback: string) => {
-    if (!threadId || loading) return
-    addMessage("user", `Cambios solicitados: ${feedback}`)
-    pipeline.advance("copywriter", "Revisando escaleta con feedback...")
-    setLoading(true)
-
-    try {
-      const res = await resumeCheckpoint(threadId, { approved: false, feedback })
-      handleResponse(res)
-    } catch (err) {
-      handleError(err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleSoundApprove = async () => {
-    if (!threadId || loading) return
-    addMessage("user", "Sonido aprobado")
-    pipeline.advance("rendering", "Generando audio y renderizando...")
-    setLoading(true)
-
-    try {
-      const res = await resumeCheckpoint(threadId, { approved: true })
-      handleResponse(res)
-    } catch (err) {
-      handleError(err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleSoundRequestChanges = async (feedback: string) => {
-    if (!threadId || loading) return
-    addMessage("user", `Ajustes de sonido: ${feedback}`)
-    pipeline.advance("sound_engineer", "Revisando carta de sonido...")
-    setLoading(true)
-
-    try {
-      const res = await resumeCheckpoint(threadId, { approved: false, feedback })
-      handleResponse(res)
-    } catch (err) {
-      handleError(err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const checkpointHandlers = useMemo(
+    () => ({
+      escaleta: createCheckpointHandlers("Aprobado", "Cambios solicitados"),
+      direction: createCheckpointHandlers("Direccion aprobada", "Ajustes de direccion"),
+      sound_chart: createCheckpointHandlers("Sonido aprobado", "Ajustes de sonido"),
+      generic: createCheckpointHandlers("Aprobado", "Cambios"),
+    }),
+    [createCheckpointHandlers],
+  )
 
   return (
     <AppLayout
@@ -147,14 +147,14 @@ export default function App() {
           <Header />
           <ChatThread
             messages={messages}
-            onApprove={handleApprove}
-            onRequestChanges={handleRequestChanges}
-            onSoundApprove={handleSoundApprove}
-            onSoundRequestChanges={handleSoundRequestChanges}
-            loading={loading}
+            streamState={stream.streamState}
+            checkpointHandlers={checkpointHandlers}
+            loading={stream.isStreaming}
             loadingLabel={pipeline.getLoadingLabel()}
+            onRetry={stream.clearError}
+            currentStage={pipeline.state.currentStage}
           />
-          <InputBar value={input} onChange={setInput} onSend={handleSend} disabled={loading} />
+          <InputBar value={input} onChange={setInput} onSend={handleSend} disabled={stream.isStreaming} />
         </>
       }
     />

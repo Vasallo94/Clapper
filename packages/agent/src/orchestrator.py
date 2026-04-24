@@ -2,10 +2,13 @@ import os
 from pathlib import Path
 
 from deepagents import create_deep_agent
+from deepagents.backends import CompositeBackend, StateBackend, StoreBackend
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.memory import MemorySaver  # used when running standalone
 
 from .tools.render import check_render_status, submit_render
+
+from .config import PROJECT_ROOT
 
 PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
 SKILLS_DIR = Path(__file__).parent.parent / "skills"
@@ -47,8 +50,14 @@ def create_model(name: str | None = None):
     )
 
 
-def create_video_orchestrator():
-    """Create the multi-agent video orchestrator with 3 subgraphs."""
+def create_video_orchestrator(*, checkpointer=None):
+    """Create the multi-agent video orchestrator with 3 subgraphs.
+
+    Args:
+        checkpointer: Optional checkpointer for state persistence.
+            When served via `langgraph dev`, the platform provides its own
+            checkpointer so this should be omitted.
+    """
     from .subagents import (
         create_audio_planner,
         create_copywriter,
@@ -61,7 +70,15 @@ def create_video_orchestrator():
     )
 
     model = create_model()
-    checkpointer = MemorySaver()
+
+    backend = CompositeBackend(
+        default=StateBackend(),
+        routes={
+            "/memories/": StoreBackend(
+                namespace=lambda rt: ("video-orchestrator",),
+            ),
+        },
+    )
 
     subagents = [
         # Creative subgraph
@@ -77,13 +94,17 @@ def create_video_orchestrator():
         create_reviewer(),
     ]
 
-    agent = create_deep_agent(
-        model=model,
-        tools=[submit_render, check_render_status],
-        system_prompt=load_prompt("orchestrator"),
-        checkpointer=checkpointer,
-        subagents=subagents,
-        skills=[str(SKILLS_DIR)],
-    )
+    kwargs: dict = {
+        "model": model,
+        "tools": [submit_render, check_render_status],
+        "system_prompt": load_prompt("orchestrator"),
+        "subagents": subagents,
+        "skills": [str(SKILLS_DIR)],
+        "backend": backend,
+        "memory": ["/memories/AGENTS.md"],
+        "name": "video-orchestrator",
+    }
+    if checkpointer is not None:
+        kwargs["checkpointer"] = checkpointer
 
-    return agent
+    return create_deep_agent(**kwargs)

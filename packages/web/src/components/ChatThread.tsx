@@ -1,34 +1,40 @@
-import { useEffect, useRef } from "react"
-import type { ChatMessage, CheckpointData, SoundChartData } from "../types"
+import React, { useEffect, useRef } from "react"
+import type { ChatMessage, CheckpointData, DirectionData, PipelineStageId, SoundChartData } from "../types"
+import type { StreamState } from "../hooks/useAgentStream"
 import { CheckpointCard } from "./CheckpointCard"
+import { DirectionCard } from "./DirectionCard"
+import { GenericCheckpointCard } from "./GenericCheckpointCard"
 import { SoundChartCard } from "./SoundChartCard"
+import { StreamingBubble } from "./StreamingBubble"
+import { ErrorBanner } from "./ErrorBanner"
 import { MessageBubble } from "./MessageBubble"
+import { RenderProgress } from "./RenderProgress"
 import { theme } from "../theme"
 
 interface Props {
   messages: ChatMessage[]
-  onApprove: () => void
-  onRequestChanges: (feedback: string) => void
-  onSoundApprove: () => void
-  onSoundRequestChanges: (feedback: string) => void
+  streamState: StreamState
+  checkpointHandlers: Record<string, { onApprove: () => void; onRequestChanges: (feedback: string) => void }>
   loading: boolean
   loadingLabel: string
+  onRetry?: () => void
+  currentStage?: PipelineStageId
 }
 
 export function ChatThread({
   messages,
-  onApprove,
-  onRequestChanges,
-  onSoundApprove,
-  onSoundRequestChanges,
+  streamState,
+  checkpointHandlers,
   loading,
   loadingLabel,
+  onRetry,
+  currentStage,
 }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages.length, loading])
+  }, [messages.length, loading, streamState.activeAgent, streamState.tools.length])
 
   return (
     <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
@@ -62,36 +68,69 @@ export function ChatThread({
       )}
 
       {messages.map((msg) => {
-        if (msg.checkpointType === "sound_chart" && msg.checkpoint) {
+        if (msg.role === "agent" && msg.agentSummary) {
           return (
-            <div key={msg.id}>
-              <MessageBubble message={{ ...msg, checkpoint: undefined }} />
-              <SoundChartCard
-                data={msg.checkpoint as SoundChartData}
-                onApprove={onSoundApprove}
-                onRequestChanges={onSoundRequestChanges}
-                disabled={loading}
-              />
-            </div>
+            <StreamingBubble
+              key={msg.id}
+              agentName={msg.agentSummary.name}
+              tools={msg.agentSummary.tools}
+              status="completed"
+              durationMs={msg.agentSummary.durationMs}
+              defaultExpanded={false}
+            />
           )
         }
-        if (msg.checkpointType === "escaleta" && msg.checkpoint) {
-          return (
-            <div key={msg.id}>
-              <MessageBubble message={{ ...msg, checkpoint: undefined }} />
-              <CheckpointCard
-                data={msg.checkpoint as CheckpointData}
-                onApprove={onApprove}
-                onRequestChanges={onRequestChanges}
-                disabled={loading}
-              />
-            </div>
-          )
+        if (msg.checkpointType && msg.checkpoint && checkpointHandlers[msg.checkpointType]) {
+          const handlers = checkpointHandlers[msg.checkpointType]
+          const bubble = <MessageBubble message={{ ...msg, checkpoint: undefined }} />
+          const cardProps = {
+            onApprove: handlers.onApprove,
+            onRequestChanges: handlers.onRequestChanges,
+            disabled: loading,
+          }
+
+          let card: React.ReactNode = null
+          if (msg.checkpointType === "sound_chart")
+            card = <SoundChartCard data={msg.checkpoint as SoundChartData} {...cardProps} />
+          else if (msg.checkpointType === "direction")
+            card = <DirectionCard data={msg.checkpoint as DirectionData} {...cardProps} />
+          else if (msg.checkpointType === "escaleta")
+            card = <CheckpointCard data={msg.checkpoint as CheckpointData} {...cardProps} />
+          else if (msg.checkpointType === "generic")
+            card = <GenericCheckpointCard data={msg.checkpoint as Record<string, unknown>} {...cardProps} />
+
+          if (card) {
+            return (
+              <div key={msg.id}>
+                {bubble}
+                {card}
+              </div>
+            )
+          }
         }
         return <MessageBubble key={msg.id} message={msg} />
       })}
 
-      {loading && (
+      {/* Active agent bubble (only the currently running one) */}
+      {streamState.activeAgent && (
+        <div style={{ marginBottom: 8 }}>
+          <StreamingBubble
+            agentName={streamState.activeAgent}
+            tools={streamState.tools}
+            llmText={streamState.llmText}
+            status="active"
+            defaultExpanded={true}
+          />
+        </div>
+      )}
+
+      {/* Error banner */}
+      {streamState.error && <ErrorBanner message={streamState.error} onRetry={onRetry} />}
+
+      {currentStage === "rendering" && loading && !streamState.activeAgent && <RenderProgress progress={0} />}
+
+      {/* Loading indicator (only when streaming but no active agent detected yet) */}
+      {loading && !streamState.activeAgent && !streamState.error && currentStage !== "rendering" && (
         <div className="animate-slide-in" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
           <div
             style={{

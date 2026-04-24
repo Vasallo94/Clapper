@@ -13,6 +13,18 @@ const INITIAL_STATE: PipelineState = {
   startedAt: null,
 }
 
+const AGENT_TO_STAGE: Record<string, PipelineStageId> = {
+  orchestrator: "orchestrator",
+  researcher: "researcher",
+  copywriter: "copywriter",
+  director: "director",
+  audio_planner: "sound_engineer",
+  voice_generator: "sound_engineer",
+  sound_engineer: "sound_engineer",
+  validator: "rendering",
+  reviewer: "rendering",
+}
+
 export function usePipelineTracker() {
   const [state, setState] = useState<PipelineState>(INITIAL_STATE)
 
@@ -40,6 +52,16 @@ export function usePipelineTracker() {
 
   const reset = useCallback(() => setState(INITIAL_STATE), [])
 
+  const advanceFromStream = useCallback(
+    (agentName: string) => {
+      const stage = AGENT_TO_STAGE[agentName]
+      if (stage && stage !== state.currentStage) {
+        advance(stage, `${agentName} trabajando...`)
+      }
+    },
+    [state.currentStage, advance],
+  )
+
   const getLoadingLabel = useCallback((): string => {
     switch (state.currentStage) {
       case "orchestrator":
@@ -59,5 +81,5 @@ export function usePipelineTracker() {
     }
   }, [state.currentStage])
 
-  return { state, advance, addEvent, reset, getLoadingLabel }
+  return { state, advance, advanceFromStream, addEvent, reset, getLoadingLabel }
 }

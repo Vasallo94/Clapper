@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { AbsoluteFill, Audio, Sequence, Series, staticFile, useVideoConfig } from "remotion"
 import { ThemeContext, getTheme } from "./themes"
 import type { ThemeName } from "./themes"
@@ -41,7 +41,10 @@ export function CompositionShell<S extends CompositionShellScene>({
   const { durationInFrames: totalDurationInFrames } = useVideoConfig()
   const bg = getTheme(theme).background
 
-  const { sceneInfos, sceneAudioInfos } = precomputeScenes(config.scenes, config)
+  const { sceneInfos, sceneAudioInfos } = useMemo(
+    () => precomputeScenes(config.scenes, config),
+    [config.scenes, config.fps, config.voiceover],
+  )
 
   return (
     <ThemeContext.Provider value={theme}>

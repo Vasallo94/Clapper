@@ -45,15 +45,17 @@ class TestSubmitRender:
 
 class TestCheckRenderStatus:
     @respx.mock
-    def test_check_status_rendering(self):
+    def test_check_status_timeout(self, monkeypatch):
+        import src.tools.render as render_mod
+        monkeypatch.setattr(render_mod, "RENDER_TIMEOUT_SECONDS", 0)
         respx.get("http://localhost:3100/api/render/abc-123/status").mock(
             return_value=httpx.Response(
                 200, json={"jobId": "abc-123", "status": "rendering", "progress": 42}
             )
         )
         result = check_render_status("abc-123")
-        assert result["status"] == "rendering"
-        assert result["progress"] == 42
+        assert result["status"] == "timeout"
+        assert result["_pipeline_complete"] is True
 
     @respx.mock
     def test_check_status_done(self):
@@ -82,8 +84,8 @@ class TestPresentDirection:
         assert "interrupt(" in source
 
     def test_present_direction_returns_approved(self, monkeypatch):
-        import src.tools.render as render_mod
-        monkeypatch.setattr(render_mod, "interrupt", lambda v: {"approved": True})
+        import src.tools._checkpoint as cp_mod
+        monkeypatch.setattr(cp_mod, "interrupt", lambda v: {"approved": True})
         from src.tools.render import present_direction
 
         result = present_direction(
@@ -93,8 +95,8 @@ class TestPresentDirection:
         assert "APPROVED" in result
 
     def test_present_direction_returns_feedback(self, monkeypatch):
-        import src.tools.render as render_mod
-        monkeypatch.setattr(render_mod, "interrupt", lambda v: {"approved": False, "feedback": "More pauses"})
+        import src.tools._checkpoint as cp_mod
+        monkeypatch.setattr(cp_mod, "interrupt", lambda v: {"approved": False, "feedback": "More pauses"})
         from src.tools.render import present_direction
 
         result = present_direction(
@@ -114,8 +116,8 @@ class TestPresentAudioChart:
         assert "interrupt(" in source
 
     def test_present_audio_chart_approved(self, monkeypatch):
-        import src.tools.sound as sound_mod
-        monkeypatch.setattr(sound_mod, "interrupt", lambda v: {"approved": True})
+        import src.tools._checkpoint as cp_mod
+        monkeypatch.setattr(cp_mod, "interrupt", lambda v: {"approved": True})
         from src.tools.sound import present_audio_chart
 
         result = present_audio_chart(
@@ -125,8 +127,8 @@ class TestPresentAudioChart:
         assert "APPROVED" in result
 
     def test_present_audio_chart_feedback(self, monkeypatch):
-        import src.tools.sound as sound_mod
-        monkeypatch.setattr(sound_mod, "interrupt", lambda v: {"approved": False, "feedback": "Change voice"})
+        import src.tools._checkpoint as cp_mod
+        monkeypatch.setattr(cp_mod, "interrupt", lambda v: {"approved": False, "feedback": "Change voice"})
         from src.tools.sound import present_audio_chart
 
         result = present_audio_chart(

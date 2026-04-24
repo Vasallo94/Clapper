@@ -1,12 +1,12 @@
 import type { PipelineStageId } from "../types"
 import { theme } from "../theme"
 
-const STEPS: { id: PipelineStageId; label: string }[] = [
-  { id: "researcher", label: "Investigacion" },
-  { id: "copywriter", label: "Guion" },
-  { id: "director", label: "Direccion" },
-  { id: "sound_engineer", label: "Sonido" },
-  { id: "rendering", label: "Render" },
+const STEPS: { id: PipelineStageId; label: string; covers: PipelineStageId[] }[] = [
+  { id: "researcher", label: "Investigacion", covers: ["orchestrator", "researcher"] },
+  { id: "copywriter", label: "Guion", covers: ["copywriter", "escaleta_review"] },
+  { id: "director", label: "Direccion", covers: ["director"] },
+  { id: "sound_engineer", label: "Sonido", covers: ["sound_engineer", "sound_review"] },
+  { id: "rendering", label: "Render", covers: ["rendering"] },
 ]
 
 const STAGE_ORDER: PipelineStageId[] = [
@@ -23,24 +23,25 @@ const STAGE_ORDER: PipelineStageId[] = [
   "error",
 ]
 
-function getStepStatus(stepId: PipelineStageId, currentStage: PipelineStageId): "pending" | "active" | "completed" {
+function getStepStatus(
+  step: (typeof STEPS)[number],
+  currentStage: PipelineStageId,
+): "pending" | "active" | "completed" {
   const currentIdx = STAGE_ORDER.indexOf(currentStage)
-  const stepIdx = STAGE_ORDER.indexOf(stepId)
+  const stepIdx = STAGE_ORDER.indexOf(step.id)
+  if (currentStage === "idle") return "pending"
+  if (currentStage === "done") return "completed"
   if (currentStage === "error") return stepIdx < currentIdx ? "completed" : "pending"
+  if (step.covers.includes(currentStage)) return "active"
   if (stepIdx < currentIdx) return "completed"
-  if (stepId === currentStage) return "active"
-  // escaleta_review means copywriter is completed
-  if (stepId === "copywriter" && currentStage === "escaleta_review") return "completed"
-  // sound_review means sound_engineer is completed
-  if (stepId === "sound_engineer" && currentStage === "sound_review") return "completed"
   return "pending"
 }
 
 export function PipelineStepper({ currentStage }: { currentStage: PipelineStageId }) {
   return (
-    <div style={{ padding: "0 4px" }}>
+    <div role="list" aria-label="Etapas del pipeline" style={{ padding: "0 4px" }}>
       {STEPS.map((step, i) => {
-        const status = getStepStatus(step.id, currentStage)
+        const status = getStepStatus(step, currentStage)
         const isLast = i === STEPS.length - 1
         const dotColor =
           status === "completed"
@@ -51,7 +52,12 @@ export function PipelineStepper({ currentStage }: { currentStage: PipelineStageI
         const lineColor = status === "completed" ? theme.colors.status.success : theme.colors.border.default
 
         return (
-          <div key={step.id} style={{ display: "flex", gap: 12 }}>
+          <div
+            key={step.id}
+            role="listitem"
+            aria-current={status === "active" ? "step" : undefined}
+            style={{ display: "flex", gap: 12 }}
+          >
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 20 }}>
               <div
                 className={status === "active" ? "animate-pulse" : undefined}

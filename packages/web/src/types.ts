@@ -1,12 +1,28 @@
-export type MessageRole = "user" | "assistant"
-export type CheckpointType = "escaleta" | "sound_chart"
+export type MessageRole = "user" | "assistant" | "agent"
+export type CheckpointType = "escaleta" | "direction" | "sound_chart" | "generic"
 
 export interface ChatMessage {
   id: string
   role: MessageRole
   content: string
-  checkpoint?: CheckpointData | SoundChartData
+  checkpoint?: CheckpointData | SoundChartData | DirectionData | Record<string, unknown>
   checkpointType?: CheckpointType
+  agentSummary?: AgentSummary
+}
+
+export interface ToolEntry {
+  id: string
+  name: string
+  input?: string
+  status: "running" | "done" | "error"
+  startedAt: number
+}
+
+export interface AgentSummary {
+  name: string
+  tools: ToolEntry[]
+  durationMs: number
+  startedAt: number
 }
 
 export interface CheckpointData {
@@ -23,10 +39,16 @@ export interface ScenePreview {
   [key: string]: unknown
 }
 
+export interface DirectionData {
+  type: "direction_checkpoint"
+  scenes: Array<Record<string, unknown>>
+  warnings: string[]
+}
+
 export interface ChatResponse {
   type: "message" | "checkpoint"
   content?: string
-  data?: CheckpointData | SoundChartData
+  data?: CheckpointData | SoundChartData | DirectionData
   thread_id: string
 }
 

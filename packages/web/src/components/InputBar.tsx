@@ -21,7 +21,11 @@ export function InputBar({ value, onChange, onSend, disabled }: Props) {
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && onSend()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) onSend()
+          if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) onSend()
+        }}
+        aria-label="Mensaje para generar video"
         placeholder="Describe el video que necesitas..."
         disabled={disabled}
         style={{
@@ -42,6 +46,7 @@ export function InputBar({ value, onChange, onSend, disabled }: Props) {
       <button
         onClick={onSend}
         disabled={disabled || !value.trim()}
+        aria-label="Enviar mensaje"
         style={{
           padding: "10px 20px",
           backgroundColor: theme.colors.accent.primary,

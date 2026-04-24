@@ -1,6 +1,7 @@
 import { useState } from "react"
 import type { CheckpointData } from "../types"
 import { theme } from "../theme"
+import { btnStyle } from "./btnStyle"
 
 interface Props {
   data: CheckpointData
@@ -166,19 +167,4 @@ export function CheckpointCard({ data, onApprove, onRequestChanges, disabled }: 
       )}
     </div>
   )
-}
-
-function btnStyle(bg: string, disabled?: boolean): React.CSSProperties {
-  return {
-    padding: "7px 16px",
-    backgroundColor: bg,
-    color: "#fff",
-    border: "none",
-    borderRadius: 6,
-    cursor: disabled ? "not-allowed" : "pointer",
-    fontSize: 13,
-    fontWeight: 500,
-    opacity: disabled ? 0.5 : 1,
-    transition: "opacity 150ms",
-  }
 }

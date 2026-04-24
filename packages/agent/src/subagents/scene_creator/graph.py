@@ -2,6 +2,7 @@ from langgraph.graph import END, StateGraph
 
 from .nodes import (
     SceneCreatorState,
+    init_node,
     lint_node,
     register_node,
     should_retry,
@@ -13,11 +14,13 @@ def create_scene_creator_graph():
     """Create the Scene Creator validation graph."""
     builder = StateGraph(SceneCreatorState)
 
+    builder.add_node("init", init_node)
     builder.add_node("lint", lint_node)
     builder.add_node("register", register_node)
     builder.add_node("validate", validate_node)
 
-    builder.set_entry_point("lint")
+    builder.set_entry_point("init")
+    builder.add_edge("init", "lint")
     builder.add_edge("lint", "register")
     builder.add_edge("register", "validate")
     builder.add_conditional_edges(

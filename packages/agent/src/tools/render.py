@@ -1,10 +1,18 @@
+import logging
 import os
 import time
 
 import httpx
-from langgraph.types import interrupt
+
+from ._checkpoint import checkpoint_interrupt
+
+logger = logging.getLogger(__name__)
 
 RENDER_SERVICE_URL = os.environ.get("RENDER_SERVICE_URL", "http://localhost:3100")
+RENDER_TIMEOUT_SECONDS = int(os.environ.get("RENDER_TIMEOUT_SECONDS", "300"))
+
+if RENDER_SERVICE_URL == "http://localhost:3100":
+    logger.warning("RENDER_SERVICE_URL not set, using default localhost:3100")
 
 
 def present_escaleta(scenes: list[dict], brief: dict) -> str:
@@ -24,17 +32,11 @@ def present_escaleta(scenes: list[dict], brief: dict) -> str:
         A string describing the user's decision. If approved, call submit_render next.
         If not approved, revise the scenes based on feedback and call present_escaleta again.
     """
-    decision = interrupt(
-        {
-            "type": "escaleta_checkpoint",
-            "brief": brief,
-            "scenes": scenes,
-        }
+    return checkpoint_interrupt(
+        {"type": "escaleta_checkpoint", "brief": brief, "scenes": scenes},
+        "The user approved the escaleta. Now call submit_render immediately with the complete video config.",
+        "Revise the scenes and call present_escaleta again.",
     )
-    if isinstance(decision, dict) and decision.get("approved"):
-        return "APPROVED — The user approved the escaleta. Now call submit_render immediately with the complete video config."
-    feedback = decision.get("feedback", "") if isinstance(decision, dict) else str(decision)
-    return f"CHANGES REQUESTED — The user wants changes: {feedback}. Revise the scenes and call present_escaleta again."
 
 
 def present_direction(scenes: list[dict], warnings: list[str]) -> str:
@@ -47,17 +49,11 @@ def present_direction(scenes: list[dict], warnings: list[str]) -> str:
         scenes: List of scene dicts with timing and beats fields added.
         warnings: List of director warnings about potential issues.
     """
-    decision = interrupt(
-        {
-            "type": "direction_checkpoint",
-            "scenes": scenes,
-            "warnings": warnings,
-        }
+    return checkpoint_interrupt(
+        {"type": "direction_checkpoint", "scenes": scenes, "warnings": warnings},
+        "The user approved the direction. Proceed to audio planning.",
+        "Revise timing/beats and call present_direction again.",
     )
-    if isinstance(decision, dict) and decision.get("approved"):
-        return "APPROVED — The user approved the direction. Proceed to audio planning."
-    feedback = decision.get("feedback", "") if isinstance(decision, dict) else str(decision)
-    return f"CHANGES REQUESTED — {feedback}. Revise timing/beats and call present_direction again."
 
 
 def submit_render(
@@ -119,7 +115,8 @@ def check_render_status(job_id: str) -> dict:
         Dict with status (done/error/rendering), progress (0-100),
         and optionally output (file path) or error message.
     """
-    deadline = time.time() + 300
+    deadline = time.time() + RENDER_TIMEOUT_SECONDS
+    result = {"status": "timeout", "progress": 0, "_pipeline_complete": True}
     while time.time() < deadline:
         response = httpx.get(f"{RENDER_SERVICE_URL}/api/render/{job_id}/status", timeout=10.0)
         result = response.json()

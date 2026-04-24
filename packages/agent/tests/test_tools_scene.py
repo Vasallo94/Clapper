@@ -9,8 +9,8 @@ def test_present_custom_scene_uses_interrupt():
 
 
 def test_present_custom_scene_approved(monkeypatch):
-    import src.tools.scene as scene_mod
-    monkeypatch.setattr(scene_mod, "interrupt", lambda v: {"approved": True})
+    import src.tools._checkpoint as cp_mod
+    monkeypatch.setattr(cp_mod, "interrupt", lambda v: {"approved": True})
     from src.tools.scene import present_custom_scene
 
     result = present_custom_scene("my-widget", "export const MyWidgetScene = () => <div>test</div>")
@@ -18,8 +18,8 @@ def test_present_custom_scene_approved(monkeypatch):
 
 
 def test_present_custom_scene_feedback(monkeypatch):
-    import src.tools.scene as scene_mod
-    monkeypatch.setattr(scene_mod, "interrupt", lambda v: {"approved": False, "feedback": "Add animation"})
+    import src.tools._checkpoint as cp_mod
+    monkeypatch.setattr(cp_mod, "interrupt", lambda v: {"approved": False, "feedback": "Add animation"})
     from src.tools.scene import present_custom_scene
 
     result = present_custom_scene("my-widget", "export const MyWidgetScene = () => <div>test</div>")

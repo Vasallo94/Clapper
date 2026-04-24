@@ -53,13 +53,6 @@ def test_sound_engineer_definition():
     assert len(defn["tools"]) == 2
 
 
-def test_present_sound_chart_uses_interrupt():
-    from src.tools.sound import present_sound_chart
-
-    source = inspect.getsource(present_sound_chart)
-    assert "interrupt(" in source
-
-
 def test_audio_planner_definition():
     from src.subagents.audio_planner import create_audio_planner
 

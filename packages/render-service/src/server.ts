@@ -9,7 +9,6 @@ const app = express()
 app.use(cors())
 app.use(express.json({ limit: "10mb" }))
 
-// Resolve project root relative to this file (packages/render-service/src/server.ts -> root)
 const ROOT_DIR = process.env.ROOT_DIR || path.resolve(__dirname, "../../..")
 const JOBS_DIR = path.resolve(ROOT_DIR, "packages/render-service/jobs")
 
@@ -41,7 +40,7 @@ app.post("/api/validate", (req, res) => {
 
   child.on("close", (code) => {
     try {
-      // Extract JSON from stdout — npx on Windows may prepend extra output
+      // npx on Windows may prepend loader output before the JSON
       const jsonMatch = stdout.match(/(\{[\s\S]*\})\s*$/)
       const result = JSON.parse(jsonMatch ? jsonMatch[1] : stdout)
       res.status(code === 0 ? 200 : 400).json(result)
@@ -81,10 +80,10 @@ app.post("/api/render", (req, res) => {
       } catch {
         job.error = valOut || "Config validation failed"
       }
+      setTimeout(() => jobs.delete(jobId), 3_600_000)
       return
     }
 
-    // Validation passed — start render
     const job = jobs.get(jobId)!
     job.status = "rendering"
 
@@ -115,6 +114,7 @@ app.post("/api/render", (req, res) => {
         job.status = "error"
         job.error = `Render exited with code ${code}`
       }
+      setTimeout(() => jobs.delete(jobId), 3_600_000)
     })
   })
 

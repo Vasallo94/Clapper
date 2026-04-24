@@ -7,6 +7,40 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- Native Python TTS: `generate_voiceover` now calls Gemini TTS directly via `google-genai` SDK instead of subprocess to Node.js script
+- SSE reconnection with exponential backoff (3 retries) and 5-min stream timeout
+- Tool error tracking in streaming UI (tools starting with "Error" show red status)
+- ErrorBanner retry button wired to `stream.clearError`
+- Stable `id` field on ToolEntry for consistent React keys
+- Chronological agent bubbles interleaved with messages (no longer grouped at bottom)
+- RenderProgress and SubagentBadge components integrated (were dead code)
+- ARIA labels, semantic HTML, keyboard accessibility across all components
+- PipelineStepper `covers` mapping to align 5 high-level steps with internal stages
+- User-friendly error messages (ECONNREFUSED, timeout, auth errors mapped to Spanish)
+- Cmd/Ctrl+Enter keyboard shortcut for send
+- Shared `btnStyle` utility extracted from 4 checkpoint card components
+- Unified `checkpointHandlers` factory replacing 8 copy-paste handlers in App.tsx
+- Shared `checkpoint_interrupt` helper for 5 Python tool functions
+- Centralized `PROJECT_ROOT` in `packages/agent/src/config.py`
+- `useMemo` for `precomputeScenes` in CompositionShell (was recomputing every frame)
+- TTL eviction (1h) for render service jobs Map
+- `AGENT_TO_STAGE` moved to module scope in usePipelineTracker
+
+### Fixed
+
+- `scene_creator` KeyError: `max_attempts` and `attempt` now initialized via `init_node` entry point in the validation graph
+- `check_render_status` UnboundLocalError on timeout: `result` is now initialized with a safe default before the polling loop
+- Render polling timeout is now configurable via `RENDER_TIMEOUT_SECONDS` env var (default 300)
+- Startup warning logged when `RENDER_SERVICE_URL` uses the default localhost value
+- Hardcoded `#f59e0b` in DirectionCard replaced with theme tokens
+
+### Removed
+
+- Dead functions `present_sound_chart()` and `generate_audio()` from `tools/sound.py` and their exports/tests
+- Subprocess-based voiceover generation (replaced by native Python TTS)
+
+### Added
+
 - DeepAgent graph redesign: 3-subgraph architecture (creative, production, delivery) with 6 human checkpoints
 - `voice_generator` subagent for Gemini TTS voiceover generation
 - `audio_planner` subagent with unified audio chart checkpoint (CP3) — presents voice + music + SFX together

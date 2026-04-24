@@ -14,7 +14,7 @@ const TYPE_COLORS: Record<PipelineEvent["type"], string> = {
 }
 
 export function EventLog({ events }: { events: PipelineEvent[] }) {
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const bottomRef = useRef<HTMLLIElement>(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -37,9 +37,12 @@ export function EventLog({ events }: { events: PipelineEvent[] }) {
   }
 
   return (
-    <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+    <ul
+      aria-label="Registro de eventos del pipeline"
+      style={{ overflowY: "auto", flex: 1, minHeight: 0, listStyle: "none", margin: 0, padding: 0 }}
+    >
       {events.map((event) => (
-        <div
+        <li
           key={event.id}
           className="animate-fade-in"
           style={{
@@ -52,9 +55,9 @@ export function EventLog({ events }: { events: PipelineEvent[] }) {
         >
           <span style={{ color: theme.colors.text.muted, flexShrink: 0 }}>{formatTime(event.timestamp)}</span>
           <span style={{ color: TYPE_COLORS[event.type] }}>{event.message}</span>
-        </div>
+        </li>
       ))}
-      <div ref={bottomRef} />
-    </div>
+      <li ref={bottomRef} />
+    </ul>
   )
 }

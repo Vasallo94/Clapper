@@ -8,7 +8,7 @@ import type {
   DirectionData,
   SoundChartData,
 } from "./types"
-import { client, createThread } from "./api"
+import { client, createThread, fetchJobStatus } from "./api"
 import { useAgentStream } from "./hooks/useAgentStream"
 import { usePipelineTracker } from "./hooks/usePipelineTracker"
 import { AppLayout } from "./components/AppLayout"
@@ -140,6 +140,22 @@ export default function App() {
       const content = res.content?.trim() || "Proceso completado."
       pipeline.advance("done", "Pipeline completado")
       addMessage("assistant", content)
+
+      const jobIdMatch = content.match(/jobId[:\s]*["']?([a-f0-9-]+)["']?/i)
+      if (jobIdMatch) {
+        fetchJobStatus(jobIdMatch[1])
+          .then((job) => {
+            if (job.status === "done") {
+              addMessage(
+                "assistant",
+                "Video listo:",
+                { jobId: job.id, title: job.title, fileSize: job.file_size },
+                "video_result",
+              )
+            }
+          })
+          .catch(() => {})
+      }
     }
   }, [stream.result, addMessage, pipeline])
 

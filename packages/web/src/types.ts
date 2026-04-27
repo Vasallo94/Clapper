@@ -1,5 +1,5 @@
 export type MessageRole = "user" | "assistant" | "agent"
-export type CheckpointType = "escaleta" | "direction" | "sound_chart" | "generic"
+export type CheckpointType = "escaleta" | "direction" | "sound_chart" | "generic" | "video_result"
 
 export interface ChatMessage {
   id: string
@@ -88,4 +88,26 @@ export interface PipelineEvent {
   stage: PipelineStageId
   message: string
   type: "info" | "checkpoint" | "success" | "error"
+}
+
+export interface RenderJob {
+  id: string
+  config_id: string | null
+  title: string | null
+  composition: string
+  status: string
+  progress: number
+  output_path: string | null
+  file_size: number | null
+  thread_id: string | null
+  error: string | null
+  created_at: string
+  completed_at: string | null
+}
+
+export interface JobListResponse {
+  jobs: RenderJob[]
+  total: number
+  limit: number
+  offset: number
 }

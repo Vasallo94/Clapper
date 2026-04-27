@@ -8,6 +8,7 @@ import { SoundChartCard } from "./SoundChartCard"
 import { StreamingBubble } from "./StreamingBubble"
 import { ErrorBanner } from "./ErrorBanner"
 import { MessageBubble } from "./MessageBubble"
+import { VideoResultCard } from "./VideoResultCard"
 import { RenderProgress } from "./RenderProgress"
 import { theme } from "../theme"
 
@@ -78,6 +79,15 @@ export function ChatThread({
               durationMs={msg.agentSummary.durationMs}
               defaultExpanded={false}
             />
+          )
+        }
+        if (msg.checkpointType === "video_result" && msg.checkpoint) {
+          const data = msg.checkpoint as { jobId: string; title: string | null; fileSize: number | null }
+          return (
+            <div key={msg.id}>
+              <MessageBubble message={{ ...msg, checkpoint: undefined }} />
+              <VideoResultCard jobId={data.jobId} title={data.title} fileSize={data.fileSize} />
+            </div>
           )
         }
         if (msg.checkpointType && msg.checkpoint && checkpointHandlers[msg.checkpointType]) {

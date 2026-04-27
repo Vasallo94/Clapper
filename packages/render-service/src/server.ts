@@ -2,8 +2,9 @@ import express from "express"
 import cors from "cors"
 import { randomUUID } from "crypto"
 import { spawn } from "child_process"
-import { mkdirSync, writeFileSync, readdirSync } from "fs"
+import { mkdirSync, writeFileSync, readdirSync, statSync } from "fs"
 import path from "path"
+import { insertJob, updateJob, getJob, listJobs } from "./db"
 
 const app = express()
 app.use(cors())
@@ -11,15 +12,6 @@ app.use(express.json({ limit: "10mb" }))
 
 const ROOT_DIR = process.env.ROOT_DIR || path.resolve(__dirname, "../../..")
 const JOBS_DIR = path.resolve(ROOT_DIR, "packages/render-service/jobs")
-
-interface RenderJob {
-  status: "validating" | "rendering" | "done" | "error"
-  progress: number
-  output?: string
-  error?: string
-}
-
-const jobs = new Map<string, RenderJob>()
 
 // POST /api/validate — validate config against Zod schemas
 app.post("/api/validate", (req, res) => {
@@ -59,7 +51,13 @@ app.post("/api/render", (req, res) => {
   const configPath = path.join(jobDir, "config.json")
   writeFileSync(configPath, JSON.stringify(req.body, null, 2))
 
-  jobs.set(jobId, { status: "validating", progress: 0 })
+  insertJob({
+    id: jobId,
+    config_id: req.body.id,
+    title: req.body.title || req.body.headline || req.body.product,
+    composition: req.body.composition || "ClaudeCodeTutorial",
+    thread_id: req.body._threadId,
+  })
 
   // First validate
   const validateChild = spawn("npx", ["tsx", "scripts/validate-config.ts", configPath], {
@@ -72,20 +70,18 @@ app.post("/api/render", (req, res) => {
 
   validateChild.on("close", (valCode) => {
     if (valCode !== 0) {
-      const job = jobs.get(jobId)!
-      job.status = "error"
+      let errorMsg: string
       try {
         const jsonMatch = valOut.match(/(\{[\s\S]*\})\s*$/)
-        job.error = JSON.stringify(JSON.parse(jsonMatch ? jsonMatch[1] : valOut).errors)
+        errorMsg = JSON.stringify(JSON.parse(jsonMatch ? jsonMatch[1] : valOut).errors)
       } catch {
-        job.error = valOut || "Config validation failed"
+        errorMsg = valOut || "Config validation failed"
       }
-      setTimeout(() => jobs.delete(jobId), 3_600_000)
+      updateJob(jobId, { status: "error", error: errorMsg, completed_at: new Date().toISOString() })
       return
     }
 
-    const job = jobs.get(jobId)!
-    job.status = "rendering"
+    updateJob(jobId, { status: "rendering" })
 
     const renderArgs = ["tsx", "scripts/render.ts", configPath]
     if (req.body._skipAudioGeneration) renderArgs.push("--skip-audio-generation")
@@ -97,24 +93,31 @@ app.post("/api/render", (req, res) => {
 
     renderChild.stdout.on("data", (data) => {
       const match = data.toString().match(/(\d+)%/)
-      if (match) job.progress = parseInt(match[1])
+      if (match) updateJob(jobId, { progress: parseInt(match[1]) })
     })
 
     renderChild.stderr.on("data", (data) => {
       const match = data.toString().match(/(\d+)%/)
-      if (match) job.progress = parseInt(match[1])
+      if (match) updateJob(jobId, { progress: parseInt(match[1]) })
     })
 
     renderChild.on("close", (code) => {
       if (code === 0) {
-        job.status = "done"
-        job.progress = 100
-        job.output = path.join(jobDir, "output.mp4")
+        const outputPath = path.join(jobDir, "output.mp4")
+        updateJob(jobId, {
+          status: "done",
+          progress: 100,
+          output_path: outputPath,
+          file_size: statSync(outputPath).size,
+          completed_at: new Date().toISOString(),
+        })
       } else {
-        job.status = "error"
-        job.error = `Render exited with code ${code}`
+        updateJob(jobId, {
+          status: "error",
+          error: "Render exited with code " + code,
+          completed_at: new Date().toISOString(),
+        })
       }
-      setTimeout(() => jobs.delete(jobId), 3_600_000)
     })
   })
 
@@ -122,14 +125,38 @@ app.post("/api/render", (req, res) => {
   res.json({ jobId })
 })
 
+// GET /api/render/jobs — list all jobs (must be before :id routes)
+app.get("/api/render/jobs", (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit as string) || 20, 100)
+  const offset = parseInt(req.query.offset as string) || 0
+  const result = listJobs(limit, offset)
+  res.json({ ...result, limit, offset })
+})
+
 // GET /api/render/:id/status — check render progress
 app.get("/api/render/:id/status", (req, res) => {
-  const job = jobs.get(req.params.id)
+  const job = getJob(req.params.id)
   if (!job) {
     res.status(404).json({ error: "Job not found" })
     return
   }
-  res.json({ jobId: req.params.id, ...job })
+  res.json(job)
+})
+
+// GET /api/render/:id/download — download rendered video
+app.get("/api/render/:id/download", (req, res) => {
+  const job = getJob(req.params.id)
+  if (!job || job.status !== "done" || !job.output_path) {
+    res.status(404).json({ error: "Video not available" })
+    return
+  }
+  try {
+    statSync(job.output_path)
+  } catch {
+    res.status(410).json({ error: "Video file deleted" })
+    return
+  }
+  res.download(job.output_path, `${job.config_id || job.id}.mp4`)
 })
 
 // GET /api/audio/library — list available music tracks

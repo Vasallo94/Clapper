@@ -119,7 +119,11 @@ def generate_voiceover(config_json: str) -> str:
 
     voice_id = voiceover.get("voiceId", "Orus")
     language = voiceover.get("language", "es-ES")
-    scenes = voiceover.get("scenes", {})
+    raw_scenes = voiceover.get("scenes", {})
+    if isinstance(raw_scenes, list):
+        scenes = {str(s.get("sceneIndex", i)): s for i, s in enumerate(raw_scenes)}
+    else:
+        scenes = raw_scenes
     config_id = config.get("id", "unknown")
     out_dir = PROJECT_ROOT / "public" / "voiceover" / config_id
     out_dir.mkdir(parents=True, exist_ok=True)

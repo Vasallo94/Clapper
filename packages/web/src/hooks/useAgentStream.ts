@@ -209,7 +209,10 @@ export function useAgentStream(
             return
           }
 
-          if (retryCountRef.current < MAX_RETRIES) {
+          const errMsg = err instanceof Error ? err.message : String(err)
+          const isNotFound = errMsg.includes("404") || errMsg.includes("not found")
+
+          if (!isNotFound && retryCountRef.current < MAX_RETRIES) {
             retryCountRef.current += 1
             const delay = Math.pow(2, retryCountRef.current - 1) * 1000
             setStreamState((prev) => ({
@@ -222,10 +225,12 @@ export function useAgentStream(
               return attemptStream()
             }
           } else {
-            const msg = err instanceof Error ? err.message : "Stream error"
+            const msg = isNotFound
+              ? "Conversacion no encontrada. Pulsa '+ Nueva conversacion' para empezar."
+              : `Error de conexion tras ${MAX_RETRIES} intentos: ${errMsg}`
             setStreamState((prev) => ({
               ...prev,
-              error: `Error de conexion tras ${MAX_RETRIES} intentos: ${msg}`,
+              error: msg,
             }))
           }
         } finally {

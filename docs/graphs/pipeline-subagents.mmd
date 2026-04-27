@@ -1,0 +1,24 @@
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#CC3333', 'primaryTextColor': '#E8E8E8', 'primaryBorderColor': '#CC3333', 'lineColor': '#888888', 'secondaryColor': '#1A1A1A', 'tertiaryColor': '#141414', 'background': '#0D0D0D', 'mainBkg': '#1A1A1A', 'nodeBorder': '#2A2A2A', 'clusterBkg': '#141414', 'clusterBorder': '#2A2A2A', 'titleColor': '#E8E8E8', 'edgeLabelBackground': '#141414'}}}%%
+graph TD
+    START([fa:fa-user Usuario]):::startEnd --> orchestrator[fa:fa-sitemap Orchestrator]:::orchestrator
+
+    orchestrator --> researcher[fa:fa-search Researcher<br/><i>gemini-3.1-flash-lite</i>]:::agent
+    researcher --> copywriter[fa:fa-pen Copywriter<br/><i>gemini-3.1-pro</i>]:::agent
+
+    copywriter --> escaleta_review{Escaleta<br/>checkpoint}:::checkpoint
+    escaleta_review -->|aprobado| director[fa:fa-film Director<br/><i>gemini-3.1-pro</i>]:::agent
+    escaleta_review -->|cambios| copywriter
+
+    director --> sound_engineer[fa:fa-music Sound Engineer<br/><i>gemini-3.1-pro</i>]:::agent
+    sound_engineer --> sound_review{Carta sonido<br/>checkpoint}:::checkpoint
+    sound_review -->|aprobado| render[fa:fa-video submit_render]:::tool
+    sound_review -->|cambios| sound_engineer
+
+    render --> status[fa:fa-spinner check_render_status]:::tool
+    status --> DONE([fa:fa-check Video completado]):::startEnd
+
+    classDef startEnd fill:#CC3333,stroke:#CC3333,color:#fff,font-weight:bold
+    classDef orchestrator fill:#2A2A2A,stroke:#CC3333,color:#E8E8E8,font-weight:bold,stroke-width:2px
+    classDef agent fill:#1A1A1A,stroke:#888888,color:#E8E8E8
+    classDef checkpoint fill:#0D0D0D,stroke:#F59E0B,color:#F59E0B,font-weight:bold
+    classDef tool fill:#1A1A1A,stroke:#22C55E,color:#22C55E

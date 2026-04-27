@@ -27,3 +27,21 @@ __pycache__/
 *$py.class
 .venv/
 *.egg-info/
+
+# Build artifacts
+build/
+*.stackdump
+
+# LangGraph runtime state
+packages/agent/.langgraph_api/
+
+# Generated configs (agent test runs)
+/config.json
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Generated audio/video assets
+public/audio/*/
+!public/audio/library/
+presentations/*/output.mp4

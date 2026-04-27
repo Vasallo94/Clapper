@@ -36,7 +36,8 @@ Video autoreferencial que documente el proceso de crear este mismo repositorio d
 - **Catálogo web** — página estática (Astro o similar) que liste todos los vídeos generados con preview y metadatos del config.
 - **CI/CD render** — GitHub Action que renderice automáticamente cuando se pushea un config.json nuevo.
 - **Extraer shared/** — parcialmente hecho: `createCalculateMetadata` extraído a `src/utils/`, `MascotWatermark` componetizado. Pendiente: mover ThemeContext y PhoneMascot a `src/shared/` cuando haya una 3ª composición (cross-import entre ProductShort y ClaudeCodeTutorial aún existe).
-- **Tests visuales** — snapshot testing con `@remotion/test` para detectar regresiones en los frames.
+- **Tests visuales** — ~~snapshot testing con `@remotion/test`~~ Implementado (2026-04-27): vitest + pixelmatch + renderStill. `npm run test:visual`.
+- **Mover `src/` a `packages/remotion/`** — unificar todo bajo packages/ por consistencia. Requiere reconfigurar remotion.config.ts, scripts/render.ts, render-service paths y Remotion Studio entrypoint. Hacer cuando las features actuales estén estabilizadas. (2026-04-27)
 - **Reactivar generación de audio via API** — cuando ElevenLabs/Lyria estén disponibles, reactivar `generate_audio` en sound_engineer y añadir fallback chain en audio_planner. El diseño ya lo soporta. (2026-04-21)
 - **Paralelismo voice_generator/sound_engineer via LangGraph Send()** — el orquestador actual pide al modelo despachar ambos en paralelo via prompt. Para garantizarlo, implementar fork/join con `Send()` API de LangGraph. (2026-04-21)
 - **Scene Creator integración como CompiledSubAgent** — el scene_creator se registra como subagente dict pero su grafo interno (lint → register → validate) no se ejecuta como subgrafo LangGraph. Verificar API CompiledSubAgent de DeepAgents. (2026-04-21)

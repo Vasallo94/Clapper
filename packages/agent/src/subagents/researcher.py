@@ -9,5 +9,5 @@ def create_researcher() -> dict:
         "description": "Searches the web for product info, documentation, and competitive data.",
         "system_prompt": load_prompt("researcher"),
         "tools": [web_search, web_fetch, scrape_product],
-        "model": create_model("gemini-3.1-flash-lite-preview"),
+        "model": create_model(),
     }

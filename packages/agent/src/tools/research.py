@@ -7,12 +7,18 @@ def web_search(query: str) -> str:
     Args:
         query: Search query string.
     """
-    response = httpx.get(
-        "https://api.duckduckgo.com/",
-        params={"q": query, "format": "json", "no_html": 1},
-        timeout=15.0,
-    )
-    data = response.json()
+    try:
+        response = httpx.get(
+            "https://api.duckduckgo.com/",
+            params={"q": query, "format": "json", "no_html": 1},
+            timeout=15.0,
+        )
+        response.raise_for_status()
+        data = response.json()
+    except (httpx.HTTPStatusError, httpx.RequestError) as e:
+        return f"Search error: {e}"
+    except ValueError:
+        return "Search returned invalid response."
     results = []
     if data.get("AbstractText"):
         results.append(data["AbstractText"])
@@ -28,9 +34,14 @@ def web_fetch(url: str) -> str:
     Args:
         url: The URL to fetch.
     """
-    response = httpx.get(url, timeout=15.0, follow_redirects=True)
-    response.raise_for_status()
-    return response.text[:10000]
+    try:
+        response = httpx.get(url, timeout=15.0, follow_redirects=True)
+        response.raise_for_status()
+        return response.text[:10000]
+    except httpx.HTTPStatusError as e:
+        return f"Error fetching {url}: HTTP {e.response.status_code}"
+    except httpx.RequestError as e:
+        return f"Error fetching {url}: {e}"
 
 
 def scrape_product(product_slug: str) -> str:

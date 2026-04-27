@@ -8,10 +8,12 @@
     "test": "tsx --test test/server.test.ts"
   },
   "dependencies": {
+    "better-sqlite3": "^12.9.0",
     "cors": "^2.8.5",
     "express": "^5.1.0"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.0",
     "@types/node": "^22.0.0",

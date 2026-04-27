@@ -1,0 +1,13 @@
+{
+  "id": "test-tutorial",
+  "title": "Test Tutorial",
+  "description": "Visual test fixture",
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "theme": "linea-directa",
+  "scenes": [
+    { "type": "intro", "durationInSeconds": 2, "title": "Test Video" },
+    { "type": "callout", "durationInSeconds": 2, "text": "Test callout text", "position": "bottom" }
+  ]
+}

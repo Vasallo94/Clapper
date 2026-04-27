@@ -24,14 +24,19 @@
     "@remotion/bundler": "^4.0.438",
     "@remotion/eslint-config-flat": "4.0.438",
     "@remotion/renderer": "^4.0.438",
+    "@types/pngjs": "^6.0.5",
     "@types/react": "19.2.7",
     "@types/web": "0.0.166",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.4",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
+    "pixelmatch": "^7.1.0",
+    "pngjs": "^7.0.0",
     "prettier": "3.8.1",
     "tsx": "^4.21.0",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^4.1.5"
   },
   "scripts": {
     "dev": "remotion studio",
@@ -39,7 +44,10 @@
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc",
     "prepare": "husky",
-    "generate:catalog": "npx tsx scripts/generate-scene-catalog.ts"
+    "generate:catalog": "npx tsx scripts/generate-scene-catalog.ts",
+    "agent:dev": "cd packages/agent && uv run langgraph dev --config langgraph.json --port 2024 --allow-blocking",
+    "test:visual": "vitest run src/__tests__/visual.test.ts",
+    "test:visual:update": "cross-env UPDATE_SNAPSHOTS=1 vitest run src/__tests__/visual.test.ts"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

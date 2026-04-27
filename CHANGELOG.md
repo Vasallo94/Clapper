@@ -7,6 +7,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- Visual snapshot tests for `ClaudeCodeTutorial` and `ProductShort` compositions using vitest + pixelmatch + pngjs
+- Minimal test fixtures (`tutorial-minimal.json`, `short-minimal.json`) for visual regression testing
+- `test:visual` and `test:visual:update` npm scripts for running and updating snapshots
 - Scene transitions via `@remotion/transitions` TransitionSeries (fade, slide, wipe) with global config
 - VideoResultCard: inline `<video>` player + download button shown after render completes
 - `GET /api/render/:id/download` endpoint for downloading rendered MP4s

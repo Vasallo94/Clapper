@@ -8,24 +8,27 @@ from ..config import PROJECT_ROOT
 BUILTIN_SCENE_TYPES = {"intro", "terminal", "callout", "outro", "custom", "hero", "benefits", "pricing", "cta"}
 
 
-def validate_config(config_path: str) -> str:
+def _parse_config(config_input: str) -> dict:
+    try:
+        return json.loads(config_input)
+    except (json.JSONDecodeError, TypeError):
+        return json.loads(Path(config_input).read_text(encoding="utf-8"))
+
+
+def validate_config(config_input: str) -> str:
     """Validate a video config against real assets on disk.
 
     Checks that all referenced scenes exist in the registry, voiceover MP3s
     exist, sound design library tracks exist, and durations are consistent.
 
     Args:
-        config_path: Path to the config.json file.
-
-    Returns:
-        JSON string with {errors: [...], warnings: [...]}.
+        config_input: The full config as a JSON string, or a file path to config.json.
     """
-    config = json.loads(Path(config_path).read_text(encoding="utf-8"))
+    config = _parse_config(config_input)
     errors: list[str] = []
     warnings: list[str] = []
     config_id = config.get("id", "unknown")
 
-    # Check scene types
     registry_path = PROJECT_ROOT / "src" / "compositions" / "ClaudeCodeTutorial" / "customSceneRegistry.ts"
     registered_ids: set[str] = set()
     if registry_path.exists():
@@ -41,16 +44,19 @@ def validate_config(config_path: str) -> str:
         elif scene_type not in BUILTIN_SCENE_TYPES:
             errors.append(f"Scene {i}: unknown scene type '{scene_type}'")
 
-    # Check voiceover files
     voiceover = config.get("voiceover")
     if voiceover and voiceover.get("enabled"):
         vo_dir = PROJECT_ROOT / "public" / "voiceover" / config_id
-        for scene_idx in voiceover.get("scenes", {}):
+        scenes = voiceover.get("scenes", {})
+        if isinstance(scenes, list):
+            scene_keys = [str(s.get("sceneIndex", i)) for i, s in enumerate(scenes)]
+        else:
+            scene_keys = list(scenes.keys())
+        for scene_idx in scene_keys:
             mp3_path = vo_dir / f"{scene_idx}.mp3"
             if not mp3_path.exists():
                 errors.append(f"Voiceover MP3 missing for scene {scene_idx}: {mp3_path}")
 
-    # Check sound design library tracks
     sound = config.get("soundDesign")
     if sound and sound.get("enabled"):
         library_dir = PROJECT_ROOT / "public" / "audio" / "library"
@@ -59,9 +65,6 @@ def validate_config(config_path: str) -> str:
             lid = music_bed.get("libraryId")
             if lid and not (library_dir / f"{lid}.mp3").exists():
                 errors.append(f"Music bed libraryId '{lid}' not found in {library_dir}")
-            custom_prompt = music_bed.get("customPrompt")
-            if custom_prompt and not lid:
-                warnings.append("Music bed uses customPrompt but API generation is disabled — needs libraryId")
 
         audio_dir = PROJECT_ROOT / "public" / "audio" / config_id
         for sfx in sound.get("sfx", []):
@@ -74,20 +77,17 @@ def validate_config(config_path: str) -> str:
     return json.dumps({"errors": errors, "warnings": warnings})
 
 
-def review_render(output_path: str, config_path: str) -> str:
+def review_render(output_path: str, config_input: str) -> str:
     """Review a rendered MP4 for correctness.
 
     Checks file existence, duration match, and audio presence via ffprobe.
 
     Args:
         output_path: Path to the rendered MP4 file.
-        config_path: Path to the config.json used for rendering.
-
-    Returns:
-        JSON string with review results.
+        config_input: The full config as a JSON string, or a file path to config.json.
     """
     output = Path(output_path)
-    config = json.loads(Path(config_path).read_text(encoding="utf-8"))
+    config = _parse_config(config_input)
 
     expected_duration = sum(s.get("durationInSeconds", 0) for s in config.get("scenes", []))
 

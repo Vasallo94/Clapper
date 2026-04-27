@@ -1,9 +1,13 @@
 import React, { useMemo } from "react"
-import { AbsoluteFill, Audio, Sequence, Series, staticFile, useVideoConfig } from "remotion"
+import { AbsoluteFill, Audio, Sequence, staticFile, useVideoConfig } from "remotion"
+import { TransitionSeries, linearTiming, type TransitionPresentation } from "@remotion/transitions"
+import { fade } from "@remotion/transitions/fade"
+import { slide } from "@remotion/transitions/slide"
+import { wipe } from "@remotion/transitions/wipe"
 import { ThemeContext, getTheme } from "./themes"
 import type { ThemeName } from "./themes"
 import { computeMusicVolume, dbToLinear, getSceneSfxEntries, sfxEndFrame, sfxTriggerFrame } from "../utils/audioMix"
-import type { Beat, MusicBed, SoundDesign, Timing, VoiceoverConfig } from "./schemas"
+import type { Beat, MusicBed, SoundDesign, Timing, TransitionConfig, VoiceoverConfig } from "./schemas"
 import { precomputeScenes, type SceneInfo } from "./useScenePrecomputation"
 import type { SceneAudioInfo } from "../utils/audioMix"
 
@@ -21,6 +25,7 @@ interface CompositionShellConfig<S extends CompositionShellScene> {
   soundDesign?: SoundDesign
   voiceover?: VoiceoverConfig
   scenes: S[]
+  transition?: TransitionConfig
 }
 
 interface CompositionShellProps<S extends CompositionShellScene> {
@@ -46,6 +51,24 @@ export function CompositionShell<S extends CompositionShellScene>({
     [config.scenes, config.fps, config.voiceover],
   )
 
+  const transitionType = config.transition?.type ?? "none"
+  const transitionDuration = config.transition?.durationInFrames ?? 15
+
+  function getPresentation(): TransitionPresentation<Record<string, unknown>> | null {
+    switch (transitionType) {
+      case "fade":
+        return fade() as TransitionPresentation<Record<string, unknown>>
+      case "slide":
+        return slide() as TransitionPresentation<Record<string, unknown>>
+      case "wipe":
+        return wipe() as TransitionPresentation<Record<string, unknown>>
+      default:
+        return null
+    }
+  }
+  const presentation = getPresentation()
+  const transitionTiming = presentation ? linearTiming({ durationInFrames: transitionDuration }) : undefined
+
   return (
     <ThemeContext.Provider value={theme}>
       <AbsoluteFill style={{ background: bg }}>
@@ -64,11 +87,17 @@ export function CompositionShell<S extends CompositionShellScene>({
             {...(musicLoop ? { loop: true } : {})}
           />
         )}
-        <Series>
-          {sceneInfos.map((info, i) => {
+        <TransitionSeries>
+          {sceneInfos.flatMap((info, i) => {
             const { directedScene, durationInFrames, timing, hasVoiceover, audioDelayFrames } = info
-            return (
-              <Series.Sequence key={i} durationInFrames={durationInFrames}>
+            const elements: React.ReactNode[] = []
+            if (i > 0 && presentation && transitionTiming) {
+              elements.push(
+                <TransitionSeries.Transition key={`t-${i}`} presentation={presentation} timing={transitionTiming} />,
+              )
+            }
+            elements.push(
+              <TransitionSeries.Sequence key={i} durationInFrames={durationInFrames}>
                 {hasVoiceover && (
                   <Sequence from={audioDelayFrames}>
                     <Audio src={staticFile(`voiceover/${config.id}/${i}.mp3`)} />
@@ -92,10 +121,11 @@ export function CompositionShell<S extends CompositionShellScene>({
                   })}
                 {renderScene(directedScene, i)}
                 {renderOverlay?.(directedScene, info, i)}
-              </Series.Sequence>
+              </TransitionSeries.Sequence>,
             )
+            return elements
           })}
-        </Series>
+        </TransitionSeries>
       </AbsoluteFill>
     </ThemeContext.Provider>
   )

@@ -18,6 +18,7 @@ type CompositionConfig = {
   height: number
   scenes: { durationInSeconds: number; timing?: Timing; beats?: Beat[] }[]
   voiceover?: VoiceoverConfig
+  transition?: { type?: string; durationInFrames?: number }
 }
 
 const roundSeconds = (value: number) => Math.ceil(value * 10) / 10
@@ -90,8 +91,16 @@ export function createCalculateMetadata<T extends CompositionConfig>(): Calculat
 
     const totalSeconds = syncedScenes.reduce((sum, scene) => sum + scene.durationInSeconds, 0)
 
+    const transitionType = props.transition?.type ?? "none"
+    const transitionDurationFrames = props.transition?.durationInFrames ?? 15
+    const transitionOverlapSeconds =
+      transitionType !== "none" && syncedScenes.length > 1
+        ? ((syncedScenes.length - 1) * transitionDurationFrames) / props.fps
+        : 0
+    const adjustedTotalSeconds = totalSeconds - transitionOverlapSeconds
+
     return {
-      durationInFrames: Math.ceil(totalSeconds * props.fps),
+      durationInFrames: Math.ceil(adjustedTotalSeconds * props.fps),
       fps: props.fps,
       width: props.width,
       height: props.height,

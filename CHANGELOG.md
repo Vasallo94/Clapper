@@ -7,6 +7,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- SQLite job persistence for render-service via better-sqlite3 (replaces in-memory Map)
+- `packages/render-service/src/db.ts`: database module with `insertJob`, `updateJob`, `getJob`, `listJobs` functions
+- `GET /api/render/jobs` endpoint for paginated job listing
+- `GET /api/render/:id/download` endpoint for downloading rendered videos
+- Jobs survive server restarts; removed TTL-based auto-deletion
+
+- Conversation persistence: threadId and thread list stored in localStorage, survives page refresh
+- ThreadList component in sidebar: switch between conversations, delete old threads, start new ones
+- `packages/web/src/lib/threadStorage.ts`: CRUD helpers for stored threads (max 50, LRU)
+- Thread history restore: selecting a thread fetches messages from LangGraph state via `client.threads.getState()`
 - Native Python TTS: `generate_voiceover` now calls Gemini TTS directly via `google-genai` SDK instead of subprocess to Node.js script
 - SSE reconnection with exponential backoff (3 retries) and 5-min stream timeout
 - Tool error tracking in streaming UI (tools starting with "Error" show red status)

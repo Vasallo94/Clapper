@@ -8,7 +8,7 @@ import type {
   DirectionData,
   SoundChartData,
 } from "./types"
-import { createThread } from "./api"
+import { client, createThread } from "./api"
 import { useAgentStream } from "./hooks/useAgentStream"
 import { usePipelineTracker } from "./hooks/usePipelineTracker"
 import { AppLayout } from "./components/AppLayout"
@@ -16,11 +16,20 @@ import { Sidebar } from "./components/Sidebar"
 import { Header } from "./components/Header"
 import { ChatThread } from "./components/ChatThread"
 import { InputBar } from "./components/InputBar"
+import {
+  getThreads,
+  saveThread,
+  removeThread,
+  getCurrentThreadId,
+  setCurrentThreadId,
+  type StoredThread,
+} from "./lib/threadStorage"
 
 export default function App() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
-  const [threadId, setThreadId] = useState<string>()
+  const [threadId, setThreadId] = useState<string | undefined>(() => getCurrentThreadId() ?? undefined)
+  const [storedThreads, setStoredThreads] = useState<StoredThread[]>(() => getThreads())
   const pipeline = usePipelineTracker()
 
   const handleAgentComplete = useCallback((summary: AgentSummary) => {
@@ -37,6 +46,14 @@ export default function App() {
 
   const stream = useAgentStream(pipeline.advanceFromStream, handleAgentComplete)
 
+  const handleNewThread = useCallback(() => {
+    setThreadId(undefined)
+    setCurrentThreadId(null)
+    setMessages([])
+    stream.resetStream()
+    pipeline.reset()
+  }, [stream, pipeline])
+
   const addMessage = useCallback(
     (
       role: ChatMessage["role"],
@@ -49,6 +66,40 @@ export default function App() {
       return id
     },
     [],
+  )
+
+  const handleSelectThread = useCallback(
+    async (tid: string) => {
+      setThreadId(tid)
+      setCurrentThreadId(tid)
+      setMessages([])
+      stream.resetStream()
+      pipeline.reset()
+      try {
+        const state = await client.threads.getState(tid)
+        const msgs =
+          ((state.values as Record<string, unknown>)?.messages as Array<{ type: string; content: string }>) ?? []
+        for (const m of msgs) {
+          addMessage(
+            m.type === "human" ? "user" : "assistant",
+            typeof m.content === "string" ? m.content : JSON.stringify(m.content),
+          )
+        }
+      } catch {
+        removeThread(tid)
+        setStoredThreads(getThreads())
+      }
+    },
+    [addMessage, stream, pipeline],
+  )
+
+  const handleDeleteThread = useCallback(
+    (tid: string) => {
+      removeThread(tid)
+      setStoredThreads(getThreads())
+      if (tid === threadId) handleNewThread()
+    },
+    [threadId, handleNewThread],
   )
 
   const lastProcessedResult = useRef<ChatResponse | null>(null)
@@ -110,6 +161,14 @@ export default function App() {
 
     const tid = threadId ?? (await createThread())
     setThreadId(tid)
+    setCurrentThreadId(tid)
+    saveThread({
+      threadId: tid,
+      title: text.slice(0, 60),
+      createdAt: new Date().toISOString(),
+      lastActiveAt: new Date().toISOString(),
+    })
+    setStoredThreads(getThreads())
     stream.startStream(tid, text)
   }
 
@@ -141,7 +200,17 @@ export default function App() {
 
   return (
     <AppLayout
-      sidebar={<Sidebar currentStage={pipeline.state.currentStage} events={pipeline.state.events} />}
+      sidebar={
+        <Sidebar
+          currentStage={pipeline.state.currentStage}
+          events={pipeline.state.events}
+          threads={storedThreads}
+          currentThreadId={threadId}
+          onSelectThread={handleSelectThread}
+          onDeleteThread={handleDeleteThread}
+          onNewThread={handleNewThread}
+        />
+      }
       main={
         <>
           <Header />

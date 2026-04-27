@@ -7,6 +7,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- Interactive video preview via `@remotion/player` in web frontend (VideoPlayer component)
+- Shared `calculateTotalFrames` pure function in `src/shared/calculateDuration.ts` (used by both Player and calculateMetadata)
+- Vite `@remotion-src` path alias for importing Remotion source from web app
+- Escaleta preview: CheckpointCard now embeds a Player preview of the proposed scenes
 - Visual snapshot tests for `ClaudeCodeTutorial` and `ProductShort` compositions using vitest + pixelmatch + pngjs
 - Minimal test fixtures (`tutorial-minimal.json`, `short-minimal.json`) for visual regression testing
 - `test:visual` and `test:visual:update` npm scripts for running and updating snapshots

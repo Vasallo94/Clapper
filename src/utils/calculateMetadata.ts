@@ -10,6 +10,7 @@ import {
   getVoiceoverText,
   VoiceoverConfig,
 } from "./direction"
+import { calculateTotalFrames } from "../shared/calculateDuration"
 
 type CompositionConfig = {
   id?: string
@@ -18,6 +19,7 @@ type CompositionConfig = {
   height: number
   scenes: { durationInSeconds: number; timing?: Timing; beats?: Beat[] }[]
   voiceover?: VoiceoverConfig
+  transition?: { type?: string; durationInFrames?: number }
 }
 
 const roundSeconds = (value: number) => Math.ceil(value * 10) / 10
@@ -88,10 +90,8 @@ export function createCalculateMetadata<T extends CompositionConfig>(): Calculat
       scenes: syncedScenes,
     }
 
-    const totalSeconds = syncedScenes.reduce((sum, scene) => sum + scene.durationInSeconds, 0)
-
     return {
-      durationInFrames: Math.ceil(totalSeconds * props.fps),
+      durationInFrames: calculateTotalFrames(syncedScenes, props.fps, props.transition),
       fps: props.fps,
       width: props.width,
       height: props.height,

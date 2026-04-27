@@ -2,6 +2,7 @@ import { useState } from "react"
 import type { CheckpointData } from "../types"
 import { theme } from "../theme"
 import { btnStyle } from "./btnStyle"
+import { VideoPlayer } from "./VideoPlayer"
 
 interface Props {
   data: CheckpointData
@@ -119,6 +120,16 @@ export function CheckpointCard({ data, onApprove, onRequestChanges, disabled }: 
       <div style={{ fontSize: 12, color: theme.colors.text.secondary, marginBottom: 14, fontFamily: theme.fonts.mono }}>
         total: {totalDuration}s / {data.scenes.length} escenas
       </div>
+
+      <VideoPlayer
+        config={{
+          id: "preview",
+          fps: 30,
+          composition: "ProductShort",
+          scenes: data.scenes,
+        }}
+        style={{ marginBottom: 12, maxHeight: 300 }}
+      />
 
       <div style={{ display: "flex", gap: 8 }}>
         <button onClick={onApprove} disabled={disabled} style={btnStyle(theme.colors.status.success, disabled)}>

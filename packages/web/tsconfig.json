@@ -6,7 +6,10 @@
     "jsx": "react-jsx",
     "strict": true,
     "noEmit": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@remotion-src/*": ["../../src/*"]
+    }
   },
   "include": ["src"]
 }

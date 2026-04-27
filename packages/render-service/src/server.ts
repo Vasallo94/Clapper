@@ -66,19 +66,35 @@ app.post("/api/render", (req, res) => {
   })
 
   let valOut = ""
+  let valErr = ""
   validateChild.stdout.on("data", (d) => (valOut += d.toString()))
+  validateChild.stderr.on("data", (d) => (valErr += d.toString()))
 
   validateChild.on("close", (valCode) => {
-    if (valCode !== 0) {
-      let errorMsg: string
-      try {
-        const jsonMatch = valOut.match(/(\{[\s\S]*\})\s*$/)
-        errorMsg = JSON.stringify(JSON.parse(jsonMatch ? jsonMatch[1] : valOut).errors)
-      } catch {
-        errorMsg = valOut || "Config validation failed"
+    let validationPassed = valCode === 0
+    try {
+      const jsonMatch = valOut.match(/(\{[\s\S]*\})\s*$/)
+      if (jsonMatch) {
+        const result = JSON.parse(jsonMatch[1])
+        validationPassed = result.valid === true || (Array.isArray(result.errors) && result.errors.length === 0)
+        if (!validationPassed) {
+          updateJob(jobId, {
+            status: "error",
+            error: JSON.stringify(result.errors || result),
+            completed_at: new Date().toISOString(),
+          })
+          return
+        }
       }
-      updateJob(jobId, { status: "error", error: errorMsg, completed_at: new Date().toISOString() })
-      return
+    } catch {
+      if (valCode !== 0) {
+        updateJob(jobId, {
+          status: "error",
+          error: valErr || valOut || "Config validation failed",
+          completed_at: new Date().toISOString(),
+        })
+        return
+      }
     }
 
     updateJob(jobId, { status: "rendering" })

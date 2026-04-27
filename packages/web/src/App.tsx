@@ -112,7 +112,7 @@ export default function App() {
     setThreadId(res.thread_id)
 
     if (res.type === "checkpoint" && res.data) {
-      const cpType = (res.data as Record<string, unknown>).type as string
+      const cpType = (res.data as unknown as Record<string, unknown>).type as string
       if (cpType === "sound_chart_checkpoint") {
         pipeline.advance("sound_review", "Carta de sonido generada")
         addMessage(
@@ -134,7 +134,12 @@ export default function App() {
         addMessage("assistant", "He preparado una propuesta de escaleta:", res.data as CheckpointData, "escaleta")
       } else {
         pipeline.advance("escaleta_review", `Checkpoint: ${cpType}`)
-        addMessage("assistant", `Checkpoint recibido (${cpType}):`, res.data as Record<string, unknown>, "generic")
+        addMessage(
+          "assistant",
+          `Checkpoint recibido (${cpType}):`,
+          res.data as unknown as Record<string, unknown>,
+          "generic",
+        )
       }
     } else if (res.type === "message") {
       const content = res.content?.trim() || "Proceso completado."

@@ -46,7 +46,7 @@ export async function extractResponse(threadId: string): Promise<ChatResponse> {
   if (firstInterrupt) {
     const interruptValue = firstInterrupt.interrupts![0].value
     if (interruptValue && typeof interruptValue === "object") {
-      return { type: "checkpoint", data: interruptValue as Record<string, unknown>, thread_id: threadId }
+      return { type: "checkpoint", data: interruptValue as unknown as Record<string, unknown>, thread_id: threadId }
     }
   }
 

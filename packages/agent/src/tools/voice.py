@@ -104,10 +104,10 @@ def generate_voiceover(config_json: str) -> str:
     Args:
         config_json: The full video config as a JSON string, or a file path to config.json.
     """
-    if config_json.strip().startswith("{"):
+    try:
         config = json.loads(config_json)
-    else:
-        config = json.loads(Path(config_json).read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, TypeError):
+        return "Error: config_json must be a valid JSON string with the full video config. Do not pass a file path."
 
     voiceover = config.get("voiceover")
     if not voiceover or not voiceover.get("enabled"):

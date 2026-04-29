@@ -42,6 +42,41 @@ class TestSubmitRender:
         request_body = json.loads(route.calls[0].request.content)
         assert request_body["_skipAudioGeneration"] is True
 
+    @respx.mock
+    def test_submit_render_includes_voiceover(self):
+        route = respx.post("http://localhost:3100/api/render").mock(
+            return_value=httpx.Response(200, json={"jobId": "abc-123"})
+        )
+        vo = {"enabled": True, "provider": "gemini", "voiceId": "Orus", "scenes": {}}
+        submit_render(id="test", scenes=[{"type": "intro", "durationInSeconds": 3}], voiceover=vo)
+        body = json.loads(route.calls[0].request.content)
+        assert body["voiceover"] == vo
+        assert "_skipAudioGeneration" not in body
+
+    @respx.mock
+    def test_submit_render_includes_sound_design(self):
+        route = respx.post("http://localhost:3100/api/render").mock(
+            return_value=httpx.Response(200, json={"jobId": "abc-123"})
+        )
+        sd = {"enabled": True, "musicBed": {"libraryId": "lofi-tech"}, "sfx": []}
+        submit_render(id="test", scenes=[{"type": "intro", "durationInSeconds": 3}], sound_design=sd)
+        body = json.loads(route.calls[0].request.content)
+        assert body["soundDesign"] == sd
+        assert "_skipAudioGeneration" not in body
+
+    @respx.mock
+    def test_submit_render_both_audio_fields(self):
+        route = respx.post("http://localhost:3100/api/render").mock(
+            return_value=httpx.Response(200, json={"jobId": "abc-123"})
+        )
+        vo = {"enabled": True, "provider": "gemini", "voiceId": "Orus", "scenes": {}}
+        sd = {"enabled": True, "musicBed": {"libraryId": "lofi-tech"}, "sfx": []}
+        submit_render(id="test", scenes=[], voiceover=vo, sound_design=sd)
+        body = json.loads(route.calls[0].request.content)
+        assert body["voiceover"] == vo
+        assert body["soundDesign"] == sd
+        assert "_skipAudioGeneration" not in body
+
 
 class TestCheckRenderStatus:
     @respx.mock

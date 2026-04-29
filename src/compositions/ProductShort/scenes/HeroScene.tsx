@@ -23,10 +23,20 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle, timing })
   })
   const mascotY = interpolate(mascotSpring, [0, 1], [200, 0])
 
+  const accentSpring = spring({
+    frame: Math.max(0, frame - motionStartFrame - 14),
+    fps,
+    config: { damping: 200 },
+    durationInFrames: 25,
+  })
+  const accentWidth = interpolate(accentSpring, [0, 1], [0, 80])
+
+  const breathe = interpolate(frame, [0, 90, 180], [42, 55, 42], { extrapolateRight: "extend" })
+
   return (
     <AbsoluteFill
       style={{
-        background: tokens.primary,
+        background: `radial-gradient(circle at 50% ${breathe}%, ${tokens.primary}, ${tokens.primary}d0)`,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -44,19 +54,31 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle, timing })
         <PhoneMascot scale={2} animation="entry" />
       </div>
 
-      <div
-        style={{
-          fontFamily: tokens.fontFamily,
-          fontSize: 72,
-          fontWeight: 800,
-          color: tokens.primaryForeground,
-          textAlign: "center",
-          lineHeight: 1.1,
-          opacity: titleAnim.opacity,
-          transform: `translateY(${titleAnim.y}px)`,
-        }}
-      >
-        {title}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div
+          style={{
+            fontFamily: tokens.fontFamily,
+            fontSize: 72,
+            fontWeight: 800,
+            color: tokens.primaryForeground,
+            textAlign: "center",
+            lineHeight: 1.1,
+            opacity: titleAnim.opacity,
+            transform: `translateY(${titleAnim.y}px)`,
+          }}
+        >
+          {title}
+        </div>
+        <div
+          style={{
+            height: 4,
+            width: accentWidth,
+            background: tokens.primaryForeground,
+            borderRadius: 2,
+            marginTop: 16,
+            opacity: accentSpring,
+          }}
+        />
       </div>
 
       {subtitle && (

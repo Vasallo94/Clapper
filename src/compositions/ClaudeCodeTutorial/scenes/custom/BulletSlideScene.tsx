@@ -21,8 +21,24 @@ import {
 import type { Beat, Timing } from "../../../../utils/direction"
 import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
 
+type IconKey =
+  | "terminal"
+  | "cloud"
+  | "code"
+  | "folder"
+  | "shield"
+  | "gear"
+  | "user"
+  | "book"
+  | "lightbulb"
+  | "layers"
+  | "link"
+  | "check"
+  | "file"
+  | "arrow"
+
 interface BulletItem {
-  icon?: string
+  icon?: IconKey
   text: string
 }
 

@@ -68,6 +68,8 @@ def submit_render(
     composition: str = "ProductShort",
     product: str = "",
     headline: str = "",
+    voiceover: dict | None = None,
+    sound_design: dict | None = None,
 ) -> dict:
     """Submit a complete video config for rendering.
 
@@ -86,11 +88,19 @@ def submit_render(
         composition: "ProductShort" for vertical shorts, omit for tutorials.
         product: Product name (ProductShort only).
         headline: Marketing headline (ProductShort only).
+        voiceover: Voiceover config from audio_planner (provider, voiceId, scenes).
+        sound_design: Sound design config from audio_planner (musicBed, sfx).
 
     Returns:
         Dict with "jobId" on success, or error details on failure.
     """
-    config: dict = {"id": id, "fps": fps, "width": width, "height": height, "theme": theme, "scenes": scenes, "_skipAudioGeneration": True}
+    config: dict = {"id": id, "fps": fps, "width": width, "height": height, "theme": theme, "scenes": scenes}
+    if voiceover is not None:
+        config["voiceover"] = voiceover
+    if sound_design is not None:
+        config["soundDesign"] = sound_design
+    if voiceover is None and sound_design is None:
+        config["_skipAudioGeneration"] = True
     if composition == "ProductShort":
         config["composition"] = composition
         config["product"] = product

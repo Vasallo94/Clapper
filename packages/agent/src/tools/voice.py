@@ -8,6 +8,18 @@ from pathlib import Path
 
 from ..config import PROJECT_ROOT
 
+GEMINI_TTS_VOICES = {"Orus", "Kore", "Aoede", "Puck", "Charon", "Fenrir", "Leda", "Zephyr"}
+DEFAULT_VOICE = "Orus"
+
+
+def _sanitize_voice_id(voice_id: str) -> str:
+    if voice_id in GEMINI_TTS_VOICES:
+        return voice_id
+    logger_msg = f"voice_id '{voice_id}' is not a valid Gemini TTS voice, falling back to '{DEFAULT_VOICE}'"
+    import logging
+    logging.getLogger(__name__).warning(logger_msg)
+    return DEFAULT_VOICE
+
 
 def _find_ffmpeg() -> str:
     ffmpeg_bundled = PROJECT_ROOT / "node_modules" / "@remotion" / "compositor-win32-x64-msvc" / "ffmpeg.exe"
@@ -117,7 +129,7 @@ def generate_voiceover(config_json: str) -> str:
     if not client:
         return "Error: no Google credentials found. Set GOOGLE_APPLICATION_CREDENTIALS or GOOGLE_AI_API_KEY."
 
-    voice_id = voiceover.get("voiceId", "Orus")
+    voice_id = _sanitize_voice_id(voiceover.get("voiceId", DEFAULT_VOICE))
     language = voiceover.get("language", "es-ES")
     raw_scenes = voiceover.get("scenes", {})
     if isinstance(raw_scenes, list):

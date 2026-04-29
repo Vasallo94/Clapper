@@ -52,7 +52,8 @@ export const PricingScene: React.FC<PricingSceneProps> = ({ price, period, note,
             height: 400,
             borderRadius: "50%",
             border: `4px solid ${tokens.primary}`,
-            opacity: 0.15,
+            opacity: interpolate(Math.sin(frame * 0.08), [-1, 1], [0.1, 0.22]),
+            boxShadow: `0 0 60px ${tokens.primary}30`,
           }}
         />
       )}

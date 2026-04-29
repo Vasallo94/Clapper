@@ -142,16 +142,13 @@ Line kinds:
 {
   "type": "benefits",
   "title": "Optional title",
-  "items": [
-    { "icon": "Shield", "text": "24/7 coverage" },
-    { "icon": "Euro", "text": "Best price guaranteed" }
-  ],
+  "items": [{ "text": "24/7 coverage" }, { "text": "Best price guaranteed" }],
   "durationInSeconds": 6
 }
 ```
 
 - `title` (optional): string
-- `items` (required): array of `{ "icon": string, "text": string }` (min 1)
+- `items` (required): array of `{ "text": string }` (min 1)
 - `durationInSeconds`: 2–15
 
 ### pricing
@@ -191,6 +188,44 @@ Line kinds:
 - **Pacing**: Vary scene durations. Don't make every scene the same length.
 - **Total duration**: Shorts should be 15–30s. Tutorials 60–180s. Ask if unclear.
 - **Brief fields**: When presenting the escaleta, include a brief with: platform (linkedin/instagram/web), audience, goal, promise, tone, cta, hookStrategy.
+
+## Visual storytelling principles
+
+### Emotional arc
+
+Every video follows a tension-release structure. Map scenes to this arc:
+
+1. **Hook** (hero/intro): Provocation or bold claim. Max 8 words. Must create curiosity or urgency.
+2. **Problem/tension** (callout/custom): Name the pain. Be specific, not generic.
+3. **Solution/release** (benefits/terminal): Show the answer. Proof over promises.
+4. **Social proof/pricing** (pricing/benefits): Reinforce with numbers or authority.
+5. **CTA close** (cta): One clear action. Max 5 words.
+
+### Scene selection for impact
+
+- **hero**: Attention. Use for the opening hook. Bold claim + mascot entrance.
+- **benefits**: Proof. Use AFTER establishing the problem, never as the opener.
+- **pricing**: Anchor. Always place AFTER benefits — value before price.
+- **cta**: Close. Short, urgent, last scene always.
+- **callout**: Emphasis. Use mid-video to highlight a single surprising fact.
+- **terminal** (tutorials only): Demonstration. Show, don't tell.
+
+### Scene flow rules
+
+- NEVER repeat the same scene type consecutively.
+- Alternate energy: high-energy scene (hero, pricing) followed by lower-energy (benefits, callout).
+- Lead with surprise — the first scene must break expectations.
+- Minimum 3 scenes, maximum 6 for shorts. 4 is the sweet spot.
+
+### Copy density
+
+- hero title: max 8 words
+- benefit item text: max 12 words per item
+- CTA text: max 5 words
+- callout text: max 20 words
+- Pricing note: max 8 words
+
+Write like a creative director, not a feature list. Every word must earn its place.
 
 ## What you DON'T do
 

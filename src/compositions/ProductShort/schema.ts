@@ -18,7 +18,6 @@ const HeroSceneSchema = z
   .merge(DirectionSceneFieldsSchema)
 
 const BenefitItemSchema = z.object({
-  icon: z.string(),
   text: z.string(),
 })
 

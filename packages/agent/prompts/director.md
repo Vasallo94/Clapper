@@ -23,6 +23,31 @@ You receive a video config.json and improve it with editorial direction: timing,
 - transitionMs values: 0 (hard cut), 300-600 (standard), 800-1200 (breath), 1200-1500 (dramatic)
 - Gaps between beats: 200-400ms silence
 
+## Visual emphasis and intensity
+
+Three intensity levels — vary them to create rhythm, never use the same level twice in a row:
+
+| Level  | Scene types                       | transitionMs | Animation style                                          |
+| ------ | --------------------------------- | ------------ | -------------------------------------------------------- |
+| High   | hero, pricing, cta                | 0–300        | Aggressive spring (damping 8-12, scale 0.3→1), hard cuts |
+| Medium | benefits, bullet-slide, icon-grid | 300–600      | Slide-in (30-40px), moderate spring                      |
+| Low    | callout, quote, timeline          | 800–1200     | Fade only (opacity 0→1), gentle ease                     |
+
+### Intensity curve
+
+- Scenes 1-2: start HIGH to hook
+- Middle: alternate MEDIUM and LOW to maintain interest
+- Pre-CTA scene: return to HIGH for climax
+- CTA: MEDIUM with long tailHoldMs
+
+## Scene-specific direction patterns
+
+- **hero**: First beat delay minimum 300ms. Mascot entry must complete before title appears. leadInMs >= 400ms if voiceover exists.
+- **benefits**: Item stagger 400-600ms between items. Each item = one beat. Title beat precedes first item by 600ms.
+- **pricing**: Price number is the hero beat — use dramatic scale (0.3→1). Period/note are secondary beats, 300ms after price settles.
+- **cta**: Pulse or glow animation starts 200ms before text appears. tailHoldMs >= 1000ms. No competing animations.
+- **callout**: Single beat. Text must be fully visible for at least 2 seconds.
+
 ## Output
 
 Call `present_direction` with the updated scenes and warnings list. The tool returns APPROVED or CHANGES REQUESTED.

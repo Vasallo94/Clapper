@@ -2,13 +2,14 @@ import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { useThemeTokens } from "../../../../shared/themes"
 import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
+import { CrossIcon, CheckIcon } from "./svg-icons"
 import type { Beat, Timing } from "../../../../utils/direction"
 import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
 
 interface ProblemSolutionProps {
   title?: string
-  problem: { icon?: string; text: string }
-  solution: { icon?: string; text: string }
+  problem: { text: string }
+  solution: { text: string }
   timing?: Timing
   beats?: Beat[]
 }
@@ -130,7 +131,7 @@ export const ProblemSolutionScene: React.FC<Record<string, unknown>> = (rawProps
             flexShrink: 0,
           }}
         >
-          {problem.icon ?? "⚠"}
+          <CrossIcon size={20} color={problemColor} />
         </div>
         <div>
           <div
@@ -184,7 +185,7 @@ export const ProblemSolutionScene: React.FC<Record<string, unknown>> = (rawProps
             flexShrink: 0,
           }}
         >
-          {solution.icon ?? "✓"}
+          <CheckIcon size={20} color={solutionColor} />
         </div>
         <div>
           <div

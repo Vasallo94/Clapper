@@ -5,6 +5,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+
+- `submit_render()` now passes `voiceover` and `soundDesign` to render service (audio was silently dropped)
+- Removed `icon` string field from `BenefitItemSchema` — was rendering raw text in videos
+- Replaced emoji fallbacks in `ProblemSolutionScene` with proper SVG icons (CrossIcon/CheckIcon)
+
+### Changed
+
+- Constrained `icon` field in `IconGridScene` and `BulletSlideScene` to valid SVG lookup keys only
+- Copywriter prompt: added visual storytelling principles, scene selection guide, copy density rules
+- Director prompt: added visual emphasis/intensity levels and scene-specific direction patterns
+- Improved `BenefitsScene` animations: scale effect per item, animated accent line under title
+- Improved `HeroScene`: breathing radial gradient, accent line under title
+- Improved `PricingScene`: pulsing glow on light variant circle
+
 ### Added
 
 - Interactive video preview via `@remotion/player` in web frontend (VideoPlayer component)

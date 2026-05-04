@@ -62,14 +62,15 @@ def submit_render(
     title: str = "",
     description: str = "",
     fps: int = 30,
-    width: int = 1280,
-    height: int = 720,
+    width: int = 0,
+    height: int = 0,
     theme: str = "linea-directa",
     composition: str = "",
     product: str = "",
     headline: str = "",
     voiceover: dict | None = None,
     sound_design: dict | None = None,
+    runtime=None,
 ) -> dict:
     """Submit a complete video config for rendering.
 
@@ -82,19 +83,33 @@ def submit_render(
         title: Video title (required for tutorials).
         description: One-line description (required for tutorials).
         fps: Frames per second (always 30).
-        width: Video width in pixels.
-        height: Video height in pixels.
+        width: Video width in pixels (0 = resolve from runtime or default 1280).
+        height: Video height in pixels (0 = resolve from runtime or default 720).
         theme: Theme name (always "linea-directa" unless specified).
         composition: "ProductShort" for vertical shorts, empty string for tutorials (default).
         product: Product name (ProductShort only).
         headline: Marketing headline (ProductShort only).
         voiceover: Voiceover config from audio_planner (provider, voiceId, scenes).
         sound_design: Sound design config from audio_planner (musicBed, sfx).
+        runtime: Optional ToolRuntime injected by DeepAgents. Provides context with
+            render_service_url, width, and height overrides.
 
     Returns:
         Dict with "jobId" on success, or error details on failure.
     """
-    config: dict = {"id": id, "fps": fps, "width": width, "height": height, "theme": theme, "scenes": scenes}
+    ctx = getattr(runtime, "context", None) if runtime else None
+    render_url = (ctx.render_service_url if ctx else None) or RENDER_SERVICE_URL
+    effective_width = width or (ctx.width if ctx else 1280) or 1280
+    effective_height = height or (ctx.height if ctx else 720) or 720
+
+    config: dict = {
+        "id": id,
+        "fps": fps,
+        "width": effective_width,
+        "height": effective_height,
+        "theme": theme,
+        "scenes": scenes,
+    }
     if voiceover is not None:
         config["voiceover"] = voiceover
     if sound_design is not None:
@@ -108,7 +123,7 @@ def submit_render(
     else:
         config["title"] = title
         config["description"] = description
-    response = httpx.post(f"{RENDER_SERVICE_URL}/api/render", json=config, timeout=30.0)
+    response = httpx.post(f"{render_url}/api/render", json=config, timeout=30.0)
     return response.json()
 
 

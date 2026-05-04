@@ -97,6 +97,63 @@ class TestSubmitRender:
         assert "_skipAudioGeneration" not in body
 
 
+class TestSubmitRenderWithRuntime:
+    @respx.mock
+    def test_submit_render_uses_runtime_render_url(self):
+        custom_url = "http://custom-render:9999"
+        respx.post(f"{custom_url}/api/render").mock(
+            return_value=httpx.Response(200, json={"jobId": "rt-123"})
+        )
+        from unittest.mock import MagicMock
+        from src.context import PipelineContext
+
+        runtime = MagicMock()
+        runtime.context = PipelineContext(
+            config_id="test",
+            render_service_url=custom_url,
+        )
+
+        result = submit_render(
+            id="test",
+            scenes=[{"type": "intro", "durationInSeconds": 3}],
+            runtime=runtime,
+        )
+        assert result == {"jobId": "rt-123"}
+
+    @respx.mock
+    def test_submit_render_uses_runtime_dimensions(self):
+        route = respx.post("http://localhost:3100/api/render").mock(
+            return_value=httpx.Response(200, json={"jobId": "dim-123"})
+        )
+        from unittest.mock import MagicMock
+        from src.context import PipelineContext
+
+        runtime = MagicMock()
+        runtime.context = PipelineContext(
+            config_id="test",
+            width=1080,
+            height=1920,
+            composition="ProductShort",
+        )
+
+        submit_render(
+            id="test",
+            scenes=[{"type": "hero", "durationInSeconds": 3}],
+            runtime=runtime,
+        )
+        body = json.loads(route.calls[0].request.content)
+        assert body["width"] == 1080
+        assert body["height"] == 1920
+
+    @respx.mock
+    def test_submit_render_works_without_runtime(self):
+        respx.post("http://localhost:3100/api/render").mock(
+            return_value=httpx.Response(200, json={"jobId": "no-rt"})
+        )
+        result = submit_render(id="test", scenes=[])
+        assert result == {"jobId": "no-rt"}
+
+
 class TestCheckRenderStatus:
     @respx.mock
     def test_check_status_timeout(self, monkeypatch):

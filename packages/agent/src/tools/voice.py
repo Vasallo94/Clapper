@@ -9,6 +9,8 @@ from typing import Annotated, Any
 
 from langchain_core.tools import InjectedToolArg
 
+from ..context import resolve_config_id
+
 from ..config import PROJECT_ROOT
 
 GEMINI_TTS_VOICES = {"Orus", "Kore", "Aoede", "Puck", "Charon", "Fenrir", "Leda", "Zephyr"}
@@ -149,8 +151,7 @@ def generate_voiceover(config_json: str, runtime: Annotated[Any, InjectedToolArg
         scenes = {str(s.get("sceneIndex", i)): s for i, s in enumerate(raw_scenes)}
     else:
         scenes = raw_scenes
-    ctx = getattr(runtime, "context", None) if runtime else None
-    config_id = (ctx.config_id if ctx else None) or config.get("id", "unknown")
+    config_id = resolve_config_id(runtime, config)
     out_dir = PROJECT_ROOT / "public" / "voiceover" / config_id
     out_dir.mkdir(parents=True, exist_ok=True)
 

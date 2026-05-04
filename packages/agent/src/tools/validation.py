@@ -7,6 +7,7 @@ from typing import Annotated, Any
 from langchain_core.tools import InjectedToolArg
 
 from ..config import PROJECT_ROOT
+from ..context import resolve_config_id
 
 BUILTIN_SCENE_TYPES = {"intro", "terminal", "callout", "outro", "custom", "hero", "benefits", "pricing", "cta"}
 
@@ -40,8 +41,7 @@ def validate_config(config_input: str, runtime: Annotated[Any, InjectedToolArg] 
         return json.dumps({"errors": [config], "warnings": []})
     errors: list[str] = []
     warnings: list[str] = []
-    ctx = getattr(runtime, "context", None) if runtime else None
-    config_id = (ctx.config_id if ctx else None) or config.get("id", "unknown")
+    config_id = resolve_config_id(runtime, config)
 
     registry_path = PROJECT_ROOT / "src" / "compositions" / "ClaudeCodeTutorial" / "customSceneRegistry.ts"
     registered_ids: set[str] = set()

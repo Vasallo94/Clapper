@@ -15,6 +15,19 @@ import { KaraokeSubtitles, type WordTimestamp } from "../../shared/components/Ka
 import { LogoWatermark } from "../../shared/components/LogoWatermark"
 import { CompositionShell } from "../../shared/CompositionShell"
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const SCENE_MAP: Record<string, React.FC<any>> = {
+  intro: IntroScene,
+  terminal: TerminalScene,
+  callout: CalloutScene,
+  outro: OutroScene,
+  custom: CustomScene,
+  hero: HeroScene,
+  benefits: BenefitsScene,
+  pricing: PricingScene,
+  cta: CtaScene,
+}
+
 function useTimestamps(configId: string, sceneCount: number, enabled: boolean): (WordTimestamp[] | null)[] {
   const [timestamps, setTimestamps] = React.useState<(WordTimestamp[] | null)[]>(() =>
     Array.from({ length: sceneCount }, () => null),
@@ -25,20 +38,16 @@ function useTimestamps(configId: string, sceneCount: number, enabled: boolean): 
     if (!enabled) return
 
     const loadAll = async () => {
-      const results: (WordTimestamp[] | null)[] = []
-      for (let i = 0; i < sceneCount; i++) {
-        try {
-          const url = staticFile(`voiceover/${configId}/${i}.timestamps.json`)
-          const res = await fetch(url)
-          if (res.ok) {
-            results.push(await res.json())
-          } else {
-            results.push(null)
+      const results = await Promise.all(
+        Array.from({ length: sceneCount }, async (_, i) => {
+          try {
+            const res = await fetch(staticFile(`voiceover/${configId}/${i}.timestamps.json`))
+            return res.ok ? ((await res.json()) as WordTimestamp[]) : null
+          } catch {
+            return null
           }
-        } catch {
-          results.push(null)
-        }
-      }
+        }),
+      )
       setTimestamps(results)
       if (handle !== null) continueRender(handle)
     }
@@ -59,19 +68,10 @@ export const ClaudeCodeTutorial: React.FC<TutorialConfig> = (config) => {
     <CompositionShell
       config={config}
       theme={config.theme ?? "default"}
-      renderScene={(scene) => (
-        <>
-          {scene.type === "intro" && <IntroScene {...scene} />}
-          {scene.type === "terminal" && <TerminalScene {...scene} />}
-          {scene.type === "callout" && <CalloutScene {...scene} />}
-          {scene.type === "outro" && <OutroScene {...scene} />}
-          {scene.type === "custom" && <CustomScene {...scene} />}
-          {scene.type === "hero" && <HeroScene {...scene} />}
-          {scene.type === "benefits" && <BenefitsScene {...scene} />}
-          {scene.type === "pricing" && <PricingScene {...scene} />}
-          {scene.type === "cta" && <CtaScene {...scene} />}
-        </>
-      )}
+      renderScene={(scene) => {
+        const Scene = SCENE_MAP[scene.type]
+        return Scene ? <Scene {...scene} /> : null
+      }}
       renderOverlay={(scene, info, i) => (
         <>
           {subtitlesEnabled && sceneTimestamps[i] && (

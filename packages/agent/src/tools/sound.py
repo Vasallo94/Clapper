@@ -5,6 +5,7 @@ from langchain_core.tools import InjectedToolArg
 
 from ._checkpoint import checkpoint_interrupt
 from ..config import PROJECT_ROOT
+from ..context import get_pipeline_context
 
 
 def list_audio_library() -> str:
@@ -41,7 +42,7 @@ def copy_library_track(track_id: str, config_id: str, dest_name: str, runtime: A
         dest_name: Destination filename without extension (e.g. 'music-bed' or 'sfx-swoosh').
         runtime: Optional ToolRuntime. When present, runtime.context.config_id takes precedence.
     """
-    ctx = getattr(runtime, "context", None) if runtime else None
+    ctx = get_pipeline_context(runtime)
     effective_config_id = (ctx.config_id if ctx else None) or config_id
 
     import shutil

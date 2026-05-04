@@ -7,6 +7,7 @@ import httpx
 from langchain_core.tools import InjectedToolArg
 
 from ._checkpoint import checkpoint_interrupt
+from ..context import get_pipeline_context
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +100,7 @@ def submit_render(
     Returns:
         Dict with "jobId" on success, or error details on failure.
     """
-    ctx = getattr(runtime, "context", None) if runtime else None
+    ctx = get_pipeline_context(runtime)
     render_url = (ctx.render_service_url if ctx else None) or RENDER_SERVICE_URL
     effective_width = width or (ctx.width if ctx else 1280) or 1280
     effective_height = height or (ctx.height if ctx else 720) or 720
@@ -145,7 +146,7 @@ def check_render_status(job_id: str, runtime: Annotated[Any, InjectedToolArg] = 
         and optionally output_path (file path) or error (detailed message
         including stderr from the render process).
     """
-    ctx = getattr(runtime, "context", None) if runtime else None
+    ctx = get_pipeline_context(runtime)
     render_url = (ctx.render_service_url if ctx else None) or RENDER_SERVICE_URL
     deadline = time.time() + RENDER_TIMEOUT_SECONDS
     result: dict = {"status": "timeout", "progress": 0, "_pipeline_complete": True}

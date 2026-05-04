@@ -12,7 +12,13 @@ def _parse_config(config_input: str) -> dict:
     try:
         return json.loads(config_input)
     except (json.JSONDecodeError, TypeError):
-        return json.loads(Path(config_input).read_text(encoding="utf-8"))
+        p = Path(config_input)
+        if not p.is_file():
+            raise FileNotFoundError(
+                f"Cannot read '{config_input}' — if this is a virtual path like /pipeline/config.json, "
+                f"use read_file to get the JSON content first, then pass the JSON string to validate_config."
+            )
+        return json.loads(p.read_text(encoding="utf-8"))
 
 
 def validate_config(config_input: str) -> str:

@@ -1,8 +1,10 @@
 import logging
 import os
 import time
+from typing import Annotated, Any
 
 import httpx
+from langchain_core.tools import InjectedToolArg
 
 from ._checkpoint import checkpoint_interrupt
 
@@ -70,7 +72,7 @@ def submit_render(
     headline: str = "",
     voiceover: dict | None = None,
     sound_design: dict | None = None,
-    runtime=None,
+    runtime: Annotated[Any, InjectedToolArg] = None,
 ) -> dict:
     """Submit a complete video config for rendering.
 
@@ -127,7 +129,7 @@ def submit_render(
     return response.json()
 
 
-def check_render_status(job_id: str, runtime=None) -> dict:
+def check_render_status(job_id: str, runtime: Annotated[Any, InjectedToolArg] = None) -> dict:
     """Check the status of a render job. Polls until terminal state (max 5 min).
 
     After this returns, the pipeline is COMPLETE. Do not call any other tools

@@ -37,9 +37,9 @@ You dispatch tasks to these agents using the `task(name, task)` tool:
    **Creative phase:**
    a. Dispatch **researcher** to gather product/topic data → writes `/pipeline/brief.json`
    b. Dispatch **copywriter** with instruction to read `/pipeline/brief.json` → writes `/pipeline/config.json`. It handles CP1 (escaleta approval).
-   c. Call **validate_config** on `/pipeline/config.json`. If errors, re-dispatch copywriter.
+   c. Read `/pipeline/config.json` with `read_file`, then call **validate_config** with the JSON string. If errors, re-dispatch copywriter.
    d. Dispatch **director** with instruction to read/update `/pipeline/config.json`. It handles CP2 (direction approval).
-   e. Call **validate_config** on `/pipeline/config.json`. If errors, re-dispatch director.
+   e. Read `/pipeline/config.json` with `read_file`, then call **validate_config** with the JSON string. If errors, re-dispatch director.
 
    **Production phase:**
    f. Dispatch **audio_planner** to read/update `/pipeline/config.json`. It handles CP3 (audio chart approval).
@@ -89,9 +89,9 @@ Do NOT paste the full config JSON into task descriptions. Agents use `read_file`
 
 ### Validation between steps
 
-After the **copywriter** completes, call `validate_config` on `/pipeline/config.json` to catch schema errors early. If validation returns errors, re-dispatch the copywriter with the error list.
+After the **copywriter** completes, read `/pipeline/config.json` with `read_file` and pass the JSON string to `validate_config`. Do NOT pass the file path — pass the actual JSON content. If validation returns errors, re-dispatch the copywriter with the error list.
 
-After the **director** completes, call `validate_config` again. If errors, re-dispatch the director.
+After the **director** completes, do the same: read the config with `read_file`, then pass the JSON string to `validate_config`. If errors, re-dispatch the director.
 
 After **voice_generator** and **sound_engineer** complete, dispatch the **validator** for full asset verification.
 

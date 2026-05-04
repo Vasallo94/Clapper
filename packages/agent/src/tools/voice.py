@@ -5,6 +5,9 @@ import os
 import subprocess
 import time
 from pathlib import Path
+from typing import Annotated, Any
+
+from langchain_core.tools import InjectedToolArg
 
 from ..config import PROJECT_ROOT
 
@@ -115,7 +118,7 @@ def _generate_scene_audio(client, scene_index: str, text: str, voice_id: str, la
     return f"scene {scene_index}: OK ({mp3_path.stat().st_size} bytes)"
 
 
-def generate_voiceover(config_json: str, runtime=None) -> str:
+def generate_voiceover(config_json: str, runtime: Annotated[Any, InjectedToolArg] = None) -> str:
     """Generate voiceover audio for all scenes using Gemini TTS.
 
     Reads the voiceover config, calls Gemini TTS for each scene with text,

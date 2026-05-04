@@ -1,4 +1,7 @@
 import json
+from typing import Annotated, Any
+
+from langchain_core.tools import InjectedToolArg
 
 from ._checkpoint import checkpoint_interrupt
 from ..config import PROJECT_ROOT
@@ -29,7 +32,7 @@ def present_audio_chart(voiceover: dict, sound_design: dict) -> str:
     )
 
 
-def copy_library_track(track_id: str, config_id: str, dest_name: str, runtime=None) -> str:
+def copy_library_track(track_id: str, config_id: str, dest_name: str, runtime: Annotated[Any, InjectedToolArg] = None) -> str:
     """Copy a track from the audio library to a config's audio directory.
 
     Args:

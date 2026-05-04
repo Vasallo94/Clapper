@@ -1,0 +1,12 @@
+node_modules/
+.git/
+packages/agent/.venv/
+packages/agent/.langgraph_api/
+packages/render-service/node_modules/
+packages/web/node_modules/
+dist/
+out/
+.remotion/
+tutorials/*/output.mp4
+__pycache__/
+*.py[cod]

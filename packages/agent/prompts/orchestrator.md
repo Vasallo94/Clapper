@@ -57,7 +57,9 @@ You dispatch tasks to these agents using the `task(name, task)` tool:
 ## STOP CONDITIONS — CRITICAL
 
 - After step 2k (reviewer approval), report the result to the user. YOUR JOB IS DONE. Do NOT dispatch any more agents.
-- Each agent should be dispatched EXACTLY ONCE per pipeline run.
+- Each agent should be dispatched ONCE per pipeline run.
+- EXCEPTION: If a checkpoint is REJECTED with feedback, re-dispatch that same agent with the user's feedback appended to the task description. Only re-dispatch the agent that owns the rejected checkpoint — never skip ahead.
+- Forward relevant feedback to downstream agents when it affects their scope (e.g., if the user says "add audio" during CP2, mention it in the audio_planner's task description).
 - If check_render_status returns status="error", report the error to the user and STOP.
 - If validator reports blocking errors, inform the user and STOP.
 - If ANY subagent returns an error, inform the user and STOP. Do not retry or restart the pipeline.

@@ -1,0 +1,15 @@
+services:
+  agent:
+    build:
+      context: .
+      dockerfile: packages/agent/Dockerfile
+    ports:
+      - "2024:2024"
+    volumes:
+      - .:/app
+    env_file: .env
+    environment:
+      - PROJECT_ROOT=/app
+      - RENDER_SERVICE_URL=http://host.docker.internal:3100
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

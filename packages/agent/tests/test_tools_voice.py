@@ -76,13 +76,14 @@ def test_generate_voiceover_success(tmp_path, monkeypatch):
 
 
 class TestGenerateSceneAudioDataHandling:
-    def test_handles_bytes_directly(self, tmp_path):
+    def test_handles_bytes_directly(self, tmp_path, monkeypatch):
         """When Gemini returns bytes, write them directly without base64 decode."""
+        import src.tools.voice as voice_mod
         from src.tools.voice import _generate_scene_audio
 
         class FakeAudioPart:
             class inline_data:
-                data = b"\x00\x01" * 100  # raw PCM bytes
+                data = b"\x00\x01" * 100
 
         class FakeCandidate:
             class content:
@@ -97,24 +98,19 @@ class TestGenerateSceneAudioDataHandling:
                 def generate_content(**kwargs):
                     return FakeResponse()
 
-        # Mock _pcm_to_mp3 to avoid needing ffmpeg
-        import src.tools.voice as voice_mod
-        original_pcm_to_mp3 = voice_mod._pcm_to_mp3
         def fake_pcm_to_mp3(pcm_path, mp3_path):
             mp3_path.write_bytes(pcm_path.read_bytes())
             pcm_path.unlink(missing_ok=True)
-        voice_mod._pcm_to_mp3 = fake_pcm_to_mp3
 
-        try:
-            result = _generate_scene_audio(FakeClient(), "0", "Hello", "Orus", "es-ES", tmp_path)
-            assert "OK" in result
-            assert (tmp_path / "0.mp3").exists()
-        finally:
-            voice_mod._pcm_to_mp3 = original_pcm_to_mp3
+        monkeypatch.setattr(voice_mod, "_pcm_to_mp3", fake_pcm_to_mp3)
+        result = _generate_scene_audio(FakeClient(), "0", "Hello", "Orus", "es-ES", tmp_path)
+        assert "OK" in result
+        assert (tmp_path / "0.mp3").exists()
 
-    def test_handles_base64_string(self, tmp_path):
+    def test_handles_base64_string(self, tmp_path, monkeypatch):
         """When Gemini returns a base64 string, decode it properly."""
         import base64
+        import src.tools.voice as voice_mod
         from src.tools.voice import _generate_scene_audio
 
         raw_pcm = b"\x00\x01" * 100
@@ -122,7 +118,7 @@ class TestGenerateSceneAudioDataHandling:
 
         class FakeAudioPart:
             class inline_data:
-                data = b64_string  # base64-encoded string
+                data = b64_string
 
         class FakeCandidate:
             class content:
@@ -137,18 +133,13 @@ class TestGenerateSceneAudioDataHandling:
                 def generate_content(**kwargs):
                     return FakeResponse()
 
-        import src.tools.voice as voice_mod
         def fake_pcm_to_mp3(pcm_path, mp3_path):
             mp3_path.write_bytes(pcm_path.read_bytes())
             pcm_path.unlink(missing_ok=True)
-        original = voice_mod._pcm_to_mp3
-        voice_mod._pcm_to_mp3 = fake_pcm_to_mp3
 
-        try:
-            result = _generate_scene_audio(FakeClient(), "0", "Hello", "Orus", "es-ES", tmp_path)
-            assert "OK" in result
-        finally:
-            voice_mod._pcm_to_mp3 = original
+        monkeypatch.setattr(voice_mod, "_pcm_to_mp3", fake_pcm_to_mp3)
+        result = _generate_scene_audio(FakeClient(), "0", "Hello", "Orus", "es-ES", tmp_path)
+        assert "OK" in result
 
     def test_rejects_unexpected_type(self, tmp_path):
         """When Gemini returns an unexpected type, raise ValueError."""

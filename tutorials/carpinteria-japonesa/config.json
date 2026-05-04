@@ -1,0 +1,240 @@
+{
+  "theme": "linea-directa",
+  "width": 1280,
+  "height": 720,
+  "scenes": [
+    {
+      "type": "hero",
+      "durationInSeconds": 8,
+      "title": "Sashimono",
+      "subtitle": "La milenaria tradición de ebanistería japonesa sin clavos",
+      "timing": {
+        "leadInMs": 1500,
+        "audioStartMs": 1500,
+        "tailHoldMs": 1000,
+        "transitionMs": 1500
+      },
+      "beats": [
+        {
+          "id": "s1b1",
+          "startMs": 1500,
+          "narration": "Sashimono",
+          "visual": "Title fades in softly, establishing a quiet presence",
+          "animation": "slow-fade",
+          "emphasis": "medium"
+        },
+        {
+          "id": "s1b2",
+          "startMs": 4000,
+          "narration": "La milenaria tradición de ebanistería japonesa sin clavos",
+          "visual": "Subtitle is revealed, mimicking a smooth plane sliding over wood",
+          "animation": "slow-pan",
+          "emphasis": "high"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "big-number",
+      "props": {
+        "number": "+1000",
+        "label": "Años de Evolución"
+      },
+      "durationInSeconds": 8,
+      "timing": {
+        "leadInMs": 1000,
+        "audioStartMs": 1000,
+        "tailHoldMs": 1500,
+        "transitionMs": 1000
+      },
+      "beats": [
+        {
+          "id": "s2b1",
+          "startMs": 1000,
+          "narration": "Más de mil",
+          "visual": "Number increments softly but firmly",
+          "animation": "number-count-slow",
+          "emphasis": "medium"
+        },
+        {
+          "id": "s2b2",
+          "startMs": 3500,
+          "narration": "Años de Evolución",
+          "visual": "Label gently fades in beneath",
+          "animation": "fade-up",
+          "emphasis": "low"
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "durationInSeconds": 12,
+      "text": "Una técnica basada en la filosofía Wabi-Sabi, respetando la verdadera naturaleza de la madera.",
+      "position": "center",
+      "timing": {
+        "leadInMs": 1200,
+        "audioStartMs": 1200,
+        "tailHoldMs": 1500,
+        "transitionMs": 1200
+      },
+      "beats": [
+        {
+          "id": "s3b1",
+          "startMs": 1200,
+          "narration": "Una técnica basada en la filosofía Wabi-Sabi",
+          "visual": "Text emerges with subtle grain texture overlaid",
+          "animation": "fade-in-slow",
+          "emphasis": "high"
+        },
+        {
+          "id": "s3b2",
+          "startMs": 6000,
+          "narration": "respetando la verdadera naturaleza de la madera.",
+          "visual": "Focus lingers on text as a soft light sweeps across",
+          "animation": "slow-zoom",
+          "emphasis": "medium"
+        }
+      ]
+    },
+    {
+      "type": "benefits",
+      "durationInSeconds": 15,
+      "title": "Resiliencia Natural",
+      "items": [
+        {
+          "text": "Movimiento higroscópico: La madera se expande y contrae"
+        },
+        {
+          "text": "Durabilidad eterna: Sin metales que se oxiden"
+        },
+        {
+          "text": "Antisísmico: Flexibilidad que absorbe el impacto"
+        }
+      ],
+      "timing": {
+        "leadInMs": 1000,
+        "audioStartMs": 1000,
+        "tailHoldMs": 1200,
+        "transitionMs": 1000
+      },
+      "beats": [
+        {
+          "id": "s4b1",
+          "startMs": 1000,
+          "narration": "Resiliencia Natural",
+          "visual": "Title appears calmly",
+          "animation": "fade-in",
+          "emphasis": "low"
+        },
+        {
+          "id": "s4b2",
+          "startMs": 3500,
+          "narration": "Movimiento higroscópico: La madera se expande y contrae",
+          "visual": "First point slides in, gentle expansion animation",
+          "animation": "slide-up-slow",
+          "emphasis": "medium"
+        },
+        {
+          "id": "s4b3",
+          "startMs": 7500,
+          "narration": "Durabilidad eterna: Sin metales que se oxiden",
+          "visual": "Second point appears, solid and lasting",
+          "animation": "slide-up-slow",
+          "emphasis": "medium"
+        },
+        {
+          "id": "s4b4",
+          "startMs": 11500,
+          "narration": "Antisísmico: Flexibilidad que absorbe el impacto",
+          "visual": "Third point highlights structural resilience",
+          "animation": "slide-up-slow",
+          "emphasis": "high"
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "durationInSeconds": 10,
+      "text": "\"La integridad de usar madera para conectar madera honra el espíritu vivo del árbol.\" - Filosofía Sashimono",
+      "position": "center",
+      "timing": {
+        "leadInMs": 1200,
+        "audioStartMs": 1200,
+        "tailHoldMs": 1500,
+        "transitionMs": 1500
+      },
+      "beats": [
+        {
+          "id": "s5b1",
+          "startMs": 1200,
+          "narration": "\"La integridad de usar madera para conectar madera",
+          "visual": "Quote text elegantly fades in",
+          "animation": "fade-in",
+          "emphasis": "high"
+        },
+        {
+          "id": "s5b2",
+          "startMs": 5500,
+          "narration": "honra el espíritu vivo del árbol.\" - Filosofía Sashimono",
+          "visual": "Second part of the quote concludes the thought",
+          "animation": "fade-in-slow",
+          "emphasis": "medium"
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "durationInSeconds": 7,
+      "text": "Descubre la belleza de la imperfección.",
+      "url": "wabi-sabi.jp",
+      "timing": {
+        "leadInMs": 1000,
+        "audioStartMs": 1000,
+        "tailHoldMs": 2500,
+        "transitionMs": 1500
+      },
+      "beats": [
+        {
+          "id": "s6b1",
+          "startMs": 1000,
+          "narration": "Descubre la belleza de la imperfección.",
+          "visual": "CTA text fades in over a perfected wooden joint",
+          "animation": "fade-in",
+          "emphasis": "high"
+        },
+        {
+          "id": "s6b2",
+          "startMs": 3500,
+          "narration": "wabi-sabi.jp",
+          "visual": "URL fades up gently, holding in silence",
+          "animation": "fade-up",
+          "emphasis": "low"
+        }
+      ]
+    }
+  ],
+  "voiceover": {
+    "enabled": true,
+    "provider": "gemini",
+    "voiceId": "Zephyr",
+    "language": "es-ES",
+    "scenes": {
+      "0": "Sashimono. La milenaria tradición de ebanistería japonesa sin clavos.",
+      "1": "Más de mil años de evolución.",
+      "2": "Una técnica basada en la filosofía Wabi-Sabi, respetando la verdadera naturaleza de la madera.",
+      "3": "Resiliencia Natural. Movimiento higroscópico, durabilidad eterna, y un diseño antisísmico.",
+      "4": "La integridad de usar madera para conectar madera honra el espíritu vivo del árbol. Filosofía Sashimono.",
+      "5": "Descubre la belleza de la imperfección. wabi-sabi.jp"
+    }
+  },
+  "soundDesign": {
+    "enabled": false,
+    "musicBed": null,
+    "sfx": []
+  },
+  "transition": null,
+  "id": "carpinteria-japonesa",
+  "fps": 30,
+  "title": "Sashimono: Carpintería Japonesa sin Clavos",
+  "description": "Video educativo sobre la tradición milenaria del sashimono japonés"
+}

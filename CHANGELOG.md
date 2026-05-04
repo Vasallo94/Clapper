@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- ClaudeCodeTutorial composition now supports `hero`, `benefits`, `pricing`, `cta` scene types (previously ProductShort-only)
 - `PipelineContext` dataclass (`packages/agent/src/context.py`) for static per-run metadata; fields: `config_id`, `composition`, `width`, `height`, `theme`, `output_dir`, `render_service_url`
 - Filesystem virtual state management: all agent prompts now include `## State management` sections specifying `/pipeline/*.json` read/write paths via built-in `read_file`/`write_file`
 - `validate_config` registered as orchestrator direct tool for intermediate validation between creative steps

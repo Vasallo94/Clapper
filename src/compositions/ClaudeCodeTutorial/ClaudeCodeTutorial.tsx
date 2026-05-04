@@ -7,6 +7,10 @@ import { TerminalScene } from "./scenes/TerminalScene"
 import { CalloutScene } from "./scenes/CalloutScene"
 import { OutroScene } from "./scenes/OutroScene"
 import { CustomScene } from "./scenes/CustomScene"
+import { HeroScene } from "../ProductShort/scenes/HeroScene"
+import { BenefitsScene } from "../ProductShort/scenes/BenefitsScene"
+import { PricingScene } from "../ProductShort/scenes/PricingScene"
+import { CtaScene } from "../ProductShort/scenes/CtaScene"
 import { KaraokeSubtitles, type WordTimestamp } from "../../shared/components/KaraokeSubtitles"
 import { LogoWatermark } from "../../shared/components/LogoWatermark"
 import { CompositionShell } from "../../shared/CompositionShell"
@@ -62,6 +66,10 @@ export const ClaudeCodeTutorial: React.FC<TutorialConfig> = (config) => {
           {scene.type === "callout" && <CalloutScene {...scene} />}
           {scene.type === "outro" && <OutroScene {...scene} />}
           {scene.type === "custom" && <CustomScene {...scene} />}
+          {scene.type === "hero" && <HeroScene {...scene} />}
+          {scene.type === "benefits" && <BenefitsScene {...scene} />}
+          {scene.type === "pricing" && <PricingScene {...scene} />}
+          {scene.type === "cta" && <CtaScene {...scene} />}
         </>
       )}
       renderOverlay={(scene, info, i) => (

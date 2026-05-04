@@ -67,12 +67,56 @@ const CustomSceneSchema = z
   })
   .merge(DirectionSceneFieldsSchema)
 
+const BenefitItemSchema = z.object({ text: z.string() })
+
+const HeroSceneSchema = z
+  .object({
+    type: z.literal("hero"),
+    title: z.string(),
+    subtitle: z.string().nullable().optional(),
+    durationInSeconds: z.number().min(1).max(30),
+  })
+  .merge(DirectionSceneFieldsSchema)
+
+const BenefitsSceneSchema = z
+  .object({
+    type: z.literal("benefits"),
+    title: z.string().nullable().optional(),
+    items: z.array(BenefitItemSchema).min(1),
+    durationInSeconds: z.number().min(2).max(30),
+  })
+  .merge(DirectionSceneFieldsSchema)
+
+const PricingSceneSchema = z
+  .object({
+    type: z.literal("pricing"),
+    price: z.string(),
+    period: z.string().nullable().optional(),
+    note: z.string().nullable().optional(),
+    variant: z.enum(["light", "dark"]),
+    durationInSeconds: z.number().min(1).max(15),
+  })
+  .merge(DirectionSceneFieldsSchema)
+
+const CtaSceneSchema = z
+  .object({
+    type: z.literal("cta"),
+    text: z.string(),
+    url: z.string().nullable().optional(),
+    durationInSeconds: z.number().min(1).max(15),
+  })
+  .merge(DirectionSceneFieldsSchema)
+
 const SceneSchema = z.union([
   IntroSceneSchema,
   TerminalSceneSchema,
   CalloutSceneSchema,
   OutroSceneSchema,
   CustomSceneSchema,
+  HeroSceneSchema,
+  BenefitsSceneSchema,
+  PricingSceneSchema,
+  CtaSceneSchema,
 ])
 
 const SubtitlesConfigSchema = z.object({
@@ -108,3 +152,7 @@ export type TerminalSceneProps = z.infer<typeof TerminalSceneSchema>
 export type CalloutSceneProps = z.infer<typeof CalloutSceneSchema>
 export type OutroSceneProps = z.infer<typeof OutroSceneSchema>
 export type CustomSceneProps = z.infer<typeof CustomSceneSchema>
+export type HeroSceneProps = z.infer<typeof HeroSceneSchema>
+export type BenefitsSceneProps = z.infer<typeof BenefitsSceneSchema>
+export type PricingSceneProps = z.infer<typeof PricingSceneSchema>
+export type CtaSceneProps = z.infer<typeof CtaSceneSchema>

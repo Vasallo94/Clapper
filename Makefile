@@ -1,4 +1,4 @@
-.PHONY: help dev studio agent renderer web up stop \
+.PHONY: help dev studio agent agent-native agent-logs agent-shell renderer web up stop \
        render validate catalog voiceover sound \
        lint typecheck check test test-visual test-visual-update \
        install install-all browser-ensure clean
@@ -25,8 +25,18 @@ dev: studio ## Alias for studio
 studio: ## Start Remotion Studio (preview)
 	npm run dev
 
-agent: ## Start LangGraph agent server (port 2024)
-	cd $(AGENT_DIR) && uv run langgraph dev --config langgraph.json --port $(AGENT_PORT) --allow-blocking
+agent: ## Start LangGraph agent (Docker)
+	docker compose up agent --build
+
+agent-native: ## Start LangGraph agent (native, no Docker)
+	cd $(AGENT_DIR) && uv run langgraph dev --config langgraph.json \
+	    --port $(AGENT_PORT) --allow-blocking
+
+agent-logs: ## Tail agent container logs
+	docker compose logs -f agent
+
+agent-shell: ## Open shell in agent container
+	docker compose exec agent bash
 
 renderer: ## Start render service (port 3100)
 	cd $(RENDER_DIR) && npm run dev

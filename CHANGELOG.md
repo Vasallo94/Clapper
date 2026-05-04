@@ -13,19 +13,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
-- `submit_render()` defaults changed from ProductShort (1080x1920) to Tutorial (1280x720) — agents that omit dimensions no longer produce wrong-sized renders
-- `generate_voiceover()` now checks for scenes presence instead of `enabled: true` flag — voiceover was silently skipped because audio_planner never set `enabled`
-- Audio planner prompt now always includes `"enabled": true` in voiceover config (required by Zod schema at render time)
-- Voice generator prompt clarifies `enabled` is optional for the tool but required by the render schema
-
-- `_find_ffmpeg()` now raises `FileNotFoundError` immediately when ffmpeg is not found instead of returning bare `"ffmpeg"` string that causes confusing subprocess errors later
-- Added `FFMPEG_PATH` env var support to `_find_ffmpeg()` for explicit ffmpeg binary override
-- Removed Remotion bundled ffmpeg fallback paths (don't work cross-directory)
-
-### Fixed
-
-- `_generate_scene_audio()` base64 handling: bytes from Gemini SDK are written directly, base64 strings are decoded explicitly, and unexpected types now raise `ValueError` instead of silently converting via `str()`
-- `list_audio_library()` now searches for `.mp3` files instead of directories — the function used `is_dir()` instead of `is_file()`, so the sound engineer agent never found any background music tracks
+- `list_audio_library()` now searches for `.mp3` files instead of directories — videos will now have background music
+- `generate_voiceover()` now checks for scenes presence instead of `enabled: true` flag — voiceover was silently skipped
+- `_generate_scene_audio()` base64 handling: bytes written directly, strings decoded, unexpected types raise `ValueError`
+- `_find_ffmpeg()` raises `FileNotFoundError` instead of returning bare `"ffmpeg"` string; supports `FFMPEG_PATH` env var
+- `submit_render()` defaults changed from ProductShort (1080x1920) to Tutorial (1280x720)
+- BeatSchema `narration`, `visual`, `animation` fields are now optional — missing fields no longer block renders
+- Orchestrator allows re-dispatching agents on checkpoint rejection with user feedback
+- Audio planner prompt always includes `"enabled": true` in voiceover config (required by Zod schema)
 - Render service now captures stderr and surfaces actual error messages (Zod validation, bundler crashes) instead of opaque "exit code N"
 - All Zod `.optional()` fields in schemas now accept `null` via `.nullable().optional()` — prevents validation failures when Python agents send `null` instead of omitting keys
 - DuckDuckGo search tool now handles HTTP 202 responses and guides agent to fallback tools

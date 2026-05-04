@@ -1,6 +1,11 @@
+---
+name: scene-catalog
+description: Catalogo completo de escenas disponibles para generacion de videos Remotion. Tipos de escena con campos, restricciones de duracion, y 26 componentes custom registrados. Usala al generar configs, validar escenas, o crear componentes custom.
+---
+
 # Scene Catalog
 
-Available scene types for video generation. Each scene has a `type` field and `durationInSeconds`.
+Reference catalog of all available scene types for video generation. Every scene requires `type` and `durationInSeconds` fields.
 
 All scenes accept optional direction fields: `timing` (leadInMs, audioStartMs, tailHoldMs, transitionMs) and `beats` (array of narration/visual/animation cues with startMs/endMs).
 
@@ -17,28 +22,49 @@ Opening title card with animated lockup.
 | pixelLogo         | object | no       | `{ enabled, scale (1-12), animation: "none"\|"build"\|"glint"\|"pulse" }` |
 | durationInSeconds | number | yes      | 1-30                                                                      |
 
+```json
+{ "type": "intro", "title": "...", "subtitle": "...", "durationInSeconds": 3 }
+```
+
 ### terminal
 
 Simulated Claude Code CLI session with typewriter/streaming effects.
 
-| Field             | Type   | Required | Notes                                                                                     |
-| ----------------- | ------ | -------- | ----------------------------------------------------------------------------------------- |
-| title             | string | no       | Scene heading                                                                             |
-| lines             | array  | yes      | Min 1 line. Each: `{ kind: "command"\|"output"\|"claude"\|"blank", text, delayAfterMs? }` |
-| durationInSeconds | number | yes      | 2-120                                                                                     |
+| Field             | Type   | Required | Notes                                             |
+| ----------------- | ------ | -------- | ------------------------------------------------- |
+| title             | string | no       | Scene heading                                     |
+| lines             | array  | yes      | Min 1 line. Each: `{ kind, text, delayAfterMs? }` |
+| durationInSeconds | number | yes      | 2-120                                             |
 
-Line rendering speeds: command = 0.5 chars/frame, claude = 1 char/frame (18-frame gap between lines), output = instant (8 frames).
+Line kinds and rendering speeds:
+
+- `command`: user typing (typewriter, ~0.5 chars/frame)
+- `claude`: AI response (streaming, ~1 char/frame, 18-frame gap between lines)
+- `output`: tool output (instant reveal, 8 frames)
+- `blank`: visual separator
+
+```json
+{
+  "type": "terminal",
+  "lines": [
+    { "kind": "command", "text": "claude 'explain this code'" },
+    { "kind": "claude", "text": "This function validates user input..." },
+    { "kind": "output", "text": "Done in 1.2s" }
+  ],
+  "durationInSeconds": 10
+}
+```
 
 ### callout
 
-Highlighted text overlay for key points or transitions.
+Highlighted text overlay for key points.
 
-| Field             | Type                     | Required | Notes               |
-| ----------------- | ------------------------ | -------- | ------------------- |
-| text              | string                   | yes      | Callout message     |
-| position          | "top"\|"bottom"\|"right" | yes      | Placement on screen |
-| background        | "overlay"\|"solid"       | no       | Default "overlay"   |
-| durationInSeconds | number                   | yes      | 1-15                |
+| Field             | Type   | Required | Notes                              |
+| ----------------- | ------ | -------- | ---------------------------------- |
+| text              | string | yes      | Callout message                    |
+| position          | enum   | yes      | `"top"` \| `"bottom"` \| `"right"` |
+| background        | enum   | no       | `"overlay"` (default) \| `"solid"` |
+| durationInSeconds | number | yes      | 1-15                               |
 
 ### outro
 
@@ -76,23 +102,23 @@ Opening vertical hero card.
 
 Animated benefit items list.
 
-| Field             | Type   | Required | Notes                   |
-| ----------------- | ------ | -------- | ----------------------- |
-| title             | string | no       | Section heading         |
-| items             | array  | yes      | Min 1. Each: `{ text }` |
-| durationInSeconds | number | yes      | 2-15                    |
+| Field             | Type   | Required | Notes                             |
+| ----------------- | ------ | -------- | --------------------------------- |
+| title             | string | no       | Section heading                   |
+| items             | array  | yes      | Min 1. Each: `{ "text": string }` |
+| durationInSeconds | number | yes      | 2-15                              |
 
 ### pricing
 
-Price display with optional period and note.
+Price display card.
 
-| Field             | Type            | Required | Notes                    |
-| ----------------- | --------------- | -------- | ------------------------ |
-| price             | string          | yes      | e.g. "desde 180 EUR/ano" |
-| period            | string          | no       | e.g. "al ano"            |
-| note              | string          | no       | Small print              |
-| variant           | "light"\|"dark" | yes      | Color scheme             |
-| durationInSeconds | number          | yes      | 1-10                     |
+| Field             | Type   | Required | Notes                    |
+| ----------------- | ------ | -------- | ------------------------ |
+| price             | string | yes      | e.g. "desde 180 EUR/ano" |
+| period            | string | no       | e.g. "al ano"            |
+| note              | string | no       | Small print              |
+| variant           | enum   | yes      | `"light"` \| `"dark"`    |
+| durationInSeconds | number | yes      | 1-10                     |
 
 ### cta
 
@@ -136,3 +162,7 @@ Registered in `customSceneRegistry.ts`. Use `type: "custom"` with the `component
 | step-list        | Numbered step sequence             |
 | timeline         | Timeline visualization             |
 | two-column-text  | Two-column text layout             |
+
+## CRITICAL: durationInSeconds
+
+Every scene MUST use `"durationInSeconds"` (a number). NEVER use `durationInFrames`, `duration`, or any other name.

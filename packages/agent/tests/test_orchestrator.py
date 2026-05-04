@@ -22,12 +22,55 @@ def test_all_prompts_exist():
 
 
 def test_all_skills_exist():
-    """All skill files must exist."""
+    """All skill directories must have SKILL.md."""
     from pathlib import Path
     skills_dir = Path(__file__).parent.parent / "skills"
-    required = ["scene_catalog.md", "best_practices.md", "brand_guidelines.md"]
+    required = [
+        "scene-catalog",
+        "video-best-practices",
+        "brand-guidelines",
+        "remotion-best-practices",
+        "remotion-director",
+        "remotion-tutorial-generator",
+        "remotion-short-ld",
+        "sound-engineer",
+    ]
     for name in required:
-        assert (skills_dir / name).exists(), f"Missing skill: {name}"
+        skill_file = skills_dir / name / "SKILL.md"
+        assert skill_file.exists(), f"Missing skill: {name}/SKILL.md"
+
+
+def test_skills_have_valid_frontmatter():
+    """All SKILL.md files must have name and description in frontmatter."""
+    from pathlib import Path
+    import re
+    skills_dir = Path(__file__).parent.parent / "skills"
+    for skill_dir in skills_dir.iterdir():
+        skill_file = skill_dir / "SKILL.md"
+        if not skill_file.exists():
+            continue
+        content = skill_file.read_text(encoding="utf-8")
+        assert content.startswith("---"), f"{skill_dir.name}/SKILL.md missing frontmatter"
+        fm_end = content.index("---", 3)
+        frontmatter = content[3:fm_end]
+        assert "name:" in frontmatter, f"{skill_dir.name}/SKILL.md missing 'name' field"
+        assert "description:" in frontmatter, f"{skill_dir.name}/SKILL.md missing 'description' field"
+
+
+def test_subagents_with_skills_have_skills_key():
+    """Subagents that need domain knowledge must have a skills key."""
+    from src.subagents import (
+        create_audio_planner,
+        create_copywriter,
+        create_director,
+        create_sound_engineer,
+        create_validator,
+    )
+
+    for factory in [create_copywriter, create_director, create_audio_planner, create_sound_engineer, create_validator]:
+        defn = factory()
+        assert "skills" in defn, f"{factory.__name__} missing 'skills' key"
+        assert len(defn["skills"]) > 0, f"{factory.__name__} has empty skills list"
 
 
 def test_load_prompt():

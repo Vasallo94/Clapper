@@ -35,6 +35,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 - Researcher agent prompt: limits failed search retries to 2, prioritizes `scrape_product` over `web_search` for known domains, caps total tool calls to 3
 - `scrape_product` docstring now lists common Línea Directa slugs and marks it as primary research tool
+- Skills restructured from flat `.md` files to proper DeepAgents skill directories (`scene-catalog/SKILL.md`, `brand-guidelines/SKILL.md`, `video-best-practices/SKILL.md`) with YAML frontmatter — enables progressive disclosure via SkillsMiddleware
+- Prompts (copywriter, director, audio_planner, sound_engineer) rewritten: domain knowledge moved to skills, prompts now contain only workflow/tools/state-management; each includes `## Skills` section referencing relevant skill directories
+- All subagent factories with domain needs now include `"skills": [str(SKILLS_DIR)]` key for SkillsMiddleware integration
+- ADR 0003: documents skills/prompts/agents architecture decision (separation of domain knowledge from workflow)
 
 ### Fixed
 

@@ -43,7 +43,7 @@ def create_scene_creator():
     by the orchestrator. The exact integration depends on the
     DeepAgents CompiledSubAgent API.
     """
-    from ...orchestrator import create_model, load_prompt
+    from ...orchestrator import SKILLS_DIR, create_model, load_prompt
     from ...tools.scene import present_custom_scene
     from .tools import read_scene, write_scene
 
@@ -55,5 +55,6 @@ def create_scene_creator():
         "graph": graph,
         "system_prompt": load_prompt("scene_creator"),
         "tools": [write_scene, read_scene, present_custom_scene],
+        "skills": [str(SKILLS_DIR)],
         "model": create_model(),
     }

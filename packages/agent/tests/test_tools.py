@@ -294,6 +294,42 @@ class TestCopyLibraryTrack:
         assert "not found" in result.lower()
 
 
+class TestCopyLibraryTrackRuntime:
+    def test_uses_runtime_config_id(self, tmp_path, monkeypatch):
+        import src.tools.sound as sound_mod
+        monkeypatch.setattr(sound_mod, "PROJECT_ROOT", tmp_path)
+
+        library_dir = tmp_path / "public" / "audio" / "library"
+        library_dir.mkdir(parents=True)
+        (library_dir / "lofi-tech.mp3").write_bytes(b"fake-mp3")
+
+        from unittest.mock import MagicMock
+        from src.context import PipelineContext
+
+        runtime = MagicMock()
+        runtime.context = PipelineContext(config_id="rt-video")
+
+        from src.tools.sound import copy_library_track
+        result = copy_library_track("lofi-tech", "ignored-id", "music-bed", runtime=runtime)
+        assert "Copied" in result
+        dest = tmp_path / "public" / "audio" / "rt-video" / "music-bed.mp3"
+        assert dest.exists()
+
+    def test_falls_back_to_arg_without_runtime(self, tmp_path, monkeypatch):
+        import src.tools.sound as sound_mod
+        monkeypatch.setattr(sound_mod, "PROJECT_ROOT", tmp_path)
+
+        library_dir = tmp_path / "public" / "audio" / "library"
+        library_dir.mkdir(parents=True)
+        (library_dir / "lofi-tech.mp3").write_bytes(b"fake-mp3")
+
+        from src.tools.sound import copy_library_track
+        result = copy_library_track("lofi-tech", "arg-id", "music-bed")
+        assert "Copied" in result
+        dest = tmp_path / "public" / "audio" / "arg-id" / "music-bed.mp3"
+        assert dest.exists()
+
+
 class TestListAudioLibrary:
     def test_lists_mp3_files_not_dirs(self, tmp_path, monkeypatch):
         import src.tools.sound as sound_mod

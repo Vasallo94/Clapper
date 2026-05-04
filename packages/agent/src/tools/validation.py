@@ -2,6 +2,9 @@ import json
 import re
 import subprocess
 from pathlib import Path
+from typing import Annotated, Any
+
+from langchain_core.tools import InjectedToolArg
 
 from ..config import PROJECT_ROOT
 
@@ -23,7 +26,7 @@ def _parse_config(config_input: str) -> dict | str:
         return json.loads(p.read_text(encoding="utf-8"))
 
 
-def validate_config(config_input: str) -> str:
+def validate_config(config_input: str, runtime: Annotated[Any, InjectedToolArg] = None) -> str:
     """Validate a video config against real assets on disk.
 
     Checks that all referenced scenes exist in the registry, voiceover MP3s
@@ -37,7 +40,8 @@ def validate_config(config_input: str) -> str:
         return json.dumps({"errors": [config], "warnings": []})
     errors: list[str] = []
     warnings: list[str] = []
-    config_id = config.get("id", "unknown")
+    ctx = getattr(runtime, "context", None) if runtime else None
+    config_id = (ctx.config_id if ctx else None) or config.get("id", "unknown")
 
     registry_path = PROJECT_ROOT / "src" / "compositions" / "ClaudeCodeTutorial" / "customSceneRegistry.ts"
     registered_ids: set[str] = set()

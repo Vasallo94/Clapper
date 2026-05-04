@@ -28,6 +28,26 @@ Read `scene-catalog` on every invocation. Consult `brand-guidelines` for creativ
 
 Every scene has `"type"` (NOT `sceneType`) and `"durationInSeconds"` (NOT `duration` or `durationInFrames`).
 
+### Top-level required fields
+
+The config MUST include these top-level fields:
+
+```json
+{
+  "id": "slug-del-video",
+  "title": "Título del video",
+  "description": "Descripción breve",
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "theme": "linea-directa",
+  "transition": null,
+  "scenes": [...]
+}
+```
+
+- `"id"` is a kebab-case slug derived from the video topic (e.g., `"carpinteria-japonesa"`, `"seguro-hogar"`). It is used to locate voiceover files on disk — if missing, the pipeline breaks.
+
 ### Native scene types (use `"type"` directly)
 
 - **hero**: `{ "type": "hero", "title": "...", "subtitle": "...", "durationInSeconds": N }`

@@ -20,6 +20,21 @@ Read `video-best-practices` on every invocation for volume values and audio rule
    - VoiceId: MUST be one of these Gemini TTS voice names: "Orus" (didactic/warm), "Kore" (corporate/professional), "Puck" (energetic/young), "Charon" (deep/authoritative), "Leda" (soft/feminine), "Zephyr" (neutral/calm), "Aoede" (bright/musical), "Fenrir" (bold/dramatic). NEVER use Google Cloud TTS format like "es-ES-Standard-A" — those crash the pipeline
    - Language: `es-ES` (default) unless user specified otherwise
    - Write voiceover text for each scene that needs narration (skip pure visual scenes)
+   - **`scenes` MUST be a record keyed by scene index (string), NOT an array:**
+     ```json
+     "voiceover": {
+       "enabled": true,
+       "provider": "gemini",
+       "voiceId": "Zephyr",
+       "language": "es-ES",
+       "scenes": {
+         "0": "Texto de la escena 0.",
+         "1": "Texto de la escena 1.",
+         "2": { "text": "Texto largo.", "leadInMs": 500 }
+       }
+     }
+     ```
+     NEVER use `[{ "sceneIndex": 0, "text": "..." }]` — Zod rejects arrays
 5. Design the sound design section:
    - Music bed: select ONLY from tracks returned by `list_audio_library`
    - SFX: select ONLY from tracks returned by `list_audio_library` — if no SFX tracks exist, set sfx to empty array

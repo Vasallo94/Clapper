@@ -26,6 +26,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- `validate_config` now reads `config_id` from `PipelineContext` runtime — no longer defaults to `"unknown"` when config JSON lacks `id` field
+- Copywriter prompt now requires `id` field in config JSON — voiceover files are saved to the correct directory
+- Audio planner prompt enforces `voiceover.scenes` as record format (`{"0": "text"}`) — Zod no longer rejects array format at render time
 - `list_audio_library()` now searches for `.mp3` files instead of directories — videos will now have background music
 - `generate_voiceover()` now checks for scenes presence instead of `enabled: true` flag — voiceover was silently skipped
 - `_generate_scene_audio()` base64 handling: bytes written directly, strings decoded, unexpected types raise `ValueError`

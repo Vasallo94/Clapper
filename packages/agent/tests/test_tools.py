@@ -186,6 +186,35 @@ class TestCheckRenderStatus:
         assert result["output"] == "/path/to/output.mp4"
 
 
+class TestCheckRenderStatusRuntime:
+    @respx.mock
+    def test_uses_runtime_render_url(self, monkeypatch):
+        from unittest.mock import MagicMock
+        from src.context import PipelineContext
+
+        route = respx.get("http://custom:9000/api/render/job-rt/status").mock(
+            return_value=httpx.Response(
+                200, json={"status": "done", "progress": 100, "output": "/out.mp4"}
+            )
+        )
+        runtime = MagicMock()
+        runtime.context = PipelineContext(config_id="test", render_service_url="http://custom:9000")
+
+        result = check_render_status("job-rt", runtime=runtime)
+        assert result["status"] == "done"
+        assert route.called
+
+    @respx.mock
+    def test_works_without_runtime(self):
+        respx.get("http://localhost:3100/api/render/job-no-rt/status").mock(
+            return_value=httpx.Response(
+                200, json={"status": "done", "progress": 100}
+            )
+        )
+        result = check_render_status("job-no-rt")
+        assert result["status"] == "done"
+
+
 class TestPresentDirection:
     def test_present_direction_uses_interrupt(self):
         import inspect

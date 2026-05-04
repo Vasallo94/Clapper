@@ -8,6 +8,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 ### Added
 
 - `PipelineContext` dataclass (`packages/agent/src/context.py`) for static per-run metadata; fields: `config_id`, `composition`, `width`, `height`, `theme`, `output_dir`, `render_service_url`
+- Filesystem virtual state management: all agent prompts now include `## State management` sections specifying `/pipeline/*.json` read/write paths via built-in `read_file`/`write_file`
+- `validate_config` registered as orchestrator direct tool for intermediate validation between creative steps
+- `runtime` parameter on `submit_render`, `check_render_status`, `generate_voiceover`, `copy_library_track` for DeepAgents `ToolRuntime` context injection
+- Summarization middleware (`create_summarization_tool_middleware`) wired into orchestrator for context compression
+- Orchestrator prompt: validation between steps (after copywriter and director), pipeline state filesystem docs, agent dispatch instructions for filesystem usage
 - Run-state logging in `graph_server.py` for debugging LangGraph pending tool call terminations
 - `DISABLE_WRITE_TODOS` env var to suppress `write_todos` tool usage (workaround for Gemini nested format bug)
 - "Known runtime behavior" section in `prompts/orchestrator.md` documenting LangGraph run termination and write_todos issues

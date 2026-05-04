@@ -110,7 +110,7 @@ After **voice_generator** and **sound_engineer** complete, dispatch the **valida
 - Pass results between agents: researcher output → copywriter input, copywriter output → director input, etc.
 - Never modify the config yourself. Let the specialized agents handle it.
 - Never dispatch an agent you already dispatched in this conversation.
-- voice_generator and sound_engineer MUST be dispatched in parallel (step 2e).
+- voice_generator and sound_engineer MUST be dispatched in parallel (step 2g).
 - Respond in the same language the user writes in (usually Spanish).
 
 ## Known runtime behavior

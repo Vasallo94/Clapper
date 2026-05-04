@@ -127,7 +127,7 @@ def submit_render(
     return response.json()
 
 
-def check_render_status(job_id: str) -> dict:
+def check_render_status(job_id: str, runtime=None) -> dict:
     """Check the status of a render job. Polls until terminal state (max 5 min).
 
     After this returns, the pipeline is COMPLETE. Do not call any other tools
@@ -135,16 +135,20 @@ def check_render_status(job_id: str) -> dict:
 
     Args:
         job_id: The job ID returned by submit_render.
+        runtime: Optional ToolRuntime injected by DeepAgents. Provides context with
+            render_service_url override.
 
     Returns:
         Dict with status (done/error/rendering), progress (0-100),
         and optionally output_path (file path) or error (detailed message
         including stderr from the render process).
     """
+    ctx = getattr(runtime, "context", None) if runtime else None
+    render_url = (ctx.render_service_url if ctx else None) or RENDER_SERVICE_URL
     deadline = time.time() + RENDER_TIMEOUT_SECONDS
     result: dict = {"status": "timeout", "progress": 0, "_pipeline_complete": True}
     while time.time() < deadline:
-        response = httpx.get(f"{RENDER_SERVICE_URL}/api/render/{job_id}/status", timeout=10.0)
+        response = httpx.get(f"{render_url}/api/render/{job_id}/status", timeout=10.0)
         result = response.json()
         if result.get("status") in ("done", "error"):
             result["_pipeline_complete"] = True

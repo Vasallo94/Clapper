@@ -48,6 +48,14 @@ Three intensity levels — vary them to create rhythm, never use the same level 
 - **cta**: Pulse or glow animation starts 200ms before text appears. tailHoldMs >= 1000ms. No competing animations.
 - **callout**: Single beat. Text must be fully visible for at least 2 seconds.
 
+## State management
+
+- Read the current config from `/pipeline/config.json` using `read_file`
+- Add timing and beats to each scene
+- Write the enriched config back to `/pipeline/config.json` using `write_file`
+- When revising after feedback, read the current config, modify, and write back
+- Do NOT return the full config as text — update the file and confirm what changed
+
 ## Output
 
 Call `present_direction` with the updated scenes and warnings list. The tool returns APPROVED or CHANGES REQUESTED.

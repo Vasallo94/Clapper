@@ -115,7 +115,7 @@ def _generate_scene_audio(client, scene_index: str, text: str, voice_id: str, la
     return f"scene {scene_index}: OK ({mp3_path.stat().st_size} bytes)"
 
 
-def generate_voiceover(config_json: str) -> str:
+def generate_voiceover(config_json: str, runtime=None) -> str:
     """Generate voiceover audio for all scenes using Gemini TTS.
 
     Reads the voiceover config, calls Gemini TTS for each scene with text,
@@ -146,7 +146,8 @@ def generate_voiceover(config_json: str) -> str:
         scenes = {str(s.get("sceneIndex", i)): s for i, s in enumerate(raw_scenes)}
     else:
         scenes = raw_scenes
-    config_id = config.get("id", "unknown")
+    ctx = getattr(runtime, "context", None) if runtime else None
+    config_id = (ctx.config_id if ctx else None) or config.get("id", "unknown")
     out_dir = PROJECT_ROOT / "public" / "voiceover" / config_id
     out_dir.mkdir(parents=True, exist_ok=True)
 

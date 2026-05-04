@@ -233,3 +233,96 @@ class TestGenerateVoiceoverEnabledGate:
         }
         result = generate_voiceover(json.dumps(config))
         assert "no scenes" in result.lower()
+
+
+class TestGenerateVoiceoverRuntime:
+    def test_uses_runtime_config_id_for_output_dir(self, tmp_path, monkeypatch):
+        """runtime.context.config_id wins over the JSON config id for the output dir."""
+        import src.tools.voice as voice_mod
+        monkeypatch.setattr(voice_mod, "PROJECT_ROOT", tmp_path)
+
+        from unittest.mock import MagicMock
+        from src.context import PipelineContext
+
+        runtime = MagicMock()
+        runtime.context = PipelineContext(
+            config_id="runtime-video",
+            output_dir=str(tmp_path),
+        )
+
+        # Provide a real scene with text so the function reaches dir-creation code.
+        class FakeResponse:
+            class FakeCandidate:
+                class FakeContent:
+                    class FakePart:
+                        class FakeInlineData:
+                            data = "AAAA"
+                        inline_data = FakeInlineData()
+                    parts = [FakePart()]
+                content = FakeContent()
+            candidates = [FakeCandidate()]
+
+        class FakeClient:
+            class models:
+                @staticmethod
+                def generate_content(**kwargs):
+                    return FakeResponse()
+
+        monkeypatch.setattr(voice_mod, "_get_genai_client", lambda: FakeClient())
+        monkeypatch.setattr(voice_mod, "_pcm_to_mp3", lambda pcm, mp3: mp3.write_bytes(b"\xff\xfb\x90\x00"))
+
+        config = {
+            "id": "json-video",
+            "voiceover": {
+                "voiceId": "Orus",
+                "language": "es-ES",
+                "scenes": {"0": {"text": "Hola mundo"}},
+            },
+        }
+
+        result = voice_mod.generate_voiceover(json.dumps(config), runtime=runtime)
+
+        # Output dir must use runtime's config_id, not the JSON id.
+        runtime_dir = tmp_path / "public" / "voiceover" / "runtime-video"
+        json_dir = tmp_path / "public" / "voiceover" / "json-video"
+        assert runtime_dir.exists(), f"Expected runtime dir to exist. Result: {result}"
+        assert not json_dir.exists(), "JSON config id dir should NOT be created when runtime is provided"
+        assert "1 OK" in result
+
+    def test_works_without_runtime(self, tmp_path, monkeypatch):
+        """Without runtime, falls back to config JSON id for the output dir."""
+        import src.tools.voice as voice_mod
+        monkeypatch.setattr(voice_mod, "PROJECT_ROOT", tmp_path)
+
+        class FakeResponse:
+            class FakeCandidate:
+                class FakeContent:
+                    class FakePart:
+                        class FakeInlineData:
+                            data = "AAAA"
+                        inline_data = FakeInlineData()
+                    parts = [FakePart()]
+                content = FakeContent()
+            candidates = [FakeCandidate()]
+
+        class FakeClient:
+            class models:
+                @staticmethod
+                def generate_content(**kwargs):
+                    return FakeResponse()
+
+        monkeypatch.setattr(voice_mod, "_get_genai_client", lambda: FakeClient())
+        monkeypatch.setattr(voice_mod, "_pcm_to_mp3", lambda pcm, mp3: mp3.write_bytes(b"\xff\xfb\x90\x00"))
+
+        config = {
+            "id": "plain-video",
+            "voiceover": {
+                "voiceId": "Orus",
+                "language": "es-ES",
+                "scenes": {"0": {"text": "Hola mundo"}},
+            },
+        }
+        result = voice_mod.generate_voiceover(json.dumps(config))
+        expected_dir = tmp_path / "public" / "voiceover" / "plain-video"
+        assert expected_dir.exists(), f"Expected plain-video dir to exist. Result: {result}"
+        assert "1 OK" in result

@@ -102,11 +102,23 @@ Opening vertical hero card.
 
 Animated benefit items list.
 
-| Field             | Type   | Required | Notes                             |
-| ----------------- | ------ | -------- | --------------------------------- |
-| title             | string | no       | Section heading                   |
-| items             | array  | yes      | Min 1. Each: `{ "text": string }` |
-| durationInSeconds | number | yes      | 2-15                              |
+| Field             | Type   | Required | Notes                                                   |
+| ----------------- | ------ | -------- | ------------------------------------------------------- |
+| title             | string | no       | Section heading                                         |
+| items             | array  | yes      | Min 1. Each item MUST be an object: `{ "text": "..." }` |
+| durationInSeconds | number | yes      | 2-15                                                    |
+
+**CRITICAL:** `items` must be an array of objects, NOT an array of strings. This crashes the render:
+
+```json
+"items": ["Wrong", "Also wrong"]
+```
+
+Correct format:
+
+```json
+"items": [{ "text": "Correct" }, { "text": "Also correct" }]
+```
 
 ### pricing
 

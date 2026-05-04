@@ -78,7 +78,7 @@ Every video follows a tension-release structure:
 
 ## Scene flow rules
 
-- NEVER repeat the same scene type consecutively
+- **NEVER repeat the same scene type consecutively** — e.g. two `hero` or two `callout` in a row is forbidden. Use the full variety of available types.
 - Alternate energy: high (hero, pricing) then low (benefits, callout)
 - Lead with surprise — first scene breaks expectations
 - Shorts: 3-6 scenes, 4 is the sweet spot

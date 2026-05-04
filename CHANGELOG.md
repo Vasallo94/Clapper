@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- `PipelineContext` dataclass (`packages/agent/src/context.py`) for static per-run metadata; fields: `config_id`, `composition`, `width`, `height`, `theme`, `output_dir`, `render_service_url`
 - Run-state logging in `graph_server.py` for debugging LangGraph pending tool call terminations
 - `DISABLE_WRITE_TODOS` env var to suppress `write_todos` tool usage (workaround for Gemini nested format bug)
 - "Known runtime behavior" section in `prompts/orchestrator.md` documenting LangGraph run termination and write_todos issues

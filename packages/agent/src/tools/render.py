@@ -62,10 +62,10 @@ def submit_render(
     title: str = "",
     description: str = "",
     fps: int = 30,
-    width: int = 1080,
-    height: int = 1920,
+    width: int = 1280,
+    height: int = 720,
     theme: str = "linea-directa",
-    composition: str = "ProductShort",
+    composition: str = "",
     product: str = "",
     headline: str = "",
     voiceover: dict | None = None,
@@ -85,7 +85,7 @@ def submit_render(
         width: Video width in pixels.
         height: Video height in pixels.
         theme: Theme name (always "linea-directa" unless specified).
-        composition: "ProductShort" for vertical shorts, omit for tutorials.
+        composition: "ProductShort" for vertical shorts, empty string for tutorials (default).
         product: Product name (ProductShort only).
         headline: Marketing headline (ProductShort only).
         voiceover: Voiceover config from audio_planner (provider, voiceId, scenes).
@@ -123,15 +123,18 @@ def check_render_status(job_id: str) -> dict:
 
     Returns:
         Dict with status (done/error/rendering), progress (0-100),
-        and optionally output (file path) or error message.
+        and optionally output_path (file path) or error (detailed message
+        including stderr from the render process).
     """
     deadline = time.time() + RENDER_TIMEOUT_SECONDS
-    result = {"status": "timeout", "progress": 0, "_pipeline_complete": True}
+    result: dict = {"status": "timeout", "progress": 0, "_pipeline_complete": True}
     while time.time() < deadline:
         response = httpx.get(f"{RENDER_SERVICE_URL}/api/render/{job_id}/status", timeout=10.0)
         result = response.json()
         if result.get("status") in ("done", "error"):
             result["_pipeline_complete"] = True
+            if result.get("status") == "error":
+                logger.error("Render failed for job %s: %s", job_id, result.get("error", "unknown"))
             return result
         time.sleep(5)
     result["_pipeline_complete"] = True

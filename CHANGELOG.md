@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- `submit_render()` defaults changed from ProductShort (1080x1920) to Tutorial (1280x720) — agents that omit dimensions no longer produce wrong-sized renders
 - `generate_voiceover()` now checks for scenes presence instead of `enabled: true` flag — voiceover was silently skipped because audio_planner never set `enabled`
 - Audio planner prompt now always includes `"enabled": true` in voiceover config (required by Zod schema at render time)
 - Voice generator prompt clarifies `enabled` is optional for the tool but required by the render schema

@@ -65,6 +65,25 @@ class TestSubmitRender:
         assert "_skipAudioGeneration" not in body
 
     @respx.mock
+    def test_default_dimensions_are_tutorial(self):
+        route = respx.post("http://localhost:3100/api/render").mock(
+            return_value=httpx.Response(200, json={"jobId": "abc-123"})
+        )
+        submit_render(id="test", scenes=[{"type": "intro", "durationInSeconds": 3}])
+        body = json.loads(route.calls[0].request.content)
+        assert body["width"] == 1280
+        assert body["height"] == 720
+
+    @respx.mock
+    def test_default_composition_is_not_product_short(self):
+        route = respx.post("http://localhost:3100/api/render").mock(
+            return_value=httpx.Response(200, json={"jobId": "abc-123"})
+        )
+        submit_render(id="test", scenes=[{"type": "intro", "durationInSeconds": 3}])
+        body = json.loads(route.calls[0].request.content)
+        assert body.get("composition", "") != "ProductShort"
+
+    @respx.mock
     def test_submit_render_both_audio_fields(self):
         route = respx.post("http://localhost:3100/api/render").mock(
             return_value=httpx.Response(200, json={"jobId": "abc-123"})

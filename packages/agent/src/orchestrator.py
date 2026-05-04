@@ -9,6 +9,7 @@ from langgraph.checkpoint.memory import MemorySaver  # used when running standal
 from .tools.render import check_render_status, submit_render
 
 from .config import PROJECT_ROOT
+from .context import PipelineContext
 
 PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
 SKILLS_DIR = Path(__file__).parent.parent / "skills"
@@ -53,13 +54,7 @@ def create_model(name: str | None = None):
 
 
 def create_video_orchestrator(*, checkpointer=None):
-    """Create the multi-agent video orchestrator with 3 subgraphs.
-
-    Args:
-        checkpointer: Optional checkpointer for state persistence.
-            When served via `langgraph dev`, the platform provides its own
-            checkpointer so this should be omitted.
-    """
+    """Create the multi-agent video orchestrator with 3 subgraphs."""
     from .subagents import (
         create_audio_planner,
         create_copywriter,
@@ -83,22 +78,26 @@ def create_video_orchestrator(*, checkpointer=None):
     )
 
     subagents = [
-        # Creative subgraph
         create_researcher(),
         create_copywriter(),
         create_director(),
-        # Production subgraph
         create_audio_planner(),
         create_voice_generator(),
         create_sound_engineer(),
         create_validator(),
-        # Delivery subgraph
         create_reviewer(),
     ]
 
     system_prompt = load_prompt("orchestrator")
     if DISABLE_WRITE_TODOS:
         system_prompt += "\n\nDo NOT use write_todos tool. Plan using text responses only."
+
+    middleware = []
+    try:
+        from deepagents.middleware.summarization import create_summarization_tool_middleware
+        middleware.append(create_summarization_tool_middleware(model, StateBackend))
+    except ImportError:
+        pass
 
     kwargs: dict = {
         "model": model,
@@ -109,7 +108,10 @@ def create_video_orchestrator(*, checkpointer=None):
         "backend": backend,
         "memory": ["/memories/AGENTS.md"],
         "name": "video-orchestrator",
+        "context_schema": PipelineContext,
     }
+    if middleware:
+        kwargs["middleware"] = middleware
     if checkpointer is not None:
         kwargs["checkpointer"] = checkpointer
 

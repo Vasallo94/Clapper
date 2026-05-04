@@ -75,3 +75,20 @@ def test_subagent_factories_all_return_dicts():
         assert "description" in defn
         assert "system_prompt" in defn
         assert "tools" in defn
+
+
+class TestOrchestratorContextSchema:
+    def test_orchestrator_has_context_schema(self, monkeypatch):
+        monkeypatch.setenv("GOOGLE_API_KEY", "fake-key")
+        from src.orchestrator import create_video_orchestrator
+        from src.context import PipelineContext
+        from langgraph.checkpoint.memory import MemorySaver
+
+        graph = create_video_orchestrator(checkpointer=MemorySaver())
+        assert graph.config_schema is not None
+
+    def test_pipeline_context_is_importable_from_orchestrator(self):
+        from src.context import PipelineContext
+        from dataclasses import is_dataclass
+
+        assert is_dataclass(PipelineContext)

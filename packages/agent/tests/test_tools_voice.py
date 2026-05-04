@@ -75,6 +75,36 @@ def test_generate_voiceover_success(tmp_path, monkeypatch):
     assert (tmp_path / "public" / "voiceover" / "test-vid" / "0.mp3").exists()
 
 
+class TestFindFfmpeg:
+    def test_uses_ffmpeg_path_env_var(self, tmp_path, monkeypatch):
+        ffmpeg_bin = tmp_path / "custom-ffmpeg"
+        ffmpeg_bin.write_text("#!/bin/sh\n")
+        monkeypatch.setenv("FFMPEG_PATH", str(ffmpeg_bin))
+
+        from src.tools.voice import _find_ffmpeg
+
+        assert _find_ffmpeg() == str(ffmpeg_bin)
+
+    def test_uses_system_ffmpeg_when_no_env(self, monkeypatch):
+        monkeypatch.delenv("FFMPEG_PATH", raising=False)
+        import shutil
+
+        if shutil.which("ffmpeg"):
+            from src.tools.voice import _find_ffmpeg
+
+            result = _find_ffmpeg()
+            assert "ffmpeg" in result.lower()
+
+    def test_raises_when_not_found(self, monkeypatch):
+        monkeypatch.delenv("FFMPEG_PATH", raising=False)
+        monkeypatch.setattr("shutil.which", lambda x: None)
+
+        from src.tools.voice import _find_ffmpeg
+
+        with pytest.raises(FileNotFoundError, match="ffmpeg not found"):
+            _find_ffmpeg()
+
+
 class TestGenerateSceneAudioDataHandling:
     def test_handles_bytes_directly(self, tmp_path, monkeypatch):
         """When Gemini returns bytes, write them directly without base64 decode."""

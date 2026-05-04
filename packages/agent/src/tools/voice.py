@@ -24,17 +24,13 @@ def _sanitize_voice_id(voice_id: str) -> str:
 def _find_ffmpeg() -> str:
     import shutil
 
+    env_path = os.environ.get("FFMPEG_PATH")
+    if env_path:
+        return env_path
     system_ffmpeg = shutil.which("ffmpeg")
     if system_ffmpeg:
         return system_ffmpeg
-    ffmpeg_bundled = PROJECT_ROOT / "node_modules" / "@remotion" / "compositor-win32-x64-msvc" / "ffmpeg.exe"
-    if ffmpeg_bundled.exists():
-        return str(ffmpeg_bundled)
-    for suffix in ("linux-x64-gnu", "darwin-arm64", "darwin-x64"):
-        candidate = PROJECT_ROOT / "node_modules" / "@remotion" / f"compositor-{suffix}" / "ffmpeg"
-        if candidate.exists():
-            return str(candidate)
-    return "ffmpeg"
+    raise FileNotFoundError("ffmpeg not found in PATH. Install ffmpeg or set FFMPEG_PATH env var.")
 
 
 def _get_genai_client():

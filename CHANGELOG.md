@@ -7,6 +7,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- `_find_ffmpeg()` now raises `FileNotFoundError` immediately when ffmpeg is not found instead of returning bare `"ffmpeg"` string that causes confusing subprocess errors later
+- Added `FFMPEG_PATH` env var support to `_find_ffmpeg()` for explicit ffmpeg binary override
+- Removed Remotion bundled ffmpeg fallback paths (don't work cross-directory)
+
+### Fixed
+
 - `_generate_scene_audio()` base64 handling: bytes from Gemini SDK are written directly, base64 strings are decoded explicitly, and unexpected types now raise `ValueError` instead of silently converting via `str()`
 - `list_audio_library()` now searches for `.mp3` files instead of directories — the function used `is_dir()` instead of `is_file()`, so the sound engineer agent never found any background music tracks
 - Render service now captures stderr and surfaces actual error messages (Zod validation, bundler crashes) instead of opaque "exit code N"

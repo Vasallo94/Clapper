@@ -9,7 +9,7 @@ def list_audio_library() -> str:
     library_dir = PROJECT_ROOT / "public" / "audio" / "library"
     if not library_dir.exists():
         return "No audio library found at public/audio/library/"
-    tracks = sorted(d.name for d in library_dir.iterdir() if d.is_dir())
+    tracks = sorted(d.stem for d in library_dir.iterdir() if d.is_file() and d.suffix == ".mp3")
     return json.dumps(tracks) if tracks else "No tracks found."
 
 

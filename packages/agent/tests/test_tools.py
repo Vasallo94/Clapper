@@ -216,3 +216,71 @@ class TestCopyLibraryTrack:
 
         result = copy_library_track("nonexistent", "my-video", "music-bed")
         assert "not found" in result.lower()
+
+
+class TestListAudioLibrary:
+    def test_lists_mp3_files_not_dirs(self, tmp_path, monkeypatch):
+        import src.tools.sound as sound_mod
+        monkeypatch.setattr(sound_mod, "PROJECT_ROOT", tmp_path)
+
+        library_dir = tmp_path / "public" / "audio" / "library"
+        library_dir.mkdir(parents=True)
+        (library_dir / "lofi-tech.mp3").write_bytes(b"fake")
+        (library_dir / "lofi-tech-2.mp3").write_bytes(b"fake")
+        (library_dir / "some-dir").mkdir()
+
+        from src.tools.sound import list_audio_library
+        result = list_audio_library()
+        import json
+        tracks = json.loads(result)
+        assert tracks == ["lofi-tech", "lofi-tech-2"]
+
+    def test_returns_stems_without_extension(self, tmp_path, monkeypatch):
+        import src.tools.sound as sound_mod
+        monkeypatch.setattr(sound_mod, "PROJECT_ROOT", tmp_path)
+
+        library_dir = tmp_path / "public" / "audio" / "library"
+        library_dir.mkdir(parents=True)
+        (library_dir / "track-one.mp3").write_bytes(b"fake")
+
+        from src.tools.sound import list_audio_library
+        result = list_audio_library()
+        import json
+        tracks = json.loads(result)
+        assert tracks == ["track-one"]
+        assert ".mp3" not in tracks[0]
+
+    def test_ignores_non_mp3_files(self, tmp_path, monkeypatch):
+        import src.tools.sound as sound_mod
+        monkeypatch.setattr(sound_mod, "PROJECT_ROOT", tmp_path)
+
+        library_dir = tmp_path / "public" / "audio" / "library"
+        library_dir.mkdir(parents=True)
+        (library_dir / "track.mp3").write_bytes(b"fake")
+        (library_dir / "readme.txt").write_text("info")
+        (library_dir / ".DS_Store").write_bytes(b"x")
+
+        from src.tools.sound import list_audio_library
+        result = list_audio_library()
+        import json
+        tracks = json.loads(result)
+        assert tracks == ["track"]
+
+    def test_empty_library(self, tmp_path, monkeypatch):
+        import src.tools.sound as sound_mod
+        monkeypatch.setattr(sound_mod, "PROJECT_ROOT", tmp_path)
+
+        library_dir = tmp_path / "public" / "audio" / "library"
+        library_dir.mkdir(parents=True)
+
+        from src.tools.sound import list_audio_library
+        result = list_audio_library()
+        assert result == "No tracks found."
+
+    def test_missing_library_dir(self, tmp_path, monkeypatch):
+        import src.tools.sound as sound_mod
+        monkeypatch.setattr(sound_mod, "PROJECT_ROOT", tmp_path)
+
+        from src.tools.sound import list_audio_library
+        result = list_audio_library()
+        assert "No audio library" in result

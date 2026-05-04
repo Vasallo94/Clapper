@@ -7,6 +7,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- `list_audio_library()` now searches for `.mp3` files instead of directories — the function used `is_dir()` instead of `is_file()`, so the sound engineer agent never found any background music tracks
+- Render service now captures stderr and surfaces actual error messages (Zod validation, bundler crashes) instead of opaque "exit code N"
+- All Zod `.optional()` fields in schemas now accept `null` via `.nullable().optional()` — prevents validation failures when Python agents send `null` instead of omitting keys
+- DuckDuckGo search tool now handles HTTP 202 responses and guides agent to fallback tools
+
+### Changed
+
+- Researcher agent prompt: limits failed search retries to 2, prioritizes `scrape_product` over `web_search` for known domains, caps total tool calls to 3
+- `scrape_product` docstring now lists common Línea Directa slugs and marks it as primary research tool
+
+### Fixed
+
 - `submit_render()` now passes `voiceover` and `soundDesign` to render service (audio was silently dropped)
 - Removed `icon` string field from `BenefitItemSchema` — was rendering raw text in videos
 - Replaced emoji fallbacks in `ProblemSolutionScene` with proper SVG icons (CrossIcon/CheckIcon)

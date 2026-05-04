@@ -13,7 +13,7 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle, pixelLo
   const tokens = useThemeTokens()
 
   const configuredMotionStart = msToFrames(getSceneMotionDelayMs(timing), fps)
-  const firstNarratedBeat = beats?.find((beat) => beat.narration.trim())
+  const firstNarratedBeat = beats?.find((beat) => beat.narration?.trim())
   const accentStart = firstNarratedBeat ? getBeatStartFrame(firstNarratedBeat, fps) : configuredMotionStart
 
   // Lockup: title, subtitle, and logo animate in immediately on scene entry

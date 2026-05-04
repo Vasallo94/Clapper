@@ -3,19 +3,19 @@ import { z } from "zod"
 export const BeatSchema = z.object({
   id: z.string(),
   startMs: z.number().min(0),
-  endMs: z.number().min(0).optional(),
-  narration: z.string(),
-  visual: z.string(),
-  animation: z.string(),
-  emphasis: z.enum(["low", "medium", "high"]).optional(),
+  endMs: z.number().min(0).nullable().optional(),
+  narration: z.string().nullable().optional(),
+  visual: z.string().nullable().optional(),
+  animation: z.string().nullable().optional(),
+  emphasis: z.enum(["low", "medium", "high"]).nullable().optional(),
 })
 
 export const TimingSchema = z.object({
-  leadInMs: z.number().min(0).optional(),
-  audioStartMs: z.number().min(0).optional(),
-  tailHoldMs: z.number().min(0).optional(),
-  minVisualHoldMs: z.number().min(0).optional(),
-  transitionMs: z.number().min(0).max(1500).optional(),
+  leadInMs: z.number().min(0).nullable().optional(),
+  audioStartMs: z.number().min(0).nullable().optional(),
+  tailHoldMs: z.number().min(0).nullable().optional(),
+  minVisualHoldMs: z.number().min(0).nullable().optional(),
+  transitionMs: z.number().min(0).max(1500).nullable().optional(),
 })
 
 export const BriefSchema = z.object({
@@ -29,8 +29,8 @@ export const BriefSchema = z.object({
 })
 
 export const DirectionSceneFieldsSchema = z.object({
-  timing: TimingSchema.optional(),
-  beats: z.array(BeatSchema).optional(),
+  timing: TimingSchema.nullable().optional(),
+  beats: z.array(BeatSchema).nullable().optional(),
 })
 
 // Type exports

@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- `_generate_scene_audio()` base64 handling: bytes from Gemini SDK are written directly, base64 strings are decoded explicitly, and unexpected types now raise `ValueError` instead of silently converting via `str()`
 - `list_audio_library()` now searches for `.mp3` files instead of directories — the function used `is_dir()` instead of `is_file()`, so the sound engineer agent never found any background music tracks
 - Render service now captures stderr and surfaces actual error messages (Zod validation, bundler crashes) instead of opaque "exit code N"
 - All Zod `.optional()` fields in schemas now accept `null` via `.nullable().optional()` — prevents validation failures when Python agents send `null` instead of omitting keys

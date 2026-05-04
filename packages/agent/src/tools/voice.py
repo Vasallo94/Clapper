@@ -22,6 +22,11 @@ def _sanitize_voice_id(voice_id: str) -> str:
 
 
 def _find_ffmpeg() -> str:
+    import shutil
+
+    system_ffmpeg = shutil.which("ffmpeg")
+    if system_ffmpeg:
+        return system_ffmpeg
     ffmpeg_bundled = PROJECT_ROOT / "node_modules" / "@remotion" / "compositor-win32-x64-msvc" / "ffmpeg.exe"
     if ffmpeg_bundled.exists():
         return str(ffmpeg_bundled)
@@ -99,7 +104,14 @@ def _generate_scene_audio(client, scene_index: str, text: str, voice_id: str, la
             raise
 
     audio_part = response.candidates[0].content.parts[0]
-    pcm_data = base64.b64decode(audio_part.inline_data.data)
+    raw = audio_part.inline_data.data
+    if isinstance(raw, bytes):
+        pcm_data = raw
+    elif isinstance(raw, str):
+        padded = raw + "=" * (-len(raw) % 4)
+        pcm_data = base64.b64decode(padded)
+    else:
+        raise ValueError(f"Unexpected audio data type: {type(raw)}")
     pcm_path = out_dir / f"{scene_index}.pcm"
     pcm_path.write_bytes(pcm_data)
     _pcm_to_mp3(pcm_path, mp3_path)

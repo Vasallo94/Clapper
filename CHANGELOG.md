@@ -17,6 +17,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - `DISABLE_WRITE_TODOS` env var to suppress `write_todos` tool usage (workaround for Gemini nested format bug)
 - "Known runtime behavior" section in `prompts/orchestrator.md` documenting LangGraph run termination and write_todos issues
 
+### Changed
+
+- Callout scene now accepts `"center"` position in addition to `"top"`, `"bottom"`, `"right"` (schema, component, skill)
+- `validate_config` / `review_render` return error JSON instead of crashing when given virtual paths — LLM can recover gracefully
+- Scene catalog skill updated: callout position includes "center"
+
 ### Fixed
 
 - `list_audio_library()` now searches for `.mp3` files instead of directories — videos will now have background music

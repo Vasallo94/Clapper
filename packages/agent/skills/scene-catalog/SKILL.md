@@ -59,12 +59,12 @@ Line kinds and rendering speeds:
 
 Highlighted text overlay for key points.
 
-| Field             | Type   | Required | Notes                              |
-| ----------------- | ------ | -------- | ---------------------------------- |
-| text              | string | yes      | Callout message                    |
-| position          | enum   | yes      | `"top"` \| `"bottom"` \| `"right"` |
-| background        | enum   | no       | `"overlay"` (default) \| `"solid"` |
-| durationInSeconds | number | yes      | 1-15                               |
+| Field             | Type   | Required | Notes                                            |
+| ----------------- | ------ | -------- | ------------------------------------------------ |
+| text              | string | yes      | Callout message                                  |
+| position          | enum   | yes      | `"top"` \| `"center"` \| `"bottom"` \| `"right"` |
+| background        | enum   | no       | `"overlay"` (default) \| `"solid"`               |
+| durationInSeconds | number | yes      | 1-15                                             |
 
 ### outro
 

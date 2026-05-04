@@ -8,15 +8,17 @@ from ..config import PROJECT_ROOT
 BUILTIN_SCENE_TYPES = {"intro", "terminal", "callout", "outro", "custom", "hero", "benefits", "pricing", "cta"}
 
 
-def _parse_config(config_input: str) -> dict:
+def _parse_config(config_input: str) -> dict | str:
+    """Parse JSON string or file path into a dict. Returns error string on failure."""
     try:
         return json.loads(config_input)
     except (json.JSONDecodeError, TypeError):
         p = Path(config_input)
         if not p.is_file():
-            raise FileNotFoundError(
-                f"Cannot read '{config_input}' — if this is a virtual path like /pipeline/config.json, "
-                f"use read_file to get the JSON content first, then pass the JSON string to validate_config."
+            return (
+                f"ERROR: Cannot read '{config_input}'. This looks like a virtual path. "
+                f"Use read_file('{config_input}') first to get the JSON content, "
+                f"then pass the JSON STRING to validate_config (not the path)."
             )
         return json.loads(p.read_text(encoding="utf-8"))
 
@@ -31,6 +33,8 @@ def validate_config(config_input: str) -> str:
         config_input: The full config as a JSON string, or a file path to config.json.
     """
     config = _parse_config(config_input)
+    if isinstance(config, str):
+        return json.dumps({"errors": [config], "warnings": []})
     errors: list[str] = []
     warnings: list[str] = []
     config_id = config.get("id", "unknown")
@@ -94,6 +98,8 @@ def review_render(output_path: str, config_input: str) -> str:
     """
     output = Path(output_path)
     config = _parse_config(config_input)
+    if isinstance(config, str):
+        return json.dumps({"error": config})
 
     expected_duration = sum(s.get("durationInSeconds", 0) for s in config.get("scenes", []))
 

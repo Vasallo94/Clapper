@@ -5,14 +5,16 @@ import type { CalloutSceneProps } from "../schema"
 import { useThemeTokens } from "../../../shared/themes"
 import { MascotWatermark } from "../../../shared/components/MascotWatermark"
 
-const ORIGIN: Record<"top" | "bottom" | "right", { x: number; y: number }> = {
+const ORIGIN: Record<"top" | "center" | "bottom" | "right", { x: number; y: number }> = {
   top: { x: 0, y: -30 },
+  center: { x: 0, y: 20 },
   bottom: { x: 0, y: 30 },
   right: { x: 40, y: 0 },
 }
 
-const ALIGN_MAP: Record<"top" | "bottom" | "right", string> = {
+const ALIGN_MAP: Record<"top" | "center" | "bottom" | "right", string> = {
   top: "flex-start",
+  center: "center",
   bottom: "flex-end",
   right: "center",
 }
@@ -33,7 +35,7 @@ export const CalloutScene: React.FC<CalloutSceneProps> = ({ text, position, back
   const ty = interpolate(enterSpring, [0, 1], [origin.y, 0])
   const opacity = interpolate(enterSpring, [0, 0.4], [0, 1], { extrapolateRight: "clamp" })
 
-  const justify = position === "right" ? "flex-end" : "center"
+  const justify = position === "right" ? "flex-end" : ("center" as const)
   const align = ALIGN_MAP[position]
 
   const bgColor = background === "overlay" ? tokens.overlay : tokens.background

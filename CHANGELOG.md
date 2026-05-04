@@ -7,6 +7,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- Docker containerization for LangGraph agent (`make agent` now uses Docker)
+- `docker-compose.yml` with agent service, bind mount, and env passthrough
+- `make agent-native` escape hatch for running without Docker
+- `make agent-logs` and `make agent-shell` helper targets
 - ClaudeCodeTutorial composition now supports `hero`, `benefits`, `pricing`, `cta` scene types (previously ProductShort-only)
 - `PipelineContext` dataclass (`packages/agent/src/context.py`) for static per-run metadata; fields: `config_id`, `composition`, `width`, `height`, `theme`, `output_dir`, `render_service_url`
 - Filesystem virtual state management: all agent prompts now include `## State management` sections specifying `/pipeline/*.json` read/write paths via built-in `read_file`/`write_file`

@@ -7,6 +7,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- `generate_voiceover()` now checks for scenes presence instead of `enabled: true` flag — voiceover was silently skipped because audio_planner never set `enabled`
+- Audio planner prompt now always includes `"enabled": true` in voiceover config (required by Zod schema at render time)
+- Voice generator prompt clarifies `enabled` is optional for the tool but required by the render schema
+
 - `_find_ffmpeg()` now raises `FileNotFoundError` immediately when ffmpeg is not found instead of returning bare `"ffmpeg"` string that causes confusing subprocess errors later
 - Added `FFMPEG_PATH` env var support to `_find_ffmpeg()` for explicit ffmpeg binary override
 - Removed Remotion bundled ffmpeg fallback paths (don't work cross-directory)

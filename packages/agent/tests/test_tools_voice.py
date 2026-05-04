@@ -14,7 +14,7 @@ def test_generate_voiceover_disabled():
 
     config = json.dumps({"id": "test", "voiceover": {"enabled": False}})
     result = generate_voiceover(config)
-    assert "not enabled" in result.lower()
+    assert "no scenes" in result.lower()
 
 
 def test_generate_voiceover_no_credentials(monkeypatch):
@@ -194,3 +194,42 @@ class TestGenerateSceneAudioDataHandling:
 
         with pytest.raises(ValueError, match="Unexpected audio data type"):
             _generate_scene_audio(FakeClient(), "0", "Hello", "Orus", "es-ES", tmp_path)
+
+
+class TestGenerateVoiceoverEnabledGate:
+    def test_generates_when_voiceover_has_scenes_but_no_enabled(self, monkeypatch):
+        """If voiceover config has scenes, generate even without enabled: true."""
+        import src.tools.voice as voice_mod
+        monkeypatch.setattr(voice_mod, "_get_genai_client", lambda: None)
+
+        config = {
+            "id": "test",
+            "voiceover": {
+                "provider": "gemini",
+                "voiceId": "Orus",
+                "language": "es-ES",
+                "scenes": {"0": {"text": "Hello"}},
+            },
+            "scenes": [{"type": "intro", "durationInSeconds": 3}],
+        }
+        result = voice_mod.generate_voiceover(json.dumps(config))
+        # Should try to generate (fail on credentials), not return "not enabled"
+        assert "not enabled" not in result.lower()
+
+    def test_returns_early_when_no_voiceover_section(self):
+        """If there's no voiceover section at all, return early."""
+        from src.tools.voice import generate_voiceover
+        config = {"id": "test", "scenes": [{"type": "intro", "durationInSeconds": 3}]}
+        result = generate_voiceover(json.dumps(config))
+        assert "not enabled" in result.lower() or "no voiceover" in result.lower()
+
+    def test_returns_early_when_no_scenes_in_voiceover(self):
+        """If voiceover section has no scenes, return early."""
+        from src.tools.voice import generate_voiceover
+        config = {
+            "id": "test",
+            "voiceover": {"provider": "gemini", "voiceId": "Orus"},
+            "scenes": [{"type": "intro", "durationInSeconds": 3}],
+        }
+        result = generate_voiceover(json.dumps(config))
+        assert "no scenes" in result.lower()

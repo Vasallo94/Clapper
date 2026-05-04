@@ -130,8 +130,10 @@ def generate_voiceover(config_json: str) -> str:
         return "Error: config_json must be a valid JSON string with the full video config. Do not pass a file path."
 
     voiceover = config.get("voiceover")
-    if not voiceover or not voiceover.get("enabled"):
+    if not voiceover:
         return "Voiceover not enabled in config."
+    if not voiceover.get("scenes"):
+        return "Voiceover has no scenes defined."
 
     client = _get_genai_client()
     if not client:

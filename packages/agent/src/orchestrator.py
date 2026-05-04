@@ -15,6 +15,8 @@ SKILLS_DIR = Path(__file__).parent.parent / "skills"
 
 DEFAULT_MODEL = "gemini-3.1-pro-preview"
 
+DISABLE_WRITE_TODOS = os.environ.get("DISABLE_WRITE_TODOS", "").lower() in ("1", "true", "yes")
+
 
 def load_prompt(name: str) -> str:
     return (PROMPTS_DIR / f"{name}.md").read_text(encoding="utf-8")
@@ -94,10 +96,14 @@ def create_video_orchestrator(*, checkpointer=None):
         create_reviewer(),
     ]
 
+    system_prompt = load_prompt("orchestrator")
+    if DISABLE_WRITE_TODOS:
+        system_prompt += "\n\nDo NOT use write_todos tool. Plan using text responses only."
+
     kwargs: dict = {
         "model": model,
         "tools": [submit_render, check_render_status],
-        "system_prompt": load_prompt("orchestrator"),
+        "system_prompt": system_prompt,
         "subagents": subagents,
         "skills": [str(SKILLS_DIR)],
         "backend": backend,

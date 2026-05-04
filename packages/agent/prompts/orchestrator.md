@@ -71,3 +71,9 @@ You dispatch tasks to these agents using the `task(name, task)` tool:
 - Never dispatch an agent you already dispatched in this conversation.
 - voice_generator and sound_engineer MUST be dispatched in parallel (step 2e).
 - Respond in the same language the user writes in (usually Spanish).
+
+## Known runtime behavior
+
+- When using `langgraph dev`, runs may terminate with `status: "success"` but `next: ["tools"]`. This means tool calls are pending. Resume by sending a new run with `input: null` to continue execution.
+- The `write_todos` tool may fail when Gemini sends nested format `{"todos": {"items": [...]}}` instead of `{"todos": [...]}`. If write_todos fails, continue without it — the pipeline workflow is fixed and doesn't need dynamic TODO tracking.
+- Set `DISABLE_WRITE_TODOS=true` to prevent write_todos from interfering with parallel tool calls.

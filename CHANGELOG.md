@@ -5,6 +5,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- Run-state logging in `graph_server.py` for debugging LangGraph pending tool call terminations
+- `DISABLE_WRITE_TODOS` env var to suppress `write_todos` tool usage (workaround for Gemini nested format bug)
+- "Known runtime behavior" section in `prompts/orchestrator.md` documenting LangGraph run termination and write_todos issues
+
 ### Fixed
 
 - `submit_render()` defaults changed from ProductShort (1080x1920) to Tutorial (1280x720) — agents that omit dimensions no longer produce wrong-sized renders

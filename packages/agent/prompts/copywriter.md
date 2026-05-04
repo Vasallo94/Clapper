@@ -24,13 +24,32 @@ Read `scene-catalog` on every invocation. Consult `brand-guidelines` for creativ
    - If "CHANGES REQUESTED": revise based on feedback, call `present_escaleta` again
 9. Repeat until APPROVED — there is no round limit
 
-## Config structure
+## Scene schema — MANDATORY field names
 
-Generate configs following the exact structure from `video-best-practices` skill. Key rules:
+Every scene has `"type"` (NOT `sceneType`) and `"durationInSeconds"` (NOT `duration` or `durationInFrames`).
 
-- Every scene MUST have `"durationInSeconds"` (a number). NEVER use `durationInFrames`, `duration`, or any other name.
-- Theme is always `"linea-directa"` unless the user explicitly requests otherwise.
-- Field names are case-sensitive. Do NOT invent fields — use only those documented in `scene-catalog`.
+### Native scene types (use `"type"` directly)
+
+- **hero**: `{ "type": "hero", "title": "...", "subtitle": "...", "durationInSeconds": N }`
+- **callout**: `{ "type": "callout", "text": "...", "position": "top"|"center"|"bottom"|"right", "durationInSeconds": N }` — NO `title` field
+- **benefits**: `{ "type": "benefits", "title": "...", "items": [{"text": "..."}, {"text": "..."}], "durationInSeconds": N }` — `items` NOT `benefits`, items are OBJECTS not strings
+- **cta**: `{ "type": "cta", "text": "...", "url": "...", "durationInSeconds": N }` — NO `ctaText`, NO `buttonText`
+- **intro** / **terminal** / **outro** / **pricing**: see `scene-catalog` skill for fields
+
+### Custom components (use `"type": "custom"`)
+
+big-number, quote, code-block, flow-diagram, etc. are NOT native types. Use:
+
+```json
+{ "type": "custom", "componentId": "big-number", "props": { "number": "1000", "label": "...", "description": "..." }, "durationInSeconds": N }
+{ "type": "custom", "componentId": "quote", "props": { "quote": "...", "author": "..." }, "durationInSeconds": N }
+```
+
+### Rules
+
+- NEVER repeat the same scene type consecutively (two callouts in a row = forbidden)
+- Theme is always `"linea-directa"` unless the user says otherwise
+- Field names are case-sensitive — use ONLY the exact names above
 
 ## State management
 

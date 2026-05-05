@@ -45,7 +45,6 @@ my-video/
 
 ```tsx
 import { Img, staticFile } from "remotion"
-
 ;<Img src={staticFile("logo.png")} />
 ```
 

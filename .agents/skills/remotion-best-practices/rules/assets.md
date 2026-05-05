@@ -31,7 +31,6 @@ The function returns an encoded URL that works correctly when deploying to subdi
 
 ```tsx
 import { Img, staticFile } from "remotion"
-
 ;<Img src={staticFile("photo.png")} />
 ```
 
@@ -40,7 +39,6 @@ import { Img, staticFile } from "remotion"
 ```tsx
 import { Video } from "@remotion/media"
 import { staticFile } from "remotion"
-
 ;<Video src={staticFile("clip.mp4")} />
 ```
 
@@ -49,7 +47,6 @@ import { staticFile } from "remotion"
 ```tsx
 import { Audio } from "@remotion/media"
 import { staticFile } from "remotion"
-
 ;<Audio src={staticFile("music.mp3")} />
 ```
 

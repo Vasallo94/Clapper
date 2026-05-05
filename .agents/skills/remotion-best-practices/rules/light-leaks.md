@@ -24,7 +24,6 @@ npx remotion add @remotion/light-leaks
 ```tsx
 import { TransitionSeries } from "@remotion/transitions"
 import { LightLeak } from "@remotion/light-leaks"
-
 ;<TransitionSeries>
   <TransitionSeries.Sequence durationInFrames={60}>
     <SceneA />

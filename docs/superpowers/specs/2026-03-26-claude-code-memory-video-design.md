@@ -4,14 +4,14 @@ Educational video for LinkedIn explaining Claude Code's memory system using a re
 
 ## Video Identity
 
-| Property | Value |
-|----------|-------|
-| Composition | `ClaudeCodeTutorial` (1280×720, 30fps) |
-| Theme | `atom-dark` |
-| Duration | ~4:50 (~8700 frames) |
-| Language | Spanish |
-| Voiceover | Deferred (text-only first pass) |
-| Tutorial slug | `tutorials/claude-code-memory/` |
+| Property      | Value                                  |
+| ------------- | -------------------------------------- |
+| Composition   | `ClaudeCodeTutorial` (1280×720, 30fps) |
+| Theme         | `atom-dark`                            |
+| Duration      | ~4:50 (~8700 frames)                   |
+| Language      | Spanish                                |
+| Voiceover     | Deferred (text-only first pass)        |
+| Tutorial slug | `tutorials/claude-code-memory/`        |
 
 ## Narrative Structure
 
@@ -74,6 +74,7 @@ Educational video for LinkedIn explaining Claude Code's memory system using a re
 Two separate scenes in config:
 
 **Scene 6a — Los 4 tipos de memoria (Block Diagram, 30s / 900 frames)**
+
 - **Type:** `custom` → `BlockDiagramScene` (reuse with different props, `layout: "grid"`)
 - Four blocks appear with staggered springs, each with a color and one-line example:
   - **user** (blue): "Es astrofotógrafo, prefiere recomendaciones con investigación"
@@ -82,6 +83,7 @@ Two separate scenes in config:
   - **reference** (orange): "Los bugs se trackean en Linear proyecto INGEST"
 
 **Scene 6b — MEMORY.md como índice (File Explorer, 25s / 750 frames)**
+
 - **Type:** `custom` → `FileExplorerScene` (reuse with MEMORY.md as the expanded file)
 - Show MEMORY.md content: one-line entries pointing to memory files
 - Callout text: "Claude lee este índice al empezar cada sesión. Si algo es relevante, abre el archivo completo. Si no, lo ignora."
@@ -144,14 +146,14 @@ Three new scene components to register in `customSceneRegistry.ts`:
 
 ## Color Palette (atom-dark theme reference)
 
-| Role | Color | Token |
-|------|-------|-------|
-| Background | `#282c34` | `background` |
-| Foreground | `#abb2bf` | `foreground` |
-| Primary (blue) | `#61afef` | `primary` |
-| Secondary (purple) | `#c678dd` | `secondary` |
-| Green | `#98c379` | `terminal.command` / `terminal.successColor` |
-| Orange | `#d19a66` | `terminal.dots[1]` |
-| Red | `#e06c75` | `terminal.dots[0]` |
-| Borders | `#3e4451` | `terminal.borderColor` |
-| Muted text | `#636d83` | `foregroundMid` |
+| Role               | Color     | Token                                        |
+| ------------------ | --------- | -------------------------------------------- |
+| Background         | `#282c34` | `background`                                 |
+| Foreground         | `#abb2bf` | `foreground`                                 |
+| Primary (blue)     | `#61afef` | `primary`                                    |
+| Secondary (purple) | `#c678dd` | `secondary`                                  |
+| Green              | `#98c379` | `terminal.command` / `terminal.successColor` |
+| Orange             | `#d19a66` | `terminal.dots[1]`                           |
+| Red                | `#e06c75` | `terminal.dots[0]`                           |
+| Borders            | `#3e4451` | `terminal.borderColor`                       |
+| Muted text         | `#636d83` | `foregroundMid`                              |

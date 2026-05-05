@@ -63,11 +63,13 @@ remotion-playground/
 ## Componente 1: La Skill (`tutorial-generator`)
 
 ### Ubicación
+
 `skills/tutorial-generator/index.md`
 
 > **Nota sobre paths**: Los skills del proyecto viven en `skills/` en la raíz (no en `.claude/skills/`). La convención es que `.claude/skills/` sea un symlink o alias hacia `skills/`, como ocurre con `remotion-best-practices`.
 
 ### Qué hace
+
 Skill de Claude Code invocable con `/tutorial-generator "<instrucción>"`.
 Orquesta investigación → script → archivos → render.
 
@@ -185,7 +187,7 @@ const OutroSceneSchema = z.object({
 // NO por path de archivo. Remotion no soporta imports dinámicos en runtime.
 const CustomSceneSchema = z.object({
   type: z.literal("custom"),
-  componentId: z.string(),    // Clave en customSceneRegistry.ts
+  componentId: z.string(), // Clave en customSceneRegistry.ts
   durationInSeconds: z.number().min(1).max(120),
   props: z.record(z.unknown()).optional(),
 })
@@ -197,20 +199,24 @@ export const TutorialConfigSchema = z.object({
   fps: z.literal(30),
   width: z.literal(1280),
   height: z.literal(720),
-  scenes: z.array(
-    z.discriminatedUnion("type", [
-      IntroSceneSchema,
-      TerminalSceneSchema,
-      CalloutSceneSchema,
-      OutroSceneSchema,
-      CustomSceneSchema,
-    ])
-  ).min(1),
-  voiceover: z.object({
-    enabled: z.literal(true),
-    voiceId: z.string(),
-    scenes: z.record(z.string()),   // sceneIndex (string) → texto narrado
-  }).optional(),
+  scenes: z
+    .array(
+      z.discriminatedUnion("type", [
+        IntroSceneSchema,
+        TerminalSceneSchema,
+        CalloutSceneSchema,
+        OutroSceneSchema,
+        CustomSceneSchema,
+      ]),
+    )
+    .min(1),
+  voiceover: z
+    .object({
+      enabled: z.literal(true),
+      voiceId: z.string(),
+      scenes: z.record(z.string()), // sceneIndex (string) → texto narrado
+    })
+    .optional(),
 })
 
 export type TutorialConfig = z.infer<typeof TutorialConfigSchema>
@@ -247,15 +253,19 @@ import { calculateMetadata } from "./compositions/ClaudeCodeTutorial/calculateMe
 import { TutorialConfigSchema } from "./compositions/ClaudeCodeTutorial/schema"
 
 // Dentro de RemotionRoot:
-<Composition
+;<Composition
   id="ClaudeCodeTutorial"
   component={ClaudeCodeTutorial}
-  durationInFrames={300}   // Fallback — calculateMetadata lo sobreescribe
+  durationInFrames={300} // Fallback — calculateMetadata lo sobreescribe
   fps={30}
   width={1280}
   height={720}
   schema={TutorialConfigSchema}
-  defaultProps={{ /* props mínimas válidas */ }}
+  defaultProps={
+    {
+      /* props mínimas válidas */
+    }
+  }
   calculateMetadata={calculateMetadata}
 />
 ```
@@ -267,6 +277,7 @@ import { TutorialConfigSchema } from "./compositions/ClaudeCodeTutorial/schema"
 ### `TerminalScene.tsx` — el componente estrella
 
 Renderiza una ventana de terminal simulada con:
+
 - **Chrome de ventana**: barra de título, tres puntos (rojo/amarillo/verde)
 - **Prompt**: `user@machine ~/proyecto $` con cursor parpadeante
 - **Comandos** (`kind: "command"`): typewriter via string slicing (nunca CSS transitions)
@@ -275,6 +286,7 @@ Renderiza una ventana de terminal simulada con:
 - **Blank**: línea vacía de separación
 
 **Convenciones visuales:**
+
 - Fondo ventana: `#0d1117`
 - Texto comando: `#7ee787` (verde)
 - Texto output: `#c9d1d9` (gris claro)
@@ -285,6 +297,7 @@ Renderiza una ventana de terminal simulada con:
 ### `CalloutScene.tsx`
 
 Escena autónoma con fondo configurable:
+
 - `"overlay"`: fondo semi-transparente oscuro (como si flotara sobre la terminal anterior)
 - `"solid"`: fondo sólido para callouts independientes
 
@@ -293,6 +306,7 @@ Caja de texto animada que entra con spring desde el lado indicado (`position`).
 ### `CustomScene.tsx`
 
 Wrapper que lee `componentId` y busca el componente en `customSceneRegistry.ts`:
+
 ```tsx
 import { customSceneRegistry } from "../customSceneRegistry"
 
@@ -330,7 +344,7 @@ export const customSceneRegistry: Record<string, FC<Record<string, unknown>>> = 
 // scripts/render.ts
 // Uso: npx tsx scripts/render.ts tutorials/[slug]/config.json
 
-import { bundle } from "@remotion/bundler"           // @remotion/bundler — ver deps
+import { bundle } from "@remotion/bundler" // @remotion/bundler — ver deps
 import { renderMedia, selectComposition } from "@remotion/renderer"
 import { readFileSync } from "fs"
 import path from "path"
@@ -375,21 +389,23 @@ console.log(`✓ Vídeo generado: ${outputPath}`)
 ## Dependencias
 
 ### Instaladas
-| Paquete | Tipo | Uso |
-|---|---|---|
-| `remotion@4.0.438` | dep | Core |
-| `@remotion/cli@4.0.438` | dep | Studio + CLI |
-| `@remotion/renderer@4.0.438` | **devDep** | Render programático (solo uso local) |
-| `@remotion/transitions@4.0.438` | dep | TransitionSeries |
-| `@remotion/tailwind-v4@4.0.438` | dep | TailwindCSS |
-| `zod` | dep | Schema validation |
+
+| Paquete                         | Tipo       | Uso                                  |
+| ------------------------------- | ---------- | ------------------------------------ |
+| `remotion@4.0.438`              | dep        | Core                                 |
+| `@remotion/cli@4.0.438`         | dep        | Studio + CLI                         |
+| `@remotion/renderer@4.0.438`    | **devDep** | Render programático (solo uso local) |
+| `@remotion/transitions@4.0.438` | dep        | TransitionSeries                     |
+| `@remotion/tailwind-v4@4.0.438` | dep        | TailwindCSS                          |
+| `zod`                           | dep        | Schema validation                    |
 
 ### Pendientes de instalar
-| Paquete | Tipo | Cuándo |
-|---|---|---|
-| `@remotion/bundler` | devDep | Al implementar render.ts |
-| `tsx` | devDep | Al implementar scripts/ |
-| `@remotion/google-fonts` | dep | Al implementar TerminalScene (JetBrains Mono) |
+
+| Paquete                  | Tipo   | Cuándo                                        |
+| ------------------------ | ------ | --------------------------------------------- |
+| `@remotion/bundler`      | devDep | Al implementar render.ts                      |
+| `tsx`                    | devDep | Al implementar scripts/                       |
+| `@remotion/google-fonts` | dep    | Al implementar TerminalScene (JetBrains Mono) |
 
 ---
 
@@ -407,11 +423,11 @@ Los `config.json` sí se commitean — son el source of truth del tutorial.
 
 ## Extensibilidad futura
 
-| Agente futuro | Carpeta base | Descripción |
-|---|---|---|
-| `presentation-generator` | `presentations/[slug]/` | Slides con charts y datos |
-| `explainer-generator` | `explainers/[slug]/` | Animaciones tipo 3Blue1Brown |
-| `social-clip-generator` | `clips/[slug]/` | Vertical, subtítulos TikTok |
+| Agente futuro            | Carpeta base            | Descripción                  |
+| ------------------------ | ----------------------- | ---------------------------- |
+| `presentation-generator` | `presentations/[slug]/` | Slides con charts y datos    |
+| `explainer-generator`    | `explainers/[slug]/`    | Animaciones tipo 3Blue1Brown |
+| `social-clip-generator`  | `clips/[slug]/`         | Vertical, subtítulos TikTok  |
 
 Cada agente: su propia skill en `skills/[nombre]/`, su composición en `src/compositions/[Nombre]/`, su carpeta de output.
 

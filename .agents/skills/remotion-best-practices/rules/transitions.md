@@ -25,7 +25,6 @@ npx remotion add @remotion/transitions
 ```tsx
 import { TransitionSeries, linearTiming } from "@remotion/transitions"
 import { fade } from "@remotion/transitions/fade"
-
 ;<TransitionSeries>
   <TransitionSeries.Sequence durationInFrames={60}>
     <SceneA />
@@ -44,7 +43,6 @@ Any React component can be used as an overlay. For a ready-made effect, see the 
 ```tsx
 import { TransitionSeries } from "@remotion/transitions"
 import { LightLeak } from "@remotion/light-leaks"
-
 ;<TransitionSeries>
   <TransitionSeries.Sequence durationInFrames={60}>
     <SceneA />
@@ -66,7 +64,6 @@ Transitions and overlays can coexist in the same `<TransitionSeries>`, but an ov
 import { TransitionSeries, linearTiming } from "@remotion/transitions"
 import { fade } from "@remotion/transitions/fade"
 import { LightLeak } from "@remotion/light-leaks"
-
 ;<TransitionSeries>
   <TransitionSeries.Sequence durationInFrames={60}>
     <SceneA />
@@ -114,7 +111,6 @@ import { clockWipe } from "@remotion/transitions/clock-wipe"
 
 ```tsx
 import { slide } from "@remotion/transitions/slide"
-
 ;<TransitionSeries.Transition
   presentation={slide({ direction: "from-left" })}
   timing={linearTiming({ durationInFrames: 20 })}

@@ -7,6 +7,26 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- `packages/agent/src/paths.py` — single source of truth for all agent path constants (`PROJECT_ROOT`, `SCENE_CATALOG`, `CUSTOM_SCENES_DIR`, `SCENE_REGISTRY`, `AUDIO_LIBRARY_DIR`, etc.)
+- `docs/agent-io-convention.md` — formal specification of agent READ/WRITE/SUBMIT paths and environment variables
+- `content/` directory for committed video project configs (tutorials, shorts, presentations)
+- `.generated/` directory for all transient pipeline outputs (render jobs, configs, MP4s, SQLite DB)
+- npm workspaces configuration for `packages/render-service` and `packages/web`
+
+### Changed
+
+- Agent path resolution: all 8 Python files now import from `paths.py` instead of computing `Path(__file__).parent.parent...` chains (up to 5 levels deep)
+- Render service job outputs moved from `packages/render-service/jobs/` to `.generated/renders/`
+- Video configs relocated: `tutorials/` → `content/tutorials/`, `shorts/` → `content/shorts/`, `presentations/` → `content/presentations/`
+- `CLAUDE.md` updated with full directory layout, agent I/O convention reference, and corrected paths
+- `Makefile` updated for `content/` paths and npm workspace-aware install
+
+### Removed
+
+- `.agents/skills/` duplicate skills directory (44 files) — `packages/agent/skills/` is the single authoritative source
+
+### Added
+
 - Docker containerization for LangGraph agent (`make agent` now uses Docker)
 - `docker-compose.yml` with agent service, bind mount, and env passthrough
 - `make agent-native` escape hatch for running without Docker

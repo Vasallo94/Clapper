@@ -5,6 +5,10 @@
   "repository": {},
   "license": "UNLICENSED",
   "private": true,
+  "workspaces": [
+    "packages/render-service",
+    "packages/web"
+  ],
   "dependencies": {
     "@google/genai": "^1.52.0",
     "@remotion/cli": "4.0.457",

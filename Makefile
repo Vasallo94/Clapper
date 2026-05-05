@@ -95,9 +95,7 @@ test-visual-update: ## Update visual snapshots
 install: ## Install root dependencies
 	npm install
 
-install-all: install ## Install all workspace dependencies
-	cd $(RENDER_DIR) && npm install
-	cd $(WEB_DIR) && npm install
+install-all: install ## Install all workspace dependencies (npm workspaces + agent)
 	cd $(AGENT_DIR) && uv sync
 
 browser-ensure: ## Ensure Chromium is available for Remotion

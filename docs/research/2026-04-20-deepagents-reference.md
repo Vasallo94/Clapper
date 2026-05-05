@@ -1,8 +1,8 @@
 # DeepAgents SDK -- Complete Reference
 
 > Source: https://docs.langchain.com/oss/python/deepagents/
-> Fetched: 2026-04-20
-> Pages researched: overview, quickstart, customization, models, backends, sandboxes, permissions, human-in-the-loop, skills, subagents, memory, middleware
+> Fetched: 2026-04-20 (updated 2026-05-04)
+> Pages researched: overview, quickstart, customization, models, backends, sandboxes, permissions, human-in-the-loop, skills, subagents, memory, middleware, context-engineering
 
 ---
 
@@ -1307,3 +1307,151 @@ Automated agent behavior:
 - **Tracing:** Set `LANGSMITH_TRACING=true` with API key for LangSmith
 - **Provider packages:** `langchain-anthropic`, `langchain-openai`, `langchain-google-genai`, `langchain-openrouter`, `langchain-fireworks`, `langchain-baseten`, `langchain-ollama`
 - **Sandbox packages:** `langchain-modal`, `langchain-runloop`, `langchain-daytona`, `langsmith[sandbox]`, `langchain-agentcore-codeinterpreter`
+
+---
+
+## 15. Context Engineering (added 2026-05-04)
+
+> Source: https://docs.langchain.com/oss/python/deepagents/context-engineering
+
+DeepAgents manages five distinct context categories for optimal token usage and state management.
+
+### 15.1 Context Types
+
+| Type                    | Description                                    | Mechanism                                               |
+| ----------------------- | ---------------------------------------------- | ------------------------------------------------------- |
+| **Input Context**       | System prompt, memory, skills                  | Loaded at startup; always present                       |
+| **Runtime Context**     | Per-run config (user metadata, API keys)       | `context_schema` dataclass; propagates to all subagents |
+| **Context Compression** | Automatic offloading and summarization         | Triggers at 85% token capacity                          |
+| **Context Isolation**   | Subagent delegation for compartmentalized work | `task()` tool; fresh context per subagent               |
+| **Long-term Memory**    | Persistent storage across threads              | `StoreBackend` with `CompositeBackend` routing          |
+
+### 15.2 Runtime Context (Critical for Pipelines)
+
+Runtime context passes per-invocation configuration **without automatic prompt inclusion**. Define via `@dataclass` and access in tools via `ToolRuntime`:
+
+```python
+from dataclasses import dataclass
+from deepagents import create_deep_agent
+from langchain.tools import tool, ToolRuntime
+
+@dataclass
+class Context:
+    user_id: str
+    api_key: str
+
+@tool
+def fetch_user_data(query: str, runtime: ToolRuntime[Context]) -> str:
+    """Fetch data for the current user."""
+    user_id = runtime.context.user_id
+    return f"Data for user {user_id}: {query}"
+
+agent = create_deep_agent(
+    model="google_genai:gemini-3.1-pro-preview",
+    tools=[fetch_user_data],
+    context_schema=Context,
+)
+
+result = agent.invoke(
+    {"messages": [{"role": "user", "content": "Get my recent activity"}]},
+    context=Context(user_id="user-123", api_key="sk-..."),
+)
+```
+
+**Key property:** Runtime context **propagates to all subagents automatically**. When a subagent executes, it receives the same runtime context as its parent.
+
+### 15.3 Dynamic System Prompts
+
+For prompts that need runtime values, use `@dynamic_prompt` decorator to read from `request.runtime.context` and `request.runtime.store`.
+
+### 15.4 Context Compression
+
+**Offloading** (automatic):
+
+- Tool inputs/outputs > 20,000 tokens → stored to filesystem, replaced with file reference + 10-line preview
+- At 85% context capacity, older tool calls truncated and replaced with disk pointers
+
+**Summarization** (automatic):
+
+- Triggers at 85% of model's `max_input_tokens`
+- Retains 10% as recent context
+- Falls back to 170,000-token trigger if profile unavailable
+- Writes complete original messages to filesystem as canonical record
+- Handles `ContextOverflowError` by immediately summarizing and retrying
+
+**Optional summarization tool** (agents can trigger compression at strategic points):
+
+```python
+from deepagents.middleware.summarization import create_summarization_tool_middleware
+
+agent = create_deep_agent(
+    model="google_genai:gemini-3.1-pro-preview",
+    middleware=[create_summarization_tool_middleware(model, StateBackend)],
+)
+```
+
+### 15.5 System Prompt Assembly Order
+
+The assembled system message follows this exact sequence:
+
+1. Custom `system_prompt`
+2. Base agent prompt
+3. To-do list prompt
+4. Memory prompt
+5. Skills prompt
+6. Virtual filesystem prompt
+7. Subagent prompt
+8. User middleware prompts
+9. Human-in-the-loop prompt
+
+### 15.6 Best Practices for State Management
+
+1. **Input context:** Minimize memory for universal conventions; use focused skills for task-specific workflows
+2. **Subagent delegation:** Isolate multi-step, output-heavy tasks to maintain main agent context efficiency
+3. **Subagent output control:** Add `system_prompt` guidance directing synthesis/summarization rather than raw output
+4. **Filesystem leverage:** Persist large outputs so active context remains compact; use `read_file` and `grep` for selective retrieval
+5. **Memory documentation:** Clearly specify `/memories/` structure and usage patterns for agent awareness
+6. **Runtime context for tools:** Supply user metadata, API keys, and static configuration enabling tools to access context via injected `ToolRuntime` object
+
+---
+
+## 16. Async Subagents (Preview) (added 2026-05-04)
+
+Preview feature for parallel subagent execution. **API may change.**
+
+### 16.1 Tools
+
+| Tool                | Purpose                                 |
+| ------------------- | --------------------------------------- |
+| `start_async_task`  | Launch task, returns job ID immediately |
+| `check_async_task`  | Retrieve status/results                 |
+| `update_async_task` | Send mid-flight instructions            |
+| `list_async_tasks`  | Summarize all tracked tasks             |
+| `cancel_async_task` | Terminate running tasks                 |
+
+Async task metadata lives in a dedicated `async_tasks` state channel, separate from message history, so task IDs survive context compaction/summarization.
+
+### 16.2 Caveats
+
+- Requires Agent Protocol-compatible servers
+- Worker pool exhaustion can queue launches
+- Supervisors polling immediately post-launch negates async benefits
+- Task ID truncation can cause lookup failures
+
+---
+
+## 17. Known Issues & Limitations (added 2026-05-04)
+
+### Architectural
+
+- **No inter-step validation** as a first-class concept. Must be composed from middleware + permissions + structured output.
+- **Synchronous subagents block the parent**. Async subagents are preview with potential API changes.
+- **Last-write-wins** on concurrent file writes to the same path. No built-in conflict resolution or locking.
+- **Subagent file leakage**: Files written by subagents persist in parent state after subagent completion.
+- **Trust-the-LLM security model**: No built-in self-policing. Boundaries enforced at tool/sandbox level only.
+- **Cannot list SubAgentMiddleware in `excluded_middleware`** -- must use `enabled=False` flag instead.
+
+### Open Bugs
+
+- **#3050**: Virtual paths from `CompositeBackend` routes don't resolve in `LocalShellBackend.execute` (backends, bug)
+- **#3105**: `BaseSandbox.ls` silently swallows errors, returning empty results (bug)

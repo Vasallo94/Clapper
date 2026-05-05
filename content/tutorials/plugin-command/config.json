@@ -75,7 +75,11 @@
         { "kind": "command", "text": "claude --plugin-dir ./my-plugin", "delayAfterMs": 600 },
         { "kind": "blank", "text": "", "delayAfterMs": 400 },
         { "kind": "command", "text": "/my-plugin:hello Alex" },
-        { "kind": "claude", "text": "¡Hola Alex! Soy tu plugin personalizado. ¿En qué puedo ayudarte?", "delayAfterMs": 500 }
+        {
+          "kind": "claude",
+          "text": "¡Hola Alex! Soy tu plugin personalizado. ¿En qué puedo ayudarte?",
+          "delayAfterMs": 500
+        }
       ],
       "durationInSeconds": 14
     },

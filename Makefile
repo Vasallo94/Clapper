@@ -12,7 +12,7 @@ AGENT_PORT  := 2024
 RENDER_PORT := 3100
 
 # Tutorial slug — override with: make render TUTORIAL=my-slug
-TUTORIAL    ?= $(shell ls -1 tutorials/ 2>/dev/null | head -1)
+TUTORIAL    ?= $(shell ls -1 content/tutorials/ 2>/dev/null | head -1)
 
 # ─── Help ────────────────────────────────────────────────────
 help: ## Show this help
@@ -56,22 +56,22 @@ up: ## Start all services (studio + agent + renderer + web)
 # ─── Video pipeline ─────────────────────────────────────────
 render: ## Render tutorial to MP4 (TUTORIAL=slug)
 	@test -n "$(TUTORIAL)" || { echo "Usage: make render TUTORIAL=<slug>"; exit 1; }
-	npx tsx scripts/render.ts tutorials/$(TUTORIAL)/config.json
+	npx tsx scripts/render.ts content/tutorials/$(TUTORIAL)/config.json
 
 validate: ## Validate tutorial config (TUTORIAL=slug)
 	@test -n "$(TUTORIAL)" || { echo "Usage: make validate TUTORIAL=<slug>"; exit 1; }
-	npx tsx scripts/validate-config.ts tutorials/$(TUTORIAL)/config.json
+	npx tsx scripts/validate-config.ts content/tutorials/$(TUTORIAL)/config.json
 
 catalog: ## Regenerate scene catalog
 	npm run generate:catalog
 
 voiceover: ## Generate voiceover (TUTORIAL=slug)
 	@test -n "$(TUTORIAL)" || { echo "Usage: make voiceover TUTORIAL=<slug>"; exit 1; }
-	npx tsx scripts/generate-voiceover.ts tutorials/$(TUTORIAL)/config.json
+	npx tsx scripts/generate-voiceover.ts content/tutorials/$(TUTORIAL)/config.json
 
 sound: ## Generate sound design (TUTORIAL=slug)
 	@test -n "$(TUTORIAL)" || { echo "Usage: make sound TUTORIAL=<slug>"; exit 1; }
-	npx tsx scripts/generate-sound-design.ts tutorials/$(TUTORIAL)/config.json
+	npx tsx scripts/generate-sound-design.ts content/tutorials/$(TUTORIAL)/config.json
 
 # ─── Quality ─────────────────────────────────────────────────
 lint: ## Run ESLint
@@ -106,4 +106,4 @@ browser-ensure: ## Ensure Chromium is available for Remotion
 # ─── Cleanup ─────────────────────────────────────────────────
 clean: ## Remove build artifacts and node_modules caches
 	rm -rf dist out .remotion
-	find tutorials -name "output.mp4" -delete 2>/dev/null || true
+	find content -name "output.mp4" -delete 2>/dev/null || true

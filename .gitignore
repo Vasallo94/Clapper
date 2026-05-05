@@ -8,8 +8,7 @@ dist
 out
 
 # Vídeos generados — binarios grandes, no trackear
-tutorials/*/output.mp4
-shorts/*/output.mp4
+content/**/output.mp4
 public/voiceover/
 .superpowers/
 .claude/hooks/
@@ -44,7 +43,6 @@ packages/agent/.langgraph_api/
 # Generated audio/video assets
 public/audio/*/
 !public/audio/library/
-presentations/*/output.mp4
 
 # All transient pipeline outputs (renders, generated assets)
 .generated/

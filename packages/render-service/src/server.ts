@@ -11,7 +11,8 @@ app.use(cors())
 app.use(express.json({ limit: "10mb" }))
 
 const ROOT_DIR = process.env.ROOT_DIR || path.resolve(__dirname, "../../..")
-const JOBS_DIR = path.resolve(ROOT_DIR, "packages/render-service/jobs")
+const JOBS_DIR = path.resolve(ROOT_DIR, ".generated/renders")
+mkdirSync(JOBS_DIR, { recursive: true })
 
 // POST /api/validate — validate config against Zod schemas
 app.post("/api/validate", (req, res) => {

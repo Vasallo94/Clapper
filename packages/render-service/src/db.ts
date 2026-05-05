@@ -1,8 +1,11 @@
 import Database from "better-sqlite3"
 import path from "path"
 
+import { mkdirSync } from "fs"
+
 const ROOT_DIR = process.env.ROOT_DIR || path.resolve(__dirname, "../../..")
-const JOBS_DIR = path.resolve(ROOT_DIR, "packages/render-service/jobs")
+const JOBS_DIR = path.resolve(ROOT_DIR, ".generated/renders")
+mkdirSync(JOBS_DIR, { recursive: true })
 
 const db = new Database(path.join(JOBS_DIR, "jobs.db"))
 db.pragma("journal_mode = WAL")

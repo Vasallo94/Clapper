@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
+
 WORKDIR /app/packages/agent
 
 COPY packages/agent/pyproject.toml packages/agent/uv.lock ./
@@ -13,8 +15,9 @@ RUN uv sync --frozen --no-dev
 
 EXPOSE 2024
 
-CMD ["uv", "run", "langgraph", "dev", \
+CMD ["uv", "run", "--project", "/app/packages/agent", \
+     "langgraph", "dev", \
      "--host", "0.0.0.0", \
-     "--config", "langgraph.json", \
+     "--config", "/app/packages/agent/langgraph.json", \
      "--port", "2024", \
      "--allow-blocking"]

@@ -5,7 +5,7 @@
 export function calculateTotalFrames(
   scenes: Array<{ durationInSeconds: number }>,
   fps: number,
-  transition?: { type?: string; durationInFrames?: number },
+  transition?: { type?: string; durationInFrames?: number } | null,
 ): number {
   const totalSeconds = scenes.reduce((sum, s) => sum + s.durationInSeconds, 0)
   const transitionType = transition?.type ?? "none"

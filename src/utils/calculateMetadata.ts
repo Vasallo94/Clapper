@@ -17,9 +17,9 @@ type CompositionConfig = {
   fps: number
   width: number
   height: number
-  scenes: { durationInSeconds: number; timing?: Timing; beats?: Beat[] }[]
-  voiceover?: VoiceoverConfig
-  transition?: { type?: string; durationInFrames?: number }
+  scenes: { durationInSeconds: number; timing?: Timing | null; beats?: Beat[] | null }[]
+  voiceover?: VoiceoverConfig | null
+  transition?: { type?: string; durationInFrames?: number } | null
 }
 
 const roundSeconds = (value: number) => Math.ceil(value * 10) / 10

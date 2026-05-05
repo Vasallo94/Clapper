@@ -27,11 +27,11 @@ import type { Beat, Timing, VoiceoverScene } from "../shared/schemas"
 
 type DirectionalScene = {
   durationInSeconds: number
-  timing?: Timing
-  beats?: Beat[]
+  timing?: Timing | null
+  beats?: Beat[] | null
 }
 
-const hasValue = (value: number | undefined) => typeof value === "number" && Number.isFinite(value)
+const hasValue = (value: number | null | undefined) => typeof value === "number" && Number.isFinite(value)
 
 export const DEFAULT_AUDIO_TAIL_PADDING_MS = 350
 
@@ -49,7 +49,7 @@ export const getVoiceoverSceneObject = (scene?: VoiceoverScene) => {
   return scene
 }
 
-export const getMergedTiming = (sceneTiming?: Timing, voiceScene?: VoiceoverScene): Timing | undefined => {
+export const getMergedTiming = (sceneTiming?: Timing | null, voiceScene?: VoiceoverScene): Timing | undefined => {
   const voiceTiming =
     voiceScene && typeof voiceScene !== "string"
       ? {
@@ -68,7 +68,7 @@ export const getMergedTiming = (sceneTiming?: Timing, voiceScene?: VoiceoverScen
   return Object.values(merged).some(hasValue) ? merged : undefined
 }
 
-export const getMergedBeats = (sceneBeats?: Beat[], voiceScene?: VoiceoverScene) => {
+export const getMergedBeats = (sceneBeats?: Beat[] | null, voiceScene?: VoiceoverScene) => {
   if (sceneBeats && sceneBeats.length > 0) {
     return sceneBeats
   }
@@ -80,17 +80,17 @@ export const getMergedBeats = (sceneBeats?: Beat[], voiceScene?: VoiceoverScene)
   return undefined
 }
 
-export const hasExplicitDirection = (timing?: Timing, beats?: Beat[]) =>
+export const hasExplicitDirection = (timing?: Timing | null, beats?: Beat[] | null) =>
   Boolean((timing && Object.values(timing).some(hasValue)) || (beats && beats.length > 0))
 
-export const getSceneMotionDelayMs = (timing?: Timing) => timing?.leadInMs ?? 0
+export const getSceneMotionDelayMs = (timing?: Timing | null) => timing?.leadInMs ?? 0
 
-export const getSceneAudioDelayMs = (timing?: Timing) => (timing?.leadInMs ?? 0) + (timing?.audioStartMs ?? 0)
+export const getSceneAudioDelayMs = (timing?: Timing | null) => (timing?.leadInMs ?? 0) + (timing?.audioStartMs ?? 0)
 
-export const getSceneTailHoldMs = (timing?: Timing) =>
+export const getSceneTailHoldMs = (timing?: Timing | null) =>
   hasValue(timing?.tailHoldMs) ? (timing?.tailHoldMs ?? 0) : DEFAULT_AUDIO_TAIL_PADDING_MS
 
-export const getSceneMinVisualHoldMs = (timing?: Timing) => timing?.minVisualHoldMs ?? 0
+export const getSceneMinVisualHoldMs = (timing?: Timing | null) => timing?.minVisualHoldMs ?? 0
 
 export const getBeatStartFrame = (beat: Beat, fps: number) => msToFrames(beat.startMs, fps)
 
@@ -123,7 +123,7 @@ export const getDirectedSceneDurationInSeconds = ({
   timing,
 }: {
   audioDurationInSeconds: number
-  timing?: Timing
+  timing?: Timing | null
 }) => {
   const totalMs =
     getSceneAudioDelayMs(timing) +

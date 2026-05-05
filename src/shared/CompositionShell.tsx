@@ -14,18 +14,18 @@ import type { SceneAudioInfo } from "../utils/audioMix"
 interface CompositionShellScene {
   type: string
   durationInSeconds: number
-  timing?: Timing
-  beats?: Beat[]
+  timing?: Timing | null
+  beats?: Beat[] | null
   componentId?: string
 }
 
 interface CompositionShellConfig<S extends CompositionShellScene> {
   id: string
   fps: number
-  soundDesign?: SoundDesign
-  voiceover?: VoiceoverConfig
+  soundDesign?: SoundDesign | null
+  voiceover?: VoiceoverConfig | null
   scenes: S[]
-  transition?: TransitionConfig
+  transition?: TransitionConfig | null
 }
 
 interface CompositionShellProps<S extends CompositionShellScene> {

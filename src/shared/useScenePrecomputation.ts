@@ -13,14 +13,14 @@ export interface SceneInfo<S> {
 interface PrecomputableScene {
   type: string
   durationInSeconds: number
-  timing?: Timing
-  beats?: Beat[]
+  timing?: Timing | null
+  beats?: Beat[] | null
   componentId?: string
 }
 
 interface PrecomputableConfig {
   fps: number
-  voiceover?: VoiceoverConfig
+  voiceover?: VoiceoverConfig | null
 }
 
 export interface PrecomputeResult<S> {

@@ -39,6 +39,7 @@ export const TransitionConfigSchema = z
     type: TransitionTypeSchema,
     durationInFrames: z.number().int().min(1).max(60).default(15),
   })
+  .nullable()
   .optional()
 
 export type TransitionType = z.infer<typeof TransitionTypeSchema>

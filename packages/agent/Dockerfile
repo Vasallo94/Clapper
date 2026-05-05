@@ -15,9 +15,9 @@ RUN uv sync --frozen --no-dev
 
 EXPOSE 2024
 
-CMD ["uv", "run", "--project", "/app/packages/agent", \
-     "langgraph", "dev", \
-     "--host", "0.0.0.0", \
-     "--config", "/app/packages/agent/langgraph.json", \
-     "--port", "2024", \
-     "--allow-blocking"]
+CMD uv run --project /app/packages/agent \
+    langgraph dev \
+    --host 0.0.0.0 \
+    --config /app/packages/agent/langgraph.json \
+    --port 2024 \
+    --allow-blocking

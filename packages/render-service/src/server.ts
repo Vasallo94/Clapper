@@ -107,14 +107,21 @@ app.post("/api/render", (req, res) => {
       shell: true,
     })
 
+    let renderStderr = ""
+    const MAX_STDERR = 4000
+
     renderChild.stdout.on("data", (data) => {
       const match = data.toString().match(/(\d+)%/)
       if (match) updateJob(jobId, { progress: parseInt(match[1]) })
     })
 
     renderChild.stderr.on("data", (data) => {
-      const match = data.toString().match(/(\d+)%/)
+      const chunk = data.toString()
+      const match = chunk.match(/(\d+)%/)
       if (match) updateJob(jobId, { progress: parseInt(match[1]) })
+      if (renderStderr.length < MAX_STDERR) {
+        renderStderr += chunk.slice(0, MAX_STDERR - renderStderr.length)
+      }
     })
 
     renderChild.on("close", (code) => {
@@ -128,9 +135,10 @@ app.post("/api/render", (req, res) => {
           completed_at: new Date().toISOString(),
         })
       } else {
+        const detail = renderStderr.trim()
         updateJob(jobId, {
           status: "error",
-          error: "Render exited with code " + code,
+          error: detail || `Render exited with code ${code}`,
           completed_at: new Date().toISOString(),
         })
       }

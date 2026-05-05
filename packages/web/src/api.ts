@@ -1,5 +1,5 @@
 import { Client } from "@langchain/langgraph-sdk"
-import type { ChatResponse, RenderJob, JobListResponse } from "./types"
+import type { ChatResponse, CheckpointData, DirectionData, RenderJob, JobListResponse, SoundChartData } from "./types"
 
 export const client = new Client({
   apiUrl: import.meta.env.VITE_LANGGRAPH_URL ?? "http://localhost:2024",
@@ -46,7 +46,11 @@ export async function extractResponse(threadId: string): Promise<ChatResponse> {
   if (firstInterrupt) {
     const interruptValue = firstInterrupt.interrupts![0].value
     if (interruptValue && typeof interruptValue === "object") {
-      return { type: "checkpoint", data: interruptValue as unknown as Record<string, unknown>, thread_id: threadId }
+      return {
+        type: "checkpoint",
+        data: interruptValue as CheckpointData | SoundChartData | DirectionData,
+        thread_id: threadId,
+      }
     }
   }
 

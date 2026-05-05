@@ -1,3 +1,1 @@
-from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+from .paths import PROJECT_ROOT  # noqa: F401

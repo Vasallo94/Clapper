@@ -1,10 +1,11 @@
 import os
 import uuid
 from dataclasses import dataclass, field, fields, MISSING
-from pathlib import Path
 from typing import Any
 
-_PROJECT_ROOT = str(Path(__file__).resolve().parent.parent.parent.parent)
+from .paths import PROJECT_ROOT as _PROJECT_ROOT_PATH
+
+_PROJECT_ROOT = str(_PROJECT_ROOT_PATH)
 
 
 def _generate_config_id() -> str:

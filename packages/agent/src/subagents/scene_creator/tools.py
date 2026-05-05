@@ -1,6 +1,4 @@
-from ...config import PROJECT_ROOT
-
-SCENES_DIR = PROJECT_ROOT / "src" / "compositions" / "ClaudeCodeTutorial" / "scenes" / "custom"
+from ...paths import CUSTOM_SCENES_DIR as SCENES_DIR
 
 
 def _component_id_to_class_name(component_id: str) -> str:

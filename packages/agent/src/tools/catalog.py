@@ -1,7 +1,6 @@
 import json
-from pathlib import Path
 
-CATALOG_PATH = Path(__file__).resolve().parent.parent.parent.parent.parent / "src" / "shared" / "scene-catalog.json"
+from ..paths import SCENE_CATALOG as CATALOG_PATH
 
 
 def query_scene_catalog(query: str = "") -> str:

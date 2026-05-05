@@ -1,9 +1,7 @@
 import subprocess
 from typing import TypedDict
 
-from ...config import PROJECT_ROOT
-
-REGISTRY_PATH = PROJECT_ROOT / "src" / "compositions" / "ClaudeCodeTutorial" / "customSceneRegistry.ts"
+from ...paths import PROJECT_ROOT, SCENE_REGISTRY as REGISTRY_PATH
 
 
 class SceneCreatorState(TypedDict):

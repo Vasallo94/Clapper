@@ -6,8 +6,8 @@ from typing import Annotated, Any
 
 from langchain_core.tools import InjectedToolArg
 
-from ..config import PROJECT_ROOT
 from ..context import resolve_config_id
+from ..paths import AUDIO_BASE_DIR, AUDIO_LIBRARY_DIR, SCENE_REGISTRY, VOICEOVER_BASE_DIR
 
 BUILTIN_SCENE_TYPES = {"intro", "terminal", "callout", "outro", "custom", "hero", "benefits", "pricing", "cta"}
 
@@ -43,7 +43,7 @@ def validate_config(config_input: str, runtime: Annotated[Any, InjectedToolArg] 
     warnings: list[str] = []
     config_id = resolve_config_id(runtime, config)
 
-    registry_path = PROJECT_ROOT / "src" / "compositions" / "ClaudeCodeTutorial" / "customSceneRegistry.ts"
+    registry_path = SCENE_REGISTRY
     registered_ids: set[str] = set()
     if registry_path.exists():
         content = registry_path.read_text(encoding="utf-8")
@@ -60,7 +60,7 @@ def validate_config(config_input: str, runtime: Annotated[Any, InjectedToolArg] 
 
     voiceover = config.get("voiceover")
     if voiceover and voiceover.get("enabled"):
-        vo_dir = PROJECT_ROOT / "public" / "voiceover" / config_id
+        vo_dir = VOICEOVER_BASE_DIR / config_id
         scenes = voiceover.get("scenes", {})
         if isinstance(scenes, list):
             scene_keys = [str(s.get("sceneIndex", i)) for i, s in enumerate(scenes)]
@@ -73,14 +73,14 @@ def validate_config(config_input: str, runtime: Annotated[Any, InjectedToolArg] 
 
     sound = config.get("soundDesign")
     if sound and sound.get("enabled"):
-        library_dir = PROJECT_ROOT / "public" / "audio" / "library"
+        library_dir = AUDIO_LIBRARY_DIR
         music_bed = sound.get("musicBed")
         if music_bed:
             lid = music_bed.get("libraryId")
             if lid and not (library_dir / f"{lid}.mp3").exists():
                 errors.append(f"Music bed libraryId '{lid}' not found in {library_dir}")
 
-        audio_dir = PROJECT_ROOT / "public" / "audio" / config_id
+        audio_dir = AUDIO_BASE_DIR / config_id
         for sfx in sound.get("sfx", []):
             sfx_id = sfx.get("id", "")
             sfx_file = audio_dir / f"sfx-{sfx_id}.mp3"

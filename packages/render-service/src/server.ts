@@ -245,36 +245,43 @@ app.get("/api/render/:id/status", (req, res) => {
   res.json(job)
 })
 
+// Resolve video path from job ID (immune to host vs container path mismatch)
+function resolveOutputPath(jobId: string): string {
+  return path.join(JOBS_DIR, jobId, "output.mp4")
+}
+
 // GET /api/render/:id/stream — serve video for in-browser playback (supports Range)
 app.get("/api/render/:id/stream", (req, res) => {
   const job = getJob(req.params.id)
-  if (!job || job.status !== "done" || !job.output_path) {
+  if (!job || job.status !== "done") {
     res.status(404).json({ error: "Video not available" })
     return
   }
+  const filePath = resolveOutputPath(req.params.id)
   try {
-    statSync(job.output_path)
+    statSync(filePath)
   } catch {
     res.status(410).json({ error: "Video file deleted" })
     return
   }
-  res.sendFile(job.output_path, { headers: { "Content-Type": "video/mp4" } })
+  res.sendFile(filePath, { headers: { "Content-Type": "video/mp4" }, dotfiles: "allow" })
 })
 
 // GET /api/render/:id/download — download rendered video
 app.get("/api/render/:id/download", (req, res) => {
   const job = getJob(req.params.id)
-  if (!job || job.status !== "done" || !job.output_path) {
+  if (!job || job.status !== "done") {
     res.status(404).json({ error: "Video not available" })
     return
   }
+  const filePath = resolveOutputPath(req.params.id)
   try {
-    statSync(job.output_path)
+    statSync(filePath)
   } catch {
     res.status(410).json({ error: "Video file deleted" })
     return
   }
-  res.download(job.output_path, `${job.config_id || job.id}.mp4`)
+  res.download(filePath, `${job.config_id || job.id}.mp4`)
 })
 
 // GET /api/audio/library — list available music tracks

@@ -99,6 +99,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Stale closure in `App.tsx` stream result handler: `activeTarget` was read inside `useEffect` but not in its dependency array, causing auto-lookup to query the wrong config_id (showed esporas video when git tutorial was selected)
 - Silent error swallowing: replaced three `.catch(() => {})` calls with `console.warn` logging for `fetchConfigs`, `fetchJobStatus`, and `fetchLatestRender`
 - Video player not playing in `VideoResultCard`: `<video>` element now uses `/stream` endpoint (`sendFile`) instead of `/download` endpoint (`Content-Disposition: attachment`)
+- Video streaming 404 in Docker: Express `send` module rejected paths through `.generated/` (dotfile security check); added `dotfiles: "allow"` to `sendFile` options
+- Host/container path mismatch for video files: `resolveOutputPath(jobId)` derives path from `JOBS_DIR` instead of using stored `output_path` from SQLite (which contains host absolute paths)
 
 ### Removed
 

@@ -2,6 +2,7 @@ import { useState } from "react"
 import type { DirectionData } from "../types"
 import { theme } from "../theme"
 import { btnStyle } from "./btnStyle"
+import { asArray, asRecord, getSceneTitle } from "./reviewData"
 
 interface Props {
   data: DirectionData
@@ -35,6 +36,58 @@ export function DirectionCard({ data, onApprove, onRequestChanges, disabled }: P
       <div style={{ fontSize: 13, color: theme.colors.text.secondary, marginBottom: 12 }}>
         {data.scenes.length} escenas con timing y beats narrativos
       </div>
+
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, marginBottom: 14 }}>
+        <thead>
+          <tr style={{ borderBottom: `1px solid ${theme.colors.border.default}` }}>
+            {["#", "Escena", "Timing", "Beats"].map((h) => (
+              <th
+                key={h}
+                style={{
+                  padding: "6px 8px",
+                  textAlign: "left",
+                  color: theme.colors.text.muted,
+                  fontWeight: 500,
+                  fontSize: 11,
+                  textTransform: "uppercase" as const,
+                  letterSpacing: "0.05em",
+                }}
+              >
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.scenes.map((scene, index) => {
+            const sceneRecord = scene as Record<string, unknown>
+            const timing = asRecord(sceneRecord.timing)
+            const beats = asArray(sceneRecord.beats)
+            return (
+              <tr key={index} style={{ borderBottom: `1px solid ${theme.colors.border.subtle}` }}>
+                <td style={{ padding: "6px 8px", color: theme.colors.text.muted, fontFamily: theme.fonts.mono }}>
+                  {String(index + 1).padStart(2, "0")}
+                </td>
+                <td style={{ padding: "6px 8px", color: theme.colors.text.primary }}>{getSceneTitle(sceneRecord)}</td>
+                <td style={{ padding: "6px 8px", color: theme.colors.text.secondary, fontSize: 12 }}>
+                  {timing
+                    ? [
+                        timing.leadInMs ? `in ${timing.leadInMs}ms` : "",
+                        timing.audioStartMs ? `voz ${timing.audioStartMs}ms` : "",
+                        timing.tailHoldMs ? `hold ${timing.tailHoldMs}ms` : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" · ") || "definido"
+                    : "-"}
+                </td>
+                <td style={{ padding: "6px 8px", color: theme.colors.text.secondary, fontSize: 12 }}>
+                  {beats.length > 0 ? `${beats.length} beats` : "-"}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
 
       {data.warnings.length > 0 && (
         <div

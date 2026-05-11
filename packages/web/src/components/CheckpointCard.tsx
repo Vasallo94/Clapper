@@ -2,7 +2,7 @@ import { useState } from "react"
 import type { CheckpointData } from "../types"
 import { theme } from "../theme"
 import { btnStyle } from "./btnStyle"
-import { VideoPlayer } from "./VideoPlayer"
+import { getSceneScript, getSceneTitle } from "./reviewData"
 
 interface Props {
   data: CheckpointData
@@ -15,6 +15,9 @@ export function CheckpointCard({ data, onApprove, onRequestChanges, disabled }: 
   const [feedback, setFeedback] = useState("")
   const [showFeedback, setShowFeedback] = useState(false)
   const totalDuration = data.scenes.reduce((sum, s) => sum + (s.durationInSeconds || 0), 0)
+  const scenesWithScript = data.scenes
+    .map((scene, index) => ({ index, text: getSceneScript(scene as Record<string, unknown>) }))
+    .filter((entry) => entry.text)
 
   return (
     <div
@@ -99,7 +102,7 @@ export function CheckpointCard({ data, onApprove, onRequestChanges, disabled }: 
                 {scene.type}
               </td>
               <td style={{ padding: "6px 8px", color: theme.colors.text.primary }}>
-                {scene.title || scene.text || "-"}
+                {getSceneTitle(scene as Record<string, unknown>)}
               </td>
               <td
                 style={{
@@ -121,15 +124,42 @@ export function CheckpointCard({ data, onApprove, onRequestChanges, disabled }: 
         total: {totalDuration}s / {data.scenes.length} escenas
       </div>
 
-      <VideoPlayer
-        config={{
-          id: "preview",
-          fps: 30,
-          composition: "ProductShort",
-          scenes: data.scenes,
-        }}
-        style={{ marginBottom: 12, maxHeight: 300 }}
-      />
+      {scenesWithScript.length > 0 && (
+        <div style={{ marginBottom: 14 }}>
+          <div
+            style={{
+              color: theme.colors.text.muted,
+              fontSize: 11,
+              fontWeight: 700,
+              marginBottom: 6,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            }}
+          >
+            Guion disponible
+          </div>
+          {scenesWithScript.map((entry) => (
+            <div
+              key={entry.index}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "42px 1fr",
+                gap: 8,
+                color: theme.colors.text.secondary,
+                fontSize: 12,
+                lineHeight: 1.5,
+                padding: "5px 0",
+                borderBottom: `1px solid ${theme.colors.border.subtle}`,
+              }}
+            >
+              <span style={{ color: theme.colors.text.muted, fontFamily: theme.fonts.mono }}>
+                {String(entry.index + 1).padStart(2, "0")}
+              </span>
+              <span>{entry.text}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div style={{ display: "flex", gap: 8 }}>
         <button onClick={onApprove} disabled={disabled} style={btnStyle(theme.colors.status.success, disabled)}>

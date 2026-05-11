@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type {
   AgentSummary,
+  AudioChartData,
   ChatMessage,
   ChatResponse,
   CheckpointData,
   CheckpointType,
   DirectionData,
   SoundChartData,
+  ValidationReportData,
 } from "./types"
 import { client, createThread, fetchJobStatus } from "./api"
 import { useAgentStream } from "./hooks/useAgentStream"
@@ -33,6 +35,7 @@ export default function App() {
   const pipeline = usePipelineTracker()
 
   const handleAgentComplete = useCallback((summary: AgentSummary) => {
+    if (summary.tools.length === 0 && summary.artifacts.length === 0 && !summary.llmText?.trim()) return
     setMessages((prev) => [
       ...prev,
       {
@@ -121,6 +124,14 @@ export default function App() {
           res.data as SoundChartData,
           "sound_chart",
         )
+      } else if (cpType === "audio_chart_checkpoint") {
+        pipeline.advance("sound_review", "Carta de audio generada")
+        addMessage(
+          "assistant",
+          "He preparado una propuesta de audio y guion:",
+          res.data as AudioChartData,
+          "audio_chart",
+        )
       } else if (cpType === "direction_checkpoint") {
         pipeline.advance("director", "Direccion editorial lista")
         addMessage(
@@ -132,6 +143,9 @@ export default function App() {
       } else if (cpType === "escaleta_checkpoint") {
         pipeline.advance("escaleta_review", "Escaleta generada")
         addMessage("assistant", "He preparado una propuesta de escaleta:", res.data as CheckpointData, "escaleta")
+      } else if (cpType === "validation_report") {
+        pipeline.advance("rendering", "Validacion generada")
+        addMessage("assistant", "Resultado de validacion:", res.data as ValidationReportData, "validation")
       } else {
         pipeline.advance("escaleta_review", `Checkpoint: ${cpType}`)
         addMessage(
@@ -180,17 +194,14 @@ export default function App() {
     pipeline.reset()
     pipeline.advance("orchestrator", "Mensaje recibido: " + text.slice(0, 60))
 
-    const tid = threadId ?? (await createThread())
-    setThreadId(tid)
-    setCurrentThreadId(tid)
-    saveThread({
-      threadId: tid,
-      title: text.slice(0, 60),
-      createdAt: new Date().toISOString(),
-      lastActiveAt: new Date().toISOString(),
-    })
-    setStoredThreads(getThreads())
-    stream.startStream(tid, text)
+    try {
+      const tid = await resolveThreadForSend(text)
+      stream.startStream(tid, text)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      pipeline.advance("error", message)
+      addMessage("assistant", `No he podido conectar con el backend: ${message}`)
+    }
   }
 
   const createCheckpointHandlers = useCallback(
@@ -214,9 +225,40 @@ export default function App() {
       escaleta: createCheckpointHandlers("Aprobado", "Cambios solicitados"),
       direction: createCheckpointHandlers("Direccion aprobada", "Ajustes de direccion"),
       sound_chart: createCheckpointHandlers("Sonido aprobado", "Ajustes de sonido"),
+      audio_chart: createCheckpointHandlers("Audio aprobado", "Ajustes de audio"),
+      validation: createCheckpointHandlers("Validacion aprobada", "Ajustes de validacion"),
       generic: createCheckpointHandlers("Aprobado", "Cambios"),
     }),
     [createCheckpointHandlers],
+  )
+
+  const resolveThreadForSend = useCallback(
+    async (initialMessage: string) => {
+      if (threadId) {
+        try {
+          await client.threads.getState(threadId)
+          return threadId
+        } catch {
+          removeThread(threadId)
+          setStoredThreads(getThreads())
+          setCurrentThreadId(null)
+          setThreadId(undefined)
+        }
+      }
+
+      const tid = await createThread()
+      setThreadId(tid)
+      setCurrentThreadId(tid)
+      saveThread({
+        threadId: tid,
+        title: initialMessage.slice(0, 60),
+        createdAt: new Date().toISOString(),
+        lastActiveAt: new Date().toISOString(),
+      })
+      setStoredThreads(getThreads())
+      return tid
+    },
+    [threadId],
   )
 
   return (

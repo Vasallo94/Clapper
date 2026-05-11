@@ -1,11 +1,13 @@
 import React, { useState } from "react"
-import type { ToolEntry } from "../types"
+import type { AgentArtifact, ToolEntry } from "../types"
 import { theme } from "../theme"
 import { SubagentBadge } from "./SubagentBadge"
+import { AgentArtifactCard } from "./AgentArtifactCard"
 
 interface Props {
   agentName: string
   tools: ToolEntry[]
+  artifacts?: AgentArtifact[]
   llmText?: string
   status: "active" | "completed" | "error"
   durationMs?: number
@@ -18,7 +20,15 @@ const STATUS_COLORS = {
   error: { dot: "#ef4444", border: "rgba(239,68,68,0.3)", name: "#ef4444" },
 }
 
-export function StreamingBubble({ agentName, tools, llmText, status, durationMs, defaultExpanded = true }: Props) {
+export function StreamingBubble({
+  agentName,
+  tools,
+  artifacts = [],
+  llmText,
+  status,
+  durationMs,
+  defaultExpanded = true,
+}: Props) {
   const [expanded, setExpanded] = useState(defaultExpanded)
   const colors = STATUS_COLORS[status]
   const doneTools = tools.filter((t) => t.status === "done").length
@@ -58,7 +68,8 @@ export function StreamingBubble({ agentName, tools, llmText, status, durationMs,
             {agentName}
           </span>
           <span style={{ color: theme.colors.text.muted, fontSize: 11 }}>
-            {doneTools} tools{durationMs ? ` · ${(durationMs / 1000).toFixed(0)}s` : ""}
+            {doneTools} tools{artifacts.length ? ` · ${artifacts.length} artefactos` : ""}
+            {durationMs ? ` · ${(durationMs / 1000).toFixed(0)}s` : ""}
           </span>
         </div>
         <span style={{ color: theme.colors.text.muted, fontSize: 10 }}>&#9660;</span>
@@ -88,7 +99,7 @@ export function StreamingBubble({ agentName, tools, llmText, status, durationMs,
           display: "flex",
           alignItems: "center",
           gap: 8,
-          marginBottom: tools.length > 0 || llmText ? 8 : 0,
+          marginBottom: tools.length > 0 || llmText || artifacts.length > 0 ? 8 : 0,
           cursor: status === "completed" ? "pointer" : "default",
         }}
       >
@@ -110,7 +121,7 @@ export function StreamingBubble({ agentName, tools, llmText, status, durationMs,
           style={{
             borderLeft: `2px solid ${theme.colors.border.default}`,
             paddingLeft: 10,
-            marginBottom: llmText ? 8 : 0,
+            marginBottom: llmText || artifacts.length ? 8 : 0,
           }}
         >
           {tools.map((t) => (
@@ -138,18 +149,39 @@ export function StreamingBubble({ agentName, tools, llmText, status, durationMs,
       {llmText && (
         <div
           style={{
-            fontSize: 11,
-            color: theme.colors.text.muted,
-            fontStyle: "italic",
+            border: `1px solid ${theme.colors.border.subtle}`,
+            borderRadius: theme.radius.sm,
+            padding: "8px 10px",
+            backgroundColor: theme.colors.bg.primary,
+            fontSize: 12,
+            color: theme.colors.text.secondary,
             lineHeight: 1.5,
-            maxHeight: 80,
-            overflow: "hidden",
+            maxHeight: 150,
+            overflow: "auto",
+            marginBottom: artifacts.length ? 8 : 0,
+            whiteSpace: "pre-wrap",
           }}
         >
-          {llmText.slice(-200)}
+          <div
+            style={{
+              color: theme.colors.text.muted,
+              fontSize: 10,
+              fontWeight: 700,
+              marginBottom: 4,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            }}
+          >
+            Pensamiento operativo visible
+          </div>
+          {llmText}
           {status === "active" && <span className="loading-dot" style={{ marginLeft: 2 }} />}
         </div>
       )}
+
+      {artifacts.map((artifact) => (
+        <AgentArtifactCard key={artifact.id} artifact={artifact} />
+      ))}
     </div>
   )
 }

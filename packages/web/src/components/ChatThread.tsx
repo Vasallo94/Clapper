@@ -1,5 +1,13 @@
 import React, { useEffect, useRef } from "react"
-import type { ChatMessage, CheckpointData, DirectionData, PipelineStageId, SoundChartData } from "../types"
+import type {
+  AudioChartData,
+  ChatMessage,
+  CheckpointData,
+  DirectionData,
+  PipelineStageId,
+  SoundChartData,
+  ValidationReportData,
+} from "../types"
 import type { StreamState } from "../hooks/useAgentStream"
 import { CheckpointCard } from "./CheckpointCard"
 import { DirectionCard } from "./DirectionCard"
@@ -10,6 +18,7 @@ import { ErrorBanner } from "./ErrorBanner"
 import { MessageBubble } from "./MessageBubble"
 import { VideoResultCard } from "./VideoResultCard"
 import { RenderProgress } from "./RenderProgress"
+import { ValidationReportCard } from "./ValidationReportCard"
 import { theme } from "../theme"
 
 interface Props {
@@ -75,6 +84,8 @@ export function ChatThread({
               key={msg.id}
               agentName={msg.agentSummary.name}
               tools={msg.agentSummary.tools}
+              artifacts={msg.agentSummary.artifacts}
+              llmText={msg.agentSummary.llmText}
               status="completed"
               durationMs={msg.agentSummary.durationMs}
               defaultExpanded={false}
@@ -102,10 +113,14 @@ export function ChatThread({
           let card: React.ReactNode = null
           if (msg.checkpointType === "sound_chart")
             card = <SoundChartCard data={msg.checkpoint as SoundChartData} {...cardProps} />
+          else if (msg.checkpointType === "audio_chart")
+            card = <SoundChartCard data={msg.checkpoint as AudioChartData} {...cardProps} />
           else if (msg.checkpointType === "direction")
             card = <DirectionCard data={msg.checkpoint as DirectionData} {...cardProps} />
           else if (msg.checkpointType === "escaleta")
             card = <CheckpointCard data={msg.checkpoint as CheckpointData} {...cardProps} />
+          else if (msg.checkpointType === "validation")
+            card = <ValidationReportCard data={msg.checkpoint as ValidationReportData} {...cardProps} />
           else if (msg.checkpointType === "generic")
             card = <GenericCheckpointCard data={msg.checkpoint as Record<string, unknown>} {...cardProps} />
 
@@ -127,6 +142,7 @@ export function ChatThread({
           <StreamingBubble
             agentName={streamState.activeAgent}
             tools={streamState.tools}
+            artifacts={streamState.artifacts}
             llmText={streamState.llmText}
             status="active"
             defaultExpanded={true}

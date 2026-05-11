@@ -1,13 +1,22 @@
 import { Client } from "@langchain/langgraph-sdk"
-import type { ChatResponse, CheckpointData, DirectionData, RenderJob, JobListResponse, SoundChartData } from "./types"
+import type {
+  AudioChartData,
+  ChatResponse,
+  CheckpointData,
+  DirectionData,
+  JobListResponse,
+  RenderJob,
+  SoundChartData,
+  ValidationReportData,
+} from "./types"
 
 export const client = new Client({
-  apiUrl: import.meta.env.VITE_LANGGRAPH_URL ?? "http://localhost:2024",
+  apiUrl: import.meta.env.VITE_LANGGRAPH_URL ?? "http://127.0.0.1:2024",
 })
 
 export const ASSISTANT_ID = "agent"
 
-const RENDER_URL = import.meta.env.VITE_RENDER_URL ?? "http://localhost:3100"
+const RENDER_URL = import.meta.env.VITE_RENDER_URL ?? "http://127.0.0.1:3100"
 
 export async function fetchJobStatus(jobId: string): Promise<RenderJob> {
   const res = await fetch(`${RENDER_URL}/api/render/${jobId}/status`)
@@ -48,7 +57,7 @@ export async function extractResponse(threadId: string): Promise<ChatResponse> {
     if (interruptValue && typeof interruptValue === "object") {
       return {
         type: "checkpoint",
-        data: interruptValue as CheckpointData | SoundChartData | DirectionData,
+        data: interruptValue as CheckpointData | SoundChartData | AudioChartData | DirectionData | ValidationReportData,
         thread_id: threadId,
       }
     }

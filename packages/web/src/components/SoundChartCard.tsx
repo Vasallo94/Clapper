@@ -1,36 +1,51 @@
 import { useState } from "react"
-import type { SoundChartData } from "../types"
+import type { AudioChartData, SoundChartData } from "../types"
 import { theme } from "../theme"
 import { btnStyle } from "./btnStyle"
+import { asRecord, asString, getMusicBed, getSfxEntries, getSoundDesign, getVoiceoverEntries } from "./reviewData"
 
 interface Props {
-  data: SoundChartData
-  onApprove: () => void
-  onRequestChanges: (feedback: string) => void
+  data: SoundChartData | AudioChartData
+  onApprove?: () => void
+  onRequestChanges?: (feedback: string) => void
   disabled?: boolean
+  compact?: boolean
 }
 
-export function SoundChartCard({ data, onApprove, onRequestChanges, disabled }: Props) {
+export function SoundChartCard({ data, onApprove, onRequestChanges, disabled, compact }: Props) {
   const [feedback, setFeedback] = useState("")
   const [showFeedback, setShowFeedback] = useState(false)
+  const dataRecord = data as unknown as Record<string, unknown>
+  const soundDesign = getSoundDesign(dataRecord)
+  const musicBed = getMusicBed(soundDesign)
+  const sfxEntries = getSfxEntries(soundDesign)
+  const legacyMusicBed = asRecord((data as SoundChartData).music_bed)
+  const legacySfx = (data as SoundChartData).sfx_entries ?? []
+  const effectiveMusicBed = musicBed ?? legacyMusicBed
+  const effectiveSfx = sfxEntries.length > 0 ? sfxEntries : legacySfx
+  const voiceover = asRecord((data as AudioChartData).voiceover)
+  const voiceoverEntries = getVoiceoverEntries(voiceover)
+  const hasActions = Boolean(onApprove && onRequestChanges)
 
   return (
     <div
-      className="animate-card-reveal"
+      className={compact ? undefined : "animate-card-reveal"}
       style={{
         border: `1px solid ${theme.colors.border.accent}`,
         borderRadius: theme.radius.lg,
-        padding: theme.spacing.lg,
-        margin: "12px 0",
+        padding: compact ? theme.spacing.md : theme.spacing.lg,
+        margin: compact ? "8px 0" : "12px 0",
         backgroundColor: theme.colors.bg.elevated,
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
         <div style={{ width: 3, height: 18, backgroundColor: theme.colors.accent.primary, borderRadius: 2 }} />
-        <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: theme.colors.text.primary }}>Carta de sonido</h3>
+        <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: theme.colors.text.primary }}>
+          {data.type === "audio_chart_checkpoint" ? "Carta de audio" : "Carta de sonido"}
+        </h3>
       </div>
 
-      {data.music_bed && (
+      {voiceover && (
         <div
           style={{
             fontSize: 12,
@@ -42,13 +57,68 @@ export function SoundChartCard({ data, onApprove, onRequestChanges, disabled }: 
             fontFamily: theme.fonts.mono,
           }}
         >
-          <span style={{ color: theme.colors.text.muted }}>music_bed:</span> {data.music_bed.libraryId ?? "custom"}{" "}
-          <span style={{ color: theme.colors.text.muted }}>vol:</span> {data.music_bed.volume}dB{" "}
-          <span style={{ color: theme.colors.text.muted }}>ducking:</span> {data.music_bed.duckingVolume}dB
+          <span style={{ color: theme.colors.text.muted }}>voz:</span> {asString(voiceover.voiceId) || "sin definir"}{" "}
+          <span style={{ color: theme.colors.text.muted }}>provider:</span> {asString(voiceover.provider) || "n/a"}{" "}
+          <span style={{ color: theme.colors.text.muted }}>idioma:</span> {asString(voiceover.language) || "n/a"}
         </div>
       )}
 
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, marginBottom: 12 }}>
+      {voiceoverEntries.length > 0 && (
+        <div style={{ marginBottom: 12 }}>
+          <div
+            style={{
+              color: theme.colors.text.muted,
+              fontSize: 11,
+              fontWeight: 700,
+              marginBottom: 6,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            }}
+          >
+            Guion de locucion
+          </div>
+          {voiceoverEntries.map((entry) => (
+            <div
+              key={entry.scene}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "48px 1fr",
+                gap: 8,
+                fontSize: 12,
+                color: theme.colors.text.secondary,
+                lineHeight: 1.5,
+                padding: "5px 0",
+                borderBottom: `1px solid ${theme.colors.border.subtle}`,
+              }}
+            >
+              <span style={{ color: theme.colors.text.muted, fontFamily: theme.fonts.mono }}>#{entry.scene}</span>
+              <span>{entry.text}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {effectiveMusicBed && (
+        <div
+          style={{
+            fontSize: 12,
+            color: theme.colors.text.secondary,
+            marginBottom: 12,
+            padding: "8px 10px",
+            backgroundColor: theme.colors.bg.primary,
+            borderRadius: theme.radius.sm,
+            fontFamily: theme.fonts.mono,
+          }}
+        >
+          <span style={{ color: theme.colors.text.muted }}>music_bed:</span>{" "}
+          {asString(effectiveMusicBed.libraryId) || "custom"}{" "}
+          <span style={{ color: theme.colors.text.muted }}>vol:</span> {String(effectiveMusicBed.volume ?? "n/a")}dB{" "}
+          <span style={{ color: theme.colors.text.muted }}>ducking:</span>{" "}
+          {String(effectiveMusicBed.duckingVolume ?? effectiveMusicBed.ducking_volume ?? "n/a")}dB
+        </div>
+      )}
+
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, marginBottom: hasActions ? 12 : 0 }}>
         <thead>
           <tr style={{ borderBottom: `1px solid ${theme.colors.border.default}` }}>
             {["SFX", "Trigger", "Escenas", "Vol"].map((h, i) => (
@@ -70,8 +140,8 @@ export function SoundChartCard({ data, onApprove, onRequestChanges, disabled }: 
           </tr>
         </thead>
         <tbody>
-          {data.sfx_entries.map((sfx) => (
-            <tr key={sfx.id} style={{ borderBottom: `1px solid ${theme.colors.border.subtle}` }}>
+          {effectiveSfx.map((sfx) => (
+            <tr key={String(sfx.id)} style={{ borderBottom: `1px solid ${theme.colors.border.subtle}` }}>
               <td
                 style={{
                   padding: "6px 8px",
@@ -80,11 +150,13 @@ export function SoundChartCard({ data, onApprove, onRequestChanges, disabled }: 
                   fontSize: 12,
                 }}
               >
-                {sfx.id}
+                {String(sfx.id ?? "-")}
               </td>
-              <td style={{ padding: "6px 8px", color: theme.colors.text.primary }}>{sfx.trigger}</td>
+              <td style={{ padding: "6px 8px", color: theme.colors.text.primary }}>
+                {String(sfx.trigger ?? sfx.prompt ?? "-")}
+              </td>
               <td style={{ padding: "6px 8px", color: theme.colors.text.secondary, fontSize: 12 }}>
-                {sfx.sceneTypes?.join(", ") ?? "all"}
+                {Array.isArray(sfx.sceneTypes) ? sfx.sceneTypes.join(", ") : "all"}
               </td>
               <td
                 style={{
@@ -95,27 +167,29 @@ export function SoundChartCard({ data, onApprove, onRequestChanges, disabled }: 
                   fontSize: 12,
                 }}
               >
-                {sfx.volume}dB
+                {String(sfx.volume ?? "n/a")}dB
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={onApprove} disabled={disabled} style={btnStyle(theme.colors.status.success, disabled)}>
-          Aprobar
-        </button>
-        <button
-          onClick={() => setShowFeedback(!showFeedback)}
-          disabled={disabled}
-          style={btnStyle(theme.colors.status.warning, disabled)}
-        >
-          Ajustar
-        </button>
-      </div>
+      {hasActions && (
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={onApprove} disabled={disabled} style={btnStyle(theme.colors.status.success, disabled)}>
+            Aprobar
+          </button>
+          <button
+            onClick={() => setShowFeedback(!showFeedback)}
+            disabled={disabled}
+            style={btnStyle(theme.colors.status.warning, disabled)}
+          >
+            Ajustar
+          </button>
+        </div>
+      )}
 
-      {showFeedback && (
+      {showFeedback && hasActions && (
         <div style={{ marginTop: 10 }}>
           <textarea
             value={feedback}
@@ -136,7 +210,7 @@ export function SoundChartCard({ data, onApprove, onRequestChanges, disabled }: 
           />
           <button
             onClick={() => {
-              onRequestChanges(feedback)
+              onRequestChanges?.(feedback)
               setFeedback("")
               setShowFeedback(false)
             }}

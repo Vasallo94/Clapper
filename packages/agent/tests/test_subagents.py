@@ -29,7 +29,8 @@ def test_director_definition():
     assert defn["name"] == "director"
     tool_names = [t.__name__ for t in defn["tools"]]
     assert "present_direction" in tool_names
-    assert len(defn["tools"]) == 1
+    assert "audit_content_quality" in tool_names
+    assert len(defn["tools"]) == 2
 
 
 def test_copywriter_definition():
@@ -93,7 +94,8 @@ def test_validator_definition():
     assert defn["name"] == "validator"
     tool_names = [t.__name__ for t in defn["tools"]]
     assert "validate_config" in tool_names
-    assert len(defn["tools"]) == 1
+    assert "audit_content_quality" in tool_names
+    assert len(defn["tools"]) == 2
 
 
 def test_reviewer_definition():

@@ -24,8 +24,9 @@ def present_escaleta(scenes: list[dict], brief: dict) -> str:
     Call this after generating a scene list. Pauses execution and waits for the
     user to approve, request changes, or reject.
 
-    IMPORTANT: When the return value contains "approved": true, you MUST immediately
-    call submit_render with the approved scenes. Do NOT call present_escaleta again.
+    IMPORTANT: When the return value contains APPROVED, the copywriter must write
+    the complete config to /pipeline/config.json. The orchestrator will continue
+    with director, audio planning, validation, and render.
 
     Args:
         scenes: List of scene dicts matching the Remotion config schema.
@@ -37,7 +38,7 @@ def present_escaleta(scenes: list[dict], brief: dict) -> str:
     """
     return checkpoint_interrupt(
         {"type": "escaleta_checkpoint", "brief": brief, "scenes": scenes},
-        "The user approved the escaleta. Now call submit_render immediately with the complete video config.",
+        "The user approved the escaleta. Write the complete video config to /pipeline/config.json.",
         "Revise the scenes and call present_escaleta again.",
     )
 

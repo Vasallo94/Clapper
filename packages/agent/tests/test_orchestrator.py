@@ -96,6 +96,7 @@ def test_subagent_factories_all_return_dicts():
         create_director,
         create_researcher,
         create_reviewer,
+        create_scene_creator,
         create_sound_engineer,
         create_validator,
         create_voice_generator,
@@ -108,6 +109,7 @@ def test_subagent_factories_all_return_dicts():
         create_audio_planner,
         create_voice_generator,
         create_sound_engineer,
+        create_scene_creator,
         create_validator,
         create_reviewer,
     ]
@@ -118,6 +120,16 @@ def test_subagent_factories_all_return_dicts():
         assert "description" in defn
         assert "system_prompt" in defn
         assert "tools" in defn
+
+
+def test_orchestrator_registers_scene_creator():
+    """The orchestrator must include scene_creator in the real subagent list."""
+    import inspect
+    from src.orchestrator import create_video_orchestrator
+
+    source = inspect.getsource(create_video_orchestrator)
+    assert "create_scene_creator" in source
+    assert "create_scene_creator()" in source
 
 
 class TestOrchestratorContextSchema:

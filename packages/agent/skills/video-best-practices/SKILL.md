@@ -20,6 +20,17 @@ Two composition formats:
   "description": "One-line description",
   "fps": 30, "width": 1280, "height": 720,
   "theme": "linea-directa",
+  "brief": {
+    "platform": "linkedin",
+    "audience": "...",
+    "goal": "...",
+    "promise": "...",
+    "tone": "...",
+    "cta": "...",
+    "hookStrategy": "...",
+    "templateId": "tutorial-code-walkthrough",
+    "narrativeArc": ["promise", "demo", "takeaway"]
+  },
   "scenes": [...]
 }
 ```
@@ -34,9 +45,27 @@ Two composition formats:
   "headline": "Marketing headline",
   "theme": "linea-directa",
   "fps": 30, "width": 1080, "height": 1920,
+  "brief": {
+    "platform": "shorts",
+    "audience": "...",
+    "goal": "...",
+    "promise": "...",
+    "tone": "...",
+    "cta": "...",
+    "hookStrategy": "...",
+    "templateId": "product-short-offer",
+    "narrativeArc": ["offer hook", "benefits", "cta"]
+  },
   "scenes": [...]
 }
 ```
+
+## Narrative templates
+
+- Always choose a `templateId` from the `scene-catalog` templates before writing scenes.
+- Store `brief.templateId` and `brief.narrativeArc` in the config.
+- Use template steps as the first escaleta draft; deviations are allowed only when the user's request or research brief demands it.
+- Every scene should serve one dominant narrative role: hook, problem, demo, proof, transition, takeaway, summary, or CTA.
 
 ## Animation rules
 

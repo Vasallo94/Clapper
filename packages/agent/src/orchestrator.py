@@ -7,7 +7,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.checkpoint.memory import MemorySaver  # used when running standalone
 
 from .tools.render import check_render_status, submit_render
-from .tools.validation import validate_config
+from .tools.validation import audit_content_quality, validate_config
 
 from .config import PROJECT_ROOT
 from .context import PipelineContext
@@ -62,6 +62,7 @@ def create_video_orchestrator(*, checkpointer=None):
         create_director,
         create_researcher,
         create_reviewer,
+        create_scene_creator,
         create_sound_engineer,
         create_validator,
         create_voice_generator,
@@ -85,6 +86,7 @@ def create_video_orchestrator(*, checkpointer=None):
         create_audio_planner(),
         create_voice_generator(),
         create_sound_engineer(),
+        create_scene_creator(),
         create_validator(),
         create_reviewer(),
     ]
@@ -102,7 +104,7 @@ def create_video_orchestrator(*, checkpointer=None):
 
     kwargs: dict = {
         "model": model,
-        "tools": [submit_render, check_render_status, validate_config],
+        "tools": [submit_render, check_render_status, validate_config, audit_content_quality],
         "system_prompt": system_prompt,
         "subagents": subagents,
         "skills": [str(SKILLS_DIR)],

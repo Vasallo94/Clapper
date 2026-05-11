@@ -5,12 +5,24 @@ from langchain_core.tools import InjectedToolArg
 
 from ._checkpoint import checkpoint_interrupt
 from ..context import get_pipeline_context
-from ..paths import AUDIO_LIBRARY_DIR, audio_dir
+from ..paths import PROJECT_ROOT as DEFAULT_PROJECT_ROOT
+
+PROJECT_ROOT = DEFAULT_PROJECT_ROOT
+
+
+def _audio_library_dir():
+    return PROJECT_ROOT / "public" / "audio" / "library"
+
+
+def _audio_dir(config_id: str):
+    d = PROJECT_ROOT / "public" / "audio" / config_id
+    d.mkdir(parents=True, exist_ok=True)
+    return d
 
 
 def list_audio_library() -> str:
     """List available music tracks in the audio library."""
-    library_dir = AUDIO_LIBRARY_DIR
+    library_dir = _audio_library_dir()
     if not library_dir.exists():
         return "No audio library found at public/audio/library/"
     tracks = sorted(d.stem for d in library_dir.iterdir() if d.is_file() and d.suffix == ".mp3")
@@ -47,11 +59,11 @@ def copy_library_track(track_id: str, config_id: str, dest_name: str, runtime: A
 
     import shutil
 
-    source = AUDIO_LIBRARY_DIR / f"{track_id}.mp3"
+    source = _audio_library_dir() / f"{track_id}.mp3"
     if not source.exists():
         return f"Error: track '{track_id}' not found in library at {source}"
 
-    dest_dir = audio_dir(effective_config_id)
+    dest_dir = _audio_dir(effective_config_id)
     dest = dest_dir / f"{dest_name}.mp3"
     shutil.copy2(source, dest)
     return f"Copied {track_id}.mp3 → {dest}"

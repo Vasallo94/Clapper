@@ -9,6 +9,44 @@ Reference catalog of all available scene types for video generation. Every scene
 
 All scenes accept optional direction fields: `timing` (leadInMs, audioStartMs, tailHoldMs, transitionMs) and `beats` (array of narration/visual/animation cues with startMs/endMs).
 
+## How agents should use the catalog
+
+Before writing scenes, choose a **video template** and then choose scenes by narrative role:
+
+1. Call `query_scene_catalog("template")` to inspect available templates.
+2. Pick the template whose `bestFor`, `avoidWhen`, composition, and target duration match the request.
+3. Write `brief.templateId` and `brief.narrativeArc` into the config so downstream agents preserve the story shape.
+4. Use the template `steps` as the first draft of the escaleta.
+5. Replace a preferred scene only when the scene catalog says another scene is better for that role.
+6. If you deviate from the template, mention the reason in the escaleta checkpoint.
+
+Scene metadata fields:
+
+- `narrativeRoles` — what job the scene performs in the story.
+- `bestFor` — when to use the scene.
+- `avoidWhen` — when to choose a different scene.
+- `textLimits` — visible-copy budget for readable Remotion output.
+- `durationRange` — recommended seconds, separate from schema max/min.
+- `recommendedBeats` — default number of director beats for the scene.
+- `placement` — first, middle, near-end, or last.
+
+## Video templates
+
+Templates are narrative guides, not rigid schemas. Use them to avoid generic videos.
+
+| templateId                       | Composition        | Best for                                                     |
+| -------------------------------- | ------------------ | ------------------------------------------------------------ |
+| `tutorial-code-walkthrough`      | ClaudeCodeTutorial | Codex/Claude Code command tutorials with a realistic demo    |
+| `tutorial-agent-pipeline`        | ClaudeCodeTutorial | DeepAgents, multi-agent workflows, generated artifacts       |
+| `product-short-offer`            | ProductShort       | Linea Directa offer-led vertical ads with price or clear CTA |
+| `product-short-problem-solution` | ProductShort       | Vertical ads where the pain point is stronger than the offer |
+
+Query a template by id for its steps:
+
+```text
+query_scene_catalog("tutorial-code-walkthrough")
+```
+
 ## ClaudeCodeTutorial (1280x720 landscape)
 
 ### intro

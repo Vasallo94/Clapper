@@ -4,10 +4,58 @@ import pytest
 
 
 class TestValidateConfig:
+    def test_includes_remotion_schema_errors(self, monkeypatch):
+        import src.tools.validation as val_mod
+
+        monkeypatch.setattr(val_mod, "_run_remotion_schema_validation", lambda config: (["Schema title: Required"], []))
+
+        from src.tools.validation import validate_config
+
+        config = {
+            "id": "test-video",
+            "title": "Test",
+            "description": "Test",
+            "fps": 30,
+            "width": 1280,
+            "height": 720,
+            "theme": "linea-directa",
+            "transition": None,
+            "scenes": [
+                {"type": "intro", "title": "Hello", "durationInSeconds": 3},
+                {"type": "outro", "title": "Bye", "durationInSeconds": 3},
+            ],
+        }
+
+        result = validate_config(json.dumps(config))
+        parsed = json.loads(result)
+        assert "Schema title: Required" in parsed["errors"]
+
+    def test_audit_content_quality_reports_editorial_warnings(self):
+        from src.tools.validation import audit_content_quality
+
+        dense_text = " ".join(["palabra"] * 80)
+        config = {
+            "id": "dense",
+            "title": "Dense",
+            "description": "Dense",
+            "fps": 30,
+            "width": 1280,
+            "height": 720,
+            "theme": "linea-directa",
+            "transition": None,
+            "scenes": [{"type": "callout", "text": dense_text, "position": "center", "durationInSeconds": 3}],
+        }
+
+        parsed = json.loads(audit_content_quality(json.dumps(config)))
+        assert any("dense" in warning.lower() for warning in parsed["warnings"])
+        assert any("Final scene" in warning for warning in parsed["warnings"])
+        assert any("templateId" in recommendation for recommendation in parsed["recommendations"])
+
     def test_valid_config_all_assets_exist(self, tmp_path, monkeypatch):
         import src.tools.validation as val_mod
 
         monkeypatch.setattr(val_mod, "PROJECT_ROOT", tmp_path)
+        monkeypatch.setattr(val_mod, "_run_remotion_schema_validation", lambda config: ([], []))
 
         config_id = "test-video"
         config = {
@@ -35,6 +83,7 @@ class TestValidateConfig:
         import src.tools.validation as val_mod
 
         monkeypatch.setattr(val_mod, "PROJECT_ROOT", tmp_path)
+        monkeypatch.setattr(val_mod, "_run_remotion_schema_validation", lambda config: ([], []))
 
         config = {
             "id": "test-video",
@@ -67,6 +116,7 @@ class TestValidateConfig:
         import src.tools.validation as val_mod
 
         monkeypatch.setattr(val_mod, "PROJECT_ROOT", tmp_path)
+        monkeypatch.setattr(val_mod, "_run_remotion_schema_validation", lambda config: ([], []))
 
         config = {
             "id": "test-video",
@@ -97,6 +147,7 @@ class TestValidateConfig:
         import src.tools.validation as val_mod
 
         monkeypatch.setattr(val_mod, "PROJECT_ROOT", tmp_path)
+        monkeypatch.setattr(val_mod, "_run_remotion_schema_validation", lambda config: ([], []))
 
         config = {
             "id": "test-video",

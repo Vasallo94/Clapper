@@ -13,6 +13,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 ### Fixed
 
 - Target dropdown polluted with `.generated/renders/` artifacts — `/api/configs` now only scans `content/` directories, reducing 40+ junk entries to 11 curated configs
+- `npx` not found error in agent validation — replaced subprocess call with HTTP request to render-service `/api/validate` endpoint, eliminating the need for Node.js in the Python agent container
 - Stream event normalization helpers (`packages/web/src/lib/streamEvents.ts`): stable hashing (DJB2), tool call deduplication by `tool_call_id` + input signature, artifact deduplication by content signature, streaming text merge, subagent name extraction
 - Target metadata helpers (`packages/web/src/lib/targetMetadata.ts`): `appendTargetMetadata`, `parseTargetMetadata`, `stripTargetMetadata` for embedding active video target in user messages without visual contamination
 - `TargetSelectionCard` component — radio-button UI for selecting among candidate video configs at target_selection checkpoints

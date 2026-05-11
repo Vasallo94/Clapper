@@ -1,7 +1,9 @@
 import json
+import os
 import re
 import subprocess
-import tempfile
+import urllib.request
+import urllib.error
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -66,36 +68,27 @@ def _format_schema_issue(issue: dict) -> str:
     return f"Schema {where}: {message}"
 
 
+RENDER_SERVICE_URL = os.environ.get("RENDER_SERVICE_URL", "http://localhost:3100")
+
+
 def _run_remotion_schema_validation(config: dict) -> tuple[list[str], list[str]]:
-    """Validate with the same Zod schemas used by the Remotion render service."""
-    script = _project_path("scripts", "validate-config.ts")
-    package_json = _project_path("package.json")
-    if not script.exists() or not package_json.exists():
-        return [], ["Remotion schema validation skipped: scripts/validate-config.ts not found"]
-
-    tmp_path: Path | None = None
+    """Validate via the render-service's /api/validate endpoint (Zod schemas)."""
     try:
-        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as tmp:
-            json.dump(config, tmp)
-            tmp_path = Path(tmp.name)
-
-        result = subprocess.run(
-            ["npx", "tsx", "scripts/validate-config.ts", str(tmp_path)],
-            capture_output=True,
-            text=True,
-            timeout=60,
-            cwd=str(PROJECT_ROOT),
+        body = json.dumps(config).encode("utf-8")
+        req = urllib.request.Request(
+            f"{RENDER_SERVICE_URL}/api/validate",
+            data=body,
+            headers={"Content-Type": "application/json"},
+            method="POST",
         )
-    except (FileNotFoundError, subprocess.SubprocessError, OSError) as exc:
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                parsed = json.loads(resp.read())
+        except urllib.error.HTTPError as exc:
+            parsed = json.loads(exc.read())
+    except (urllib.error.URLError, json.JSONDecodeError, OSError) as exc:
         return [], [f"Remotion schema validation skipped: {exc}"]
-    finally:
-        if tmp_path is not None:
-            tmp_path.unlink(missing_ok=True)
 
-    parsed = _extract_json(result.stdout)
-    if parsed is None:
-        detail = (result.stderr or result.stdout).strip()
-        return [], [f"Remotion schema validation returned non-JSON output: {detail[:500]}"]
     if parsed.get("valid") is True:
         return [], []
 

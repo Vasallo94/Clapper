@@ -47,6 +47,21 @@ export function extractArtifactFromToolMessage(toolName: string, content?: strin
   const parsed = parseJson(content)
   const parsedRecord = asRecord(parsed)
 
+  if (parsedRecord?.error === "validation_failed" && Array.isArray(parsedRecord.errors)) {
+    return {
+      id: crypto.randomUUID(),
+      kind: "validation",
+      title: "Errores de validacion pre-render",
+      source: toolName,
+      data: toValidationReport({
+        errors: parsedRecord.errors,
+        warnings: [],
+        recommendations: parsedRecord.mutations ?? [],
+      }) as unknown as Record<string, unknown>,
+      createdAt: Date.now(),
+    }
+  }
+
   if (parsedRecord && isValidationReport(parsedRecord)) {
     return {
       id: crypto.randomUUID(),

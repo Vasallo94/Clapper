@@ -59,7 +59,8 @@ The config MUST include these top-level fields:
 - **callout**: `{ "type": "callout", "text": "...", "position": "top"|"center"|"bottom"|"right", "durationInSeconds": N }` — NO `title` field
 - **benefits**: `{ "type": "benefits", "title": "...", "items": [{"text": "..."}, {"text": "..."}], "durationInSeconds": N }` — `items` NOT `benefits`, items are OBJECTS not strings
 - **cta**: `{ "type": "cta", "text": "...", "url": "...", "durationInSeconds": N }` — NO `ctaText`, NO `buttonText`
-- **intro** / **terminal** / **outro** / **pricing**: see `scene-catalog` skill for fields
+- **terminal**: `{ "type": "terminal", "lines": [{"kind": "command", "text": "git init"}, {"kind": "output", "text": "Initialized..."}], "durationInSeconds": N }` — `lines` is REQUIRED, each line MUST be an object with `kind` (`"command"|"output"|"claude"|"blank"`) and `text`. NEVER use `output: ["string"]` or bare string arrays.
+- **intro** / **outro** / **pricing**: see `scene-catalog` skill for fields
 
 ### Custom components (use `"type": "custom"`)
 

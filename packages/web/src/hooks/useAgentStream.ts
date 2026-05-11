@@ -42,6 +42,19 @@ function extractToolNames(toolCalls: Array<{ name?: string; args?: Record<string
     }))
 }
 
+function isToolError(content?: string): boolean {
+  if (!content || typeof content !== "string") return false
+  const trimmed = content.trimStart()
+  if (/^[Ee]rror\b/.test(trimmed)) return true
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed && typeof parsed === "object" && typeof parsed.error === "string") return true
+  } catch {
+    /* not JSON */
+  }
+  return false
+}
+
 function mergeStreamingText(previous: string, next: string): string {
   if (!previous) return next.slice(-4000)
   if (next.startsWith(previous)) return next.slice(-4000)
@@ -208,9 +221,7 @@ export function useAgentStream(
                 if (toolsUpdate?.messages?.length) {
                   for (const toolMsg of toolsUpdate.messages) {
                     if (toolMsg.name) {
-                      const hasError =
-                        typeof toolMsg.content === "string" &&
-                        (toolMsg.content.startsWith("Error") || toolMsg.content.startsWith("error"))
+                      const hasError = isToolError(toolMsg.content)
                       const newStatus = hasError ? ("error" as const) : ("done" as const)
                       const artifact = extractArtifactFromToolMessage(toolMsg.name, toolMsg.content)
                       setStreamState((prev) => ({

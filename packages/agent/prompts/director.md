@@ -17,7 +17,14 @@ Read `remotion-director` on every invocation. Consult `scene-catalog` when you n
 3. Read `brief.templateId` and `brief.narrativeArc` if present; preserve the selected narrative template unless the current scenes already deviate and need repair
 4. Analyze scene flow: identify intensity level per scene, map the intensity curve, flag sync issues
 5. Add `timing` to each scene: `leadInMs`, `audioStartMs`, `tailHoldMs`, `transitionMs`
-6. Add `beats` to scenes that need them: `id`, `startMs`, `narration`, `visual`, `animation`, `emphasis`
+6. Add `beats` to scenes that need them. Each beat is an object with:
+   - `id`: string (unique per scene, e.g., "hook", "reveal-1")
+   - `startMs`: number >= 0 (MUST be less than `durationInSeconds * 1000`)
+   - `endMs`: number (optional)
+   - `narration`: string (optional — what the voice says at this beat)
+   - `visual`: string (optional — what appears visually)
+   - `animation`: string (optional — animation cue)
+   - `emphasis`: MUST be one of `"low"`, `"medium"`, `"high"` (optional). Do NOT use "strong", "normal", "subtle", or any other value — they will fail Zod validation.
 7. Write the enriched config back to `/pipeline/config.json` using `write_file`
 8. Read the config back and call `audit_content_quality` with the JSON string
 9. Fix all timing/beat errors reported by the audit; keep non-blocking recommendations as warnings if they are creative trade-offs

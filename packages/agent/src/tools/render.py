@@ -7,7 +7,9 @@ import httpx
 from langchain_core.tools import InjectedToolArg
 
 from ._checkpoint import checkpoint_interrupt
+from ._sanitize import sanitize_config
 from ..context import get_pipeline_context
+from .validation import _run_remotion_schema_validation
 
 logger = logging.getLogger(__name__)
 
@@ -127,8 +129,33 @@ def submit_render(
     else:
         config["title"] = title
         config["description"] = description
-    response = httpx.post(f"{render_url}/api/render", json=config, timeout=30.0)
-    return response.json()
+
+    # ── Sanitize LLM output before validation ────────────────────────────
+    config, mutations = sanitize_config(config)
+    if mutations:
+        logger.info("Config sanitized with %d mutations:\n  %s", len(mutations), "\n  ".join(mutations))
+
+    # ── Pre-render schema validation ─────────────────────────────────────
+    schema_errors, schema_warnings = _run_remotion_schema_validation(config)
+    if schema_warnings:
+        logger.warning("Schema validation warnings: %s", schema_warnings)
+    if schema_errors:
+        logger.error("Schema validation failed: %s", schema_errors)
+        return {"error": "validation_failed", "errors": schema_errors, "mutations": mutations}
+
+    # ── Submit to render service ─────────────────────────────────────────
+    try:
+        response = httpx.post(f"{render_url}/api/render", json=config, timeout=30.0)
+        response.raise_for_status()
+        return response.json()
+    except httpx.ConnectError:
+        return {"error": "connection_failed", "message": f"Cannot connect to render service at {render_url}. Is it running?"}
+    except httpx.TimeoutException:
+        return {"error": "timeout", "message": "Render service did not respond within 30 seconds."}
+    except httpx.HTTPStatusError as exc:
+        return {"error": "http_error", "status_code": exc.response.status_code, "message": exc.response.text[:500]}
+    except Exception as exc:
+        return {"error": "unexpected", "message": str(exc)[:500]}
 
 
 def check_render_status(job_id: str, runtime: Annotated[Any, InjectedToolArg] = None) -> dict:
@@ -152,8 +179,29 @@ def check_render_status(job_id: str, runtime: Annotated[Any, InjectedToolArg] = 
     deadline = time.time() + RENDER_TIMEOUT_SECONDS
     result: dict = {"status": "timeout", "progress": 0, "_pipeline_complete": True}
     while time.time() < deadline:
-        response = httpx.get(f"{render_url}/api/render/{job_id}/status", timeout=10.0)
-        result = response.json()
+        try:
+            response = httpx.get(f"{render_url}/api/render/{job_id}/status", timeout=10.0)
+            response.raise_for_status()
+            result = response.json()
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 404:
+                return {
+                    "status": "error",
+                    "error": f"Job {job_id} not found (404)",
+                    "_pipeline_complete": True,
+                }
+            logger.warning("HTTP %d polling job %s, will retry", exc.response.status_code, job_id)
+            time.sleep(5)
+            continue
+        except (httpx.ConnectError, httpx.TimeoutException) as exc:
+            logger.warning("Network error polling job %s: %s — will retry", job_id, exc)
+            time.sleep(5)
+            continue
+        except Exception as exc:
+            logger.warning("Unexpected error polling job %s: %s — will retry", job_id, exc)
+            time.sleep(5)
+            continue
+
         if result.get("status") in ("done", "error"):
             result["_pipeline_complete"] = True
             if result.get("status") == "error":

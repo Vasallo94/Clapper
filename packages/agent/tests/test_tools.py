@@ -6,6 +6,10 @@ from src.tools.render import present_escaleta, submit_render, check_render_statu
 
 
 class TestSubmitRender:
+    @pytest.fixture(autouse=True)
+    def _bypass_validation(self, monkeypatch):
+        monkeypatch.setattr("src.tools.render._run_remotion_schema_validation", lambda config: ([], []))
+
     @respx.mock
     def test_submit_render_success(self):
         respx.post("http://localhost:3100/api/render").mock(
@@ -98,6 +102,10 @@ class TestSubmitRender:
 
 
 class TestSubmitRenderWithRuntime:
+    @pytest.fixture(autouse=True)
+    def _bypass_validation(self, monkeypatch):
+        monkeypatch.setattr("src.tools.render._run_remotion_schema_validation", lambda config: ([], []))
+
     @respx.mock
     def test_submit_render_uses_runtime_render_url(self):
         custom_url = "http://custom-render:9999"

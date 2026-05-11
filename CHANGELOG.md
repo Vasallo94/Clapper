@@ -7,6 +7,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- Config sanitizer (`packages/agent/src/tools/_sanitize.py`) that auto-fixes common LLM mistakes before Zod validation: emphasis enum normalization, terminal line format conversion, duration clamping, callout position normalization, benefits items wrapping, timing.transitionMs clamping, and out-of-range beat removal
+- Pre-render Zod schema validation gate in `submit_render` — fails fast with structured errors before posting to render service
+- Structured httpx error handling in `submit_render` and `check_render_status` (ConnectError, TimeoutException, HTTPStatusError)
+- GraphRecursionError parsing in web frontend — shows user-friendly Spanish message instead of raw traceback
+- `validation_failed` artifact handling in web frontend — displays structured validation card for pre-render errors
+- `isToolError()` helper in `useAgentStream.ts` for robust tool error detection (regex + JSON parsing)
+- 26 unit tests for config sanitizer across 8 test classes (`test_sanitize.py`)
+- ADR 0005 documenting schema validation and editorial guardrails
+- ADR 0006 documenting scene catalog narrative templates
+- ADR 0007 documenting frontend artifact normalization
+- ADR 0008 documenting educational video duration defaults
 - Docker Compose multi-service setup: `docker compose up` starts agent, render-service, and web together with healthchecks and dependency ordering
 - `packages/render-service/Dockerfile` — Node 22 + Chromium headless for containerized Remotion rendering
 - `packages/web/Dockerfile` — Node 22 + Vite dev server containerized with `--host 0.0.0.0`
@@ -25,6 +36,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- `submit_render` now sanitizes configs and validates against Zod schemas before posting to render service
+- Orchestrator prompt: added validation retry limit (max 2 re-dispatches) to prevent GraphRecursionError loops
+- Director prompt: explicit emphasis enum values (`"low"|"medium"|"high"` ONLY) with warning against invalid values
+- Copywriter prompt: explicit terminal scene format with `lines: [{kind, text}]` and warning against `output: string[]`
+- Validator prompt: clarified that `validate_config` expects JSON string content, not file paths
 - `docker-compose.yml` rewritten from 1 service to 3 (agent, render-service, web) with healthchecks and `depends_on` ordering
 - Agent `RENDER_SERVICE_URL` changed from `http://host.docker.internal:3100` to `http://render-service:3100` (Docker internal DNS)
 - Makefile `up` target now uses `docker compose up --build` instead of 4 background processes

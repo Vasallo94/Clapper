@@ -48,7 +48,18 @@ export async function extractResponse(threadId: string): Promise<ChatResponse> {
 
   const errorTask = tasks.find((t) => t.error)
   if (errorTask) {
-    return { type: "message", content: `Error: ${errorTask.error}`, thread_id: threadId }
+    const errorMsg = errorTask.error ?? "Unknown error"
+    if (errorMsg.includes("Recursion limit") || errorMsg.includes("GRAPH_RECURSION_LIMIT")) {
+      return {
+        type: "message",
+        content:
+          "El pipeline ha alcanzado el limite de iteraciones intentando corregir errores de validacion. " +
+          "Esto ocurre cuando el agente no puede generar un config valido automaticamente. " +
+          "Intenta con una solicitud mas especifica o con menos escenas personalizadas.",
+        thread_id: threadId,
+      }
+    }
+    return { type: "message", content: `Error: ${errorMsg}`, thread_id: threadId }
   }
 
   const firstInterrupt = tasks.find((t) => t.interrupts && t.interrupts.length > 0)

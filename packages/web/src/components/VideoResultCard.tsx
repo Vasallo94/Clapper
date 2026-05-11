@@ -1,5 +1,5 @@
 import { theme } from "../theme"
-import { getDownloadUrl } from "../api"
+import { getDownloadUrl, getStreamUrl } from "../api"
 import { btnStyle } from "./btnStyle"
 
 interface Props {
@@ -15,6 +15,7 @@ function formatBytes(bytes: number): string {
 }
 
 export function VideoResultCard({ jobId, title, fileSize }: Props) {
+  const streamUrl = getStreamUrl(jobId)
   const downloadUrl = getDownloadUrl(jobId)
 
   return (
@@ -51,7 +52,7 @@ export function VideoResultCard({ jobId, title, fileSize }: Props) {
           marginBottom: 12,
         }}
       >
-        <source src={downloadUrl} type="video/mp4" />
+        <source src={streamUrl} type="video/mp4" />
       </video>
 
       <a href={downloadUrl} download style={{ textDecoration: "none" }}>

@@ -80,6 +80,8 @@ export default function App() {
   const [storedThreads, setStoredThreads] = useState<StoredThread[]>(() => getThreads())
   const [videoArtifacts, setVideoArtifacts] = useState<StoredVideoArtifact[]>(() => getVideoArtifacts())
   const [activeTarget, setActiveTargetState] = useState(() => getActiveVideoTarget())
+  const activeTargetRef = useRef(activeTarget)
+  activeTargetRef.current = activeTarget
   const pipeline = usePipelineTracker()
 
   const handleAgentComplete = useCallback((summary: AgentSummary) => {
@@ -110,7 +112,7 @@ export default function App() {
         }
         setVideoArtifacts(merged)
       })
-      .catch(() => {})
+      .catch((err) => console.warn("[init] fetchConfigs failed:", err))
   }, [])
 
   const handleNewThread = useCallback(() => {
@@ -261,9 +263,10 @@ export default function App() {
               )
             }
           })
-          .catch(() => {})
-      } else if (activeTarget?.configId) {
-        fetchLatestRender(activeTarget.configId)
+          .catch((err) => console.warn("[auto-lookup] fetchJobStatus failed:", err))
+      } else if (activeTargetRef.current?.configId) {
+        const targetConfigId = activeTargetRef.current.configId
+        fetchLatestRender(targetConfigId)
           .then((job) => {
             if (job) {
               addMessage(
@@ -274,7 +277,7 @@ export default function App() {
               )
             }
           })
-          .catch(() => {})
+          .catch((err) => console.warn("[auto-lookup] fetchLatestRender failed:", err))
       }
     }
   }, [stream.result, addMessage, pipeline])

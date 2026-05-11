@@ -56,6 +56,13 @@ describe("GET /api/render/:id/status", () => {
   })
 })
 
+describe("GET /api/render/:id/stream", () => {
+  it("returns 404 for unknown job", async () => {
+    const res = await fetch(`${BASE}/api/render/nonexistent/stream`)
+    assert.strictEqual(res.status, 404)
+  })
+})
+
 describe("GET /api/audio/library", () => {
   it("returns a list of tracks", async () => {
     const res = await fetch(`${BASE}/api/audio/library`)

@@ -245,6 +245,22 @@ app.get("/api/render/:id/status", (req, res) => {
   res.json(job)
 })
 
+// GET /api/render/:id/stream — serve video for in-browser playback (supports Range)
+app.get("/api/render/:id/stream", (req, res) => {
+  const job = getJob(req.params.id)
+  if (!job || job.status !== "done" || !job.output_path) {
+    res.status(404).json({ error: "Video not available" })
+    return
+  }
+  try {
+    statSync(job.output_path)
+  } catch {
+    res.status(410).json({ error: "Video file deleted" })
+    return
+  }
+  res.sendFile(job.output_path, { headers: { "Content-Type": "video/mp4" } })
+})
+
 // GET /api/render/:id/download — download rendered video
 app.get("/api/render/:id/download", (req, res) => {
   const job = getJob(req.params.id)

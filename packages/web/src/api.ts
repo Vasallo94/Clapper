@@ -44,6 +44,10 @@ export async function fetchLatestRender(configId: string): Promise<RenderJob | n
   return done ?? null
 }
 
+export function getStreamUrl(jobId: string): string {
+  return `${RENDER_URL}/api/render/${jobId}/stream`
+}
+
 export function getDownloadUrl(jobId: string): string {
   return `${RENDER_URL}/api/render/${jobId}/download`
 }

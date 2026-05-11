@@ -18,6 +18,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - `ConfigListResponse` type and checkpoint data types: `TargetSelectionData`, `RevisionPlanData`, `VariantPlanData`, `IntentDecisionData`
 - `AgentArtifactKind` now includes `"intent_decision"` for route_intent tool output artifacts
 - `CheckpointType` now includes `"target_selection"`, `"revision_plan"`, `"variant_plan"` for new checkpoint cards
+- `GET /api/render/:id/stream` endpoint — serves video via `sendFile` for in-browser `<video>` playback (supports Range headers), separate from `/download` which sets `Content-Disposition: attachment`
+- `getStreamUrl(jobId)` in web API client — returns streaming URL for the video player
 - `getJobByConfigId` function in render-service DB layer — query latest render job by config_id
 - `config_id` query param filter on `GET /api/render/jobs` — returns latest job for a specific video config
 - `fetchLatestRender(configId)` in web API client — looks up most recent completed render for a config
@@ -65,7 +67,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - `useAgentStream` refactored: side-effect-free setState updaters, refs for stable IDs, `useEffect` for agent completion callbacks, `streamSubgraphs: true` on all stream calls
 - `ChatThread` now renders `TargetSelectionCard`, `RevisionPlanCard`, and `VariantPlanCard` for their respective checkpoint types
 - `AgentArtifactCard` now renders `IntentDecisionCard` for `route_intent` tool outputs
-- `App.tsx` checkpoint handlers extended with `target_selection`, `revision_plan`, and `variant_plan` handlers; fetches configs on mount to populate video artifact selector
+- `App.tsx` checkpoint handlers extended with `target_selection`, `revision_plan`, and `variant_plan` handlers; fetches configs on mount to populate video artifact selector; `activeTargetRef` prevents stale closure in auto-lookup effect
+- `VideoResultCard` uses `/stream` endpoint for `<video>` playback, `/download` for the download button
 - `render-service/server.ts` `app.listen()` guarded with entrypoint check (`import.meta.url === pathToFileURL(process.argv[1])`) so importing for tests no longer starts a server
 - `route_intent` refactored from regex classifier to contract resolver — the orchestrator LLM now decides the mode, `route_intent` validates and returns the contract (`mode` is now the first parameter instead of being inferred from regex patterns)
 - Orchestrator prompt rewritten for LLM-based intent routing: explicit mode selection guidance with decision heuristics instead of delegating to regex classification
@@ -90,6 +93,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Video configs relocated: `tutorials/` → `content/tutorials/`, `shorts/` → `content/shorts/`, `presentations/` → `content/presentations/`
 - `CLAUDE.md` updated with full directory layout, agent I/O convention reference, and corrected paths
 - `Makefile` updated for `content/` paths and npm workspace-aware install
+
+### Fixed
+
+- Stale closure in `App.tsx` stream result handler: `activeTarget` was read inside `useEffect` but not in its dependency array, causing auto-lookup to query the wrong config_id (showed esporas video when git tutorial was selected)
+- Silent error swallowing: replaced three `.catch(() => {})` calls with `console.warn` logging for `fetchConfigs`, `fetchJobStatus`, and `fetchLatestRender`
+- Video player not playing in `VideoResultCard`: `<video>` element now uses `/stream` endpoint (`sendFile`) instead of `/download` endpoint (`Content-Disposition: attachment`)
 
 ### Removed
 

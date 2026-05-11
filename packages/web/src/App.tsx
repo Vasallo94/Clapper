@@ -14,7 +14,7 @@ import type {
   ValidationReportData,
   VariantPlanData,
 } from "./types"
-import { client, createThread, fetchConfigs, fetchJobStatus } from "./api"
+import { client, createThread, fetchConfigs, fetchJobStatus, fetchLatestRender } from "./api"
 import { useAgentStream } from "./hooks/useAgentStream"
 import { usePipelineTracker } from "./hooks/usePipelineTracker"
 import { AppLayout } from "./components/AppLayout"
@@ -257,6 +257,19 @@ export default function App() {
                 "assistant",
                 "Video listo:",
                 { jobId: job.id, title: job.title, fileSize: job.file_size, target: artifact },
+                "video_result",
+              )
+            }
+          })
+          .catch(() => {})
+      } else if (activeTarget?.configId) {
+        fetchLatestRender(activeTarget.configId)
+          .then((job) => {
+            if (job) {
+              addMessage(
+                "assistant",
+                "Video listo:",
+                { jobId: job.id, title: job.title, fileSize: job.file_size },
                 "video_result",
               )
             }

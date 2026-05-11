@@ -37,6 +37,13 @@ export async function fetchConfigs(): Promise<ConfigListResponse> {
   return res.json()
 }
 
+export async function fetchLatestRender(configId: string): Promise<RenderJob | null> {
+  const res = await fetch(`${RENDER_URL}/api/render/jobs?config_id=${encodeURIComponent(configId)}`)
+  const body: JobListResponse = await res.json()
+  const done = body.jobs.find((j) => j.status === "done")
+  return done ?? null
+}
+
 export function getDownloadUrl(jobId: string): string {
   return `${RENDER_URL}/api/render/${jobId}/download`
 }

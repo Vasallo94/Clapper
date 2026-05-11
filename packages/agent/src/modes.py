@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 from dataclasses import asdict, dataclass, field
 from typing import Literal, TypedDict
 
@@ -62,6 +61,17 @@ class IntentDecision:
         data["checkpoints"] = list(self.checkpoints)
         return data
 
+
+ALL_MODES: tuple[ModeName, ...] = (
+    "new_video",
+    "revise_existing",
+    "render_only",
+    "recover_failed_render",
+    "audit_only",
+    "variant",
+    "asset_regeneration",
+    "question",
+)
 
 MODE_CONTRACTS: dict[ModeName, ModeContract] = {
     "new_video": ModeContract(
@@ -209,40 +219,6 @@ MODE_CONTRACTS: dict[ModeName, ModeContract] = {
 }
 
 
-QUESTION_PATTERNS = (
-    r"\b(qué|que|cu[aá]l|como|c[oó]mo|por qu[eé]|d[oó]nde|cuando|cu[aá]ndo)\b.*\?",
-    r"^\s*(expl[ií]came|dime|ay[uú]dame a entender|tengo una pregunta)\b",
-)
-NEW_VIDEO_PATTERNS = (
-    r"\b(crea|crear|genera|generar|haz|hacer|produce|producir|nuevo|nueva)\b.*\b(v[ií]deo|video|short|tutorial|demo)\b",
-    r"\b(v[ií]deo|video|short|tutorial|demo)\b.*\b(nuevo|nueva|desde cero)\b",
-)
-REVISE_PATTERNS = (
-    r"\b(mejora|mejorar|ajusta|ajustar|corrige|corregir|cambia|cambiar|edita|editar|revisa|revisar|actualiza|actualizar)\b",
-    r"\b(v[ií]deo anterior|video anterior|este v[ií]deo|este video|la versi[oó]n actual)\b",
-)
-RENDER_PATTERNS = (
-    r"\b(renderiza|renderizar|rerender|vuelve a renderizar|exporta|exportar)\b",
-    r"\b(otra vez|de nuevo)\b.*\b(render|renderiza|exporta)\b",
-)
-RECOVER_PATTERNS = (
-    r"\b(error|fall[oó]|falla|failed|zod|schema|validaci[oó]n|render roto|no renderiza|stderr)\b",
-    r"\b(arregla|repara|desbloquea)\b.*\b(render|validaci[oó]n|zod|schema)\b",
-)
-AUDIT_PATTERNS = (
-    r"\b(qu[eé] mejorar[ií]as|audita|auditar|analiza|analizar|review|revisi[oó]n|opin[ií]on|diagn[oó]stico)\b",
-    r"\b(sin tocar|sin cambiar|solo mirar|solo analizar)\b",
-)
-VARIANT_PATTERNS = (
-    r"\b(versi[oó]n|variante|deriva|duplic[aá]|adapta)\b",
-    r"\b(m[aá]s corto|m[aá]s larga|vertical|horizontal|linkedin|tiktok|short)\b",
-)
-ASSET_PATTERNS = (
-    r"\b(regenera|regenerar|vuelve a generar|recrea|recrear|copia|copiar)\b.*\b(voz|voiceover|audio|m[uú]sica|sfx|sonido|asset|assets)\b",
-    r"\b(voz|voiceover|audio|m[uú]sica|sfx|sonido|asset|assets)\b.*\b(regenera|regenerar|copia|copiar)\b",
-)
-
-
 def get_mode_contract(mode: ModeName) -> dict:
     """Return the contract for a video-orchestrator mode."""
     return MODE_CONTRACTS[mode].to_dict()
@@ -253,71 +229,47 @@ def list_mode_contracts() -> dict:
     return {mode: contract.to_dict() for mode, contract in MODE_CONTRACTS.items()}
 
 
-def route_intent(user_request: str, active_target: ActiveVideoTarget | None = None) -> dict:
-    """Classify a user request into a mode contract decision.
+def route_intent(
+    mode: ModeName,
+    user_request: str,
+    rationale: str = "",
+    active_target: ActiveVideoTarget | None = None,
+) -> dict:
+    """Confirm a mode selection and return the full contract.
+
+    The orchestrator decides the mode based on its understanding of the
+    user's message, then calls this tool to get the contract and log
+    the decision.  No regex classification — the LLM is the classifier.
 
     Args:
-        user_request: Latest user message, optionally including UI target metadata.
+        mode: The mode the orchestrator chose for this request.
+        user_request: Latest user message (used for target extraction).
+        rationale: Brief reason the orchestrator chose this mode.
         active_target: Optional selected video artifact from the UI.
     """
-    request = user_request.strip()
-    normalized = request.lower()
-    parsed_target = active_target or _extract_target_from_request(request)
+    if mode not in MODE_CONTRACTS:
+        return {"error": f"Unknown mode: {mode}. Valid: {', '.join(ALL_MODES)}"}
 
-    mode, confidence, rationale = _classify(normalized, bool(parsed_target))
+    request = user_request.strip()
+    parsed_target = active_target or _extract_target_from_request(request)
     contract = MODE_CONTRACTS[mode]
     missing_target = contract.requires_target and not parsed_target
 
     decision = IntentDecision(
         mode=mode,
-        confidence=confidence,
+        confidence=1.0,
         requires_target=contract.requires_target,
         target=parsed_target,
         agent_scope=contract.allowed_agents,
         requires_checkpoint=bool(contract.checkpoints),
         can_write_files=contract.can_write_files,
         can_render=contract.can_render,
-        rationale=rationale,
+        rationale=rationale or f"Orchestrator selected {mode}.",
         missing_target=missing_target,
         forbidden_agents=contract.forbidden_agents,
         checkpoints=contract.checkpoints,
     )
     return decision.to_dict()
-
-
-def _classify(normalized: str, has_target: bool) -> tuple[ModeName, float, str]:
-    if _matches(normalized, RECOVER_PATTERNS):
-        return "recover_failed_render", 0.9, "The request mentions a concrete validation/render failure."
-
-    if _matches(normalized, ASSET_PATTERNS):
-        return "asset_regeneration", 0.88, "The request is limited to voiceover, music, SFX, or asset regeneration."
-
-    if _matches(normalized, RENDER_PATTERNS):
-        return "render_only", 0.86, "The request asks to render/export again."
-
-    if _matches(normalized, AUDIT_PATTERNS):
-        return "audit_only", 0.84, "The request asks for analysis or recommendations without implementation."
-
-    if has_target and _matches(normalized, VARIANT_PATTERNS):
-        return "variant", 0.82, "The request asks for a derived version of an existing target."
-
-    if has_target and _matches(normalized, REVISE_PATTERNS):
-        return "revise_existing", 0.82, "The request asks to modify the active video target."
-
-    if _matches(normalized, NEW_VIDEO_PATTERNS):
-        return "new_video", 0.84, "The request asks to create a new video."
-
-    if _matches(normalized, QUESTION_PATTERNS):
-        return "question", 0.74, "The request is phrased as a question."
-
-    if has_target and _matches(normalized, REVISE_PATTERNS + VARIANT_PATTERNS):
-        return "revise_existing", 0.68, "The request refers to an existing active target."
-
-    return "question", 0.58, "No production intent was detected; answer directly."
-
-
-def _matches(value: str, patterns: tuple[str, ...]) -> bool:
-    return any(re.search(pattern, value, flags=re.IGNORECASE) for pattern in patterns)
 
 
 def _extract_target_from_request(request: str) -> ActiveVideoTarget | None:

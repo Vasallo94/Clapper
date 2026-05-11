@@ -18,6 +18,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - `ConfigListResponse` type and checkpoint data types: `TargetSelectionData`, `RevisionPlanData`, `VariantPlanData`, `IntentDecisionData`
 - `AgentArtifactKind` now includes `"intent_decision"` for route_intent tool output artifacts
 - `CheckpointType` now includes `"target_selection"`, `"revision_plan"`, `"variant_plan"` for new checkpoint cards
+- `getJobByConfigId` function in render-service DB layer — query latest render job by config_id
+- `config_id` query param filter on `GET /api/render/jobs` — returns latest job for a specific video config
+- `fetchLatestRender(configId)` in web API client — looks up most recent completed render for a config
+- Auto-lookup video preview in `App.tsx` — when the agent completes with an active target, surfaces the latest render via `VideoResultCard` if one exists
 - Orchestrator mode router (`packages/agent/src/modes.py`): deterministic classification of 8 modes with contracts (target, agents, permissions, checkpoints)
 - Config management tools (`packages/agent/src/tools/configs.py`): `list_configs`, `load_config`, `prepare_config`, `save_config` for operating on existing video configs
 - ADR 0009 — Router subgraphs by mode
@@ -63,6 +67,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - `AgentArtifactCard` now renders `IntentDecisionCard` for `route_intent` tool outputs
 - `App.tsx` checkpoint handlers extended with `target_selection`, `revision_plan`, and `variant_plan` handlers; fetches configs on mount to populate video artifact selector
 - `render-service/server.ts` `app.listen()` guarded with entrypoint check (`import.meta.url === pathToFileURL(process.argv[1])`) so importing for tests no longer starts a server
+- `route_intent` refactored from regex classifier to contract resolver — the orchestrator LLM now decides the mode, `route_intent` validates and returns the contract (`mode` is now the first parameter instead of being inferred from regex patterns)
+- Orchestrator prompt rewritten for LLM-based intent routing: explicit mode selection guidance with decision heuristics instead of delegating to regex classification
 - Orchestrator prompt updated with mode-aware dispatch and `route_intent` requirement
 - All agent prompts updated for mode contracts (target awareness, permission boundaries)
 - Agent Docker Compose: added `BG_JOB_ISOLATED_LOOPS=true` env var to isolate each LangGraph run in its own event loop (prevents blocking tool calls from starving concurrent pipelines)
@@ -87,6 +93,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Removed
 
+- Regex-based intent classification from `modes.py` (~80 lines of pattern constants, `_classify()`, `_matches()`, `import re`) — replaced by LLM-driven mode selection in the orchestrator
 - `host.docker.internal` dependency for agent→render-service communication
 - `.agents/skills/` duplicate skills directory (44 files) — `packages/agent/skills/` is the single authoritative source
 

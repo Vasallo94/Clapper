@@ -57,6 +57,7 @@ const updateStmt = db.prepare(`
 const getStmt = db.prepare("SELECT * FROM jobs WHERE id = ?")
 const listStmt = db.prepare("SELECT * FROM jobs ORDER BY created_at DESC LIMIT ? OFFSET ?")
 const countStmt = db.prepare("SELECT COUNT(*) as total FROM jobs")
+const getByConfigIdStmt = db.prepare("SELECT * FROM jobs WHERE config_id = ? ORDER BY created_at DESC LIMIT 1")
 
 export function insertJob(job: {
   id: string
@@ -95,6 +96,10 @@ export function updateJob(
 
 export function getJob(id: string): Job | undefined {
   return getStmt.get(id) as Job | undefined
+}
+
+export function getJobByConfigId(configId: string): Job | undefined {
+  return getByConfigIdStmt.get(configId) as Job | undefined
 }
 
 export function listJobs(limit = 20, offset = 0): { jobs: Job[]; total: number } {

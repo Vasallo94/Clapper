@@ -10,71 +10,72 @@ TARGET = {
 }
 
 
-def test_router_new_video():
-    decision = route_intent("crea un vídeo nuevo sobre git")
+def test_route_intent_returns_contract_for_mode():
+    decision = route_intent("new_video", "crea un vídeo nuevo sobre git")
     assert decision["mode"] == "new_video"
     assert decision["missing_target"] is False
     assert "copywriter" in decision["agent_scope"]
+    assert decision["can_write_files"] is True
+    assert decision["can_render"] is True
 
 
-def test_router_revise_existing_with_target():
-    decision = route_intent("mejora el vídeo anterior", TARGET)
+def test_route_intent_with_target():
+    decision = route_intent("revise_existing", "mejora el vídeo anterior", active_target=TARGET)
     assert decision["mode"] == "revise_existing"
     assert decision["target"] == TARGET
     assert "copywriter" in decision["forbidden_agents"]
 
 
-def test_router_render_only():
-    decision = route_intent("renderiza otra vez", TARGET)
+def test_route_intent_marks_missing_target():
+    decision = route_intent("render_only", "renderiza otra vez")
+    assert decision["requires_target"] is True
+    assert decision["missing_target"] is True
+
+
+def test_route_intent_render_only():
+    decision = route_intent("render_only", "renderiza", active_target=TARGET)
     assert decision["mode"] == "render_only"
     assert decision["can_write_files"] is False
     assert decision["can_render"] is True
 
 
-def test_router_recover_failed_render():
-    decision = route_intent("ha fallado Zod durante el render", TARGET)
-    assert decision["mode"] == "recover_failed_render"
-    assert decision["can_write_files"] is True
-
-
-def test_router_audit_only():
-    decision = route_intent("qué mejorarías del vídeo?", TARGET)
-    assert decision["mode"] == "audit_only"
+def test_route_intent_question():
+    decision = route_intent("question", "puedes mostrarme este vídeo?")
+    assert decision["mode"] == "question"
+    assert decision["agent_scope"] == []
     assert decision["can_write_files"] is False
     assert decision["can_render"] is False
 
 
-def test_router_variant():
-    decision = route_intent("haz una versión corta", TARGET)
+def test_route_intent_extracts_ui_target_metadata():
+    decision = route_intent(
+        "revise_existing",
+        'mejora el vídeo\n\nACTIVE_VIDEO_TARGET: {"configPath":"content/tutorials/demo/config.json","configId":"demo"}',
+    )
+    assert decision["target"]["configPath"] == "content/tutorials/demo/config.json"
+    assert decision["missing_target"] is False
+
+
+def test_route_intent_rationale():
+    decision = route_intent("question", "hola", rationale="User is just greeting")
+    assert decision["rationale"] == "User is just greeting"
+
+
+def test_route_intent_unknown_mode():
+    result = route_intent("nonexistent_mode", "test")
+    assert "error" in result
+
+
+def test_route_intent_variant():
+    decision = route_intent("variant", "haz una versión corta", active_target=TARGET)
     assert decision["mode"] == "variant"
     assert "variant_plan_checkpoint" in decision["checkpoints"]
 
 
-def test_router_asset_regeneration():
-    decision = route_intent("regenera la voz", TARGET)
-    assert decision["mode"] == "asset_regeneration"
+def test_route_intent_audit():
+    decision = route_intent("audit_only", "analiza el vídeo", active_target=TARGET)
+    assert decision["can_write_files"] is False
     assert decision["can_render"] is False
-
-
-def test_router_question():
-    decision = route_intent("¿cómo funciona el render service?")
-    assert decision["mode"] == "question"
-    assert decision["agent_scope"] == []
-
-
-def test_target_required_mode_marks_missing_target():
-    decision = route_intent("renderiza otra vez")
-    assert decision["mode"] == "render_only"
-    assert decision["requires_target"] is True
-    assert decision["missing_target"] is True
-
-
-def test_router_extracts_ui_target_metadata():
-    decision = route_intent(
-        'mejora el vídeo anterior\n\nACTIVE_VIDEO_TARGET: {"configPath":"content/tutorials/demo/config.json","configId":"demo"}'
-    )
-    assert decision["mode"] == "revise_existing"
-    assert decision["target"]["configPath"] == "content/tutorials/demo/config.json"
 
 
 def test_contracts_enforce_mode_prohibitions():

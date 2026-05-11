@@ -65,6 +65,16 @@ describe("GET /api/audio/library", () => {
   })
 })
 
+describe("GET /api/render/jobs?config_id=", () => {
+  it("returns empty array for unknown config_id", async () => {
+    const res = await fetch(`${BASE}/api/render/jobs?config_id=nonexistent`)
+    assert.strictEqual(res.status, 200)
+    const body = await res.json()
+    assert(Array.isArray(body.jobs))
+    assert.strictEqual(body.jobs.length, 0)
+  })
+})
+
 describe("GET /api/configs", () => {
   it("returns selectable configs", async () => {
     const res = await fetch(`${BASE}/api/configs`)

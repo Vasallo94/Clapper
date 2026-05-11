@@ -5,7 +5,7 @@ import { spawn } from "child_process"
 import { mkdirSync, writeFileSync, readdirSync, statSync, readFileSync } from "fs"
 import { pathToFileURL } from "url"
 import path from "path"
-import { insertJob, updateJob, getJob, listJobs } from "./db"
+import { insertJob, updateJob, getJob, getJobByConfigId, listJobs } from "./db"
 
 const app = express()
 app.use(cors())
@@ -208,6 +208,12 @@ app.post("/api/render", (req, res) => {
 
 // GET /api/render/jobs — list all jobs (must be before :id routes)
 app.get("/api/render/jobs", (req, res) => {
+  const configId = req.query.config_id as string | undefined
+  if (configId) {
+    const job = getJobByConfigId(configId)
+    res.json({ jobs: job ? [job] : [], total: job ? 1 : 0, limit: 1, offset: 0 })
+    return
+  }
   const limit = Math.min(parseInt(req.query.limit as string) || 20, 100)
   const offset = parseInt(req.query.offset as string) || 0
   const result = listJobs(limit, offset)

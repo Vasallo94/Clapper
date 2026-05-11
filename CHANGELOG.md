@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- `packages/web/Dockerfile` — containerizes the Vite dev server with Node 22 and curl, exposing port 5173 with `--host 0.0.0.0` for container accessibility.
 - `packages/render-service/Dockerfile` — containerizes the render-service with Node 22, Chromium headless dependencies, and pre-downloaded Remotion browser.
 - Narrative metadata and reusable video templates in `src/shared/scene-catalog.json` for template-first video generation.
 - `query_scene_catalog` support for searching both scenes and video templates.

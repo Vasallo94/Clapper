@@ -104,6 +104,42 @@ Optional on all scenes. Added by the director agent, not the copywriter.
 - File naming: `{sceneIndex}.mp3`
 - ALWAYS include `"enabled": true` when voiceover has scenes (Zod schema requires it)
 - Provider is always `gemini` (ElevenLabs not available)
+- See `gemini-tts` skill for full voice catalog (30 voices), audio tags, and multi-speaker reference
+
+### Audio tags
+
+Inline modifiers in brackets that control delivery — no code changes needed, just include in text:
+
+```
+[excited] We just launched the new feature!
+[whispers] This is a secret.
+[very slow] Let... that... sink... in.
+```
+
+Rules: place tag BEFORE the text it modifies, use English tags even for non-English text, 1-2 tags per scene max.
+
+### Multi-speaker mode (2 voices)
+
+For dialogue/podcast-style narration, add `speakers` to voiceover config:
+
+```json
+{
+  "voiceover": {
+    "enabled": true,
+    "provider": "gemini",
+    "language": "es-ES",
+    "speakers": [
+      { "name": "Ana", "voiceId": "Leda" },
+      { "name": "Carlos", "voiceId": "Orus" }
+    ],
+    "scenes": {
+      "0": { "text": "Ana: Bienvenidos.\nCarlos: Hoy hablamos de Docker." }
+    }
+  }
+}
+```
+
+Rules: exactly 2 speakers (API limit), speaker names in text must match config names, choose contrasting voice timbres. When `speakers` is present, `voiceId` is ignored.
 
 ## Sound design
 

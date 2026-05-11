@@ -12,6 +12,7 @@ import {
   getVoiceoverText,
   type VoiceoverScene,
 } from "../src/utils/direction"
+import type { SpeakerConfig } from "../src/shared/schemas"
 
 function findFfmpeg(): string {
   // Try system ffmpeg first, then Remotion's bundled copy
@@ -69,6 +70,8 @@ const languageCode = config.voiceover.language || "es-ES"
 const elevenLabsDefaults = (config.voiceover.elevenlabs || {}) as ElevenLabsOptions
 const scenes = config.voiceover.scenes || {}
 const outDir = path.resolve("public", "voiceover", config.id)
+const speakers: SpeakerConfig[] | null =
+  Array.isArray(config.voiceover.speakers) && config.voiceover.speakers.length === 2 ? config.voiceover.speakers : null
 
 mkdirSync(outDir, { recursive: true })
 
@@ -107,6 +110,24 @@ if (provider === "elevenlabs" && !elevenLabsApiKey) {
   process.exit(1)
 }
 
+function buildSpeechConfig(spkrs: SpeakerConfig[] | null): Record<string, unknown> {
+  if (spkrs) {
+    return {
+      languageCode,
+      multiSpeakerVoiceConfig: {
+        speakerVoiceConfigs: spkrs.map((s) => ({
+          speaker: s.name,
+          voiceConfig: { prebuiltVoiceConfig: { voiceName: s.voiceId } },
+        })),
+      },
+    }
+  }
+  return {
+    languageCode,
+    voiceConfig: { prebuiltVoiceConfig: { voiceName: voiceId } },
+  }
+}
+
 async function generateWithGemini(sceneIndex: string, text: string, mp3Path: string) {
   if (!ai) {
     throw new Error("Gemini client not initialized")
@@ -121,12 +142,7 @@ async function generateWithGemini(sceneIndex: string, text: string, mp3Path: str
         contents: [{ role: "user", parts: [{ text }] }],
         config: {
           responseModalities: ["AUDIO"],
-          speechConfig: {
-            languageCode,
-            voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: voiceId },
-            },
-          },
+          speechConfig: buildSpeechConfig(speakers),
         },
       })
       break
@@ -172,6 +188,7 @@ function createSceneFingerprint(sceneIndex: string, sceneText: string, sceneValu
     sceneIndex,
     text: sceneText,
     sceneValue,
+    speakers,
   }
 
   return createHash("sha256").update(JSON.stringify(basePayload)).digest("hex")
@@ -327,7 +344,10 @@ async function generateScene(sceneIndex: string, text: string, sceneValue?: Voic
 
 async function main() {
   const entries = Object.entries(scenes)
-  console.log(`🎙️  Generating ${entries.length} voiceover clips (provider: ${provider}, voice: ${voiceId})...`)
+  const mode = speakers ? "multi-speaker" : "single-speaker"
+  console.log(
+    `🎙️  Generating ${entries.length} voiceover clips (provider: ${provider}, mode: ${mode}, voice: ${speakers ? speakers.map((s) => `${s.name}:${s.voiceId}`).join("+") : voiceId})...`,
+  )
 
   for (const [sceneIndex, sceneValue] of entries as Array<[string, VoiceoverScene]>) {
     const text = getVoiceoverText(sceneValue)

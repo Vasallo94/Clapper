@@ -1,4 +1,4 @@
-from ..orchestrator import load_prompt
+from ..orchestrator import SKILLS_DIR, load_prompt
 from ..tools.voice import generate_voiceover
 
 
@@ -9,4 +9,5 @@ def create_voice_generator() -> dict:
         "description": "Generates voiceover audio via Gemini TTS for each scene.",
         "system_prompt": load_prompt("voice_generator"),
         "tools": [generate_voiceover],
+        "skills": [str(SKILLS_DIR)],
     }

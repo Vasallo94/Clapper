@@ -1,4 +1,5 @@
-.PHONY: help dev studio agent agent-native agent-logs agent-shell renderer web up stop \
+.PHONY: help dev studio up stop agent renderer web logs agent-logs agent-shell \
+       agent-native renderer-native web-native \
        render validate catalog voiceover sound \
        lint typecheck check test test-visual test-visual-update \
        install install-all browser-ensure clean
@@ -22,15 +23,26 @@ help: ## Show this help
 # ─── Development ─────────────────────────────────────────────
 dev: studio ## Alias for studio
 
-studio: ## Start Remotion Studio (preview)
+studio: ## Start Remotion Studio (native, needs browser)
 	npm run dev
+
+up: ## Start all services (Docker Compose)
+	docker compose up --build
+
+stop: ## Stop all services
+	docker compose down
 
 agent: ## Start LangGraph agent (Docker)
 	docker compose up agent --build
 
-agent-native: ## Start LangGraph agent (native, no Docker)
-	cd $(AGENT_DIR) && uv run langgraph dev --config langgraph.json \
-	    --port $(AGENT_PORT) --allow-blocking
+renderer: ## Start render service (Docker)
+	docker compose up render-service --build
+
+web: ## Start web UI (Docker)
+	docker compose up web --build
+
+logs: ## Tail all service logs
+	docker compose logs -f
 
 agent-logs: ## Tail agent container logs
 	docker compose logs -f agent
@@ -38,20 +50,16 @@ agent-logs: ## Tail agent container logs
 agent-shell: ## Open shell in agent container
 	docker compose exec agent bash
 
-renderer: ## Start render service (port 3100)
+# ─── Native (no Docker) ─────────────────────────────────────
+agent-native: ## Start LangGraph agent (native, no Docker)
+	cd $(AGENT_DIR) && uv run langgraph dev --config langgraph.json \
+	    --port $(AGENT_PORT) --allow-blocking
+
+renderer-native: ## Start render service (native, no Docker)
 	cd $(RENDER_DIR) && npm run dev
 
-web: ## Start web UI (Vite)
+web-native: ## Start web UI (native, no Docker)
 	cd $(WEB_DIR) && npm run dev
-
-up: ## Start all services (studio + agent + renderer + web)
-	@echo "Starting all services… (Ctrl+C to stop)"
-	@trap 'kill 0; exit 0' INT TERM; \
-		$(MAKE) studio &  \
-		$(MAKE) agent &   \
-		$(MAKE) renderer & \
-		$(MAKE) web &      \
-		wait
 
 # ─── Video pipeline ─────────────────────────────────────────
 render: ## Render tutorial to MP4 (TUTORIAL=slug)

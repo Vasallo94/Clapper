@@ -7,8 +7,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
-- `packages/web/Dockerfile` — containerizes the Vite dev server with Node 22 and curl, exposing port 5173 with `--host 0.0.0.0` for container accessibility.
-- `packages/render-service/Dockerfile` — containerizes the render-service with Node 22, Chromium headless dependencies, and pre-downloaded Remotion browser.
+- Docker Compose multi-service setup: `docker compose up` starts agent, render-service, and web together with healthchecks and dependency ordering
+- `packages/render-service/Dockerfile` — Node 22 + Chromium headless for containerized Remotion rendering
+- `packages/web/Dockerfile` — Node 22 + Vite dev server containerized with `--host 0.0.0.0`
+- Makefile targets for Docker-based workflow (`up`, `stop`, `logs`) and native alternatives (`agent-native`, `renderer-native`, `web-native`)
 - Narrative metadata and reusable video templates in `src/shared/scene-catalog.json` for template-first video generation.
 - `query_scene_catalog` support for searching both scenes and video templates.
 - Optional `brief.templateId` and `brief.narrativeArc` fields in shared video schemas.
@@ -23,6 +25,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- `docker-compose.yml` rewritten from 1 service to 3 (agent, render-service, web) with healthchecks and `depends_on` ordering
+- Agent `RENDER_SERVICE_URL` changed from `http://host.docker.internal:3100` to `http://render-service:3100` (Docker internal DNS)
+- Makefile `up` target now uses `docker compose up --build` instead of 4 background processes
 - Copywriter/director prompts now require preserving a selected narrative template before generating scenes and beats.
 - `scene-catalog` and `video-best-practices` skills now document template-first generation.
 - `validate_config` now runs the Remotion Zod validation script when available and returns schema errors together with asset checks and editorial recommendations.
@@ -36,6 +41,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Removed
 
+- `host.docker.internal` dependency for agent→render-service communication
 - `.agents/skills/` duplicate skills directory (44 files) — `packages/agent/skills/` is the single authoritative source
 
 ### Added

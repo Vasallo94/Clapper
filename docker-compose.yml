@@ -28,6 +28,7 @@ services:
     environment:
       - PROJECT_ROOT=/app
       - RENDER_SERVICE_URL=http://render-service:3100
+      - BG_JOB_ISOLATED_LOOPS=true
     depends_on:
       render-service:
         condition: service_healthy

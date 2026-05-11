@@ -36,6 +36,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- Agent Docker Compose: added `BG_JOB_ISOLATED_LOOPS=true` env var to isolate each LangGraph run in its own event loop (prevents blocking tool calls from starving concurrent pipelines)
 - `submit_render` now sanitizes configs and validates against Zod schemas before posting to render service
 - Orchestrator prompt: added validation retry limit (max 2 re-dispatches) to prevent GraphRecursionError loops
 - Director prompt: explicit emphasis enum values (`"low"|"medium"|"high"` ONLY) with warning against invalid values

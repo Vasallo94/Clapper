@@ -4,6 +4,71 @@ Specs movidas aquí tras implementación exitosa.
 
 ---
 
+## 2026-05-08 — Scene Catalog Templates and Narrative Metadata
+
+### Objective
+
+Elevar el catálogo de escenas de una lista técnica de componentes a una herramienta de dirección narrativa para agentes. El copywriter ahora puede elegir una plantilla de vídeo y escenas por rol narrativo antes de generar la escaleta.
+
+### Scope
+
+- Añadir metadata narrativa a escenas built-in y custom.
+- Añadir plantillas reutilizables para tutoriales y shorts.
+- Hacer que `query_scene_catalog` consulte escenas y plantillas.
+- Actualizar skills/prompts para exigir selección de plantilla.
+- Añadir `brief.templateId` y `brief.narrativeArc` al schema compartido.
+
+### Acceptance Criteria
+
+1. `scene-catalog.json` incluye metadata narrativa por escena.
+2. `scene-catalog.json` incluye plantillas de vídeo reutilizables.
+3. `query_scene_catalog` permite consultar escenas y plantillas por texto.
+4. La skill `scene-catalog` documenta cómo elegir plantilla antes de escribir escenas.
+5. El prompt del copywriter obliga a seleccionar una plantilla y justificar desviaciones.
+6. La auditoría editorial recomienda añadir `brief.templateId` cuando falte.
+7. Hay tests de la tool de catálogo y de la auditoría de template.
+
+### Test Cases
+
+1. `query_scene_catalog("template")` devuelve plantillas.
+2. `query_scene_catalog("code-walkthrough")` devuelve la plantilla concreta.
+3. `query_scene_catalog("terminal")` devuelve metadata narrativa de la escena.
+4. Config sin `brief.templateId` devuelve recomendación editorial.
+5. `npm run generate:catalog` genera un JSON válido.
+
+---
+
+## 2026-05-08 — DeepAgent Content Quality Upgrade
+
+### Objective
+
+Mejorar el pipeline DeepAgents para que genere mejores vídeos automáticamente, alineando el flujo con las recomendaciones oficiales de Remotion para agentes: skills reutilizables, salida estructurada validada contra schemas, y compilación/validación automática antes de renderizar.
+
+### Scope
+
+- Registrar `scene_creator` en el orquestador real.
+- Ejecutar la validación Zod de Remotion desde `validate_config` cuando el script local está disponible.
+- Añadir `audit_content_quality` para detectar problemas editoriales de hook, densidad, CTA, beats, timing y voiceover.
+- Actualizar prompts de orquestador, copywriter, director, validator y scene creator.
+- Normalizar path handling en herramientas de audio/voz para tests y runtime local/Docker.
+
+### Acceptance Criteria
+
+1. El orquestador incluye el subagente `scene_creator` que ya existe.
+2. `validate_config` ejecuta la validación Zod de Remotion y conserva los checks de assets.
+3. La auditoría editorial devuelve errores, warnings y recomendaciones accionables.
+4. Los prompts obligan a usar validación de schema + calidad antes de avanzar.
+5. Hay tests unitarios para validación Zod, auditoría editorial y conexión del `scene_creator`.
+
+### Test Cases
+
+1. `uv run pytest tests` en `packages/agent`.
+2. Config con schema inválido devuelve errores de schema.
+3. Config con texto denso devuelve warnings editoriales.
+4. Orquestador mantiene `create_scene_creator()` en el flujo.
+
+---
+
 ## 2026-03-28 — Claude Code Memory V2
 
 ### Objective
@@ -164,3 +229,70 @@ Hacer que las escenas de terminal pierdan menos tiempo en typing lento y exponer
 1. Ejecutar `npm run lint`.
 2. Verificar que un config legacy con strings en `voiceover.scenes` sigue validando.
 3. Verificar que un config con `provider: "elevenlabs"` y sin overrides sigue generando usando defaults razonables.
+
+---
+
+## 2026-05-08 — Deepagent Human Review Frontend
+
+### Objective
+
+Mejorar el frontal web de interacción con el deepagent para que el humano vea, durante el streaming y en los checkpoints, los artefactos creativos y técnicos relevantes: pensamiento operativo resumido, validaciones, escaleta, dirección, carta de sonido/audio y guion/voiceover.
+
+### Scope
+
+- Capturar outputs relevantes de herramientas como artefactos consultables del agente.
+- Mostrar tarjetas legibles para validaciones y audio chart.
+- Enriquecer las tarjetas existentes de escaleta, dirección y sonido.
+- Soportar `audio_chart_checkpoint` además de `sound_chart_checkpoint`.
+- Mantener fallback JSON para checkpoints desconocidos.
+
+### Acceptance Criteria
+
+1. El streaming muestra una línea de pensamiento/actividad del agente más legible que el texto parcial recortado.
+2. Los outputs relevantes de herramientas se capturan como eventos consultables del agente.
+3. Los checkpoints de escaleta, dirección, audio/carta de sonido y validación tienen tarjetas legibles para humano.
+4. La escaleta muestra guion/voz si está disponible en la escena o en el checkpoint.
+5. La carta de sonido soporta tanto `sound_chart_checkpoint` como `audio_chart_checkpoint`.
+6. Los checkpoints desconocidos siguen teniendo fallback JSON aprobable.
+7. La UI compila con TypeScript.
+
+### Test Cases
+
+1. `escaleta_checkpoint` con escenas muestra tabla de escenas, duración total y guion por escena si existe.
+2. `direction_checkpoint` con warnings y beats muestra avisos y resumen de dirección por escena.
+3. `audio_chart_checkpoint` con `voiceover` y `sound_design` muestra voz, música, SFX y guion de locución.
+4. Resultado de `validate_config` con errors/warnings/recommendations aparece como artefacto de validación en el stream.
+5. Tool output no JSON se muestra como artefacto de texto sin romper la UI.
+
+---
+
+## 2026-05-08 — Frontend Stream Polish And Duration Defaults
+
+### Objective
+
+Corregir los problemas visuales del frontal durante una ejecución real del deepagent y ajustar el criterio por defecto del copywriter para que los vídeos educativos no salgan como micro-piezas de 30-40 segundos cuando el usuario pide un tema amplio.
+
+### Scope
+
+- Ocultar burbujas de agente completado sin herramientas, artefactos ni texto útil.
+- Deduplicar herramientas y artefactos equivalentes.
+- Quitar el preview negro de la tarjeta de escaleta.
+- Cambiar los templates tutoriales a 90-180 segundos.
+- Añadir guardrail de auditoría para tutoriales por debajo de 90 segundos.
+
+### Acceptance Criteria
+
+1. No se muestran burbujas de agente completado sin herramientas, artefactos ni texto útil.
+2. Las herramientas repetidas no generan ruido visual innecesario.
+3. Los artefactos de validación duplicados se deduplican antes de pintarse.
+4. La tarjeta de escaleta no muestra un player negro cuando la propuesta todavía no es un config renderizable completo.
+5. El copywriter usa 90-180 segundos como duración educativa por defecto si el usuario no pide explícitamente un short.
+6. La auditoría editorial avisa cuando un tutorial educativo queda por debajo de 90 segundos.
+7. La UI compila con TypeScript.
+
+### Test Cases
+
+1. Stream con subagente sin contenido útil no muestra bubble vacía.
+2. Dos outputs iguales de `validate_config` / `audit_content_quality` muestran un solo artefacto equivalente.
+3. Escaleta con escenas terminal/custom parciales no muestra rectángulo negro de preview.
+4. Prompt “vídeo educativo sobre Claude Code” hace que el agente reciba instrucción explícita de generar 90-180 segundos por defecto.

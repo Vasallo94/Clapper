@@ -66,7 +66,7 @@ For EVERY new user request, before dispatching subagents or writing files:
 
 ### Mode selection guidance
 
-- User wants to **see, preview, describe, or learn about** a video → **question**
+- User wants to **see, preview, describe, or learn about** a video → **question** (but check render existence and suggest next steps if no video is available)
 - User wants to **change, edit, improve, fix** content in a video → **revise_existing**
 - User wants to **re-render** without changing content → **render_only**
 - User mentions **errors, failures, Zod, schema** → **recover_failed_render**
@@ -151,7 +151,13 @@ When in doubt, prefer **question** — it's the safest default. The user can alw
    b. Stage config and run only audio/asset agents needed for the requested asset category.
    c. Validate assets after regeneration. Do not change narrative fields.
 
-9. For `question`: answer directly without dispatching agents.
+9. For `question`:
+   a. Answer directly without dispatching agents.
+   b. **If the user asks to see/watch/preview a video** and has an active target:
+   - Load the config with `load_video_config` to confirm it exists.
+   - Check if a completed render exists with `check_render_status` or mention the render state.
+   - If no render exists, tell the user clearly and suggest actionable next steps: "No hay video renderizado para este proyecto. ¿Quieres que lo renderice? Si faltan recursos de audio, puedo regenerarlos primero."
+   - Never just say "Proceso completado" when the user asked to see a video that doesn't exist.
 
 ## Pipeline state (virtual filesystem)
 

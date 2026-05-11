@@ -275,6 +275,12 @@ export default function App() {
                 { jobId: job.id, title: job.title, fileSize: job.file_size },
                 "video_result",
               )
+            } else {
+              const targetTitle = activeTargetRef.current?.title || targetConfigId
+              addMessage(
+                "assistant",
+                `No hay un video renderizado para **${targetTitle}**. Puedes usar "Renderiza otra vez" para generar uno, o pedir que se regeneren los recursos de audio primero.`,
+              )
             }
           })
           .catch((err) => console.warn("[auto-lookup] fetchLatestRender failed:", err))

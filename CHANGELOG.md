@@ -102,6 +102,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Video streaming 404 in Docker: Express `send` module rejected paths through `.generated/` (dotfile security check); added `dotfiles: "allow"` to `sendFile` options
 - Host/container path mismatch for video files: `resolveOutputPath(jobId)` derives path from `JOBS_DIR` instead of using stored `output_path` from SQLite (which contains host absolute paths)
 - `Multiple configs match` error when loading configs by slug: `_resolve_config_path` now prefers `content/` matches over `.generated/renders/` copies (render jobs duplicate config.json into job dirs)
+- No feedback when user asks to see a video with no render: auto-lookup now shows a message suggesting to render or regenerate assets when `fetchLatestRender` returns null
+- Orchestrator `question` mode silently completing when user asks to see a non-existent video: prompt now instructs the agent to check render status and suggest actionable next steps
 
 ### Removed
 

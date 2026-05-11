@@ -7,6 +7,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- `packages/render-service/Dockerfile` — containerizes the render-service with Node 22, Chromium headless dependencies, and pre-downloaded Remotion browser.
+- Narrative metadata and reusable video templates in `src/shared/scene-catalog.json` for template-first video generation.
+- `query_scene_catalog` support for searching both scenes and video templates.
+- Optional `brief.templateId` and `brief.narrativeArc` fields in shared video schemas.
+- ADR 0006 documenting scene catalog narrative templates.
+- `audit_content_quality` agent tool for deterministic editorial checks (hook, CTA, copy density, timing, beats, voiceover pacing) before checkpoints and render.
+- ADR 0005 documenting schema validation and editorial guardrails for DeepAgents.
 - `packages/agent/src/paths.py` — single source of truth for all agent path constants (`PROJECT_ROOT`, `SCENE_CATALOG`, `CUSTOM_SCENES_DIR`, `SCENE_REGISTRY`, `AUDIO_LIBRARY_DIR`, etc.)
 - `docs/agent-io-convention.md` — formal specification of agent READ/WRITE/SUBMIT paths and environment variables
 - `content/` directory for committed video project configs (tutorials, shorts, presentations)
@@ -15,6 +22,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- Copywriter/director prompts now require preserving a selected narrative template before generating scenes and beats.
+- `scene-catalog` and `video-best-practices` skills now document template-first generation.
+- `validate_config` now runs the Remotion Zod validation script when available and returns schema errors together with asset checks and editorial recommendations.
+- DeepAgents prompts now require schema/content-quality validation before advancing from copywriter/director/validator checkpoints.
+- `scene_creator` is now registered in the real orchestrator subagent list, not only documented in the prompt.
 - Agent path resolution: all 8 Python files now import from `paths.py` instead of computing `Path(__file__).parent.parent...` chains (up to 5 levels deep)
 - Render service job outputs moved from `packages/render-service/jobs/` to `.generated/renders/`
 - Video configs relocated: `tutorials/` → `content/tutorials/`, `shorts/` → `content/shorts/`, `presentations/` → `content/presentations/`

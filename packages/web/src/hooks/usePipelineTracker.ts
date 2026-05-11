@@ -1,14 +1,26 @@
 import { useCallback, useState } from "react"
 import type { PipelineEvent, PipelineStageId } from "../types"
 
+export type PipelineMode =
+  | "new_video"
+  | "revise_existing"
+  | "render_only"
+  | "recover_failed_render"
+  | "audit_only"
+  | "variant"
+  | "asset_regeneration"
+  | "question"
+
 export interface PipelineState {
   currentStage: PipelineStageId
+  mode: PipelineMode | null
   events: PipelineEvent[]
   startedAt: Date | null
 }
 
 const INITIAL_STATE: PipelineState = {
   currentStage: "idle",
+  mode: null,
   events: [],
   startedAt: null,
 }
@@ -50,6 +62,10 @@ export function usePipelineTracker() {
     }))
   }, [])
 
+  const setMode = useCallback((mode: PipelineMode) => {
+    setState((prev) => ({ ...prev, mode }))
+  }, [])
+
   const reset = useCallback(() => setState(INITIAL_STATE), [])
 
   const advanceFromStream = useCallback(
@@ -81,5 +97,5 @@ export function usePipelineTracker() {
     }
   }, [state.currentStage])
 
-  return { state, advance, advanceFromStream, addEvent, reset, getLoadingLabel }
+  return { state, advance, advanceFromStream, addEvent, setMode, reset, getLoadingLabel }
 }

@@ -64,6 +64,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- `PipelineStepper` is now mode-aware: shows contextual steps for each routing mode (new_video, revise_existing, render_only, audit_only, question, etc.) instead of hardcoded 5-stage new_video pipeline; shows mode label badge and idle state
+- `usePipelineTracker` tracks active mode (`PipelineMode`) via `setMode()`, detected from `route_intent` intent_decision artifacts in the stream
+- `Sidebar` and `App.tsx` pass mode through to PipelineStepper
 - `useAgentStream` refactored: side-effect-free setState updaters, refs for stable IDs, `useEffect` for agent completion callbacks, `streamSubgraphs: true` on all stream calls
 - `ChatThread` now renders `TargetSelectionCard`, `RevisionPlanCard`, and `VariantPlanCard` for their respective checkpoint types
 - `AgentArtifactCard` now renders `IntentDecisionCard` for `route_intent` tool outputs

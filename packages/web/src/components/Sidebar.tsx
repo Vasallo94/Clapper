@@ -1,4 +1,5 @@
 import type { PipelineEvent, PipelineStageId } from "../types"
+import type { PipelineMode } from "../hooks/usePipelineTracker"
 import { theme } from "../theme"
 import { PipelineStepper } from "./PipelineStepper"
 import { EventLog } from "./EventLog"
@@ -7,6 +8,7 @@ import { ThreadList } from "./ThreadList"
 
 interface Props {
   currentStage: PipelineStageId
+  mode: PipelineMode | null
   events: PipelineEvent[]
   threads: StoredThread[]
   currentThreadId: string | undefined
@@ -15,7 +17,16 @@ interface Props {
   onNewThread: () => void
 }
 
-export function Sidebar({ currentStage, events, threads, currentThreadId, onSelectThread, onDeleteThread, onNewThread }: Props) {
+export function Sidebar({
+  currentStage,
+  mode,
+  events,
+  threads,
+  currentThreadId,
+  onSelectThread,
+  onDeleteThread,
+  onNewThread,
+}: Props) {
   return (
     <div
       style={{
@@ -41,7 +52,7 @@ export function Sidebar({ currentStage, events, threads, currentThreadId, onSele
         >
           Pipeline
         </div>
-        <PipelineStepper currentStage={currentStage} />
+        <PipelineStepper currentStage={currentStage} mode={mode} />
       </div>
 
       <div style={{ flex: 1, padding: "12px 16px", display: "flex", flexDirection: "column", minHeight: 0 }}>

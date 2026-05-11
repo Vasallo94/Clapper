@@ -100,6 +100,17 @@ export default function App() {
   const stream = useAgentStream(pipeline.advanceFromStream, handleAgentComplete)
 
   useEffect(() => {
+    const allArtifacts = [
+      ...stream.streamState.artifacts,
+      ...stream.streamState.completedAgents.flatMap((a) => a.artifacts),
+    ]
+    const decision = allArtifacts.find((a) => a.kind === "intent_decision")
+    if (decision?.data?.mode && !pipeline.state.mode) {
+      pipeline.setMode(decision.data.mode as Parameters<typeof pipeline.setMode>[0])
+    }
+  }, [stream.streamState.artifacts, stream.streamState.completedAgents, pipeline])
+
+  useEffect(() => {
     fetchConfigs()
       .then((response) => {
         const existing = getVideoArtifacts()
@@ -379,6 +390,7 @@ export default function App() {
       sidebar={
         <Sidebar
           currentStage={pipeline.state.currentStage}
+          mode={pipeline.state.mode}
           events={pipeline.state.events}
           threads={storedThreads}
           currentThreadId={threadId}

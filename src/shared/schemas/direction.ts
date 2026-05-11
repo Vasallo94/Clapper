@@ -26,6 +26,8 @@ export const BriefSchema = z.object({
   tone: z.string(),
   cta: z.string(),
   hookStrategy: z.string(),
+  templateId: z.string().nullable().optional(),
+  narrativeArc: z.array(z.string()).nullable().optional(),
 })
 
 export const DirectionSceneFieldsSchema = z.object({

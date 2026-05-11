@@ -9,6 +9,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 - `WorkingIndicator` component with animated SVG clapperboard — replaces plain loading dots in ChatThread with a visually engaging CSS-animated claqueta de cine during agent processing
 - Auto-show video on target select — when selecting a config from the dropdown that has a completed render, `VideoResultCard` appears immediately without needing to ask the agent
+
+### Fixed
+
+- Target dropdown polluted with `.generated/renders/` artifacts — `/api/configs` now only scans `content/` directories, reducing 40+ junk entries to 11 curated configs
 - Stream event normalization helpers (`packages/web/src/lib/streamEvents.ts`): stable hashing (DJB2), tool call deduplication by `tool_call_id` + input signature, artifact deduplication by content signature, streaming text merge, subagent name extraction
 - Target metadata helpers (`packages/web/src/lib/targetMetadata.ts`): `appendTargetMetadata`, `parseTargetMetadata`, `stripTargetMetadata` for embedding active video target in user messages without visual contamination
 - `TargetSelectionCard` component — radio-button UI for selecting among candidate video configs at target_selection checkpoints

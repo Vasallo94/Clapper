@@ -52,22 +52,7 @@ function listConfigFiles(): string[] {
     }
   }
 
-  try {
-    for (const entry of readdirSync(JOBS_DIR, { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue
-      const configPath = path.join(JOBS_DIR, entry.name, "config.json")
-      try {
-        statSync(configPath)
-        files.push(configPath)
-      } catch {
-        // Render job without config.
-      }
-    }
-  } catch {
-    // Generated renders may not exist yet.
-  }
-
-  return [...new Set(files)]
+  return files
 }
 
 // POST /api/validate — validate config against Zod schemas

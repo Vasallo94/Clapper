@@ -113,15 +113,10 @@ export default function App() {
   useEffect(() => {
     fetchConfigs()
       .then((response) => {
-        const existing = getVideoArtifacts()
         const fromConfigs = response.configs
           .filter((config) => !config.error)
           .map((config) => artifactFromConfig(config))
-        const merged = [...existing]
-        for (const artifact of fromConfigs) {
-          if (!merged.some((item) => item.configPath === artifact.configPath)) merged.push(artifact)
-        }
-        setVideoArtifacts(merged)
+        setVideoArtifacts(fromConfigs)
       })
       .catch((err) => console.warn("[init] fetchConfigs failed:", err))
   }, [])

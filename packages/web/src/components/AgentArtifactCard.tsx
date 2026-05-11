@@ -1,7 +1,8 @@
-import type { AgentArtifact, AudioChartData, ValidationReportData } from "../types"
+import type { AgentArtifact, AudioChartData, IntentDecisionData, ValidationReportData } from "../types"
 import { theme } from "../theme"
 import { SoundChartCard } from "./SoundChartCard"
 import { ValidationReportCard } from "./ValidationReportCard"
+import { IntentDecisionCard } from "./IntentDecisionCard"
 
 interface Props {
   artifact: AgentArtifact
@@ -20,6 +21,10 @@ export function AgentArtifactCard({ artifact }: Props) {
         disabled
       />
     )
+  }
+
+  if (artifact.kind === "intent_decision" && artifact.data) {
+    return <IntentDecisionCard compact data={artifact.data as unknown as IntentDecisionData} />
   }
 
   return (

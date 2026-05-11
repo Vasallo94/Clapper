@@ -2,7 +2,8 @@ import express from "express"
 import cors from "cors"
 import { randomUUID } from "crypto"
 import { spawn } from "child_process"
-import { mkdirSync, writeFileSync, readdirSync, statSync } from "fs"
+import { mkdirSync, writeFileSync, readdirSync, statSync, readFileSync } from "fs"
+import { pathToFileURL } from "url"
 import path from "path"
 import { insertJob, updateJob, getJob, listJobs } from "./db"
 
@@ -13,6 +14,61 @@ app.use(express.json({ limit: "10mb" }))
 const ROOT_DIR = process.env.ROOT_DIR || path.resolve(__dirname, "../../..")
 const JOBS_DIR = path.resolve(ROOT_DIR, ".generated/renders")
 mkdirSync(JOBS_DIR, { recursive: true })
+
+function summarizeConfig(configPath: string) {
+  const config = JSON.parse(readFileSync(configPath, "utf-8"))
+  const scenes = Array.isArray(config.scenes) ? config.scenes : []
+  return {
+    configPath: path.relative(ROOT_DIR, configPath),
+    configId: config.id || path.basename(path.dirname(configPath)),
+    composition: config.composition || "ClaudeCodeTutorial",
+    title: config.title || config.headline || config.product || path.basename(path.dirname(configPath)),
+    sceneCount: scenes.length,
+    durationSeconds: scenes.reduce(
+      (sum: number, scene: { durationInSeconds?: number }) => sum + Number(scene.durationInSeconds || 0),
+      0,
+    ),
+  }
+}
+
+function listConfigFiles(): string[] {
+  const roots = ["content/tutorials", "content/shorts", "content/presentations"]
+  const files: string[] = []
+  for (const root of roots) {
+    const dir = path.join(ROOT_DIR, root)
+    try {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        if (!entry.isDirectory()) continue
+        const configPath = path.join(dir, entry.name, "config.json")
+        try {
+          statSync(configPath)
+          files.push(configPath)
+        } catch {
+          // Directory without config.
+        }
+      }
+    } catch {
+      // Optional content root.
+    }
+  }
+
+  try {
+    for (const entry of readdirSync(JOBS_DIR, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue
+      const configPath = path.join(JOBS_DIR, entry.name, "config.json")
+      try {
+        statSync(configPath)
+        files.push(configPath)
+      } catch {
+        // Render job without config.
+      }
+    }
+  } catch {
+    // Generated renders may not exist yet.
+  }
+
+  return [...new Set(files)]
+}
 
 // POST /api/validate — validate config against Zod schemas
 app.post("/api/validate", (req, res) => {
@@ -158,6 +214,21 @@ app.get("/api/render/jobs", (req, res) => {
   res.json({ ...result, limit, offset })
 })
 
+// GET /api/configs — list selectable video configs
+app.get("/api/configs", (_req, res) => {
+  const configs = listConfigFiles().map((configPath) => {
+    try {
+      return summarizeConfig(configPath)
+    } catch (error) {
+      return {
+        configPath: path.relative(ROOT_DIR, configPath),
+        error: error instanceof Error ? error.message : String(error),
+      }
+    }
+  })
+  res.json({ configs })
+})
+
 // GET /api/render/:id/status — check render progress
 app.get("/api/render/:id/status", (req, res) => {
   const job = getJob(req.params.id)
@@ -198,8 +269,10 @@ app.get("/api/audio/library", (_req, res) => {
 })
 
 const PORT = parseInt(process.env.PORT || "3100")
-app.listen(PORT, () => {
-  console.log(`Render service listening on :${PORT}`)
-})
+if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+  app.listen(PORT, () => {
+    console.log(`Render service listening on :${PORT}`)
+  })
+}
 
 export { app }

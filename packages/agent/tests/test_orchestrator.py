@@ -132,6 +132,24 @@ def test_orchestrator_registers_scene_creator():
     assert "create_scene_creator()" in source
 
 
+def test_orchestrator_registers_mode_router_tools():
+    """The orchestrator must expose deterministic mode routing and config tools."""
+    import inspect
+    from src.orchestrator import create_video_orchestrator
+
+    source = inspect.getsource(create_video_orchestrator)
+    for name in [
+        "route_intent",
+        "get_mode_contract",
+        "list_video_configs",
+        "stage_existing_config",
+        "present_revision_plan",
+        "present_variant_plan",
+        "present_target_selection",
+    ]:
+        assert name in source
+
+
 class TestOrchestratorContextSchema:
     def test_orchestrator_has_context_schema(self, monkeypatch):
         monkeypatch.setenv("GOOGLE_API_KEY", "fake-key")

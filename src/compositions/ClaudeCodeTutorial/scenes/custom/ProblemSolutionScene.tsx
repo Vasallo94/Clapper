@@ -1,44 +1,62 @@
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { useThemeTokens } from "../../../../shared/themes"
-import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
-import { CrossIcon, CheckIcon } from "./svg-icons"
 import type { Beat, Timing } from "../../../../utils/direction"
 import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
 
+const CrossIcon = ({ size, color }: { size: number; color: string }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+)
+
+const CheckIcon = ({ size, color }: { size: number; color: string }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+)
+
 interface ProblemSolutionProps {
-  title?: string
-  problem: { text: string }
-  solution: { text: string }
+  problem: string
+  solution: string
   timing?: Timing
   beats?: Beat[]
 }
 
 export const ProblemSolutionScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as ProblemSolutionProps
-  const { title, problem, solution, timing, beats } = props
+  const { problem, solution, timing, beats } = props
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
+
   const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
   const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
 
-  const problemColor = tokens.terminal.labelColor
-  const solutionColor = tokens.terminal.successColor
+  const problemColor = "#ef4444"
+  const solutionColor = "#22c55e"
 
-  // Title
-  const titleDelay = beatStartFrames?.[0] ?? motionStartFrame
-  const titleSpring = spring({
-    frame: Math.max(0, frame - titleDelay),
-    fps,
-    config: { damping: 20, stiffness: 180 },
-    durationInFrames: Math.ceil(fps * 0.5),
-  })
-  const titleOpacity = interpolate(titleSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-  const titleY = interpolate(titleSpring, [0, 1], [20, 0])
-
-  // Problem block
-  const problemDelay = beatStartFrames?.[1] ?? titleDelay + Math.ceil(fps * 0.3)
+  // Problem block (appears on Beat 0)
+  const problemDelay = beatStartFrames?.[0] ?? motionStartFrame
   const problemSpring = spring({
     frame: Math.max(0, frame - problemDelay),
     fps,
@@ -48,18 +66,8 @@ export const ProblemSolutionScene: React.FC<Record<string, unknown>> = (rawProps
   const problemX = interpolate(problemSpring, [0, 1], [-30, 0])
   const problemOpacity = interpolate(problemSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
 
-  // Gradient connector
-  const lineDelay = problemDelay + Math.ceil(fps * 0.4)
-  const lineSpring = spring({
-    frame: Math.max(0, frame - lineDelay),
-    fps,
-    config: { damping: 200 },
-    durationInFrames: Math.ceil(fps * 0.5),
-  })
-  const lineHeight = interpolate(lineSpring, [0, 1], [0, 60])
-
-  // Solution block
-  const solutionDelay = beatStartFrames?.[2] ?? lineDelay + Math.ceil(fps * 0.3)
+  // Solution block (appears on Beat 2)
+  const solutionDelay = beatStartFrames?.[2] ?? problemDelay + Math.ceil(fps * 1.5)
   const solutionSpring = spring({
     frame: Math.max(0, frame - solutionDelay),
     fps,
@@ -69,17 +77,27 @@ export const ProblemSolutionScene: React.FC<Record<string, unknown>> = (rawProps
   const solutionX = interpolate(solutionSpring, [0, 1], [-30, 0])
   const solutionOpacity = interpolate(solutionSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
 
+  // Gradient connector (appears right before solution)
+  const lineDelay = solutionDelay - Math.ceil(fps * 0.2)
+  const lineSpring = spring({
+    frame: Math.max(0, frame - lineDelay),
+    fps,
+    config: { damping: 200 },
+    durationInFrames: Math.ceil(fps * 0.5),
+  })
+  const lineHeight = interpolate(lineSpring, [0, 1], [0, 80])
+
   const blockStyle = (accent: string): React.CSSProperties => ({
     display: "flex",
     alignItems: "center",
-    gap: 16,
+    gap: 20,
     background: tokens.card.bg,
     border: `1px solid ${tokens.card.border}`,
-    borderLeft: `3px solid ${accent}`,
-    borderRadius: 10,
-    padding: "20px 28px",
+    borderLeft: `4px solid ${accent}`,
+    borderRadius: 12,
+    padding: "24px 32px",
     boxShadow: tokens.card.shadow,
-    maxWidth: 600,
+    maxWidth: 680,
   })
 
   return (
@@ -93,22 +111,6 @@ export const ProblemSolutionScene: React.FC<Record<string, unknown>> = (rawProps
         padding: "40px 60px",
       }}
     >
-      {title && (
-        <div
-          style={{
-            fontSize: 36,
-            fontWeight: 700,
-            color: tokens.foreground,
-            fontFamily: tokens.fontFamily,
-            marginBottom: 40,
-            opacity: titleOpacity,
-            transform: `translateY(${titleY}px)`,
-          }}
-        >
-          {title}
-        </div>
-      )}
-
       {/* Problem */}
       <div
         style={{
@@ -119,35 +121,35 @@ export const ProblemSolutionScene: React.FC<Record<string, unknown>> = (rawProps
       >
         <div
           style={{
-            width: 40,
-            height: 40,
+            width: 48,
+            height: 48,
             borderRadius: "50%",
             background: `${problemColor}20`,
             border: `2px solid ${problemColor}`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 20,
             flexShrink: 0,
           }}
         >
-          <CrossIcon size={20} color={problemColor} />
+          <CrossIcon size={24} color={problemColor} />
         </div>
         <div>
           <div
             style={{
-              fontSize: 11,
+              fontSize: 14,
               fontWeight: 700,
               textTransform: "uppercase",
               letterSpacing: 1.5,
               color: problemColor,
-              marginBottom: 4,
+              marginBottom: 8,
+              fontFamily: tokens.fontFamily,
             }}
           >
-            Problem
+            El Problema
           </div>
-          <div style={{ fontSize: 18, color: tokens.foreground, fontFamily: tokens.fontFamily, lineHeight: 1.4 }}>
-            {problem.text}
+          <div style={{ fontSize: 22, color: tokens.foreground, fontFamily: tokens.fontFamily, lineHeight: 1.5 }}>
+            {problem}
           </div>
         </div>
       </div>
@@ -155,7 +157,7 @@ export const ProblemSolutionScene: React.FC<Record<string, unknown>> = (rawProps
       {/* Gradient connector */}
       <div
         style={{
-          width: 3,
+          width: 4,
           height: lineHeight,
           background: `linear-gradient(${problemColor}, ${solutionColor})`,
           marginLeft: 0,
@@ -173,40 +175,38 @@ export const ProblemSolutionScene: React.FC<Record<string, unknown>> = (rawProps
       >
         <div
           style={{
-            width: 40,
-            height: 40,
+            width: 48,
+            height: 48,
             borderRadius: "50%",
             background: `${solutionColor}20`,
             border: `2px solid ${solutionColor}`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 20,
             flexShrink: 0,
           }}
         >
-          <CheckIcon size={20} color={solutionColor} />
+          <CheckIcon size={24} color={solutionColor} />
         </div>
         <div>
           <div
             style={{
-              fontSize: 11,
+              fontSize: 14,
               fontWeight: 700,
               textTransform: "uppercase",
               letterSpacing: 1.5,
               color: solutionColor,
-              marginBottom: 4,
+              marginBottom: 8,
+              fontFamily: tokens.fontFamily,
             }}
           >
-            Solution
+            La Solución
           </div>
-          <div style={{ fontSize: 18, color: tokens.foreground, fontFamily: tokens.fontFamily, lineHeight: 1.4 }}>
-            {solution.text}
+          <div style={{ fontSize: 22, color: tokens.foreground, fontFamily: tokens.fontFamily, lineHeight: 1.5 }}>
+            {solution}
           </div>
         </div>
       </div>
-
-      <MascotWatermark animation="idle" />
     </AbsoluteFill>
   )
 }

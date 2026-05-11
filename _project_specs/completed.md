@@ -4,6 +4,73 @@ Specs movidas aquí tras implementación exitosa.
 
 ---
 
+## 2026-05-11 — Normalización de streaming y UI de modos
+
+### Objective
+
+Mejorar el frontend del agente para que soporte los nuevos modos del orquestador y elimine duplicados en mensajes, cards de agentes, tools y artifacts durante la ejecución.
+
+### Scope
+
+- Normalizar eventos de streaming a entidades estables con dedupe por ids/signatures.
+- Añadir cards para checkpoints de selección de target, plan de revisión y plan de variante.
+- Refactorizar `useAgentStream` para usar refs y useEffect (sin side-effects en setState).
+- Añadir `/api/configs` endpoint al render-service.
+- Guardar `app.listen()` con entrypoint guard para tests.
+
+### Acceptance Criteria
+
+1. El procesamiento de streaming no ejecuta efectos secundarios dentro de updaters de React.
+2. Las tools se deduplican por `tool_call_id` cuando existe y por signature estable como fallback.
+3. Los artifacts se deduplican por source/signature estable y no por ids aleatorios.
+4. `ACTIVE_VIDEO_TARGET` se añade, parsea y oculta mediante helpers centralizados.
+5. La UI activa `streamSubgraphs` en las llamadas de stream para recibir namespaces cuando el backend las emita.
+6. Existen cards dedicadas para `target_selection_checkpoint`, `revision_plan_checkpoint` y `variant_plan_checkpoint`.
+7. La UI muestra una card/resumen útil para `route_intent` (como artifact compacto en AgentArtifactCard).
+8. Hay tests unitarios para helpers de metadata y dedupe de stream.
+
+### Test Cases
+
+1. `npx vitest run packages/web/src/lib/` — 6 tests passing.
+2. `npx tsx --test packages/render-service/test/server.test.ts` — 5 tests passing (includes `/api/configs`).
+3. `npx tsc --noEmit -p packages/web/tsconfig.json` — zero errors.
+
+---
+
+## 2026-05-11 — Rediseño del orquestador por modos
+
+### Objective
+
+Separar la decisión de intención del pipeline creativo completo para que el agente pueda operar sobre vídeos existentes, renders, auditorías, variantes, recuperación de errores y preguntas sin reiniciar siempre el flujo completo.
+
+### Scope
+
+- Añadir router determinista para `new_video`, `revise_existing`, `render_only`, `recover_failed_render`, `audit_only`, `variant`, `asset_regeneration` y `question`.
+- Definir contratos de modo con target requerido, agentes permitidos/prohibidos, permisos de escritura/render y checkpoints.
+- Añadir tools para listar, cargar, preparar y guardar configs existentes.
+- Añadir checkpoints para plan de revisión, variante y selección de target.
+- Actualizar prompts de orquestador/subagentes para respetar contratos de modo.
+- Persistir artifacts seleccionables en la UI y enviar target activo al backend.
+- Documentar modos futuros.
+
+### Acceptance Criteria
+
+1. El router clasifica los 8 modos base con decisión estructurada.
+2. Los contratos bloquean escritura/render/agentes prohibidos por modo.
+3. Los modos que requieren target devuelven `missing_target` cuando la UI no lo aporta.
+4. La UI guarda artifacts renderizados con `configPath`, `configId`, `jobId`, `composition` y `title`.
+5. La UI envía `ACTIVE_VIDEO_TARGET` en el mensaje al backend cuando hay target activo.
+6. Los prompts obligan al orquestador a aplicar `route_intent` antes de dispatch.
+7. Los modos futuros quedan en roadmap.
+
+### Test Cases
+
+1. `uv run pytest tests/test_modes.py tests/test_tools_configs.py`
+2. `uv run pytest tests/test_orchestrator.py`
+3. `npm run build --workspace packages/web`
+
+---
+
 ## 2026-05-08 — Scene Catalog Templates and Narrative Metadata
 
 ### Objective

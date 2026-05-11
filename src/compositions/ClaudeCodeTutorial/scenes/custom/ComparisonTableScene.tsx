@@ -1,65 +1,97 @@
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { useThemeTokens } from "../../../../shared/themes"
-import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
-import { CheckIcon, CrossIcon } from "./svg-icons"
 import type { Beat, Timing } from "../../../../utils/direction"
 import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
 
-type CellValue = string | { text: string; type: "check" | "cross" | "text" }
+const CheckIcon = ({ size, color }: { size: number; color: string }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+)
 
-interface TableRow {
-  cells: CellValue[]
+const CrossIcon = ({ size, color }: { size: number; color: string }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+)
+
+interface ColumnData {
+  header: string
+  items: string[]
 }
 
 interface ComparisonTableProps {
-  title?: string
-  headers: string[]
-  rows: TableRow[]
-  highlightRow?: number
+  title: string
+  leftColumn: ColumnData
+  rightColumn: ColumnData
   timing?: Timing
   beats?: Beat[]
 }
 
-function getCellText(cell: CellValue): string {
-  return typeof cell === "string" ? cell : cell.text
-}
-
-function getCellType(cell: CellValue): "check" | "cross" | "text" {
-  return typeof cell === "string" ? "text" : cell.type
-}
-
 export const ComparisonTableScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as ComparisonTableProps
-  const { title, headers = [], rows = [], highlightRow, timing, beats } = props
+  const { title, leftColumn, rightColumn, timing, beats } = props
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
+
   const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
   const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
-  const beatOffset = title ? 1 : 0
 
-  // Title animation
+  // Beat 0: Title
   const titleDelay = beatStartFrames?.[0] ?? motionStartFrame
-  const titleOpacity = title
-    ? interpolate(frame, [titleDelay, titleDelay + Math.ceil(fps * 0.3)], [0, 1], {
-        extrapolateLeft: "clamp",
-        extrapolateRight: "clamp",
-      })
-    : 0
+  const titleSpring = spring({ frame: Math.max(0, frame - titleDelay), fps, config: { damping: 20 } })
+  const titleOpacity = interpolate(titleSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
+  const titleY = interpolate(titleSpring, [0, 1], [20, 0])
 
-  // Header animation
-  const headerDelay = (beatStartFrames?.[beatOffset] ?? motionStartFrame) + Math.ceil(fps * 0.1)
-  const headerSpring = spring({
-    frame: Math.max(0, frame - headerDelay),
-    fps,
-    config: { damping: 200 },
-    durationInFrames: Math.ceil(fps * 0.4),
+  // Beat 1: Right column (Errores comunes)
+  const rightColDelay = beatStartFrames?.[1] ?? titleDelay + Math.ceil(fps * 2)
+  const rightColSpring = spring({ frame: Math.max(0, frame - rightColDelay), fps, config: { damping: 20 } })
+  const rightColOpacity = interpolate(rightColSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
+  const rightColY = interpolate(rightColSpring, [0, 1], [30, 0])
+
+  // Beat 2: Left column (Buenas prácticas)
+  const leftColDelay = beatStartFrames?.[2] ?? rightColDelay + Math.ceil(fps * 2)
+  const leftColSpring = spring({ frame: Math.max(0, frame - leftColDelay), fps, config: { damping: 20 } })
+  const leftColOpacity = interpolate(leftColSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
+  const leftColY = interpolate(leftColSpring, [0, 1], [30, 0])
+
+  const successColor = "#22c55e"
+  const errorColor = "#ef4444"
+
+  const columnStyle = (borderColor: string): React.CSSProperties => ({
+    flex: 1,
+    background: tokens.card.bg,
+    border: `2px solid ${tokens.card.border}`,
+    borderTop: `6px solid ${borderColor}`,
+    borderRadius: 12,
+    padding: "32px",
+    boxShadow: tokens.card.shadow,
+    display: "flex",
+    flexDirection: "column",
+    gap: 20,
+    backgroundColor: `${borderColor}08`, // subtle background tint
   })
-  const headerOpacity = interpolate(headerSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-
-  const colCount = headers.length
-  const tableWidth = Math.min(1000, 200 * colCount)
 
   return (
     <AbsoluteFill
@@ -69,118 +101,125 @@ export const ComparisonTableScene: React.FC<Record<string, unknown>> = (rawProps
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        padding: 48,
-        gap: 32,
+        padding: "40px 60px",
+        gap: 48,
       }}
     >
-      {title && (
-        <div
-          style={{
-            fontFamily: tokens.fontFamily,
-            fontSize: 36,
-            fontWeight: 700,
-            color: tokens.foreground,
-            textAlign: "center",
-            opacity: titleOpacity,
-          }}
-        >
-          {title}
-        </div>
-      )}
-
+      {/* Title */}
       <div
         style={{
-          width: tableWidth,
-          background: tokens.card.bg,
-          border: `1px solid ${tokens.card.border}`,
-          borderRadius: 10,
-          overflow: "hidden",
-          boxShadow: tokens.card.shadow,
+          fontFamily: tokens.fontFamily,
+          fontSize: 42,
+          fontWeight: 700,
+          color: tokens.foreground,
+          opacity: titleOpacity,
+          transform: `translateY(${titleY}px)`,
         }}
       >
-        {/* Header row */}
-        <div
-          style={{
-            display: "flex",
-            borderBottom: `2px solid ${tokens.primary}`,
-            opacity: headerOpacity,
-          }}
-        >
-          {headers.map((header, i) => (
-            <div
-              key={i}
-              style={{
-                flex: i === 0 ? 1.5 : 1,
-                padding: "14px 20px",
-                fontFamily: tokens.fontFamily,
-                fontSize: 18,
-                fontWeight: 700,
-                color: tokens.primary,
-                textAlign: i === 0 ? "left" : "center",
-              }}
-            >
-              {header}
-            </div>
-          ))}
-        </div>
-
-        {/* Data rows */}
-        {rows.map((row, ri) => {
-          const rowDelay =
-            beatStartFrames?.[ri + beatOffset + 1] ?? headerDelay + Math.ceil(fps * 0.3) + ri * Math.ceil(fps * 0.2)
-          const rowSpring = spring({
-            frame: Math.max(0, frame - rowDelay),
-            fps,
-            config: { damping: 200 },
-            durationInFrames: Math.ceil(fps * 0.3),
-          })
-          const rowOpacity = interpolate(rowSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-          const rowX = interpolate(rowSpring, [0, 1], [-15, 0])
-          const isHighlighted = highlightRow === ri
-
-          return (
-            <div
-              key={ri}
-              style={{
-                display: "flex",
-                borderBottom: ri < rows.length - 1 ? `1px solid ${tokens.card.border}` : "none",
-                opacity: rowOpacity,
-                transform: `translateX(${rowX}px)`,
-                background: isHighlighted ? `${tokens.primary}10` : "transparent",
-              }}
-            >
-              {row.cells.map((cell, ci) => {
-                const cellType = getCellType(cell)
-                const cellText = getCellText(cell)
-
-                return (
-                  <div
-                    key={ci}
-                    style={{
-                      flex: ci === 0 ? 1.5 : 1,
-                      padding: "12px 20px",
-                      fontFamily: ci === 0 ? tokens.fontFamily : tokens.monoFontFamily,
-                      fontSize: 17,
-                      color: tokens.foreground,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: ci === 0 ? "flex-start" : "center",
-                      gap: 8,
-                    }}
-                  >
-                    {cellType === "check" && <CheckIcon size={18} color={tokens.terminal.successColor} />}
-                    {cellType === "cross" && <CrossIcon size={18} color="#ff5f57" />}
-                    {cellType === "text" && <span>{cellText}</span>}
-                    {cellType !== "text" && cellText && <span style={{ fontSize: 15 }}>{cellText}</span>}
-                  </div>
-                )
-              })}
-            </div>
-          )
-        })}
+        {title}
       </div>
 
-      <MascotWatermark animation="idle" />
+      {/* Columns Container */}
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          maxWidth: 1000,
+          gap: 40,
+        }}
+      >
+        {/* Left Column (Buenas Prácticas) */}
+        <div
+          style={{
+            ...columnStyle(successColor),
+            opacity: leftColOpacity,
+            transform: `translateY(${leftColY}px)`,
+          }}
+        >
+          <div
+            style={{
+              fontFamily: tokens.fontFamily,
+              fontSize: 26,
+              fontWeight: 700,
+              color: successColor,
+              textAlign: "center",
+              marginBottom: 12,
+            }}
+          >
+            {leftColumn.header}
+          </div>
+          {leftColumn.items.map((item, i) => {
+            // Stagger items slightly after column appears
+            const itemDelay = leftColDelay + Math.ceil(fps * 0.2) + i * Math.ceil(fps * 0.1)
+            const itemSpring = spring({ frame: Math.max(0, frame - itemDelay), fps, config: { damping: 20 } })
+            return (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 16,
+                  opacity: interpolate(itemSpring, [0, 0.5], [0, 1], { extrapolateRight: "clamp" }),
+                  transform: `translateX(${interpolate(itemSpring, [0, 1], [-15, 0])}px)`,
+                }}
+              >
+                <div style={{ marginTop: 2 }}>
+                  <CheckIcon size={24} color={successColor} />
+                </div>
+                <div style={{ fontFamily: tokens.fontFamily, fontSize: 20, color: tokens.foreground, lineHeight: 1.4 }}>
+                  {item}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Right Column (Errores Comunes) */}
+        <div
+          style={{
+            ...columnStyle(errorColor),
+            opacity: rightColOpacity,
+            transform: `translateY(${rightColY}px)`,
+          }}
+        >
+          <div
+            style={{
+              fontFamily: tokens.fontFamily,
+              fontSize: 26,
+              fontWeight: 700,
+              color: errorColor,
+              textAlign: "center",
+              marginBottom: 12,
+            }}
+          >
+            {rightColumn.header}
+          </div>
+          {rightColumn.items.map((item, i) => {
+            // Stagger items slightly after column appears
+            const itemDelay = rightColDelay + Math.ceil(fps * 0.2) + i * Math.ceil(fps * 0.1)
+            const itemSpring = spring({ frame: Math.max(0, frame - itemDelay), fps, config: { damping: 20 } })
+            return (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 16,
+                  opacity: interpolate(itemSpring, [0, 0.5], [0, 1], { extrapolateRight: "clamp" }),
+                  transform: `translateX(${interpolate(itemSpring, [0, 1], [15, 0])}px)`,
+                }}
+              >
+                <div style={{ marginTop: 2 }}>
+                  <CrossIcon size={24} color={errorColor} />
+                </div>
+                <div style={{ fontFamily: tokens.fontFamily, fontSize: 20, color: tokens.foreground, lineHeight: 1.4 }}>
+                  {item}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
     </AbsoluteFill>
   )
 }

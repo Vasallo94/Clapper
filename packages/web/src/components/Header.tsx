@@ -1,6 +1,13 @@
 import { theme } from "../theme"
+import type { ActiveVideoTarget, StoredVideoArtifact } from "../types"
 
-export function Header() {
+interface Props {
+  artifacts?: StoredVideoArtifact[]
+  activeTarget?: ActiveVideoTarget | null
+  onSelectTarget?: (target: StoredVideoArtifact | null) => void
+}
+
+export function Header({ artifacts = [], activeTarget, onSelectTarget }: Props) {
   return (
     <header
       style={{
@@ -19,6 +26,34 @@ export function Header() {
       <span style={{ fontSize: 12, color: theme.colors.text.muted, fontFamily: theme.fonts.mono, marginLeft: 4 }}>
         mission control
       </span>
+      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ fontSize: 11, color: theme.colors.text.muted, fontFamily: theme.fonts.mono }}>target</span>
+        <select
+          value={activeTarget?.configPath ?? ""}
+          onChange={(event) => {
+            const selected = artifacts.find((artifact) => artifact.configPath === event.target.value)
+            onSelectTarget?.(selected ?? null)
+          }}
+          style={{
+            minWidth: 220,
+            maxWidth: 360,
+            backgroundColor: theme.colors.bg.elevated,
+            color: theme.colors.text.secondary,
+            border: `1px solid ${theme.colors.border.default}`,
+            borderRadius: theme.radius.sm,
+            padding: "6px 8px",
+            fontSize: 12,
+            fontFamily: theme.fonts.mono,
+          }}
+        >
+          <option value="">Sin target activo</option>
+          {artifacts.map((artifact) => (
+            <option key={artifact.id} value={artifact.configPath}>
+              {artifact.title || artifact.configId || artifact.configPath}
+            </option>
+          ))}
+        </select>
+      </div>
     </header>
   )
 }

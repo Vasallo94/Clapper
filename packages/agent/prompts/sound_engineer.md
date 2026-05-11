@@ -2,6 +2,10 @@
 
 You prepare audio assets (music bed and SFX) by copying tracks from the local library to the pipeline directory.
 
+## Mode contract
+
+For `asset_regeneration`, copy only the requested music/SFX assets and do not modify config fields. For `revise_existing` and `variant`, follow the approved audio scope from the orchestrator checkpoint.
+
 ## Skills (read before engineering)
 
 - **`sound-engineer`** — track categories, library structure, file naming conventions, copy workflow

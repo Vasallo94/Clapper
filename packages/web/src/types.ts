@@ -5,6 +5,9 @@ export type CheckpointType =
   | "sound_chart"
   | "audio_chart"
   | "validation"
+  | "target_selection"
+  | "revision_plan"
+  | "variant_plan"
   | "generic"
   | "video_result"
 
@@ -18,6 +21,9 @@ export interface ChatMessage {
     | AudioChartData
     | DirectionData
     | ValidationReportData
+    | TargetSelectionData
+    | RevisionPlanData
+    | VariantPlanData
     | Record<string, unknown>
   checkpointType?: CheckpointType
   agentSummary?: AgentSummary
@@ -25,14 +31,17 @@ export interface ChatMessage {
 
 export interface ToolEntry {
   id: string
+  toolCallId?: string
   name: string
   input?: string
   output?: string
+  namespace?: string[]
   status: "running" | "done" | "error"
   startedAt: number
 }
 
 export interface AgentSummary {
+  id?: string
   name: string
   tools: ToolEntry[]
   artifacts: AgentArtifact[]
@@ -41,7 +50,7 @@ export interface AgentSummary {
   startedAt: number
 }
 
-export type AgentArtifactKind = "validation" | "script" | "audio_chart" | "tool_output"
+export type AgentArtifactKind = "validation" | "script" | "audio_chart" | "intent_decision" | "tool_output"
 
 export interface AgentArtifact {
   id: string
@@ -76,8 +85,53 @@ export interface DirectionData {
 export interface ChatResponse {
   type: "message" | "checkpoint"
   content?: string
-  data?: CheckpointData | SoundChartData | AudioChartData | DirectionData | ValidationReportData
+  data?:
+    | CheckpointData
+    | SoundChartData
+    | AudioChartData
+    | DirectionData
+    | ValidationReportData
+    | TargetSelectionData
+    | RevisionPlanData
+    | VariantPlanData
   thread_id: string
+}
+
+export interface IntentDecisionData {
+  mode: string
+  confidence?: number
+  requires_target?: boolean
+  target?: ActiveVideoTarget | null
+  agent_scope?: string[]
+  forbidden_agents?: string[]
+  requires_checkpoint?: boolean
+  can_write_files?: boolean
+  can_render?: boolean
+  rationale?: string
+  missing_target?: boolean
+  checkpoints?: string[]
+}
+
+export interface TargetSelectionData {
+  type: "target_selection_checkpoint"
+  mode: string
+  candidates: Array<ActiveVideoTarget & { sceneCount?: number; durationSeconds?: number; error?: string }>
+}
+
+export interface RevisionPlanData {
+  type: "revision_plan_checkpoint"
+  target: Record<string, unknown>
+  requestedChanges: string[]
+  proposedEdits: string[]
+  willRender?: boolean
+}
+
+export interface VariantPlanData {
+  type: "variant_plan_checkpoint"
+  source: Record<string, unknown>
+  variant: Record<string, unknown>
+  proposedChanges: string[]
+  willRender?: boolean
 }
 
 export interface SoundChartData {
@@ -151,4 +205,23 @@ export interface JobListResponse {
   total: number
   limit: number
   offset: number
+}
+
+export interface ActiveVideoTarget {
+  configPath: string
+  configId?: string
+  jobId?: string
+  composition?: string
+  title?: string
+}
+
+export interface StoredVideoArtifact extends ActiveVideoTarget {
+  id: string
+  createdAt: string
+  sceneCount?: number
+  durationSeconds?: number
+}
+
+export interface ConfigListResponse {
+  configs: Array<ActiveVideoTarget & { sceneCount?: number; durationSeconds?: number; error?: string }>
 }

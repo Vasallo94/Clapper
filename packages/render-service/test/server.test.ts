@@ -64,3 +64,13 @@ describe("GET /api/audio/library", () => {
     assert(Array.isArray(body.tracks))
   })
 })
+
+describe("GET /api/configs", () => {
+  it("returns selectable configs", async () => {
+    const res = await fetch(`${BASE}/api/configs`)
+    assert.strictEqual(res.status, 200)
+    const body = await res.json()
+    assert(Array.isArray(body.configs))
+    assert(body.configs.some((config: { configPath?: string }) => config.configPath?.endsWith("config.json")))
+  })
+})

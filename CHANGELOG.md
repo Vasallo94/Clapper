@@ -7,6 +7,24 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- Stream event normalization helpers (`packages/web/src/lib/streamEvents.ts`): stable hashing (DJB2), tool call deduplication by `tool_call_id` + input signature, artifact deduplication by content signature, streaming text merge, subagent name extraction
+- Target metadata helpers (`packages/web/src/lib/targetMetadata.ts`): `appendTargetMetadata`, `parseTargetMetadata`, `stripTargetMetadata` for embedding active video target in user messages without visual contamination
+- `TargetSelectionCard` component — radio-button UI for selecting among candidate video configs at target_selection checkpoints
+- `RevisionPlanCard` component — two-column grid showing requested changes vs proposed edits for revision_plan checkpoints
+- `VariantPlanCard` component — source→variant transformation display for variant_plan checkpoints
+- `IntentDecisionCard` component — compact artifact card showing mode, confidence, flags (write/render/checkpoint/target) for route_intent decisions
+- `GET /api/configs` endpoint on render-service — lists selectable video configs with metadata (title, sceneCount, durationSeconds)
+- `fetchConfigs()` API client function in web package for loading configs on mount
+- `ConfigListResponse` type and checkpoint data types: `TargetSelectionData`, `RevisionPlanData`, `VariantPlanData`, `IntentDecisionData`
+- `AgentArtifactKind` now includes `"intent_decision"` for route_intent tool output artifacts
+- `CheckpointType` now includes `"target_selection"`, `"revision_plan"`, `"variant_plan"` for new checkpoint cards
+- Orchestrator mode router (`packages/agent/src/modes.py`): deterministic classification of 8 modes with contracts (target, agents, permissions, checkpoints)
+- Config management tools (`packages/agent/src/tools/configs.py`): `list_configs`, `load_config`, `prepare_config`, `save_config` for operating on existing video configs
+- ADR 0009 — Router subgraphs by mode
+- ADR 0010 — Frontend stream normalization
+- Unit tests for stream event helpers and target metadata (vitest, 6 tests)
+- Unit tests for mode router and config tools (pytest)
+- Test for `/api/configs` endpoint in render-service
 - Config sanitizer (`packages/agent/src/tools/_sanitize.py`) that auto-fixes common LLM mistakes before Zod validation: emphasis enum normalization, terminal line format conversion, duration clamping, callout position normalization, benefits items wrapping, timing.transitionMs clamping, out-of-range beat removal, voiceover.enabled literal coercion, and soundDesign.enabled boolean coercion
 - Pre-render Zod schema validation gate in `submit_render` — fails fast with structured errors before posting to render service
 - Structured httpx error handling in `submit_render` and `check_render_status` (ConnectError, TimeoutException, HTTPStatusError)
@@ -40,6 +58,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- `useAgentStream` refactored: side-effect-free setState updaters, refs for stable IDs, `useEffect` for agent completion callbacks, `streamSubgraphs: true` on all stream calls
+- `ChatThread` now renders `TargetSelectionCard`, `RevisionPlanCard`, and `VariantPlanCard` for their respective checkpoint types
+- `AgentArtifactCard` now renders `IntentDecisionCard` for `route_intent` tool outputs
+- `App.tsx` checkpoint handlers extended with `target_selection`, `revision_plan`, and `variant_plan` handlers; fetches configs on mount to populate video artifact selector
+- `render-service/server.ts` `app.listen()` guarded with entrypoint check (`import.meta.url === pathToFileURL(process.argv[1])`) so importing for tests no longer starts a server
+- Orchestrator prompt updated with mode-aware dispatch and `route_intent` requirement
+- All agent prompts updated for mode contracts (target awareness, permission boundaries)
 - Agent Docker Compose: added `BG_JOB_ISOLATED_LOOPS=true` env var to isolate each LangGraph run in its own event loop (prevents blocking tool calls from starving concurrent pipelines)
 - `submit_render` now sanitizes configs and validates against Zod schemas before posting to render service
 - Orchestrator prompt: added validation retry limit (max 2 re-dispatches) to prevent GraphRecursionError loops

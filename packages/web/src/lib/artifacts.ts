@@ -41,7 +41,20 @@ function artifactTitle(toolName: string, fallback: string): string {
   return fallback
 }
 
-export function extractArtifactFromToolMessage(toolName: string, content?: string): AgentArtifact | null {
+function stableId(toolName: string, content: string, idSeed?: string): string {
+  if (idSeed) return `${toolName}:${idSeed}`
+  let hash = 5381
+  for (let i = 0; i < content.length; i += 1) {
+    hash = (hash * 33) ^ content.charCodeAt(i)
+  }
+  return `${toolName}:${(hash >>> 0).toString(36)}`
+}
+
+export function extractArtifactFromToolMessage(
+  toolName: string,
+  content?: string,
+  idSeed?: string,
+): AgentArtifact | null {
   if (!content?.trim()) return null
 
   const parsed = parseJson(content)
@@ -49,7 +62,7 @@ export function extractArtifactFromToolMessage(toolName: string, content?: strin
 
   if (parsedRecord?.error === "validation_failed" && Array.isArray(parsedRecord.errors)) {
     return {
-      id: crypto.randomUUID(),
+      id: stableId(toolName, content, idSeed),
       kind: "validation",
       title: "Errores de validacion pre-render",
       source: toolName,
@@ -64,7 +77,7 @@ export function extractArtifactFromToolMessage(toolName: string, content?: strin
 
   if (parsedRecord && isValidationReport(parsedRecord)) {
     return {
-      id: crypto.randomUUID(),
+      id: stableId(toolName, content, idSeed),
       kind: "validation",
       title: artifactTitle(toolName, "Validacion"),
       source: toolName,
@@ -75,7 +88,7 @@ export function extractArtifactFromToolMessage(toolName: string, content?: strin
 
   if (parsedRecord?.voiceover || parsedRecord?.sound_design || parsedRecord?.soundDesign) {
     return {
-      id: crypto.randomUUID(),
+      id: stableId(toolName, content, idSeed),
       kind: "audio_chart",
       title: artifactTitle(toolName, "Carta de audio"),
       source: toolName,
@@ -84,9 +97,20 @@ export function extractArtifactFromToolMessage(toolName: string, content?: strin
     }
   }
 
+  if (toolName === "route_intent" && typeof parsedRecord?.mode === "string") {
+    return {
+      id: stableId(toolName, content, idSeed),
+      kind: "intent_decision",
+      title: `Modo: ${parsedRecord.mode}`,
+      source: toolName,
+      data: parsedRecord,
+      createdAt: Date.now(),
+    }
+  }
+
   if (parsedRecord?.scenes) {
     return {
-      id: crypto.randomUUID(),
+      id: stableId(toolName, content, idSeed),
       kind: "script",
       title: artifactTitle(toolName, "Guion / escaleta"),
       source: toolName,
@@ -97,7 +121,7 @@ export function extractArtifactFromToolMessage(toolName: string, content?: strin
 
   if (toolName === "validate_config" || toolName === "audit_content_quality") {
     return {
-      id: crypto.randomUUID(),
+      id: stableId(toolName, content, idSeed),
       kind: "tool_output",
       title: artifactTitle(toolName, "Salida de herramienta"),
       source: toolName,

@@ -5,8 +5,11 @@ import type {
   CheckpointData,
   DirectionData,
   PipelineStageId,
+  RevisionPlanData,
   SoundChartData,
+  TargetSelectionData,
   ValidationReportData,
+  VariantPlanData,
 } from "../types"
 import type { StreamState } from "../hooks/useAgentStream"
 import { CheckpointCard } from "./CheckpointCard"
@@ -19,12 +22,18 @@ import { MessageBubble } from "./MessageBubble"
 import { VideoResultCard } from "./VideoResultCard"
 import { RenderProgress } from "./RenderProgress"
 import { ValidationReportCard } from "./ValidationReportCard"
+import { TargetSelectionCard } from "./TargetSelectionCard"
+import { RevisionPlanCard } from "./RevisionPlanCard"
+import { VariantPlanCard } from "./VariantPlanCard"
 import { theme } from "../theme"
 
 interface Props {
   messages: ChatMessage[]
   streamState: StreamState
-  checkpointHandlers: Record<string, { onApprove: () => void; onRequestChanges: (feedback: string) => void }>
+  checkpointHandlers: Record<
+    string,
+    { onApprove: (payload?: Record<string, unknown>) => void; onRequestChanges: (feedback: string) => void }
+  >
   loading: boolean
   loadingLabel: string
   onRetry?: () => void
@@ -121,6 +130,12 @@ export function ChatThread({
             card = <CheckpointCard data={msg.checkpoint as CheckpointData} {...cardProps} />
           else if (msg.checkpointType === "validation")
             card = <ValidationReportCard data={msg.checkpoint as ValidationReportData} {...cardProps} />
+          else if (msg.checkpointType === "target_selection")
+            card = <TargetSelectionCard data={msg.checkpoint as TargetSelectionData} {...cardProps} />
+          else if (msg.checkpointType === "revision_plan")
+            card = <RevisionPlanCard data={msg.checkpoint as RevisionPlanData} {...cardProps} />
+          else if (msg.checkpointType === "variant_plan")
+            card = <VariantPlanCard data={msg.checkpoint as VariantPlanData} {...cardProps} />
           else if (msg.checkpointType === "generic")
             card = <GenericCheckpointCard data={msg.checkpoint as Record<string, unknown>} {...cardProps} />
 

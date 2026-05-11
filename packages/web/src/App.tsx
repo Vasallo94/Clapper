@@ -7,10 +7,14 @@ import type {
   CheckpointData,
   CheckpointType,
   DirectionData,
+  RevisionPlanData,
   SoundChartData,
+  StoredVideoArtifact,
+  TargetSelectionData,
   ValidationReportData,
+  VariantPlanData,
 } from "./types"
-import { client, createThread, fetchJobStatus } from "./api"
+import { client, createThread, fetchConfigs, fetchJobStatus } from "./api"
 import { useAgentStream } from "./hooks/useAgentStream"
 import { usePipelineTracker } from "./hooks/usePipelineTracker"
 import { AppLayout } from "./components/AppLayout"
@@ -24,14 +28,58 @@ import {
   removeThread,
   getCurrentThreadId,
   setCurrentThreadId,
+  getActiveVideoTarget,
+  getVideoArtifacts,
+  saveVideoArtifact,
+  setActiveVideoTarget,
   type StoredThread,
 } from "./lib/threadStorage"
+import { stripTargetMetadata } from "./lib/targetMetadata"
+
+function artifactFromCompletedJob(job: {
+  id: string
+  config_id: string | null
+  title: string | null
+  composition: string
+}): StoredVideoArtifact {
+  return {
+    id: job.id,
+    configPath: `.generated/renders/${job.id}/config.json`,
+    configId: job.config_id ?? undefined,
+    jobId: job.id,
+    composition: job.composition,
+    title: job.title ?? job.config_id ?? job.id,
+    createdAt: new Date().toISOString(),
+  }
+}
+
+function artifactFromConfig(config: {
+  configPath: string
+  configId?: string
+  title?: string
+  composition?: string
+  sceneCount?: number
+  durationSeconds?: number
+}): StoredVideoArtifact {
+  return {
+    id: config.configPath,
+    configPath: config.configPath,
+    configId: config.configId,
+    composition: config.composition,
+    title: config.title ?? config.configId ?? config.configPath,
+    createdAt: new Date().toISOString(),
+    sceneCount: config.sceneCount,
+    durationSeconds: config.durationSeconds,
+  }
+}
 
 export default function App() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
   const [threadId, setThreadId] = useState<string | undefined>(() => getCurrentThreadId() ?? undefined)
   const [storedThreads, setStoredThreads] = useState<StoredThread[]>(() => getThreads())
+  const [videoArtifacts, setVideoArtifacts] = useState<StoredVideoArtifact[]>(() => getVideoArtifacts())
+  const [activeTarget, setActiveTargetState] = useState(() => getActiveVideoTarget())
   const pipeline = usePipelineTracker()
 
   const handleAgentComplete = useCallback((summary: AgentSummary) => {
@@ -49,6 +97,22 @@ export default function App() {
 
   const stream = useAgentStream(pipeline.advanceFromStream, handleAgentComplete)
 
+  useEffect(() => {
+    fetchConfigs()
+      .then((response) => {
+        const existing = getVideoArtifacts()
+        const fromConfigs = response.configs
+          .filter((config) => !config.error)
+          .map((config) => artifactFromConfig(config))
+        const merged = [...existing]
+        for (const artifact of fromConfigs) {
+          if (!merged.some((item) => item.configPath === artifact.configPath)) merged.push(artifact)
+        }
+        setVideoArtifacts(merged)
+      })
+      .catch(() => {})
+  }, [])
+
   const handleNewThread = useCallback(() => {
     setThreadId(undefined)
     setCurrentThreadId(null)
@@ -56,6 +120,11 @@ export default function App() {
     stream.resetStream()
     pipeline.reset()
   }, [stream, pipeline])
+
+  const handleSelectTarget = useCallback((target: StoredVideoArtifact | null) => {
+    setActiveVideoTarget(target)
+    setActiveTargetState(target)
+  }, [])
 
   const addMessage = useCallback(
     (
@@ -85,7 +154,7 @@ export default function App() {
         for (const m of msgs) {
           addMessage(
             m.type === "human" ? "user" : "assistant",
-            typeof m.content === "string" ? m.content : JSON.stringify(m.content),
+            stripTargetMetadata(typeof m.content === "string" ? m.content : JSON.stringify(m.content)),
           )
         }
       } catch {
@@ -146,6 +215,20 @@ export default function App() {
       } else if (cpType === "validation_report") {
         pipeline.advance("rendering", "Validacion generada")
         addMessage("assistant", "Resultado de validacion:", res.data as ValidationReportData, "validation")
+      } else if (cpType === "target_selection_checkpoint") {
+        pipeline.advance("orchestrator", "Seleccion de target requerida")
+        addMessage(
+          "assistant",
+          "Necesito que elijas el config objetivo:",
+          res.data as TargetSelectionData,
+          "target_selection",
+        )
+      } else if (cpType === "revision_plan_checkpoint") {
+        pipeline.advance("escaleta_review", "Plan de revision preparado")
+        addMessage("assistant", "He preparado un plan de revision:", res.data as RevisionPlanData, "revision_plan")
+      } else if (cpType === "variant_plan_checkpoint") {
+        pipeline.advance("escaleta_review", "Plan de variante preparado")
+        addMessage("assistant", "He preparado un plan de variante:", res.data as VariantPlanData, "variant_plan")
       } else {
         pipeline.advance("escaleta_review", `Checkpoint: ${cpType}`)
         addMessage(
@@ -165,10 +248,15 @@ export default function App() {
         fetchJobStatus(jobIdMatch[1])
           .then((job) => {
             if (job.status === "done") {
+              const artifact = artifactFromCompletedJob(job)
+              saveVideoArtifact(artifact)
+              setVideoArtifacts(getVideoArtifacts())
+              setActiveVideoTarget(artifact)
+              setActiveTargetState(artifact)
               addMessage(
                 "assistant",
                 "Video listo:",
-                { jobId: job.id, title: job.title, fileSize: job.file_size },
+                { jobId: job.id, title: job.title, fileSize: job.file_size, target: artifact },
                 "video_result",
               )
             }
@@ -196,7 +284,7 @@ export default function App() {
 
     try {
       const tid = await resolveThreadForSend(text)
-      stream.startStream(tid, text)
+      stream.startStream(tid, text, activeTarget)
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       pipeline.advance("error", message)
@@ -206,10 +294,10 @@ export default function App() {
 
   const createCheckpointHandlers = useCallback(
     (approvedMessage: string, feedbackPrefix: string) => ({
-      onApprove: () => {
+      onApprove: (payload?: Record<string, unknown>) => {
         if (!threadId || stream.isStreaming) return
         addMessage("user", approvedMessage)
-        stream.resumeStream(threadId, { approved: true })
+        stream.resumeStream(threadId, { approved: true, ...payload })
       },
       onRequestChanges: (feedback: string) => {
         if (!threadId || stream.isStreaming) return
@@ -227,6 +315,9 @@ export default function App() {
       sound_chart: createCheckpointHandlers("Sonido aprobado", "Ajustes de sonido"),
       audio_chart: createCheckpointHandlers("Audio aprobado", "Ajustes de audio"),
       validation: createCheckpointHandlers("Validacion aprobada", "Ajustes de validacion"),
+      target_selection: createCheckpointHandlers("Target seleccionado", "Seleccion de target"),
+      revision_plan: createCheckpointHandlers("Plan aprobado", "Ajustes del plan"),
+      variant_plan: createCheckpointHandlers("Variante aprobada", "Ajustes de variante"),
       generic: createCheckpointHandlers("Aprobado", "Cambios"),
     }),
     [createCheckpointHandlers],
@@ -276,7 +367,7 @@ export default function App() {
       }
       main={
         <>
-          <Header />
+          <Header artifacts={videoArtifacts} activeTarget={activeTarget} onSelectTarget={handleSelectTarget} />
           <ChatThread
             messages={messages}
             streamState={stream.streamState}
@@ -286,7 +377,13 @@ export default function App() {
             onRetry={stream.clearError}
             currentStage={pipeline.state.currentStage}
           />
-          <InputBar value={input} onChange={setInput} onSend={handleSend} disabled={stream.isStreaming} />
+          <InputBar
+            value={input}
+            onChange={setInput}
+            onSend={handleSend}
+            disabled={stream.isStreaming}
+            activeTarget={activeTarget}
+          />
         </>
       }
     />

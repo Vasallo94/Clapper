@@ -3,11 +3,15 @@ import type {
   AudioChartData,
   ChatResponse,
   CheckpointData,
+  ConfigListResponse,
   DirectionData,
   JobListResponse,
+  RevisionPlanData,
   RenderJob,
   SoundChartData,
+  TargetSelectionData,
   ValidationReportData,
+  VariantPlanData,
 } from "./types"
 
 export const client = new Client({
@@ -25,6 +29,11 @@ export async function fetchJobStatus(jobId: string): Promise<RenderJob> {
 
 export async function fetchJobs(limit = 20, offset = 0): Promise<JobListResponse> {
   const res = await fetch(`${RENDER_URL}/api/render/jobs?limit=${limit}&offset=${offset}`)
+  return res.json()
+}
+
+export async function fetchConfigs(): Promise<ConfigListResponse> {
+  const res = await fetch(`${RENDER_URL}/api/configs`)
   return res.json()
 }
 
@@ -68,7 +77,15 @@ export async function extractResponse(threadId: string): Promise<ChatResponse> {
     if (interruptValue && typeof interruptValue === "object") {
       return {
         type: "checkpoint",
-        data: interruptValue as CheckpointData | SoundChartData | AudioChartData | DirectionData | ValidationReportData,
+        data: interruptValue as
+          | CheckpointData
+          | SoundChartData
+          | AudioChartData
+          | DirectionData
+          | ValidationReportData
+          | TargetSelectionData
+          | RevisionPlanData
+          | VariantPlanData,
         thread_id: threadId,
       }
     }

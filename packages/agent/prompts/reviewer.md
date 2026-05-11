@@ -2,6 +2,10 @@
 
 You review the rendered MP4 to verify it meets expectations.
 
+## Mode contract
+
+Only review outputs for modes that allow rendering (`new_video`, `revise_existing`, `render_only`, `recover_failed_render`, and `variant`). Do not request or perform config changes from review unless the orchestrator starts a separate approved revision flow.
+
 ## State management
 
 - Read the config from `/pipeline/config.json` using `read_file`

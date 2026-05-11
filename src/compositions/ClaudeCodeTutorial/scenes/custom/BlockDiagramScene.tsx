@@ -4,46 +4,45 @@ import { useThemeTokens } from "../../../../shared/themes"
 import type { Beat, Timing } from "../../../../utils/direction"
 import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
 
-interface Block {
-  id: string
-  title: string
-  subtitle: string
-  color: string
-}
-
-interface Connection {
-  from: string
-  to: string
+interface BlockDiagramBlock {
+  label: string
+  detail: string
 }
 
 interface BlockDiagramProps {
-  blocks: Block[]
-  connections?: Connection[]
-  layout?: "horizontal" | "grid"
   title?: string
+  blocks: BlockDiagramBlock[]
   timing?: Timing
   beats?: Beat[]
 }
 
 export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as BlockDiagramProps
-  const { blocks = [], connections = [], layout = "horizontal", title, timing, beats } = props
+  const { blocks = [], title, timing, beats } = props
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
 
-  const isGrid = layout === "grid"
-  const cols = isGrid ? 2 : blocks.length
-  const staggerDelay = Math.ceil(fps * 0.3)
-
-  const blockWidth = isGrid ? 330 : 290
-  const blockGap = isGrid ? 32 : 60
-  const blockMinHeight = 156
-  const rowWidth = isGrid ? cols * blockWidth + blockGap : blocks.length * blockWidth + (blocks.length - 1) * blockGap
   const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
   const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
-  // When title exists, beat[0] is the title beat — blocks start from beat[1]
-  const beatOffset = title && beatStartFrames && beatStartFrames.length > blocks.length ? 1 : 0
+
+  const blockWidth = 280
+  const blockGap = 60
+  const blockMinHeight = 160
+  const rowWidth = blocks.length * blockWidth + (blocks.length - 1) * blockGap
+
+  // Title animation on Beat 0
+  const titleDelay = beatStartFrames?.[0] ?? motionStartFrame
+  const titleOpacity = title
+    ? interpolate(frame, [titleDelay, titleDelay + Math.ceil(fps * 0.4)], [0, 1], {
+        extrapolateLeft: "clamp",
+        extrapolateRight: "clamp",
+      })
+    : 0
+
+  const titleY = title
+    ? interpolate(spring({ frame: Math.max(0, frame - titleDelay), fps, config: { damping: 20 } }), [0, 1], [20, 0])
+    : 0
 
   return (
     <AbsoluteFill
@@ -54,22 +53,19 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
         alignItems: "center",
         justifyContent: "center",
         padding: 60,
-        gap: 40,
+        gap: 60,
       }}
     >
       {title && (
         <div
           style={{
             fontFamily: tokens.fontFamily,
-            fontSize: 36,
+            fontSize: 42,
             fontWeight: 700,
             color: tokens.foreground,
             textAlign: "center",
-            maxWidth: 980,
-            opacity: interpolate(frame, [motionStartFrame, motionStartFrame + Math.ceil(fps * 0.4)], [0, 1], {
-              extrapolateLeft: "clamp",
-              extrapolateRight: "clamp",
-            }),
+            opacity: titleOpacity,
+            transform: `translateY(${titleY}px)`,
           }}
         >
           {title}
@@ -79,7 +75,6 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
       <div
         style={{
           display: "flex",
-          flexWrap: isGrid ? "wrap" : "nowrap",
           gap: blockGap,
           justifyContent: "center",
           position: "relative",
@@ -88,77 +83,72 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
           minHeight: blockMinHeight,
         }}
       >
-        {connections.length > 0 && !isGrid && (
-          <svg
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
-              overflow: "visible",
-            }}
-          >
-            {connections.map((conn, ci) => {
-              const fromIdx = blocks.findIndex((b) => b.id === conn.from)
-              const toIdx = blocks.findIndex((b) => b.id === conn.to)
-              if (fromIdx === -1 || toIdx === -1) return null
+        {/* Connection arrows behind blocks */}
+        <svg
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+            overflow: "visible",
+          }}
+        >
+          {blocks.map((_, i) => {
+            if (i >= blocks.length - 1) return null
 
-              const y = blockMinHeight / 2
-              const x1 = fromIdx * (blockWidth + blockGap) + blockWidth
-              const x2 = toIdx * (blockWidth + blockGap)
+            const y = blockMinHeight / 2
+            const x1 = i * (blockWidth + blockGap) + blockWidth
+            const x2 = (i + 1) * (blockWidth + blockGap)
 
-              // Connections appear after all blocks: last block delay + offset + stagger per connection
-              const lastBlockBeatIdx = blocks.length - 1 + beatOffset
-              const lastBlockFrame =
-                beatStartFrames?.[lastBlockBeatIdx] ?? motionStartFrame + (blocks.length - 1) * staggerDelay
-              const lineDelay = lastBlockFrame + Math.ceil(fps * 0.5) + ci * Math.ceil(fps * 0.4)
-              const lineProgress = spring({
-                frame: Math.max(0, frame - lineDelay),
-                fps,
-                config: { damping: 200 },
-                durationInFrames: Math.ceil(fps * 0.4),
-              })
+            // Connection appears with the target block
+            const targetBlockDelay = beatStartFrames?.[i + 2] ?? motionStartFrame + (i + 1) * Math.ceil(fps * 0.4)
+            const lineDelay = targetBlockDelay - Math.ceil(fps * 0.15)
 
-              const arrowSize = 10
-              const lineStartX = x1 + 8
-              const arrowTipX = interpolate(lineProgress, [0, 1], [lineStartX, x2 - 4], {
-                extrapolateLeft: "clamp",
-                extrapolateRight: "clamp",
-              })
-              const arrowBaseX = arrowTipX - arrowSize
-              const connectorOpacity = interpolate(lineProgress, [0, 0.08, 1], [0, 1, 1], {
-                extrapolateLeft: "clamp",
-                extrapolateRight: "clamp",
-              })
+            const lineProgress = spring({
+              frame: Math.max(0, frame - lineDelay),
+              fps,
+              config: { damping: 200 },
+              durationInFrames: Math.ceil(fps * 0.4),
+            })
 
-              if (lineProgress <= 0.01 || arrowBaseX <= lineStartX) {
-                return null
-              }
+            const arrowSize = 10
+            const lineStartX = x1 + 8
+            const arrowTipX = interpolate(lineProgress, [0, 1], [lineStartX, x2 - 4], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            })
+            const arrowBaseX = arrowTipX - arrowSize
+            const connectorOpacity = interpolate(lineProgress, [0, 0.08, 1], [0, 1, 1], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            })
 
-              return (
-                <g key={ci} opacity={connectorOpacity}>
-                  <line
-                    x1={lineStartX}
-                    y1={y}
-                    x2={arrowBaseX}
-                    y2={y}
-                    stroke={tokens.foregroundMid}
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                  />
-                  <polygon
-                    points={`${arrowTipX},${y} ${arrowBaseX},${y - arrowSize} ${arrowBaseX},${y + arrowSize}`}
-                    fill={tokens.foregroundMid}
-                  />
-                </g>
-              )
-            })}
-          </svg>
-        )}
+            if (lineProgress <= 0.01 || arrowBaseX <= lineStartX) return null
+
+            return (
+              <g key={i} opacity={connectorOpacity}>
+                <line
+                  x1={lineStartX}
+                  y1={y}
+                  x2={arrowBaseX}
+                  y2={y}
+                  stroke={tokens.primary}
+                  strokeWidth={3}
+                  strokeLinecap="round"
+                />
+                <polygon
+                  points={`${arrowTipX},${y} ${arrowBaseX},${y - arrowSize} ${arrowBaseX},${y + arrowSize}`}
+                  fill={tokens.primary}
+                />
+              </g>
+            )
+          })}
+        </svg>
 
         {blocks.map((block, i) => {
-          const delay = beatStartFrames?.[i + beatOffset] ?? motionStartFrame + i * staggerDelay
+          // Beat index mapping: beat 0 is title, beat 1 is block 1, beat 2 is block 2, etc.
+          const delay = beatStartFrames?.[i + 1] ?? motionStartFrame + i * Math.ceil(fps * 0.4)
           const s = spring({
             frame: Math.max(0, frame - delay),
             fps,
@@ -170,15 +160,15 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
 
           return (
             <div
-              key={block.id}
+              key={i}
               style={{
                 width: blockWidth,
                 minHeight: blockMinHeight,
                 background: tokens.card.bg,
-                border: `1px solid ${tokens.card.border}`,
-                borderTop: `3px solid ${block.color}`,
-                borderRadius: 10,
-                padding: "20px 24px",
+                border: `2px solid ${tokens.card.border}`,
+                borderTop: `4px solid ${tokens.primary}`,
+                borderRadius: 12,
+                padding: "24px",
                 opacity,
                 transform: `translateY(${y}px)`,
                 boxShadow: tokens.card.shadow,
@@ -192,24 +182,24 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
               <div
                 style={{
                   fontFamily: tokens.fontFamily,
-                  fontSize: 22,
+                  fontSize: 24,
                   fontWeight: 700,
-                  color: block.color,
-                  marginBottom: 8,
+                  color: tokens.primary,
+                  marginBottom: 12,
                 }}
               >
-                {block.title}
+                {block.label}
               </div>
               <div
                 style={{
                   fontFamily: tokens.fontFamily,
                   fontSize: 18,
                   color: tokens.foreground,
-                  opacity: 0.72,
+                  opacity: 0.8,
                   lineHeight: 1.5,
                 }}
               >
-                {block.subtitle}
+                {block.detail}
               </div>
             </div>
           )

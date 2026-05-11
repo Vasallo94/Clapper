@@ -8,6 +8,16 @@ from langgraph.checkpoint.memory import MemorySaver  # used when running standal
 
 from .tools.render import check_render_status, submit_render
 from .tools.validation import audit_content_quality, validate_config
+from .modes import get_mode_contract, list_mode_contracts, route_intent
+from .tools.configs import (
+    list_video_configs,
+    load_video_config,
+    present_revision_plan,
+    present_target_selection,
+    present_variant_plan,
+    save_pipeline_config_to_source,
+    stage_existing_config,
+)
 
 from .config import PROJECT_ROOT
 from .context import PipelineContext
@@ -104,7 +114,22 @@ def create_video_orchestrator(*, checkpointer=None):
 
     kwargs: dict = {
         "model": model,
-        "tools": [submit_render, check_render_status, validate_config, audit_content_quality],
+        "tools": [
+            route_intent,
+            get_mode_contract,
+            list_mode_contracts,
+            list_video_configs,
+            load_video_config,
+            stage_existing_config,
+            save_pipeline_config_to_source,
+            present_revision_plan,
+            present_variant_plan,
+            present_target_selection,
+            submit_render,
+            check_render_status,
+            validate_config,
+            audit_content_quality,
+        ],
         "system_prompt": system_prompt,
         "subagents": subagents,
         "skills": [str(SKILLS_DIR)],

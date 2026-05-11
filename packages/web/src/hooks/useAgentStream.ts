@@ -1,7 +1,14 @@
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { client, ASSISTANT_ID, extractResponse } from "../api"
-import { extractArtifactFromToolMessage } from "../lib/artifacts"
-import type { AgentArtifact, AgentSummary, ChatResponse, ToolEntry } from "../types"
+import { appendTargetMetadata } from "../lib/targetMetadata"
+import {
+  appendToolCalls,
+  applyToolMessages,
+  extractSubagentName,
+  mergeStreamingText,
+  type ToolCallLike,
+} from "../lib/streamEvents"
+import type { ActiveVideoTarget, AgentArtifact, AgentSummary, ChatResponse, ToolEntry } from "../types"
 
 export interface StreamState {
   activeAgent: string | null
@@ -24,76 +31,14 @@ const INITIAL: StreamState = {
 const MAX_RETRIES = 3
 const STREAM_TIMEOUT_MS = 30 * 60 * 1000
 
-function extractSubagentName(toolCalls: Array<{ name?: string; args?: Record<string, unknown> }>): string | null {
-  const taskCall = toolCalls.find((tc) => tc.name === "task")
-  if (taskCall?.args?.subagent_type) return taskCall.args.subagent_type as string
-  return null
-}
-
-function extractToolNames(toolCalls: Array<{ name?: string; args?: Record<string, unknown> }>): ToolEntry[] {
-  return toolCalls
-    .filter((tc) => tc.name && tc.name !== "task")
-    .map((tc) => ({
-      id: crypto.randomUUID(),
-      name: tc.name!,
-      input: tc.args ? JSON.stringify(tc.args).slice(0, 80) : undefined,
-      status: "running" as const,
-      startedAt: Date.now(),
-    }))
-}
-
-function isToolError(content?: string): boolean {
-  if (!content || typeof content !== "string") return false
-  const trimmed = content.trimStart()
-  if (/^[Ee]rror\b/.test(trimmed)) return true
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && typeof parsed === "object" && typeof parsed.error === "string") return true
-  } catch {
-    /* not JSON */
-  }
-  return false
-}
-
-function mergeStreamingText(previous: string, next: string): string {
-  if (!previous) return next.slice(-4000)
-  if (next.startsWith(previous)) return next.slice(-4000)
-  if (previous.endsWith(next)) return previous
-  return `${previous}${next}`.slice(-4000)
-}
-
-function artifactSignature(artifact: AgentArtifact): string {
-  return JSON.stringify({
-    kind: artifact.kind,
-    content: artifact.content ?? null,
-    data: artifact.data ?? null,
-  })
-}
-
-function appendUniqueArtifacts(existing: AgentArtifact[], artifact: AgentArtifact | null): AgentArtifact[] {
-  if (!artifact) return existing
-  const nextSignature = artifactSignature(artifact)
-  if (existing.some((item) => artifactSignature(item) === nextSignature)) return existing
-  return [...existing, artifact]
-}
-
-function appendUniqueTools(existing: ToolEntry[], incoming: ToolEntry[]): ToolEntry[] {
-  const next = [...existing]
-  for (const tool of incoming) {
-    const duplicateRunning = next.some(
-      (item) => item.status === "running" && item.name === tool.name && item.input === tool.input,
-    )
-    if (!duplicateRunning) next.push(tool)
-  }
-  return next
-}
-
 function createSummary(
   name: string,
   state: Pick<StreamState, "tools" | "artifacts" | "llmText">,
   startedAt: number,
 ): AgentSummary {
+  const summaryId = `${name}:${startedAt}`
   return {
+    id: summaryId,
     name,
     tools: [...state.tools],
     artifacts: [...state.artifacts],
@@ -119,15 +64,26 @@ export function useAgentStream(
   const retryCountRef = useRef(0)
   const abortRef = useRef(false)
   const onAgentCompleteRef = useRef(onAgentComplete)
+  const reportedSummaryIdsRef = useRef<Set<string>>(new Set())
   onAgentCompleteRef.current = onAgentComplete
+
+  useEffect(() => {
+    for (const summary of streamState.completedAgents) {
+      const id = summary.id ?? `${summary.name}:${summary.startedAt}`
+      if (reportedSummaryIdsRef.current.has(id)) continue
+      reportedSummaryIdsRef.current.add(id)
+      onAgentCompleteRef.current?.(summary)
+    }
+  }, [streamState.completedAgents])
 
   const setAgent = useCallback(
     (name: string) => {
       if (name === currentAgentRef.current) return
       if (currentAgentRef.current) {
+        const previousAgent = currentAgentRef.current
+        const previousStartedAt = agentStartRef.current
         setStreamState((prev) => {
-          const summary = createSummary(currentAgentRef.current!, prev, agentStartRef.current)
-          if (hasSummaryContent(summary)) onAgentCompleteRef.current?.(summary)
+          const summary = createSummary(previousAgent, prev, previousStartedAt)
           return {
             ...prev,
             completedAgents: hasSummaryContent(summary) ? [...prev.completedAgents, summary] : prev.completedAgents,
@@ -149,9 +105,10 @@ export function useAgentStream(
 
   const finalizeAgent = useCallback(() => {
     if (!currentAgentRef.current) return
+    const previousAgent = currentAgentRef.current
+    const previousStartedAt = agentStartRef.current
     setStreamState((prev) => {
-      const summary = createSummary(currentAgentRef.current!, prev, agentStartRef.current)
-      if (hasSummaryContent(summary)) onAgentCompleteRef.current?.(summary)
+      const summary = createSummary(previousAgent, prev, previousStartedAt)
       return {
         ...prev,
         completedAgents: hasSummaryContent(summary) ? [...prev.completedAgents, summary] : prev.completedAgents,
@@ -168,7 +125,7 @@ export function useAgentStream(
     async (threadId: string, payload: Record<string, unknown>) => {
       setIsStreaming(true)
       setResult(null)
-      setStreamState((prev) => ({ ...INITIAL, completedAgents: prev.completedAgents }))
+      setStreamState(INITIAL)
       abortRef.current = false
       retryCountRef.current = 0
 
@@ -196,7 +153,7 @@ export function useAgentStream(
 
               if ("model" in data) {
                 const modelUpdate = data.model as {
-                  messages?: Array<{ tool_calls?: Array<{ name?: string; args?: Record<string, unknown> }> }>
+                  messages?: Array<{ tool_calls?: ToolCallLike[] }>
                 }
                 const msgs = modelUpdate?.messages
                 if (msgs?.length) {
@@ -206,10 +163,10 @@ export function useAgentStream(
                     if (subagent) {
                       setAgent(subagent)
                     } else {
-                      const newTools = extractToolNames(lastMsg.tool_calls)
+                      const newTools = appendToolCalls([], lastMsg.tool_calls)
                       if (newTools.length) {
                         if (!currentAgentRef.current) setAgent("orchestrator")
-                        setStreamState((prev) => ({ ...prev, tools: appendUniqueTools(prev.tools, newTools) }))
+                        setStreamState((prev) => ({ ...prev, tools: appendToolCalls(prev.tools, lastMsg.tool_calls!) }))
                       }
                     }
                   }
@@ -217,24 +174,14 @@ export function useAgentStream(
               }
 
               if ("tools" in data) {
-                const toolsUpdate = data.tools as { messages?: Array<{ content?: string; name?: string }> }
+                const toolsUpdate = data.tools as {
+                  messages?: Array<{ content?: string; name?: string; tool_call_id?: string; toolCallId?: string }>
+                }
                 if (toolsUpdate?.messages?.length) {
-                  for (const toolMsg of toolsUpdate.messages) {
-                    if (toolMsg.name) {
-                      const hasError = isToolError(toolMsg.content)
-                      const newStatus = hasError ? ("error" as const) : ("done" as const)
-                      const artifact = extractArtifactFromToolMessage(toolMsg.name, toolMsg.content)
-                      setStreamState((prev) => ({
-                        ...prev,
-                        tools: prev.tools.map((t) =>
-                          t.name === toolMsg.name && t.status === "running"
-                            ? { ...t, status: newStatus, output: toolMsg.content }
-                            : t,
-                        ),
-                        artifacts: appendUniqueArtifacts(prev.artifacts, artifact),
-                      }))
-                    }
-                  }
+                  setStreamState((prev) => {
+                    const update = applyToolMessages(prev.tools, prev.artifacts, toolsUpdate.messages!)
+                    return { ...prev, tools: update.tools, artifacts: update.artifacts }
+                  })
                 }
               }
             }
@@ -317,11 +264,14 @@ export function useAgentStream(
   )
 
   const startStream = useCallback(
-    (threadId: string, message: string) => {
+    (threadId: string, message: string, activeTarget?: ActiveVideoTarget | null) => {
       setStreamState(INITIAL)
+      reportedSummaryIdsRef.current.clear()
+      const content = appendTargetMetadata(message, activeTarget)
       processStream(threadId, {
-        input: { messages: [{ role: "user", content: message }] },
+        input: { messages: [{ role: "user", content }] },
         streamMode: ["updates", "messages"],
+        streamSubgraphs: true,
       })
     },
     [processStream],
@@ -332,6 +282,7 @@ export function useAgentStream(
       processStream(threadId, {
         command: { resume: decision },
         streamMode: ["updates", "messages"],
+        streamSubgraphs: true,
       })
     },
     [processStream],
@@ -341,6 +292,7 @@ export function useAgentStream(
     setStreamState(INITIAL)
     setResult(null)
     currentAgentRef.current = null
+    reportedSummaryIdsRef.current.clear()
     abortRef.current = true
   }, [])
 

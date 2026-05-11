@@ -1,12 +1,13 @@
 node_modules/
 .git/
+.generated/
 packages/agent/.venv/
 packages/agent/.langgraph_api/
-packages/render-service/node_modules/
-packages/web/node_modules/
 dist/
 out/
 .remotion/
-tutorials/*/output.mp4
+content/**/output.mp4
 __pycache__/
 *.py[cod]
+docs/
+_project_specs/

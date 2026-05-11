@@ -12,7 +12,13 @@ from langchain_core.tools import InjectedToolArg
 from ..context import resolve_config_id
 from ..paths import PROJECT_ROOT as DEFAULT_PROJECT_ROOT
 
-GEMINI_TTS_VOICES = {"Orus", "Kore", "Aoede", "Puck", "Charon", "Fenrir", "Leda", "Zephyr"}
+GEMINI_TTS_VOICES = {
+    "Orus", "Kore", "Aoede", "Puck", "Charon", "Fenrir", "Leda", "Zephyr",
+    "Achernar", "Algieba", "Autonoe", "Callirrhoe", "Despina", "Erinome",
+    "Gacrux", "Iapetus", "Keid", "Laomedeia", "Pulcherrima", "Rasalgethi",
+    "Sadachbia", "Sadaltager", "Schedar", "Sulafat", "Umbriel", "Vindemiatrix",
+    "Enceladus", "Thalassa", "Proteus", "Dione",
+}
 DEFAULT_VOICE = "Orus"
 PROJECT_ROOT = DEFAULT_PROJECT_ROOT
 
@@ -72,15 +78,40 @@ def _pcm_to_mp3(pcm_path: Path, mp3_path: Path) -> None:
     pcm_path.unlink(missing_ok=True)
 
 
-def _fingerprint(scene_index: str, text: str, voice_id: str, language: str, provider: str) -> str:
-    payload = json.dumps({"provider": provider, "voiceId": voice_id, "language": language, "scene": scene_index, "text": text})
+def _is_multi_speaker(voiceover: dict) -> bool:
+    speakers = voiceover.get("speakers")
+    return isinstance(speakers, list) and len(speakers) == 2
+
+
+def _build_speech_config(voice_id: str, language: str, speakers: list | None) -> dict:
+    if speakers:
+        return {
+            "language_code": language,
+            "multi_speaker_voice_config": {
+                "speaker_voice_configs": [
+                    {
+                        "speaker": s["name"],
+                        "voice_config": {"prebuilt_voice_config": {"voice_name": _sanitize_voice_id(s["voiceId"])}},
+                    }
+                    for s in speakers
+                ],
+            },
+        }
+    return {
+        "language_code": language,
+        "voice_config": {"prebuilt_voice_config": {"voice_name": voice_id}},
+    }
+
+
+def _fingerprint(scene_index: str, text: str, voice_id: str, language: str, provider: str, *, speakers: list | None = None) -> str:
+    payload = json.dumps({"provider": provider, "voiceId": voice_id, "language": language, "scene": scene_index, "text": text, "speakers": speakers})
     return hashlib.sha256(payload.encode()).hexdigest()
 
 
-def _generate_scene_audio(client, scene_index: str, text: str, voice_id: str, language: str, out_dir: Path) -> str:
+def _generate_scene_audio(client, scene_index: str, text: str, voice_id: str, language: str, out_dir: Path, *, speakers: list | None = None) -> str:
     mp3_path = out_dir / f"{scene_index}.mp3"
     meta_path = out_dir / f"{scene_index}.meta.json"
-    fp = _fingerprint(scene_index, text, voice_id, language, "gemini")
+    fp = _fingerprint(scene_index, text, voice_id, language, "gemini", speakers=speakers)
 
     if mp3_path.exists() and meta_path.exists():
         existing = json.loads(meta_path.read_text(encoding="utf-8"))
@@ -95,12 +126,7 @@ def _generate_scene_audio(client, scene_index: str, text: str, voice_id: str, la
                 contents=text,
                 config={
                     "response_modalities": ["AUDIO"],
-                    "speech_config": {
-                        "language_code": language,
-                        "voice_config": {
-                            "prebuilt_voice_config": {"voice_name": voice_id},
-                        },
-                    },
+                    "speech_config": _build_speech_config(voice_id, language, speakers),
                 },
             )
             break
@@ -131,9 +157,10 @@ def generate_voiceover(config_json: str, runtime: Annotated[Any, InjectedToolArg
 
     Reads the voiceover config, calls Gemini TTS for each scene with text,
     converts PCM to MP3 via ffmpeg, and saves to public/voiceover/<id>/.
+    Supports both single-speaker and multi-speaker (2 voices) modes.
 
     Args:
-        config_json: The full video config as a JSON string, or a file path to config.json.
+        config_json: The full video config as a JSON string. Do not pass a file path.
     """
     try:
         config = json.loads(config_json)
@@ -150,7 +177,9 @@ def generate_voiceover(config_json: str, runtime: Annotated[Any, InjectedToolArg
     if not client:
         return "Error: no Google credentials found. Set GOOGLE_APPLICATION_CREDENTIALS or GOOGLE_AI_API_KEY."
 
-    voice_id = _sanitize_voice_id(voiceover.get("voiceId", DEFAULT_VOICE))
+    multi_speaker = _is_multi_speaker(voiceover)
+    speakers = voiceover.get("speakers") if multi_speaker else None
+    voice_id = _sanitize_voice_id(voiceover.get("voiceId", DEFAULT_VOICE)) if not multi_speaker else DEFAULT_VOICE
     language = voiceover.get("language", "es-ES")
     raw_scenes = voiceover.get("scenes", {})
     if isinstance(raw_scenes, list):
@@ -167,7 +196,7 @@ def generate_voiceover(config_json: str, runtime: Annotated[Any, InjectedToolArg
             results.append(f"scene {scene_index}: skipped (no text)")
             continue
         try:
-            result = _generate_scene_audio(client, scene_index, text, voice_id, language, out_dir)
+            result = _generate_scene_audio(client, scene_index, text, voice_id, language, out_dir, speakers=speakers)
             results.append(result)
         except Exception as e:
             results.append(f"scene {scene_index}: ERROR - {e}")
@@ -175,4 +204,5 @@ def generate_voiceover(config_json: str, runtime: Annotated[Any, InjectedToolArg
     summary = "\n".join(results)
     ok_count = sum(1 for r in results if ": OK" in r or ": skipped" in r)
     err_count = sum(1 for r in results if ": ERROR" in r)
-    return f"Voiceover generation complete. {ok_count} OK, {err_count} errors.\n{summary}"
+    mode = "multi-speaker" if multi_speaker else "single-speaker"
+    return f"Voiceover generation complete ({mode}). {ok_count} OK, {err_count} errors.\n{summary}"

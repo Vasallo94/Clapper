@@ -18,6 +18,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - ADR 0006 documenting scene catalog narrative templates
 - ADR 0007 documenting frontend artifact normalization
 - ADR 0008 documenting educational video duration defaults
+- Gemini TTS skill reference (`packages/agent/skills/gemini-tts/SKILL.md`) with 30-voice catalog, audio tags, multi-speaker format, and prompting framework
+- Multi-speaker voiceover support: `SpeakerConfigSchema` in Zod schemas, `_build_speech_config` for `multi_speaker_voice_config` API calls, `_is_multi_speaker` detection, fingerprint cache invalidation with speakers
+- Expanded `GEMINI_TTS_VOICES` from 8 to 30 voices with `_sanitize_voice_id` validation and fallback
+- 22 unit tests for multi-speaker voice tool (`test_tools_voice_multispeaker.py`)
 - Docker Compose multi-service setup: `docker compose up` starts agent, render-service, and web together with healthchecks and dependency ordering
 - `packages/render-service/Dockerfile` — Node 22 + Chromium headless for containerized Remotion rendering
 - `packages/web/Dockerfile` — Node 22 + Vite dev server containerized with `--host 0.0.0.0`

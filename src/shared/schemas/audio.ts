@@ -39,11 +39,17 @@ export const VoiceoverSceneObjectSchema = z.object({
 
 export const VoiceoverSceneSchema = z.union([z.string(), VoiceoverSceneObjectSchema])
 
+export const SpeakerConfigSchema = z.object({
+  name: z.string().min(1),
+  voiceId: z.string().min(1),
+})
+
 export const VoiceoverConfigSchema = z.object({
   enabled: z.literal(true),
   provider: z.enum(["gemini", "elevenlabs"]).default("gemini"),
-  voiceId: z.string(),
+  voiceId: z.string().optional(),
   language: z.string().nullable().optional(),
+  speakers: z.array(SpeakerConfigSchema).min(2).max(2).nullable().optional(),
   elevenlabs: ElevenLabsOptionsSchema.nullable().optional(),
   scenes: z.record(z.string(), VoiceoverSceneSchema),
 })
@@ -102,4 +108,5 @@ export type ElevenLabsOptions = z.infer<typeof ElevenLabsOptionsSchema>
 export type SfxEntry = z.infer<typeof SfxEntrySchema>
 export type MusicBed = z.infer<typeof MusicBedSchema>
 export type SoundDesign = z.infer<typeof SoundDesignSchema>
+export type SpeakerConfig = z.infer<typeof SpeakerConfigSchema>
 export type SoundLibraryEntry = z.infer<typeof SoundLibraryEntrySchema>

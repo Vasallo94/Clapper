@@ -25,6 +25,7 @@ import { ValidationReportCard } from "./ValidationReportCard"
 import { TargetSelectionCard } from "./TargetSelectionCard"
 import { RevisionPlanCard } from "./RevisionPlanCard"
 import { VariantPlanCard } from "./VariantPlanCard"
+import { WorkingIndicator } from "./WorkingIndicator"
 import { theme } from "../theme"
 
 interface Props {
@@ -172,28 +173,7 @@ export function ChatThread({
 
       {/* Loading indicator (only when streaming but no active agent detected yet) */}
       {loading && !streamState.activeAgent && !streamState.error && currentStage !== "rendering" && (
-        <div className="animate-slide-in" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-          <div
-            style={{
-              padding: "10px 14px",
-              borderRadius: "12px 12px 12px 2px",
-              backgroundColor: theme.colors.bg.elevated,
-              border: `1px solid ${theme.colors.border.default}`,
-              fontSize: 13,
-              color: theme.colors.text.secondary,
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
-            <span>{loadingLabel}</span>
-            <span style={{ display: "flex", gap: 3 }}>
-              <span className="loading-dot" />
-              <span className="loading-dot" />
-              <span className="loading-dot" />
-            </span>
-          </div>
-        </div>
+        <WorkingIndicator label={loadingLabel} />
       )}
       <div ref={bottomRef} />
     </div>

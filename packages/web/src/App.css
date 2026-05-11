@@ -91,6 +91,16 @@ body {
   }
 }
 
+@keyframes clap {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  40% {
+    transform: rotate(-30deg);
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -129,4 +139,9 @@ body {
 }
 .loading-dot:nth-child(3) {
   animation-delay: 0.4s;
+}
+
+.clapper-arm {
+  transform-origin: 3px 12px;
+  animation: clap 1.5s ease-in-out infinite;
 }

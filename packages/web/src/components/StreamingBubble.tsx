@@ -3,6 +3,7 @@ import type { AgentArtifact, ToolEntry } from "../types"
 import { theme } from "../theme"
 import { SubagentBadge } from "./SubagentBadge"
 import { AgentArtifactCard } from "./AgentArtifactCard"
+import { ClapperboardIcon } from "./WorkingIndicator"
 
 interface Props {
   agentName: string
@@ -111,6 +112,11 @@ export function StreamingBubble({
           {agentName}
         </span>
         {status === "active" && <SubagentBadge agentName={agentName} />}
+        {status === "active" && (
+          <span style={{ marginLeft: "auto", display: "flex", alignItems: "center" }}>
+            <ClapperboardIcon size={20} />
+          </span>
+        )}
         {status === "completed" && (
           <span style={{ color: theme.colors.text.muted, fontSize: 10, marginLeft: "auto" }}>&#9650;</span>
         )}

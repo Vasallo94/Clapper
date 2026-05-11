@@ -134,11 +134,6 @@ export default function App() {
     pipeline.reset()
   }, [stream, pipeline])
 
-  const handleSelectTarget = useCallback((target: StoredVideoArtifact | null) => {
-    setActiveVideoTarget(target)
-    setActiveTargetState(target)
-  }, [])
-
   const addMessage = useCallback(
     (
       role: ChatMessage["role"],
@@ -151,6 +146,28 @@ export default function App() {
       return id
     },
     [],
+  )
+
+  const handleSelectTarget = useCallback(
+    (target: StoredVideoArtifact | null) => {
+      setActiveVideoTarget(target)
+      setActiveTargetState(target)
+      if (target?.configId) {
+        fetchLatestRender(target.configId)
+          .then((job) => {
+            if (job) {
+              addMessage(
+                "assistant",
+                "Video listo:",
+                { jobId: job.id, title: job.title, fileSize: job.file_size },
+                "video_result",
+              )
+            }
+          })
+          .catch(() => {})
+      }
+    },
+    [addMessage],
   )
 
   const handleSelectThread = useCallback(

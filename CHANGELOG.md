@@ -7,7 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
-- Config sanitizer (`packages/agent/src/tools/_sanitize.py`) that auto-fixes common LLM mistakes before Zod validation: emphasis enum normalization, terminal line format conversion, duration clamping, callout position normalization, benefits items wrapping, timing.transitionMs clamping, and out-of-range beat removal
+- Config sanitizer (`packages/agent/src/tools/_sanitize.py`) that auto-fixes common LLM mistakes before Zod validation: emphasis enum normalization, terminal line format conversion, duration clamping, callout position normalization, benefits items wrapping, timing.transitionMs clamping, out-of-range beat removal, voiceover.enabled literal coercion, and soundDesign.enabled boolean coercion
 - Pre-render Zod schema validation gate in `submit_render` — fails fast with structured errors before posting to render service
 - Structured httpx error handling in `submit_render` and `check_render_status` (ConnectError, TimeoutException, HTTPStatusError)
 - GraphRecursionError parsing in web frontend — shows user-friendly Spanish message instead of raw traceback

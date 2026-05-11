@@ -347,3 +347,66 @@ class TestNoOpOnValidConfig:
         original = copy.deepcopy(cfg)
         sanitize_config(cfg)
         assert cfg == original
+
+
+class TestVoiceoverEnabled:
+    def test_string_true_coerced(self):
+        cfg = _base_config(
+            scenes=[{"type": "intro", "title": "Hi", "durationInSeconds": 5}],
+            voiceover={"enabled": "true", "provider": "gemini", "voiceId": "Orus", "scenes": {}},
+        )
+        result, mutations = sanitize_config(cfg)
+        assert result["voiceover"]["enabled"] is True
+        assert any("voiceover.enabled" in m for m in mutations)
+
+    def test_boolean_true_unchanged(self):
+        cfg = _base_config(
+            scenes=[{"type": "intro", "title": "Hi", "durationInSeconds": 5}],
+            voiceover={"enabled": True, "provider": "gemini", "voiceId": "Orus", "scenes": {}},
+        )
+        result, mutations = sanitize_config(cfg)
+        assert result["voiceover"]["enabled"] is True
+        assert not any("voiceover.enabled" in m for m in mutations)
+
+    def test_false_coerced_to_true(self):
+        cfg = _base_config(
+            scenes=[{"type": "intro", "title": "Hi", "durationInSeconds": 5}],
+            voiceover={"enabled": False, "provider": "gemini", "voiceId": "Orus", "scenes": {}},
+        )
+        result, mutations = sanitize_config(cfg)
+        assert result["voiceover"]["enabled"] is True
+
+    def test_integer_1_coerced(self):
+        cfg = _base_config(
+            scenes=[{"type": "intro", "title": "Hi", "durationInSeconds": 5}],
+            voiceover={"enabled": 1, "provider": "gemini", "voiceId": "Orus", "scenes": {}},
+        )
+        result, mutations = sanitize_config(cfg)
+        assert result["voiceover"]["enabled"] is True
+
+
+class TestSoundDesignEnabled:
+    def test_string_true_coerced(self):
+        cfg = _base_config(
+            scenes=[{"type": "intro", "title": "Hi", "durationInSeconds": 5}],
+            soundDesign={"enabled": "true", "sfx": []},
+        )
+        result, mutations = sanitize_config(cfg)
+        assert result["soundDesign"]["enabled"] is True
+
+    def test_string_false_coerced(self):
+        cfg = _base_config(
+            scenes=[{"type": "intro", "title": "Hi", "durationInSeconds": 5}],
+            soundDesign={"enabled": "false", "sfx": []},
+        )
+        result, mutations = sanitize_config(cfg)
+        assert result["soundDesign"]["enabled"] is False
+
+    def test_boolean_unchanged(self):
+        cfg = _base_config(
+            scenes=[{"type": "intro", "title": "Hi", "durationInSeconds": 5}],
+            soundDesign={"enabled": True, "sfx": []},
+        )
+        result, mutations = sanitize_config(cfg)
+        assert result["soundDesign"]["enabled"] is True
+        assert not any("soundDesign.enabled" in m for m in mutations)

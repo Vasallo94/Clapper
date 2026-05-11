@@ -163,6 +163,24 @@ def sanitize_config(config: dict) -> tuple[dict, list[str]]:
             if len(valid_beats) != len(beats):
                 scene["beats"] = valid_beats
 
+    # ── H) voiceover.enabled must be literal True ─────────────────────────
+    vo = cfg.get("voiceover")
+    if isinstance(vo, dict):
+        raw_enabled = vo.get("enabled")
+        if raw_enabled is not True:
+            coerced = str(raw_enabled).lower().strip() in ("true", "1", "yes", "sí", "si")
+            if coerced or raw_enabled is not None:
+                vo["enabled"] = True
+                mutations.append(f"voiceover.enabled {raw_enabled!r} -> True")
+
+    # ── I) soundDesign.enabled coerce to boolean ─────────────────────────
+    sd = cfg.get("soundDesign")
+    if isinstance(sd, dict) and "enabled" in sd:
+        raw_sd_enabled = sd["enabled"]
+        if not isinstance(raw_sd_enabled, bool):
+            sd["enabled"] = str(raw_sd_enabled).lower().strip() in ("true", "1", "yes", "sí", "si")
+            mutations.append(f"soundDesign.enabled {raw_sd_enabled!r} -> {sd['enabled']}")
+
     # ── A-bis) Emphasis on soundDesign.sfx[].beatEmphasis ────────────────
     sfx_list = cfg.get("soundDesign", {}).get("sfx") if isinstance(cfg.get("soundDesign"), dict) else None
     if isinstance(sfx_list, list):

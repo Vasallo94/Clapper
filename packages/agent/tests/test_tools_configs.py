@@ -82,6 +82,17 @@ def test_load_video_config_rejects_paths_outside_project(monkeypatch, tmp_path):
         raise AssertionError("Expected ValueError for outside path")
 
 
+def test_resolve_prefers_content_over_generated_renders(monkeypatch, tmp_path):
+    monkeypatch.setattr(configs, "PROJECT_ROOT", tmp_path)
+    write_config(tmp_path / "content/tutorials/que-es-git/config.json", config_id="que-es-git", title="Git")
+    write_config(tmp_path / ".generated/renders/job-aaa/config.json", config_id="que-es-git", title="Git")
+    write_config(tmp_path / ".generated/renders/job-bbb/config.json", config_id="que-es-git", title="Git")
+
+    result = configs.load_video_config("que-es-git")
+
+    assert result["sourcePath"] == "content/tutorials/que-es-git/config.json"
+
+
 def test_present_target_selection_returns_selected_target(monkeypatch):
     monkeypatch.setattr(
         configs,

@@ -72,6 +72,10 @@ def _resolve_config_path(path_or_slug: str) -> Path:
     if len(matches) == 1:
         return matches[0]
     if len(matches) > 1:
+        generated = PROJECT_ROOT / ".generated"
+        content_matches = [m for m in matches if generated not in m.parents]
+        if len(content_matches) == 1:
+            return content_matches[0]
         options = ", ".join(p.relative_to(PROJECT_ROOT).as_posix() for p in matches)
         raise ValueError(f"Multiple configs match '{path_or_slug}': {options}")
     raise FileNotFoundError(f"No config found for '{path_or_slug}'")

@@ -101,6 +101,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Video player not playing in `VideoResultCard`: `<video>` element now uses `/stream` endpoint (`sendFile`) instead of `/download` endpoint (`Content-Disposition: attachment`)
 - Video streaming 404 in Docker: Express `send` module rejected paths through `.generated/` (dotfile security check); added `dotfiles: "allow"` to `sendFile` options
 - Host/container path mismatch for video files: `resolveOutputPath(jobId)` derives path from `JOBS_DIR` instead of using stored `output_path` from SQLite (which contains host absolute paths)
+- `Multiple configs match` error when loading configs by slug: `_resolve_config_path` now prefers `content/` matches over `.generated/renders/` copies (render jobs duplicate config.json into job dirs)
 
 ### Removed
 

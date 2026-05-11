@@ -1,11 +1,24 @@
 export type MessageRole = "user" | "assistant" | "agent"
-export type CheckpointType = "escaleta" | "direction" | "sound_chart" | "generic" | "video_result"
+export type CheckpointType =
+  | "escaleta"
+  | "direction"
+  | "sound_chart"
+  | "audio_chart"
+  | "validation"
+  | "generic"
+  | "video_result"
 
 export interface ChatMessage {
   id: string
   role: MessageRole
   content: string
-  checkpoint?: CheckpointData | SoundChartData | DirectionData | Record<string, unknown>
+  checkpoint?:
+    | CheckpointData
+    | SoundChartData
+    | AudioChartData
+    | DirectionData
+    | ValidationReportData
+    | Record<string, unknown>
   checkpointType?: CheckpointType
   agentSummary?: AgentSummary
 }
@@ -14,6 +27,7 @@ export interface ToolEntry {
   id: string
   name: string
   input?: string
+  output?: string
   status: "running" | "done" | "error"
   startedAt: number
 }
@@ -21,8 +35,22 @@ export interface ToolEntry {
 export interface AgentSummary {
   name: string
   tools: ToolEntry[]
+  artifacts: AgentArtifact[]
+  llmText?: string
   durationMs: number
   startedAt: number
+}
+
+export type AgentArtifactKind = "validation" | "script" | "audio_chart" | "tool_output"
+
+export interface AgentArtifact {
+  id: string
+  kind: AgentArtifactKind
+  title: string
+  source?: string
+  content?: string
+  data?: Record<string, unknown>
+  createdAt: number
 }
 
 export interface CheckpointData {
@@ -48,7 +76,7 @@ export interface DirectionData {
 export interface ChatResponse {
   type: "message" | "checkpoint"
   content?: string
-  data?: CheckpointData | SoundChartData | DirectionData
+  data?: CheckpointData | SoundChartData | AudioChartData | DirectionData | ValidationReportData
   thread_id: string
 }
 
@@ -67,6 +95,19 @@ export interface SoundChartData {
     volume: number
     loop?: boolean
   }>
+}
+
+export interface AudioChartData {
+  type: "audio_chart_checkpoint"
+  voiceover?: Record<string, unknown>
+  sound_design?: Record<string, unknown>
+}
+
+export interface ValidationReportData {
+  type: "validation_report"
+  errors: string[]
+  warnings: string[]
+  recommendations: string[]
 }
 
 export type PipelineStageId =

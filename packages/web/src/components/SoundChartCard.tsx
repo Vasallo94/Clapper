@@ -176,7 +176,11 @@ export function SoundChartCard({ data, onApprove, onRequestChanges, disabled, co
 
       {hasActions && (
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={onApprove} disabled={disabled} style={btnStyle(theme.colors.status.success, disabled)}>
+          <button
+            onClick={() => onApprove?.()}
+            disabled={disabled}
+            style={btnStyle(theme.colors.status.success, disabled)}
+          >
             Aprobar
           </button>
           <button

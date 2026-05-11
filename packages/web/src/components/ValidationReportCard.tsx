@@ -80,7 +80,11 @@ export function ValidationReportCard({ data, onApprove, onRequestChanges, disabl
       {hasActions && (
         <>
           <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-            <button onClick={onApprove} disabled={disabled} style={btnStyle(theme.colors.status.success, disabled)}>
+            <button
+              onClick={() => onApprove?.()}
+              disabled={disabled}
+              style={btnStyle(theme.colors.status.success, disabled)}
+            >
               Aprobar
             </button>
             <button

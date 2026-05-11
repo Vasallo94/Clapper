@@ -162,7 +162,7 @@ export function CheckpointCard({ data, onApprove, onRequestChanges, disabled }: 
       )}
 
       <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={onApprove} disabled={disabled} style={btnStyle(theme.colors.status.success, disabled)}>
+        <button onClick={() => onApprove()} disabled={disabled} style={btnStyle(theme.colors.status.success, disabled)}>
           Aprobar
         </button>
         <button

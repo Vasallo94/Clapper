@@ -57,7 +57,7 @@ export function GenericCheckpointCard({ data, onApprove, onRequestChanges, disab
       </div>
 
       <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={onApprove} disabled={disabled} style={btnStyle(theme.colors.status.success, disabled)}>
+        <button onClick={() => onApprove()} disabled={disabled} style={btnStyle(theme.colors.status.success, disabled)}>
           Aprobar
         </button>
         <button

@@ -48,7 +48,7 @@ export function VariantPlanCard({ data, onApprove, onRequestChanges, disabled }:
       </ul>
 
       <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={onApprove} disabled={disabled} style={btnStyle(theme.colors.status.success, disabled)}>
+        <button onClick={() => onApprove()} disabled={disabled} style={btnStyle(theme.colors.status.success, disabled)}>
           Crear variante
         </button>
         <button

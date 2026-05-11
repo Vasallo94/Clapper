@@ -65,7 +65,7 @@ export function RevisionPlanCard({ data, onApprove, onRequestChanges, disabled }
       </div>
 
       <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={onApprove} disabled={disabled} style={btnStyle(theme.colors.status.success, disabled)}>
+        <button onClick={() => onApprove()} disabled={disabled} style={btnStyle(theme.colors.status.success, disabled)}>
           Aprobar plan
         </button>
         <button

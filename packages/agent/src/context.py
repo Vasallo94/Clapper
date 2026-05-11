@@ -39,5 +39,8 @@ def get_pipeline_context(runtime: Any) -> "PipelineContext | None":
 
 
 def resolve_config_id(runtime: Any, config: dict) -> str:
+    config_id = config.get("id")
+    if config_id:
+        return config_id
     ctx = get_pipeline_context(runtime)
-    return (ctx.config_id if ctx else None) or config.get("id", "unknown")
+    return ctx.config_id if ctx else "unknown"

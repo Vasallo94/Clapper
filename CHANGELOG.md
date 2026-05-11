@@ -107,7 +107,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - `Multiple configs match` error when loading configs by slug: `_resolve_config_path` now prefers `content/` matches over `.generated/renders/` copies (render jobs duplicate config.json into job dirs)
 - No feedback when user asks to see a video with no render: auto-lookup now shows a message suggesting to render or regenerate assets when `fetchLatestRender` returns null
 - Orchestrator `question` mode silently completing when user asks to see a non-existent video: prompt now instructs the agent to check render status and suggest actionable next steps
-- `Converting circular structure to JSON` crash on checkpoint approval: all 7 checkpoint cards passed React click event as `onApprove` payload via `onClick={onApprove}` — fixed with `onClick={() => onApprove()}`
+- `Converting circular structure to JSON` crash on checkpoint approval: all 7 checkpoint cards passed React click event as `onApprove` payload via `onClick={onApprove}` — fixed with `onClick={() => onApprove()`
+- Voiceover validation always failing for existing configs: `resolve_config_id` prioritized auto-generated `PipelineContext.config_id` (`video-{random}`) over the config's own `id` field, causing validation to look in wrong directory (e.g., `video-2d38158a/` instead of `reproduccion-por-esporas/`)
 
 ### Removed
 

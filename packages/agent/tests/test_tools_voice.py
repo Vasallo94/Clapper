@@ -236,8 +236,8 @@ class TestGenerateVoiceoverEnabledGate:
 
 
 class TestGenerateVoiceoverRuntime:
-    def test_uses_runtime_config_id_for_output_dir(self, tmp_path, monkeypatch):
-        """runtime.context.config_id wins over the JSON config id for the output dir."""
+    def test_uses_config_id_over_runtime_for_output_dir(self, tmp_path, monkeypatch):
+        """config.id wins over runtime.context.config_id — matches validation lookup."""
         import src.tools.voice as voice_mod
         monkeypatch.setattr(voice_mod, "PROJECT_ROOT", tmp_path)
 
@@ -250,7 +250,6 @@ class TestGenerateVoiceoverRuntime:
             output_dir=str(tmp_path),
         )
 
-        # Provide a real scene with text so the function reaches dir-creation code.
         class FakeResponse:
             class FakeCandidate:
                 class FakeContent:
@@ -282,11 +281,58 @@ class TestGenerateVoiceoverRuntime:
 
         result = voice_mod.generate_voiceover(json.dumps(config), runtime=runtime)
 
-        # Output dir must use runtime's config_id, not the JSON id.
-        runtime_dir = tmp_path / "public" / "voiceover" / "runtime-video"
         json_dir = tmp_path / "public" / "voiceover" / "json-video"
-        assert runtime_dir.exists(), f"Expected runtime dir to exist. Result: {result}"
-        assert not json_dir.exists(), "JSON config id dir should NOT be created when runtime is provided"
+        runtime_dir = tmp_path / "public" / "voiceover" / "runtime-video"
+        assert json_dir.exists(), f"Expected json-video dir. Result: {result}"
+        assert not runtime_dir.exists(), "Runtime config_id dir should NOT be created when config has its own id"
+        assert "1 OK" in result
+
+    def test_falls_back_to_runtime_config_id(self, tmp_path, monkeypatch):
+        """Without config.id, falls back to runtime.context.config_id."""
+        import src.tools.voice as voice_mod
+        monkeypatch.setattr(voice_mod, "PROJECT_ROOT", tmp_path)
+
+        from unittest.mock import MagicMock
+        from src.context import PipelineContext
+
+        runtime = MagicMock()
+        runtime.context = PipelineContext(
+            config_id="runtime-video",
+            output_dir=str(tmp_path),
+        )
+
+        class FakeResponse:
+            class FakeCandidate:
+                class FakeContent:
+                    class FakePart:
+                        class FakeInlineData:
+                            data = "AAAA"
+                        inline_data = FakeInlineData()
+                    parts = [FakePart()]
+                content = FakeContent()
+            candidates = [FakeCandidate()]
+
+        class FakeClient:
+            class models:
+                @staticmethod
+                def generate_content(**kwargs):
+                    return FakeResponse()
+
+        monkeypatch.setattr(voice_mod, "_get_genai_client", lambda: FakeClient())
+        monkeypatch.setattr(voice_mod, "_pcm_to_mp3", lambda pcm, mp3: mp3.write_bytes(b"\xff\xfb\x90\x00"))
+
+        config = {
+            "voiceover": {
+                "voiceId": "Orus",
+                "language": "es-ES",
+                "scenes": {"0": {"text": "Hola mundo"}},
+            },
+        }
+
+        result = voice_mod.generate_voiceover(json.dumps(config), runtime=runtime)
+
+        runtime_dir = tmp_path / "public" / "voiceover" / "runtime-video"
+        assert runtime_dir.exists(), f"Expected runtime-video dir. Result: {result}"
         assert "1 OK" in result
 
     def test_works_without_runtime(self, tmp_path, monkeypatch):

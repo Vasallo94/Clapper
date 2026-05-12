@@ -73,9 +73,11 @@ The config MUST include these top-level fields:
 big-number, quote, code-block, flow-diagram, etc. are NOT native types. Use:
 
 ```json
-{ "type": "custom", "componentId": "big-number", "props": { "number": "1000", "label": "...", "description": "..." }, "durationInSeconds": N }
-{ "type": "custom", "componentId": "quote", "props": { "quote": "...", "author": "..." }, "durationInSeconds": N }
+{ "type": "custom", "componentId": "big-number", "props": { "metrics": [{ "value": "1000", "label": "Metric label" }] }, "durationInSeconds": N }
+{ "type": "custom", "componentId": "quote", "props": { "text": "...", "author": "..." }, "durationInSeconds": N }
 ```
+
+**CRITICAL:** Before using any custom componentId, read the `scene-catalog` skill's prop tables. Using wrong prop names produces blank scenes that waste render time. The `audit_content_quality` tool also validates required props — never skip it.
 
 ### Rules
 

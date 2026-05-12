@@ -182,36 +182,154 @@ Call-to-action closing card.
 
 ## Custom Components
 
-Registered in `customSceneRegistry.ts`. Use `type: "custom"` with the `componentId`:
+Registered in `customSceneRegistry.ts`. Use `type: "custom"` with the `componentId`.
 
-| componentId      | Description                        |
-| ---------------- | ---------------------------------- |
-| annotated-image  | Image with positioned annotations  |
-| api-request      | API request/response visualization |
-| bar-chart        | Animated bar chart                 |
-| before-after     | Side-by-side comparison            |
-| big-number       | Large animated statistic           |
-| block-diagram    | Architecture block diagram         |
-| browser-mockup   | Browser window mockup              |
-| bullet-slide     | Bullet point slide                 |
-| chapter-card     | Chapter title card                 |
-| code-block       | Syntax-highlighted code            |
-| code-diff        | Code diff visualization            |
-| comparison-table | Feature comparison table           |
-| countdown        | Countdown animation                |
-| file-explorer    | File tree visualization            |
-| flow-diagram     | Flow/process diagram               |
-| icon-grid        | Grid of icons with labels          |
-| logo-wall        | Grid of logos                      |
-| media-card       | Image/video card                   |
-| problem-solution | Problem vs solution split          |
-| progress-bars    | Animated progress bars             |
-| quote            | Styled quotation                   |
-| split-screen     | Two-panel layout                   |
-| stat-reveal      | Animated statistic reveal          |
-| step-list        | Numbered step sequence             |
-| timeline         | Timeline visualization             |
-| two-column-text  | Two-column text layout             |
+**CRITICAL:** Each component has specific required props. Using wrong prop names produces blank scenes. The `audit_content_quality` tool validates required props — always run it before checkpoints.
+
+### big-number
+
+Large animated statistic with counter animation.
+
+| Prop    | Type                                                                 | Required | Notes                                                                                      |
+| ------- | -------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------ |
+| metrics | `{value: string, label: string, prefix?: string, suffix?: string}[]` | yes      | Array of metrics to animate. Non-numeric values (e.g. "Photon") display after 50% progress |
+| title   | string                                                               | no       | Optional heading above metrics                                                             |
+
+```json
+{
+  "type": "custom",
+  "componentId": "big-number",
+  "props": { "metrics": [{ "value": "3.9x", "label": "Faster" }] },
+  "durationInSeconds": 7
+}
+```
+
+### code-block
+
+Syntax-highlighted code with optional line highlighting.
+
+| Prop           | Type     | Required | Notes                                                               |
+| -------------- | -------- | -------- | ------------------------------------------------------------------- |
+| code           | string   | yes      | Source code (use `\n` for line breaks)                              |
+| language       | string   | yes      | Language for syntax coloring (e.g. `"scala"`, `"python"`, `"yaml"`) |
+| title          | string   | no       | Heading above code                                                  |
+| filename       | string   | no       | Filename shown in code header                                       |
+| highlightLines | number[] | no       | 1-indexed lines to highlight                                        |
+
+### comparison-table
+
+Side-by-side feature comparison.
+
+| Prop        | Type                                | Required | Notes             |
+| ----------- | ----------------------------------- | -------- | ----------------- |
+| title       | string                              | yes      | Table heading     |
+| leftColumn  | `{header: string, items: string[]}` | yes      | Left column data  |
+| rightColumn | `{header: string, items: string[]}` | yes      | Right column data |
+
+```json
+{
+  "type": "custom",
+  "componentId": "comparison-table",
+  "props": {
+    "title": "A vs B",
+    "leftColumn": { "header": "A", "items": ["Fast", "Typed"] },
+    "rightColumn": { "header": "B", "items": ["Slow", "Untyped"] }
+  },
+  "durationInSeconds": 15
+}
+```
+
+### file-explorer
+
+File tree with expandable file content panel.
+
+| Prop        | Type                                                                         | Required | Notes                                                        |
+| ----------- | ---------------------------------------------------------------------------- | -------- | ------------------------------------------------------------ |
+| rootPath    | string                                                                       | yes      | Root directory label (e.g. `"my-project/"`)                  |
+| files       | `{name: string, type: "file"\|"folder", indent?: number, isNew?: boolean}[]` | yes      | File tree entries                                            |
+| expandFile  | string                                                                       | yes      | Filename to expand in content panel                          |
+| fileContent | string                                                                       | yes      | Content shown in expanded panel (supports `---` frontmatter) |
+| calloutText | string                                                                       | no       | Optional callout overlay at bottom                           |
+
+### before-after
+
+Side-by-side comparison with labeled columns.
+
+| Prop       | Type     | Required | Notes                                 |
+| ---------- | -------- | -------- | ------------------------------------- |
+| leftItems  | string[] | yes      | Items for left column                 |
+| rightItems | string[] | yes      | Items for right column                |
+| title      | string   | no       | Section heading                       |
+| leftLabel  | string   | no       | Left column label (default: "Before") |
+| rightLabel | string   | no       | Right column label (default: "After") |
+
+### block-diagram
+
+Architecture block diagram with connected blocks.
+
+| Prop   | Type                                                                                                                                   | Required | Notes                               |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------- |
+| blocks | `{id: string, label: string, sublabel?: string, row: number, col: number, colSpan?: number, color?: string, connections?: string[]}[]` | yes      | Array of blocks with grid positions |
+| title  | string                                                                                                                                 | no       | Diagram heading                     |
+
+### flow-diagram
+
+Flow/process diagram with description.
+
+| Prop        | Type   | Required | Notes                                                                     |
+| ----------- | ------ | -------- | ------------------------------------------------------------------------- |
+| title       | string | yes      | Diagram title (parsed as `step1 → step2 → step3` or displayed as heading) |
+| description | string | yes      | Explanation text below                                                    |
+
+### bullet-slide
+
+Bullet point slide with title.
+
+| Prop     | Type                              | Required | Notes                  |
+| -------- | --------------------------------- | -------- | ---------------------- |
+| title    | string                            | yes      | Slide heading          |
+| items    | `{text: string, icon?: string}[]` | yes      | Bullet items           |
+| subtitle | string                            | no       | Subtitle below heading |
+
+### quote
+
+Styled quotation with attribution.
+
+| Prop   | Type   | Required | Notes               |
+| ------ | ------ | -------- | ------------------- |
+| text   | string | yes      | Quote text          |
+| author | string | no       | Attribution name    |
+| role   | string | no       | Author's role/title |
+
+### step-list
+
+Numbered step sequence.
+
+| Prop  | Type                                      | Required | Notes           |
+| ----- | ----------------------------------------- | -------- | --------------- |
+| steps | `{title: string, description?: string}[]` | yes      | Ordered steps   |
+| title | string                                    | no       | Section heading |
+
+### Other registered components
+
+| componentId      | Required props                                         |
+| ---------------- | ------------------------------------------------------ |
+| annotated-image  | `annotations`                                          |
+| api-request      | `method`, `endpoint`, `responseStatus`, `responseBody` |
+| bar-chart        | `items`                                                |
+| browser-mockup   | `url`, `content`                                       |
+| chapter-card     | `title`                                                |
+| code-diff        | `fileName`, `additions`, `deletions`                   |
+| countdown        | (all optional)                                         |
+| icon-grid        | `items`                                                |
+| logo-wall        | `items`                                                |
+| media-card       | `title`                                                |
+| problem-solution | `problem`, `solution`                                  |
+| progress-bars    | `items`                                                |
+| split-screen     | `left`, `right`                                        |
+| stat-reveal      | `value`                                                |
+| timeline         | `items`                                                |
+| two-column-text  | `left`, `right`                                        |
 
 ## CRITICAL: durationInSeconds
 

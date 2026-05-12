@@ -15,6 +15,34 @@ from ..paths import PROJECT_ROOT as DEFAULT_PROJECT_ROOT
 BUILTIN_SCENE_TYPES = {"intro", "terminal", "callout", "outro", "custom", "hero", "benefits", "pricing", "cta"}
 PROJECT_ROOT = DEFAULT_PROJECT_ROOT
 
+CUSTOM_COMPONENT_REQUIRED_PROPS: dict[str, list[str]] = {
+    "annotated-image": ["annotations"],
+    "api-request": ["method", "endpoint", "responseStatus", "responseBody"],
+    "bar-chart": ["items"],
+    "before-after": ["leftItems", "rightItems"],
+    "big-number": ["metrics"],
+    "block-diagram": ["blocks"],
+    "browser-mockup": ["url", "content"],
+    "bullet-slide": ["title", "items"],
+    "chapter-card": ["title"],
+    "code-block": ["code", "language"],
+    "code-diff": ["fileName", "additions", "deletions"],
+    "comparison-table": ["title", "leftColumn", "rightColumn"],
+    "file-explorer": ["rootPath", "files", "expandFile", "fileContent"],
+    "flow-diagram": ["title", "description"],
+    "icon-grid": ["items"],
+    "logo-wall": ["items"],
+    "media-card": ["title"],
+    "problem-solution": ["problem", "solution"],
+    "progress-bars": ["items"],
+    "quote": ["text"],
+    "split-screen": ["left", "right"],
+    "stat-reveal": ["value"],
+    "step-list": ["steps"],
+    "timeline": ["items"],
+    "two-column-text": ["left", "right"],
+}
+
 
 def _project_path(*parts: str) -> Path:
     return Path(PROJECT_ROOT).joinpath(*parts)
@@ -211,6 +239,21 @@ def audit_content_quality(config_input: str) -> str:
             warnings.append(f"Scene {index}: repeated scene type '{scene_type}' after previous scene")
         previous_type = scene_type
 
+        if scene_type == "custom":
+            component_id = scene.get("componentId", "")
+            props = scene.get("props") or {}
+            required = CUSTOM_COMPONENT_REQUIRED_PROPS.get(component_id, [])
+            for field in required:
+                val = props.get(field)
+                if val is None:
+                    errors.append(
+                        f"Scene {index}: custom '{component_id}' missing required prop '{field}'"
+                    )
+                elif isinstance(val, list) and len(val) == 0:
+                    warnings.append(
+                        f"Scene {index}: custom '{component_id}' prop '{field}' is an empty array — scene will render blank"
+                    )
+
         text_words = _word_count(_scene_text(scene))
         if duration > 0 and text_words / duration > 5:
             warnings.append(
@@ -255,6 +298,18 @@ def audit_content_quality(config_input: str) -> str:
                     warnings.append(
                         f"Voiceover scene {scene_idx}: {words} words in {duration:.1f}s is likely too fast"
                     )
+                slide_text = _scene_text(scenes[index])
+                vo_text = _voiceover_text(value)
+                if slide_text and vo_text:
+                    slide_words = set(re.findall(r"\b[\wáéíóúñü]{4,}\b", slide_text.lower()))
+                    vo_words_set = set(re.findall(r"\b[\wáéíóúñü]{4,}\b", vo_text.lower()))
+                    if slide_words and vo_words_set:
+                        overlap = len(slide_words & vo_words_set) / max(len(slide_words), 1)
+                        if overlap > 0.6:
+                            warnings.append(
+                                f"Voiceover scene {scene_idx}: high word overlap ({overlap:.0%}) with slide text — "
+                                f"voice should explain, not repeat the visual"
+                            )
     else:
         recommendations.append("Add voiceover for scenes where the viewer needs narrative guidance")
 

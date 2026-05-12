@@ -9,6 +9,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 - `WorkingIndicator` component with animated SVG clapperboard — replaces plain loading dots in ChatThread with a visually engaging CSS-animated claqueta de cine during agent processing
 - Auto-show video on target select — when selecting a config from the dropdown that has a completed render, `VideoResultCard` appears immediately without needing to ask the agent
+- Per-component required props validation in `audit_content_quality` — catches missing/empty props on custom scenes before rendering (prevents blank scenes)
+- Voiceover-slide word overlap check in `audit_content_quality` — warns when voiceover text repeats slide content instead of complementing it
+- Custom component prop schemas in scene-catalog skill — agents can now query exact required props for big-number, comparison-table, file-explorer, code-block, and 20+ other components
+- Voiceover-slide complementarity rules in audio planner prompt — explicit guidance on how voice should explain (not repeat) visual content
 
 ### Fixed
 

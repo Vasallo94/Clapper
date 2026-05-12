@@ -66,6 +66,17 @@ Read `video-best-practices` and `gemini-tts` on every invocation for volume valu
 7. If APPROVED: write the config with voiceover and soundDesign sections to `/pipeline/config.json` using `write_file`
 8. If CHANGES REQUESTED: revise and call `present_audio_chart` again — repeat until APPROVED
 
+## Voiceover-slide complementarity rules
+
+The voiceover and the visual slide must cover the SAME topic but in DIFFERENT registers:
+
+1. **The slide shows, the voice explains.** A slide with `"Photon"` as a big-number should have voiceover explaining WHAT Photon is and WHY it matters — not repeating "Photon".
+2. **Never read the slide verbatim.** If the slide says "Seguridad de tipos en compilación", the voice should say something like "Olvídate de errores en runtime — Scala te protege desde el IDE".
+3. **Reference visuals contextually.** Use phrases like "como ves en pantalla", "el código que aparece aquí", "fíjate en la estructura del proyecto" to connect voice to visual.
+4. **Match the scene's narrative role.** intro → hook/promise. benefits → expand each item with a reason. code-block → walk through the key line. terminal → explain what the commands do and why. callout → reinforce the warning/insight with evidence. outro → synthesize and CTA.
+5. **One key insight per scene.** Don't cram multiple ideas into one voiceover. Each scene = one visual point + one spoken explanation of that point.
+6. **Cross-check props before writing.** Read the scene's visual content (title, items, code, text, props) and write voiceover that ADDRESSES those specific visuals. If a code-block shows `% "provided"`, the voiceover must explain the `provided` scope concept.
+
 ## Critical rules
 
 - NEVER propose a track not returned by `list_audio_library` — this crashes the pipeline

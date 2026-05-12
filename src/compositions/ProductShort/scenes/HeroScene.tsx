@@ -51,7 +51,7 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle, timing })
           transform: `translateY(${mascotY}px)`,
         }}
       >
-        <PhoneMascot scale={2} animation="entry" />
+        <PhoneMascot scale={2} animation="entry" darkBg />
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>

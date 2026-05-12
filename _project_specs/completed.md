@@ -4,6 +4,37 @@ Specs movidas aquí tras implementación exitosa.
 
 ---
 
+## 2026-05-12 — Linea Directa Brand Lockup
+
+### Objective
+
+Mejorar la presencia de marca de Linea Directa en las presentaciones usando assets oficiales animados por composicion en Remotion.
+
+### Scope
+
+- Incorporar el SVG oficial como asset publico para el lockup completo.
+- Incorporar un recorte oficial del telefono para apariciones pequenas como mascota/watermark.
+- Crear `LineaDirectaBrandLockup` con reveal, spring y glint frame-by-frame sobre el asset oficial.
+- Usar el lockup completo en la intro de `ClaudeCodeTutorial` cuando el tema muestra mascota.
+- Mejorar contraste del simbolo en el hero vertical de `ProductShort`.
+
+### Acceptance Criteria
+
+1. Existe un componente reutilizable para el lockup de marca Linea Directa.
+2. El lockup renderiza el asset oficial con telefono, wordmark y subrayado rojo.
+3. La intro de `ClaudeCodeTutorial` usa el lockup cuando el tema muestra mascota.
+4. Las animaciones usan `useCurrentFrame()` con `spring()`/`interpolate()`.
+5. El cambio pasa `npm run lint`.
+
+### Test Cases
+
+1. `npm run lint` — zero errors, existing warnings only.
+2. `npm run test:visual` — 2 tests passing.
+3. `remotion still` frame 45 for `ClaudeCodeTutorial` — lockup visible, no duplicated brand label.
+4. `remotion still` frame 45 for `ProductShort` — phone symbol remains legible on red background.
+
+---
+
 ## 2026-05-11 — Normalización de streaming y UI de modos
 
 ### Objective

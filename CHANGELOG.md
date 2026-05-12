@@ -7,6 +7,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- Official Linea Directa brand assets in `public/branding/` plus an animated `LineaDirectaBrandLockup` that uses the official SVG with Remotion frame-driven reveal/glint effects
+- ADR 0011 documenting the decision to animate official Linea Directa assets instead of hand-redrawing the logo
 - `WorkingIndicator` component with animated SVG clapperboard — replaces plain loading dots in ChatThread with a visually engaging CSS-animated claqueta de cine during agent processing
 - Auto-show video on target select — when selecting a config from the dropdown that has a completed render, `VideoResultCard` appears immediately without needing to ask the agent
 - Per-component required props validation in `audit_content_quality` — catches missing/empty props on custom scenes before rendering (prevents blank scenes)

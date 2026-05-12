@@ -3,7 +3,7 @@ import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import type { IntroSceneProps } from "../schema"
 import { useThemeTokens } from "../../../shared/themes"
-import { PhoneMascot } from "../../../shared/components/PhoneMascot"
+import { LineaDirectaBrandLockup } from "../../../shared/components/LineaDirectaBrandLockup"
 import { PixelLogo } from "../../../shared/components/pixel-art/PixelLogo"
 import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
 
@@ -57,8 +57,8 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle, pixelLo
       }}
     >
       {tokens.mascot.show && (
-        <div style={{ marginBottom: 24, opacity: lockupOpacity }}>
-          <PhoneMascot scale={1} animation="entry" />
+        <div style={{ marginBottom: 2, opacity: lockupOpacity }}>
+          <LineaDirectaBrandLockup scale={0.72} animation="reveal" compact />
         </div>
       )}
 
@@ -84,19 +84,21 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle, pixelLo
         </div>
       )}
 
-      <div
-        style={{
-          fontFamily: tokens.fontFamily,
-          fontSize: 14,
-          fontWeight: 600,
-          letterSpacing: 4,
-          textTransform: "uppercase",
-          color: tokens.primary,
-          opacity: lockupOpacity,
-        }}
-      >
-        {tokens.label}
-      </div>
+      {!tokens.mascot.show && (
+        <div
+          style={{
+            fontFamily: tokens.fontFamily,
+            fontSize: 14,
+            fontWeight: 600,
+            letterSpacing: 4,
+            textTransform: "uppercase",
+            color: tokens.primary,
+            opacity: lockupOpacity,
+          }}
+        >
+          {tokens.label}
+        </div>
+      )}
 
       <div
         style={{

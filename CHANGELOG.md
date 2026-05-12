@@ -18,6 +18,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- Existing lint warnings from Zod `transition` schema fields and `CompositionShell` memo dependencies
 - Render service stderr noise — filter timestamps.json 404s from Remotion's embedded Chromium, increase stderr buffer to 8KB, extract progress from both stdout and stderr
 - Frontend video detection — scan completed agent tool outputs (`submit_render`, `check_render_status`) as fallback when jobId is not in the final text message
 - Databricks Scala config — fix comparison-table props format, add explicit musicBed ducking/fade fields to prevent NaN crash in `computeMusicVolume`

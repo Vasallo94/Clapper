@@ -65,6 +65,8 @@ export const ProductShortConfigSchema = z.object({
   scenes: z.array(ProductShortSceneSchema).min(1),
   voiceover: VoiceoverConfigSchema.nullable().optional(),
   soundDesign: SoundDesignSchema.nullable().optional(),
+  // Zod data field, not a CSS transition.
+  // eslint-disable-next-line @remotion/non-pure-animation
   transition: TransitionConfigSchema,
 })
 

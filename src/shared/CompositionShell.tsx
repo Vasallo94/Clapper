@@ -47,7 +47,7 @@ export function CompositionShell<S extends CompositionShellScene>({
   const bg = getTheme(theme).background
 
   const { sceneInfos, sceneAudioInfos } = useMemo(
-    () => precomputeScenes(config.scenes, config),
+    () => precomputeScenes(config.scenes, { fps: config.fps, voiceover: config.voiceover }),
     [config.scenes, config.fps, config.voiceover],
   )
 

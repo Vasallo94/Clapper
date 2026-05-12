@@ -139,6 +139,8 @@ export const TutorialConfigSchema = z.object({
   voiceover: VoiceoverConfigSchema.nullable().optional(),
   soundDesign: SoundDesignSchema.nullable().optional(),
   subtitles: SubtitlesConfigSchema.nullable().optional(),
+  // Zod data field, not a CSS transition.
+  // eslint-disable-next-line @remotion/non-pure-animation
   transition: TransitionConfigSchema,
 })
 

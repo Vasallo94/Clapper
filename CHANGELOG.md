@@ -12,6 +12,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- Render bundle cache stale audio — `scripts/render.ts` now syncs `public/voiceover/` and `public/audio/` into the cached bundle after generating audio, so Remotion's server can find newly generated MP3s
+- Validator rejected explicit `"ClaudeCodeTutorial"` composition — `scripts/validate-config.ts` now uses a `KNOWN_COMPOSITIONS` whitelist instead of only accepting `undefined` or `"ProductShort"`
+- `claude-code-memory` TTS provider switched from ElevenLabs to Gemini (no API key required)
+- `skills-claude-code` config missing required fields (`title`, `description`, `fps`, `width`, `height`)
+- `vida-de-los-grillos` comparison-table scene props incompatible with component interface (`headers/rows` → `leftColumn/rightColumn`)
 - Target dropdown polluted with `.generated/renders/` artifacts — `/api/configs` now only scans `content/` directories, reducing 40+ junk entries to 11 curated configs
 - `npx` not found error in agent validation — replaced subprocess call with HTTP request to render-service `/api/validate` endpoint, eliminating the need for Node.js in the Python agent container
 - Stream event normalization helpers (`packages/web/src/lib/streamEvents.ts`): stable hashing (DJB2), tool call deduplication by `tool_call_id` + input signature, artifact deduplication by content signature, streaming text merge, subagent name extraction

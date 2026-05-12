@@ -21,9 +21,20 @@
       "props": {
         "title": "Los Grillos en Cifras",
         "metrics": [
-          { "value": "900", "suffix": "+", "label": "Especies conocidas" },
-          { "value": "300", "label": "Millones de años de evolución" },
-          { "value": "100", "suffix": "dB", "label": "Volumen de su canto" }
+          {
+            "value": "900",
+            "suffix": "+",
+            "label": "Especies conocidas"
+          },
+          {
+            "value": "300",
+            "label": "Millones de años de evolución"
+          },
+          {
+            "value": "100",
+            "suffix": "dB",
+            "label": "Volumen de su canto"
+          }
         ]
       }
     },
@@ -34,9 +45,18 @@
       "props": {
         "title": "Ciclo de Vida",
         "steps": [
-          { "title": "Huevo", "description": "La hembra deposita hasta 200 huevos en tierra húmeda con su ovipositor" },
-          { "title": "Ninfa", "description": "Pasan por 8-10 mudas durante 2-3 meses, creciendo sin alas" },
-          { "title": "Adulto", "description": "Desarrollan alas funcionales y viven entre 2 y 3 meses más" },
+          {
+            "title": "Huevo",
+            "description": "La hembra deposita hasta 200 huevos en tierra húmeda con su ovipositor"
+          },
+          {
+            "title": "Ninfa",
+            "description": "Pasan por 8-10 mudas durante 2-3 meses, creciendo sin alas"
+          },
+          {
+            "title": "Adulto",
+            "description": "Desarrollan alas funcionales y viven entre 2 y 3 meses más"
+          },
           {
             "title": "Reproducción",
             "description": "El macho canta para atraer hembras frotando sus alas (estridulación)"
@@ -56,14 +76,14 @@
       "durationInSeconds": 12,
       "props": {
         "title": "Grillo de Campo vs Grillo Doméstico",
-        "headers": ["Característica", "Campo", "Doméstico"],
-        "rows": [
-          { "cells": ["Tamaño", "2-3 cm", "1.5-2 cm"] },
-          { "cells": ["Color", "Negro/marrón oscuro", "Marrón claro/amarillo"] },
-          { "cells": ["Hábitat", "Pradera, jardín", "Casas, edificios"] },
-          { "cells": ["Canto", "Fuerte, rítmico", "Suave, continuo"] },
-          { "cells": ["Actividad", "Nocturno", "Día y noche"] }
-        ]
+        "leftColumn": {
+          "header": "Campo",
+          "items": ["2-3 cm", "Negro/marrón oscuro", "Pradera, jardín", "Fuerte, rítmico", "Nocturno"]
+        },
+        "rightColumn": {
+          "header": "Doméstico",
+          "items": ["1.5-2 cm", "Marrón claro/amarillo", "Casas, edificios", "Suave, continuo", "Día y noche"]
+        }
       }
     },
     {
@@ -73,11 +93,26 @@
       "props": {
         "title": "Proteína por cada 100g (vs otras fuentes)",
         "items": [
-          { "label": "Grillos", "value": 65 },
-          { "label": "Pollo", "value": 31 },
-          { "label": "Ternera", "value": 26 },
-          { "label": "Huevo", "value": 13 },
-          { "label": "Tofu", "value": 8 }
+          {
+            "label": "Grillos",
+            "value": 65
+          },
+          {
+            "label": "Pollo",
+            "value": 31
+          },
+          {
+            "label": "Ternera",
+            "value": 26
+          },
+          {
+            "label": "Huevo",
+            "value": 13
+          },
+          {
+            "label": "Tofu",
+            "value": 8
+          }
         ],
         "highlightIndex": 0,
         "showValues": true
@@ -88,10 +123,18 @@
       "title": "Superpoderes del Grillo",
       "durationInSeconds": 12,
       "items": [
-        { "text": "Oídos en las patas: sus tímpanos están en las tibias delanteras" },
-        { "text": "Saltan 30 veces su tamaño corporal — equivalente a un humano saltando un edificio" },
-        { "text": "Son omnívoros: comen plantas, insectos, tela, papel y hasta otros grillos" },
-        { "text": "En China y Japón se crían como mascotas desde hace más de 2.000 años" }
+        {
+          "text": "Oídos en las patas: sus tímpanos están en las tibias delanteras"
+        },
+        {
+          "text": "Saltan 30 veces su tamaño corporal — equivalente a un humano saltando un edificio"
+        },
+        {
+          "text": "Son omnívoros: comen plantas, insectos, tela, papel y hasta otros grillos"
+        },
+        {
+          "text": "En China y Japón se crían como mascotas desde hace más de 2.000 años"
+        }
       ]
     },
     {
@@ -107,12 +150,30 @@
       "props": {
         "title": "Datos curiosos",
         "items": [
-          { "icon": "lightbulb", "label": "Solo cantan los machos" },
-          { "icon": "shield", "label": "Son criados como alimento en 80+ países" },
-          { "icon": "gear", "label": "Sus antenas detectan vibraciones mínimas" },
-          { "icon": "book", "label": "Símbolo de buena suerte en muchas culturas" },
-          { "icon": "check", "label": "Polinizan algunas flores silvestres" },
-          { "icon": "layers", "label": "Su exoesqueleto contiene quitina antimicrobiana" }
+          {
+            "icon": "lightbulb",
+            "label": "Solo cantan los machos"
+          },
+          {
+            "icon": "shield",
+            "label": "Son criados como alimento en 80+ países"
+          },
+          {
+            "icon": "gear",
+            "label": "Sus antenas detectan vibraciones mínimas"
+          },
+          {
+            "icon": "book",
+            "label": "Símbolo de buena suerte en muchas culturas"
+          },
+          {
+            "icon": "check",
+            "label": "Polinizan algunas flores silvestres"
+          },
+          {
+            "icon": "layers",
+            "label": "Su exoesqueleto contiene quitina antimicrobiana"
+          }
         ]
       }
     },
@@ -144,5 +205,8 @@
     "enabled": false,
     "musicBed": null,
     "sfx": []
+  },
+  "subtitles": {
+    "enabled": false
   }
 }

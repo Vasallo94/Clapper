@@ -98,9 +98,22 @@
       "props": {
         "rootPath": "~/.claude/projects/solar-eclipse/memory/",
         "files": [
-          { "name": "memory", "type": "folder", "indent": 0 },
-          { "name": "MEMORY.md", "type": "file", "indent": 1 },
-          { "name": "user_astrophotography.md", "type": "file", "indent": 1, "isNew": true }
+          {
+            "name": "memory",
+            "type": "folder",
+            "indent": 0
+          },
+          {
+            "name": "MEMORY.md",
+            "type": "file",
+            "indent": 1
+          },
+          {
+            "name": "user_astrophotography.md",
+            "type": "file",
+            "indent": 1,
+            "isNew": true
+          }
         ],
         "expandFile": "user_astrophotography.md",
         "fileContent": "---\nname: Astrophotography hobby and equipment\ndescription: Deep-sky setup, Bortle 3 skies, solar eclipse 2026 plan, practical research-backed preferences\ntype: user\n---\nEnrique uses an ASI2600MC AIR, FF80-APO and AM5N.\nShoots from Bortle 3 skies.\n\nPlanning solar H-alpha for the 2026 eclipse in Spain.\nChose HelioStar 100Ha + ASI432MM + Powermate 2x.\n\nPrefers practical, research-backed recommendations.",
@@ -159,18 +172,34 @@
         "title": "Lo que había detrás",
         "layout": "horizontal",
         "blocks": [
-          { "id": "claude-md", "title": "CLAUDE.md", "subtitle": "Reglas que escribes tú", "color": "#61afef" },
+          {
+            "id": "claude-md",
+            "title": "CLAUDE.md",
+            "subtitle": "Reglas que escribes tú",
+            "color": "#61afef"
+          },
           {
             "id": "auto-memory",
             "title": "Auto Memory",
             "subtitle": "Notas que Claude decide guardar",
             "color": "#c678dd"
           },
-          { "id": "auto-dream", "title": "Auto Dream", "subtitle": "Consolida y poda", "color": "#d19a66" }
+          {
+            "id": "auto-dream",
+            "title": "Auto Dream",
+            "subtitle": "Consolida y poda",
+            "color": "#d19a66"
+          }
         ],
         "connections": [
-          { "from": "claude-md", "to": "auto-memory" },
-          { "from": "auto-memory", "to": "auto-dream" }
+          {
+            "from": "claude-md",
+            "to": "auto-memory"
+          },
+          {
+            "from": "auto-memory",
+            "to": "auto-dream"
+          }
         ]
       }
     },
@@ -229,11 +258,31 @@
       "props": {
         "rootPath": "~/.claude/projects/solar-eclipse/memory/",
         "files": [
-          { "name": "memory", "type": "folder", "indent": 0 },
-          { "name": "MEMORY.md", "type": "file", "indent": 1 },
-          { "name": "user_astrophotography.md", "type": "file", "indent": 1 },
-          { "name": "feedback_no_summaries.md", "type": "file", "indent": 1 },
-          { "name": "project_release_freeze.md", "type": "file", "indent": 1 }
+          {
+            "name": "memory",
+            "type": "folder",
+            "indent": 0
+          },
+          {
+            "name": "MEMORY.md",
+            "type": "file",
+            "indent": 1
+          },
+          {
+            "name": "user_astrophotography.md",
+            "type": "file",
+            "indent": 1
+          },
+          {
+            "name": "feedback_no_summaries.md",
+            "type": "file",
+            "indent": 1
+          },
+          {
+            "name": "project_release_freeze.md",
+            "type": "file",
+            "indent": 1
+          }
         ],
         "expandFile": "MEMORY.md",
         "fileContent": "- [Astrophotography hobby](user_astrophotography.md) — Bortle 3, solar setup, recommendation style\n- [No trailing summaries](feedback_no_summaries.md) — Prefer direct answers\n- [Release freeze](project_release_freeze.md) — Dates and active restrictions",
@@ -341,9 +390,9 @@
   ],
   "voiceover": {
     "enabled": true,
-    "provider": "elevenlabs",
-    "voiceId": "y6WtESLj18d0diFRruBs",
-    "language": "es",
+    "provider": "gemini",
+    "voiceId": "Orus",
+    "language": "es-ES",
     "elevenlabs": {
       "modelId": "eleven_multilingual_v2",
       "outputFormat": "mp3_44100_128",

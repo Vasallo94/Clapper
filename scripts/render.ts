@@ -102,6 +102,15 @@ async function main() {
 
   const bundleLocation = await getCachedOrBundle()
 
+  // Sync generated audio into the cached bundle so Remotion's server can find them
+  for (const dir of ["voiceover", "audio"]) {
+    const src = path.resolve("public", dir)
+    const dest = path.join(bundleLocation, "public", dir)
+    if (existsSync(src)) {
+      cpSync(src, dest, { recursive: true })
+    }
+  }
+
   const compositionId = config.composition || "ClaudeCodeTutorial"
   console.log(`🔍 Selecting composition ${compositionId}...`)
   const composition = await selectComposition({

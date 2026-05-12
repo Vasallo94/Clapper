@@ -1,0 +1,428 @@
+{
+  "id": "que-es-git",
+  "title": "Qué es Git y por qué lo necesitas",
+  "description": "Explicación de Git, control de versiones y sus beneficios.",
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "theme": "linea-directa",
+  "transition": null,
+  "voiceover": {
+    "enabled": true,
+    "provider": "gemini",
+    "voiceId": "Orus",
+    "language": "es-ES",
+    "scenes": {
+      "0": "¿Qué es Git? Y por qué es imprescindible en tu código.",
+      "1": "Todos hemos tenido versiones como 'final_v2_FINAL_bueno.zip'. O el miedo constante de perder tu progreso. La solución es el control de versiones distribuido. Vuelve al pasado de forma segura y colabora sin problemas.",
+      "2": "Cuidado, Git no es lo mismo que GitHub. Git es la herramienta en tu equipo, y GitHub es tu repositorio en la nube.",
+      "3": "Veamos el flujo básico de Git. Primero tienes tu Directorio de trabajo, donde modificas tus archivos. Luego el Staging area, o Índice, donde preparas los cambios. Y finalmente el Repositorio Local, que guarda el historial completo.",
+      "4": "Así se ve en la práctica. Con 'git init' inicializas el repositorio. Con 'git add punto' preparas todos tus archivos. Y con 'git commit' guardas tu primer cambio de forma segura. Felicidades, acabas de asegurar tu código.",
+      "5": "Con un simple commit, has creado un punto de guardado inmutable en la historia de tu proyecto.",
+      "6": "¿Y qué pasa si quieres probar algo nuevo sin romper lo que ya funciona? Para eso existen las ramas o branches. Son líneas de tiempo paralelas para desarrollar funciones de forma segura.",
+      "7": "Entonces, ¿por qué deberías usar Git? Puedes deshacer errores y recuperar código en segundos. Facilita el trabajo en equipo sin pisar el trabajo de otros. Y te da un historial completo y detallado de cada cambio.",
+      "8": "Pero cuidado con los errores comunes. Evita hacer commits gigantes o poner mensajes poco claros como 'arreglo cosas'. En su lugar, haz commits pequeños, descriptivos y usa ramas separadas.",
+      "9": "Instala Git hoy mismo y toma el control absoluto de tu código. Visita git-scm.com para empezar."
+    }
+  },
+  "soundDesign": {
+    "musicBed": {
+      "track": "lofi-tech",
+      "volume": 0.15
+    },
+    "sfx": []
+  },
+  "brief": {
+    "platform": "YouTube/General",
+    "audience": "Desarrolladores principiantes e intermedios",
+    "goal": "Explicar los fundamentos de Git, cómo funciona y por qué usarlo",
+    "promise": "Entenderás Git, sus ramas y nunca más perderás código",
+    "tone": "Educativo, directo y claro",
+    "cta": "Instalar Git desde git-scm.com",
+    "hookStrategy": "Preguntar por problemas comunes como archivos 'final_v2.zip' y miedo a perder código",
+    "templateId": "tutorial-code-walkthrough",
+    "narrativeArc": ["promise", "mental model", "setup", "live demo", "why it matters", "pitfalls", "recap"]
+  },
+  "scenes": [
+    {
+      "type": "intro",
+      "title": "¿Qué es Git?",
+      "subtitle": "Y por qué es imprescindible en tu código",
+      "durationInSeconds": 8,
+      "timing": {
+        "leadInMs": 500,
+        "audioStartMs": 500,
+        "tailHoldMs": 0,
+        "transitionMs": 300
+      },
+      "beats": [
+        {
+          "id": "intro-beat-1",
+          "startMs": 500,
+          "narration": "¿Qué es Git?",
+          "animation": "fadeIn",
+          "emphasis": "high"
+        },
+        {
+          "id": "intro-beat-2",
+          "startMs": 3500,
+          "narration": "Y por qué es imprescindible en tu código.",
+          "animation": "slideUp",
+          "emphasis": "medium"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "problem-solution",
+      "props": {
+        "problem": "Versiones como 'final_v2_FINAL_bueno.zip', miedo a perder código y caos trabajando en equipo.",
+        "solution": "Control de versiones distribuido. Vuelve al pasado de forma segura y colabora sin pisar el trabajo de otros."
+      },
+      "durationInSeconds": 15,
+      "timing": {
+        "leadInMs": 500,
+        "audioStartMs": 500,
+        "tailHoldMs": 0,
+        "transitionMs": 300
+      },
+      "beats": [
+        {
+          "id": "prob-sol-1",
+          "startMs": 500,
+          "narration": "Todos hemos tenido versiones como 'final_v2_FINAL_bueno.zip'",
+          "visual": "problem-text"
+        },
+        {
+          "id": "prob-sol-2",
+          "startMs": 4000,
+          "narration": "O el miedo constante de perder tu progreso.",
+          "visual": "fear-icon"
+        },
+        {
+          "id": "prob-sol-3",
+          "startMs": 8000,
+          "narration": "La solución es el control de versiones distribuido.",
+          "visual": "solution-intro"
+        },
+        {
+          "id": "prob-sol-4",
+          "startMs": 11000,
+          "narration": "Vuelve al pasado de forma segura y colabora sin problemas.",
+          "visual": "solution-benefits"
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "text": "Git no es lo mismo que GitHub. Git es la herramienta instalada localmente, GitHub es donde la guardas en la nube.",
+      "position": "center",
+      "durationInSeconds": 8,
+      "timing": {
+        "leadInMs": 800,
+        "audioStartMs": 800,
+        "tailHoldMs": 0,
+        "transitionMs": 300
+      },
+      "beats": [
+        {
+          "id": "callout-1",
+          "startMs": 800,
+          "narration": "Cuidado, Git no es lo mismo que GitHub.",
+          "emphasis": "high"
+        },
+        {
+          "id": "callout-2",
+          "startMs": 3500,
+          "narration": "Git es la herramienta en tu equipo, y GitHub es tu repositorio en la nube.",
+          "emphasis": "medium"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "block-diagram",
+      "props": {
+        "title": "El flujo básico de Git",
+        "blocks": [
+          {
+            "label": "Directorio de trabajo",
+            "detail": "Tus archivos"
+          },
+          {
+            "label": "Staging (Índice)",
+            "detail": "Preparar cambios"
+          },
+          {
+            "label": "Repositorio Local",
+            "detail": "Historial (.git)"
+          }
+        ]
+      },
+      "durationInSeconds": 18,
+      "timing": {
+        "leadInMs": 500,
+        "audioStartMs": 500,
+        "tailHoldMs": 0,
+        "transitionMs": 300
+      },
+      "beats": [
+        {
+          "id": "block-1",
+          "startMs": 500,
+          "narration": "Veamos el flujo básico de Git.",
+          "visual": "title"
+        },
+        {
+          "id": "block-2",
+          "startMs": 3000,
+          "narration": "Primero tienes tu Directorio de trabajo, donde modificas tus archivos.",
+          "visual": "block-1"
+        },
+        {
+          "id": "block-3",
+          "startMs": 7000,
+          "narration": "Luego el Staging area, o Índice, donde preparas los cambios.",
+          "visual": "block-2"
+        },
+        {
+          "id": "block-4",
+          "startMs": 12000,
+          "narration": "Y finalmente el Repositorio Local, que guarda el historial completo.",
+          "visual": "block-3"
+        }
+      ]
+    },
+    {
+      "type": "terminal",
+      "command": "git init && git add . && git commit -m 'Primer commit'",
+      "lines": [
+        {
+          "text": "Initialized empty Git repository in /project/.git/",
+          "kind": "output"
+        },
+        {
+          "text": "1 file changed, 1 insertion(+)",
+          "kind": "output"
+        },
+        {
+          "text": "create mode 100644 main.js",
+          "kind": "output"
+        },
+        {
+          "text": "[main (root-commit) a1b2c3d] Primer commit",
+          "kind": "output"
+        }
+      ],
+      "durationInSeconds": 25,
+      "timing": {
+        "leadInMs": 800,
+        "audioStartMs": 800,
+        "tailHoldMs": 0,
+        "transitionMs": 300
+      },
+      "beats": [
+        {
+          "id": "term-1",
+          "startMs": 800,
+          "narration": "Así se ve en la práctica.",
+          "animation": "typewriter-start"
+        },
+        {
+          "id": "term-2",
+          "startMs": 3500,
+          "narration": "Con 'git init' inicializas el repositorio.",
+          "visual": "command-init"
+        },
+        {
+          "id": "term-3",
+          "startMs": 8000,
+          "narration": "Con 'git add punto' preparas todos tus archivos.",
+          "visual": "command-add"
+        },
+        {
+          "id": "term-4",
+          "startMs": 14000,
+          "narration": "Y con 'git commit' guardas tu primer cambio de forma segura.",
+          "visual": "command-commit"
+        },
+        {
+          "id": "term-5",
+          "startMs": 20000,
+          "narration": "Felicidades, acabas de asegurar tu código.",
+          "animation": "success"
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "text": "Con un simple commit has creado un punto de guardado inmutable en la historia de tu proyecto.",
+      "position": "bottom",
+      "durationInSeconds": 6,
+      "timing": {
+        "leadInMs": 500,
+        "audioStartMs": 500,
+        "tailHoldMs": 0,
+        "transitionMs": 300
+      },
+      "beats": [
+        {
+          "id": "callout2-1",
+          "startMs": 500,
+          "narration": "Con un simple commit, has creado un punto de guardado inmutable en la historia de tu proyecto."
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "flow-diagram",
+      "props": {
+        "title": "Las Ramas (Branches)",
+        "description": "Líneas de tiempo paralelas para desarrollar funciones sin romper el código principal."
+      },
+      "durationInSeconds": 15,
+      "timing": {
+        "leadInMs": 500,
+        "audioStartMs": 500,
+        "tailHoldMs": 0,
+        "transitionMs": 300
+      },
+      "beats": [
+        {
+          "id": "flow-1",
+          "startMs": 500,
+          "narration": "¿Y qué pasa si quieres probar algo nuevo sin romper lo que ya funciona?",
+          "visual": "title"
+        },
+        {
+          "id": "flow-2",
+          "startMs": 5000,
+          "narration": "Para eso existen las ramas o branches.",
+          "visual": "branch-intro"
+        },
+        {
+          "id": "flow-3",
+          "startMs": 9000,
+          "narration": "Son líneas de tiempo paralelas para desarrollar funciones de forma segura.",
+          "visual": "branch-lines"
+        }
+      ]
+    },
+    {
+      "type": "benefits",
+      "title": "¿Por qué usar Git?",
+      "items": [
+        {
+          "text": "Deshacer errores y recuperar código borrado en segundos."
+        },
+        {
+          "text": "Trabajo en equipo fluido sin sobreescribir el código ajeno."
+        },
+        {
+          "text": "Historial completo con auditoría detallada de cada cambio."
+        }
+      ],
+      "durationInSeconds": 15,
+      "timing": {
+        "leadInMs": 800,
+        "audioStartMs": 800,
+        "tailHoldMs": 0,
+        "transitionMs": 300
+      },
+      "beats": [
+        {
+          "id": "ben-1",
+          "startMs": 800,
+          "narration": "Entonces, ¿por qué deberías usar Git?",
+          "visual": "title"
+        },
+        {
+          "id": "ben-2",
+          "startMs": 4000,
+          "narration": "Puedes deshacer errores y recuperar código en segundos.",
+          "visual": "item-0"
+        },
+        {
+          "id": "ben-3",
+          "startMs": 8000,
+          "narration": "Facilita el trabajo en equipo sin pisar el trabajo de otros.",
+          "visual": "item-1"
+        },
+        {
+          "id": "ben-4",
+          "startMs": 12000,
+          "narration": "Y te da un historial completo y detallado de cada cambio.",
+          "visual": "item-2"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "comparison-table",
+      "props": {
+        "title": "Buenas prácticas vs Errores en Git",
+        "leftColumn": {
+          "header": "Buenas Prácticas",
+          "items": ["Commits pequeños y atómicos", "Mensajes descriptivos", "Usar ramas separadas"]
+        },
+        "rightColumn": {
+          "header": "Errores Comunes",
+          "items": ["Commits enormes mezclados", "Mensajes como 'arreglo cosas'", "Trabajar directo en main"]
+        }
+      },
+      "durationInSeconds": 15,
+      "timing": {
+        "leadInMs": 500,
+        "audioStartMs": 500,
+        "tailHoldMs": 0,
+        "transitionMs": 300
+      },
+      "beats": [
+        {
+          "id": "comp-1",
+          "startMs": 500,
+          "narration": "Pero cuidado con los errores comunes.",
+          "visual": "title"
+        },
+        {
+          "id": "comp-2",
+          "startMs": 3500,
+          "narration": "Evita hacer commits gigantes o poner mensajes poco claros como 'arreglo cosas'.",
+          "visual": "right-column"
+        },
+        {
+          "id": "comp-3",
+          "startMs": 8500,
+          "narration": "En su lugar, haz commits pequeños, descriptivos y usa ramas separadas.",
+          "visual": "left-column"
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "text": "Instala Git hoy mismo y toma el control absoluto de tu código.",
+      "url": "https://git-scm.com/",
+      "durationInSeconds": 8,
+      "timing": {
+        "leadInMs": 800,
+        "audioStartMs": 800,
+        "tailHoldMs": 1500,
+        "transitionMs": 300
+      },
+      "beats": [
+        {
+          "id": "cta-1",
+          "startMs": 800,
+          "narration": "Instala Git hoy mismo y toma el control absoluto de tu código.",
+          "visual": "cta-text"
+        },
+        {
+          "id": "cta-2",
+          "startMs": 5000,
+          "narration": "Visita git-scm.com para empezar.",
+          "visual": "cta-url"
+        }
+      ]
+    }
+  ]
+}

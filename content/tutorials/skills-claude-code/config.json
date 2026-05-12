@@ -66,7 +66,9 @@
       "type": "intro",
       "title": "Skills en Claude Code",
       "subtitle": "Enseña a tu agente nuevos superpoderes",
-      "pixelLogo": { "enabled": false },
+      "pixelLogo": {
+        "enabled": false
+      },
       "durationInSeconds": 4,
       "timing": {
         "leadInMs": 600,
@@ -147,7 +149,11 @@
         "transitionMs": 400
       },
       "beats": [
-        { "id": "title", "startMs": 0, "visual": "Scene start" },
+        {
+          "id": "title",
+          "startMs": 0,
+          "visual": "Scene start"
+        },
         {
           "id": "panels",
           "startMs": 400,
@@ -155,24 +161,52 @@
           "visual": "Paneles entran desde los lados",
           "animation": "spring"
         },
-        { "id": "left-1", "startMs": 800, "narration": "solo manuales", "visual": "Primer bullet izquierdo" },
-        { "id": "left-2", "startMs": 1200, "visual": "Segundo bullet izquierdo" },
+        {
+          "id": "left-1",
+          "startMs": 800,
+          "narration": "solo manuales",
+          "visual": "Primer bullet izquierdo"
+        },
+        {
+          "id": "left-2",
+          "startMs": 1200,
+          "visual": "Segundo bullet izquierdo"
+        },
         {
           "id": "left-3",
           "startMs": 1600,
           "narration": "sin metadatos ni recursos",
           "visual": "Tercer bullet izquierdo"
         },
-        { "id": "left-4", "startMs": 2000, "visual": "Cuarto bullet izquierdo" },
+        {
+          "id": "left-4",
+          "startMs": 2000,
+          "visual": "Cuarto bullet izquierdo"
+        },
         {
           "id": "right-1",
           "startMs": 3200,
           "narration": "Skills son carpetas completas",
           "visual": "Primer bullet derecho"
         },
-        { "id": "right-2", "startMs": 3800, "narration": "con auto-invocación", "visual": "Segundo bullet derecho" },
-        { "id": "right-3", "startMs": 4400, "narration": "frontmatter YAML", "visual": "Tercer bullet derecho" },
-        { "id": "right-4", "startMs": 5000, "narration": "y scripts bundled", "visual": "Cuarto bullet derecho" }
+        {
+          "id": "right-2",
+          "startMs": 3800,
+          "narration": "con auto-invocación",
+          "visual": "Segundo bullet derecho"
+        },
+        {
+          "id": "right-3",
+          "startMs": 4400,
+          "narration": "frontmatter YAML",
+          "visual": "Tercer bullet derecho"
+        },
+        {
+          "id": "right-4",
+          "startMs": 5000,
+          "narration": "y scripts bundled",
+          "visual": "Cuarto bullet derecho"
+        }
       ]
     },
     {
@@ -190,7 +224,12 @@
         "transitionMs": 800
       },
       "beats": [
-        { "id": "number", "startMs": 100, "visual": "Número aparece", "animation": "spring" },
+        {
+          "id": "number",
+          "startMs": 100,
+          "visual": "Número aparece",
+          "animation": "spring"
+        },
         {
           "id": "title",
           "startMs": 300,
@@ -207,12 +246,37 @@
       "props": {
         "rootPath": ".claude/skills/",
         "files": [
-          { "name": "mi-primera-skill/", "type": "folder", "indent": 0 },
-          { "name": "SKILL.md", "type": "file", "indent": 1, "isNew": true },
-          { "name": "remotion-tutorial-generator/", "type": "folder", "indent": 0 },
-          { "name": "SKILL.md", "type": "file", "indent": 1 },
-          { "name": "sound-engineer/", "type": "folder", "indent": 0 },
-          { "name": "SKILL.md", "type": "file", "indent": 1 }
+          {
+            "name": "mi-primera-skill/",
+            "type": "folder",
+            "indent": 0
+          },
+          {
+            "name": "SKILL.md",
+            "type": "file",
+            "indent": 1,
+            "isNew": true
+          },
+          {
+            "name": "remotion-tutorial-generator/",
+            "type": "folder",
+            "indent": 0
+          },
+          {
+            "name": "SKILL.md",
+            "type": "file",
+            "indent": 1
+          },
+          {
+            "name": "sound-engineer/",
+            "type": "folder",
+            "indent": 0
+          },
+          {
+            "name": "SKILL.md",
+            "type": "file",
+            "indent": 1
+          }
         ],
         "expandFile": "SKILL.md",
         "fileContent": "---\nname: deploy-checker\ndescription: Valida que el deploy cumple las reglas de seguridad del equipo.\n---\n\n# Deploy Checker\n\n## Pasos\n1. Leer el manifiesto\n2. Verificar reglas\n3. Reportar resultado"
@@ -257,7 +321,12 @@
         "transitionMs": 400
       },
       "beats": [
-        { "id": "title", "startMs": 200, "visual": "Título aparece", "animation": "fade" },
+        {
+          "id": "title",
+          "startMs": 200,
+          "visual": "Título aparece",
+          "animation": "fade"
+        },
         {
           "id": "code-reveal",
           "startMs": 400,
@@ -282,7 +351,12 @@
       "props": {
         "title": "Carga Progresiva",
         "nodes": [
-          { "id": "metadata", "title": "Metadata", "description": "Siempre cargada (~100 tokens)", "color": "#61afef" },
+          {
+            "id": "metadata",
+            "title": "Metadata",
+            "description": "Siempre cargada (~100 tokens)",
+            "color": "#61afef"
+          },
           {
             "id": "instructions",
             "title": "Instrucciones",
@@ -305,7 +379,11 @@
         "transitionMs": 600
       },
       "beats": [
-        { "id": "title", "startMs": 200, "visual": "Título aparece" },
+        {
+          "id": "title",
+          "startMs": 200,
+          "visual": "Título aparece"
+        },
         {
           "id": "node-1",
           "startMs": 800,
@@ -327,7 +405,12 @@
           "visual": "Nodo Recursos entra",
           "animation": "spring"
         },
-        { "id": "particle", "startMs": 7000, "visual": "Orbe viaja entre nodos", "animation": "particle" }
+        {
+          "id": "particle",
+          "startMs": 7000,
+          "visual": "Orbe viaja entre nodos",
+          "animation": "particle"
+        }
       ]
     },
     {
@@ -335,16 +418,49 @@
       "title": "Creando tu primera Skill",
       "durationInSeconds": 10,
       "lines": [
-        { "kind": "command", "text": "mkdir .claude/skills/deploy-checker" },
-        { "kind": "blank", "text": "" },
-        { "kind": "command", "text": "Crea una skill que valide los deploys antes de push a producción" },
-        { "kind": "claude", "text": "Voy a crear la skill deploy-checker con las reglas de seguridad del equipo..." },
-        { "kind": "output", "text": "✓ .claude/skills/deploy-checker/SKILL.md creado", "delayAfterMs": 600 },
-        { "kind": "output", "text": "✓ Frontmatter con name y description configurado" },
-        { "kind": "blank", "text": "" },
-        { "kind": "command", "text": "/deploy-checker", "delayAfterMs": 800 },
-        { "kind": "claude", "text": "Analizando el deploy actual... Verificando 5 reglas de seguridad..." },
-        { "kind": "output", "text": "✓ Deploy cumple todas las reglas. Listo para push.", "delayAfterMs": 600 }
+        {
+          "kind": "command",
+          "text": "mkdir .claude/skills/deploy-checker"
+        },
+        {
+          "kind": "blank",
+          "text": ""
+        },
+        {
+          "kind": "command",
+          "text": "Crea una skill que valide los deploys antes de push a producción"
+        },
+        {
+          "kind": "claude",
+          "text": "Voy a crear la skill deploy-checker con las reglas de seguridad del equipo..."
+        },
+        {
+          "kind": "output",
+          "text": "✓ .claude/skills/deploy-checker/SKILL.md creado",
+          "delayAfterMs": 600
+        },
+        {
+          "kind": "output",
+          "text": "✓ Frontmatter con name y description configurado"
+        },
+        {
+          "kind": "blank",
+          "text": ""
+        },
+        {
+          "kind": "command",
+          "text": "/deploy-checker",
+          "delayAfterMs": 800
+        },
+        {
+          "kind": "claude",
+          "text": "Analizando el deploy actual... Verificando 5 reglas de seguridad..."
+        },
+        {
+          "kind": "output",
+          "text": "✓ Deploy cumple todas las reglas. Listo para push.",
+          "delayAfterMs": 600
+        }
       ],
       "timing": {
         "leadInMs": 200,
@@ -398,7 +514,12 @@
         "transitionMs": 800
       },
       "beats": [
-        { "id": "number", "startMs": 100, "visual": "Número aparece", "animation": "spring" },
+        {
+          "id": "number",
+          "startMs": 100,
+          "visual": "Número aparece",
+          "animation": "spring"
+        },
         {
           "id": "title",
           "startMs": 300,
@@ -449,7 +570,12 @@
         "transitionMs": 400
       },
       "beats": [
-        { "id": "title", "startMs": 200, "narration": "Hay cuatro patrones principales", "visual": "Título aparece" },
+        {
+          "id": "title",
+          "startMs": 200,
+          "narration": "Hay cuatro patrones principales",
+          "visual": "Título aparece"
+        },
         {
           "id": "workflow",
           "startMs": 1000,
@@ -503,7 +629,11 @@
         "transitionMs": 400
       },
       "beats": [
-        { "id": "title", "startMs": 0, "visual": "Scene start" },
+        {
+          "id": "title",
+          "startMs": 0,
+          "visual": "Scene start"
+        },
         {
           "id": "panels",
           "startMs": 400,
@@ -511,17 +641,39 @@
           "visual": "Paneles entran",
           "animation": "spring"
         },
-        { "id": "left-1", "startMs": 800, "visual": "Primer bullet izquierdo" },
-        { "id": "left-2", "startMs": 1200, "narration": "compartidas con todo el equipo", "visual": "Segundo bullet" },
-        { "id": "left-3", "startMs": 1600, "visual": "Tercer bullet" },
+        {
+          "id": "left-1",
+          "startMs": 800,
+          "visual": "Primer bullet izquierdo"
+        },
+        {
+          "id": "left-2",
+          "startMs": 1200,
+          "narration": "compartidas con todo el equipo",
+          "visual": "Segundo bullet"
+        },
+        {
+          "id": "left-3",
+          "startMs": 1600,
+          "visual": "Tercer bullet"
+        },
         {
           "id": "right-1",
           "startMs": 2800,
           "narration": "Las personales van en tu máquina",
           "visual": "Primer bullet derecho"
         },
-        { "id": "right-2", "startMs": 3400, "narration": "para tus preferencias y atajos", "visual": "Segundo bullet" },
-        { "id": "right-3", "startMs": 3800, "visual": "Tercer bullet" }
+        {
+          "id": "right-2",
+          "startMs": 3400,
+          "narration": "para tus preferencias y atajos",
+          "visual": "Segundo bullet"
+        },
+        {
+          "id": "right-3",
+          "startMs": 3800,
+          "visual": "Tercer bullet"
+        }
       ]
     },
     {
@@ -529,12 +681,32 @@
       "title": "Encadenando Skills",
       "durationInSeconds": 8,
       "lines": [
-        { "kind": "command", "text": "/remotion-tutorial-generator \"explica hooks\"" },
-        { "kind": "claude", "text": "Usando skill remotion-tutorial-generator..." },
-        { "kind": "output", "text": "  Paso 6: Invocando remotion-director...", "delayAfterMs": 500 },
-        { "kind": "output", "text": "  Paso 7: Invocando sound-engineer..." },
-        { "kind": "output", "text": "  Paso 8: Renderizando video final..." },
-        { "kind": "output", "text": "✓ Tutorial generado en tutorials/hooks/output.mp4", "delayAfterMs": 600 }
+        {
+          "kind": "command",
+          "text": "/remotion-tutorial-generator \"explica hooks\""
+        },
+        {
+          "kind": "claude",
+          "text": "Usando skill remotion-tutorial-generator..."
+        },
+        {
+          "kind": "output",
+          "text": "  Paso 6: Invocando remotion-director...",
+          "delayAfterMs": 500
+        },
+        {
+          "kind": "output",
+          "text": "  Paso 7: Invocando sound-engineer..."
+        },
+        {
+          "kind": "output",
+          "text": "  Paso 8: Renderizando video final..."
+        },
+        {
+          "kind": "output",
+          "text": "✓ Tutorial generado en tutorials/hooks/output.mp4",
+          "delayAfterMs": 600
+        }
       ],
       "timing": {
         "leadInMs": 200,
@@ -573,11 +745,26 @@
       "props": {
         "title": "Qué puedes meter en una Skill",
         "items": [
-          { "icon": "file", "text": "Instrucciones en Markdown" },
-          { "icon": "code", "text": "Scripts ejecutables (Python, Bash, TS)" },
-          { "icon": "layers", "text": "Schemas de bases de datos y APIs" },
-          { "icon": "folder", "text": "Templates y ejemplos reutilizables" },
-          { "icon": "link", "text": "Referencias a MCP servers" }
+          {
+            "icon": "file",
+            "text": "Instrucciones en Markdown"
+          },
+          {
+            "icon": "code",
+            "text": "Scripts ejecutables (Python, Bash, TS)"
+          },
+          {
+            "icon": "layers",
+            "text": "Schemas de bases de datos y APIs"
+          },
+          {
+            "icon": "folder",
+            "text": "Templates y ejemplos reutilizables"
+          },
+          {
+            "icon": "link",
+            "text": "Referencias a MCP servers"
+          }
         ]
       },
       "timing": {
@@ -648,7 +835,13 @@
         "transitionMs": 600
       },
       "beats": [
-        { "id": "title", "startMs": 200, "narration": "Recuerda", "visual": "Título spring-in", "animation": "spring" },
+        {
+          "id": "title",
+          "startMs": 200,
+          "narration": "Recuerda",
+          "visual": "Título spring-in",
+          "animation": "spring"
+        },
         {
           "id": "bullet-1",
           "startMs": 800,
@@ -686,5 +879,10 @@
         }
       ]
     }
-  ]
+  ],
+  "title": "En 90 segundos sabrás crear Skills que conviertan a Claude Code en un especialista de tu equipo",
+  "description": "Que el equipo entienda qué son las Skills, cómo funcionan y cómo crearlas",
+  "fps": 30,
+  "width": 1280,
+  "height": 720
 }

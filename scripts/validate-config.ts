@@ -17,7 +17,8 @@ try {
 }
 
 const config = raw as Record<string, unknown>
-if (config.composition !== undefined && config.composition !== "ProductShort") {
+const KNOWN_COMPOSITIONS = new Set(["ClaudeCodeTutorial", "ProductShort"])
+if (config.composition !== undefined && !KNOWN_COMPOSITIONS.has(config.composition as string)) {
   console.log(JSON.stringify({ valid: false, errors: [{ message: `Unknown composition: "${config.composition}"` }] }))
   process.exit(1)
 }

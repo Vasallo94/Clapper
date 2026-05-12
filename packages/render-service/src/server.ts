@@ -150,7 +150,8 @@ app.post("/api/render", (req, res) => {
     })
 
     let renderStderr = ""
-    const MAX_STDERR = 4000
+    const MAX_STDERR = 8000
+    const NOISE_PATTERNS = [/Failed to load resource.*timestamps\.json/i, /\.timestamps\.json\] Failed/i]
 
     renderChild.stdout.on("data", (data) => {
       const match = data.toString().match(/(\d+)%/)
@@ -161,8 +162,13 @@ app.post("/api/render", (req, res) => {
       const chunk = data.toString()
       const match = chunk.match(/(\d+)%/)
       if (match) updateJob(jobId, { progress: parseInt(match[1]) })
-      if (renderStderr.length < MAX_STDERR) {
-        renderStderr += chunk.slice(0, MAX_STDERR - renderStderr.length)
+      const lines = chunk.split("\n").filter((line: string) => {
+        if (!line.trim()) return false
+        return !NOISE_PATTERNS.some((p) => p.test(line))
+      })
+      const filtered = lines.join("\n")
+      if (filtered && renderStderr.length < MAX_STDERR) {
+        renderStderr += filtered.slice(0, MAX_STDERR - renderStderr.length)
       }
     })
 

@@ -1,0 +1,469 @@
+{
+  "id": "databricks-scala-best-practices",
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "theme": "linea-directa",
+  "scenes": [
+    {
+      "timing": {
+        "transitionMs": 500,
+        "audioStartMs": 400,
+        "tailHoldMs": 300,
+        "leadInMs": 400
+      },
+      "type": "intro",
+      "beats": [
+        {
+          "emphasis": "high",
+          "visual": "Databricks & Scala en Producción",
+          "startMs": 500,
+          "id": "intro-title"
+        },
+        {
+          "startMs": 3000,
+          "id": "intro-subtitle",
+          "visual": "Ingeniería de Datos Escalable y Segura",
+          "emphasis": "medium"
+        }
+      ],
+      "title": "Databricks & Scala en Producción",
+      "subtitle": "Ingeniería de Datos Escalable y Segura",
+      "durationInSeconds": 6
+    },
+    {
+      "durationInSeconds": 7,
+      "props": {
+        "description": "El engine de Databricks combinado con la API de Datasets en Scala ofrece una ejecución ultrarrápida.",
+        "number": "Photon",
+        "label": "Aceleración Nativa"
+      },
+      "timing": {
+        "transitionMs": 500,
+        "audioStartMs": 500,
+        "tailHoldMs": 400,
+        "leadInMs": 500
+      },
+      "type": "custom",
+      "beats": [
+        {
+          "visual": "Reveal Photon large number",
+          "emphasis": "high",
+          "startMs": 500,
+          "id": "photon-reveal"
+        },
+        {
+          "visual": "El engine de Databricks...",
+          "emphasis": "low",
+          "startMs": 2500,
+          "id": "photon-desc"
+        }
+      ],
+      "componentId": "big-number"
+    },
+    {
+      "durationInSeconds": 10,
+      "items": [
+        {
+          "text": "Seguridad de tipos en tiempo de compilación"
+        },
+        {
+          "text": "Ciudadano de primera clase en Apache Spark"
+        },
+        {
+          "text": "Databricks Connect para desarrollo local en IDE"
+        }
+      ],
+      "title": "El Poder de Scala en el Ecosistema Spark",
+      "type": "benefits",
+      "beats": [
+        {
+          "emphasis": "medium",
+          "visual": "Seguridad de tipos...",
+          "startMs": 1000,
+          "id": "benefit-1"
+        },
+        {
+          "visual": "Ciudadano de primera clase...",
+          "emphasis": "medium",
+          "id": "benefit-2",
+          "startMs": 4000
+        },
+        {
+          "startMs": 7000,
+          "id": "benefit-3",
+          "visual": "Databricks Connect...",
+          "emphasis": "medium"
+        }
+      ],
+      "timing": {
+        "tailHoldMs": 1000,
+        "leadInMs": 500,
+        "transitionMs": 500,
+        "audioStartMs": 500
+      }
+    },
+    {
+      "props": {
+        "title": "Estructura de un Proyecto Modular",
+        "files": [
+          "src/main/scala/com/example/Pipeline.scala",
+          "src/test/scala/com/example/PipelineSpec.scala",
+          "databricks.yml",
+          "build.sbt",
+          ".github/workflows/deploy.yml"
+        ]
+      },
+      "durationInSeconds": 12,
+      "componentId": "file-explorer",
+      "type": "custom",
+      "beats": [
+        {
+          "emphasis": "medium",
+          "visual": "src folder files",
+          "startMs": 1500,
+          "id": "file-src"
+        },
+        {
+          "emphasis": "low",
+          "visual": "databricks.yml & build.sbt",
+          "startMs": 5000,
+          "id": "file-config"
+        },
+        {
+          "startMs": 8500,
+          "id": "file-ci",
+          "emphasis": "medium",
+          "visual": ".github/workflows"
+        }
+      ],
+      "timing": {
+        "tailHoldMs": 400,
+        "leadInMs": 600,
+        "transitionMs": 500,
+        "audioStartMs": 600
+      }
+    },
+    {
+      "timing": {
+        "tailHoldMs": 1200,
+        "leadInMs": 500,
+        "audioStartMs": 500,
+        "transitionMs": 500
+      },
+      "lines": [
+        {
+          "text": "sbt test",
+          "kind": "command"
+        },
+        {
+          "text": "Starting local SparkSession...",
+          "kind": "output"
+        },
+        {
+          "text": "[info] PipelineSpec:",
+          "kind": "output"
+        },
+        {
+          "text": "[info] - should transform deterministically using assertSmallDatasetEquality",
+          "kind": "output"
+        },
+        {
+          "text": "[success] Total time: 14 s",
+          "kind": "output"
+        }
+      ],
+      "beats": [
+        {
+          "emphasis": "high",
+          "visual": "sbt test",
+          "startMs": 800,
+          "id": "term-command"
+        },
+        {
+          "visual": "Starting local SparkSession...",
+          "emphasis": "low",
+          "id": "term-running",
+          "startMs": 4000
+        },
+        {
+          "emphasis": "high",
+          "visual": "[success] Total time",
+          "startMs": 9000,
+          "id": "term-success"
+        }
+      ],
+      "type": "terminal",
+      "durationInSeconds": 14
+    },
+    {
+      "beats": [
+        {
+          "startMs": 1500,
+          "id": "code-provided",
+          "emphasis": "high",
+          "visual": "highlight 'provided'"
+        },
+        {
+          "emphasis": "medium",
+          "visual": "evita fat-jar bloat",
+          "startMs": 4500,
+          "id": "code-explain"
+        }
+      ],
+      "type": "custom",
+      "timing": {
+        "leadInMs": 500,
+        "tailHoldMs": 400,
+        "audioStartMs": 500,
+        "transitionMs": 500
+      },
+      "componentId": "code-block",
+      "props": {
+        "code": "// Vital: evita fat-jar bloat y conflictos en el cluster\nlibraryDependencies += \"org.apache.spark\" %% \"spark-sql\" % \"3.5.0\" % \"provided\"",
+        "filename": "build.sbt",
+        "language": "scala"
+      },
+      "durationInSeconds": 10
+    },
+    {
+      "beats": [
+        {
+          "emphasis": "high",
+          "visual": "Nunca uses UDFs de Scala...",
+          "startMs": 500,
+          "id": "callout-text"
+        }
+      ],
+      "type": "callout",
+      "timing": {
+        "tailHoldMs": 400,
+        "leadInMs": 400,
+        "audioStartMs": 400,
+        "transitionMs": 500
+      },
+      "text": "Optimización Crítica: Nunca uses UDFs de Scala si existe una función nativa de Spark SQL.",
+      "position": "center",
+      "durationInSeconds": 7
+    },
+    {
+      "componentId": "code-block",
+      "timing": {
+        "leadInMs": 500,
+        "tailHoldMs": 1000,
+        "audioStartMs": 500,
+        "transitionMs": 500
+      },
+      "type": "custom",
+      "beats": [
+        {
+          "visual": "Show bad UDF usage",
+          "emphasis": "low",
+          "startMs": 1000,
+          "id": "perf-bad"
+        },
+        {
+          "visual": "Show native functions",
+          "emphasis": "high",
+          "startMs": 6000,
+          "id": "perf-good"
+        },
+        {
+          "visual": "OPTIMIZE ZORDER",
+          "emphasis": "medium",
+          "startMs": 10000,
+          "id": "perf-optimize"
+        }
+      ],
+      "durationInSeconds": 14,
+      "props": {
+        "language": "scala",
+        "filename": "PerformanceOptimization.scala",
+        "code": "// ❌ Deserializa objetos JVM y pierde Catalyst Optimizer\n// df.map(row => upper(row.getString(0)))\n\n// ✅ Utiliza funciones nativas y optimización física\ndf.withColumn(\"new_col\", upper(col(\"existing\")))\nspark.sql(\"OPTIMIZE my_table ZORDER BY (frequent_col)\")"
+      }
+    },
+    {
+      "durationInSeconds": 14,
+      "beats": [
+        {
+          "startMs": 1000,
+          "id": "deploy-validate",
+          "visual": "databricks bundle validate",
+          "emphasis": "medium"
+        },
+        {
+          "emphasis": "high",
+          "visual": "databricks bundle deploy -t prod",
+          "startMs": 6000,
+          "id": "deploy-deploy"
+        },
+        {
+          "id": "deploy-success",
+          "startMs": 10000,
+          "visual": "Deploying IaC",
+          "emphasis": "low"
+        }
+      ],
+      "type": "terminal",
+      "timing": {
+        "audioStartMs": 500,
+        "transitionMs": 500,
+        "leadInMs": 500,
+        "tailHoldMs": 400
+      },
+      "lines": [
+        {
+          "text": "databricks bundle validate",
+          "kind": "command"
+        },
+        {
+          "text": "Validation successful!",
+          "kind": "output"
+        },
+        {
+          "text": "databricks bundle deploy -t prod",
+          "kind": "command"
+        },
+        {
+          "text": "Deploying Infrastructure as Code to workspace...",
+          "kind": "output"
+        }
+      ]
+    },
+    {
+      "componentId": "comparison-table",
+      "timing": {
+        "transitionMs": 500,
+        "audioStartMs": 500,
+        "tailHoldMs": 400,
+        "leadInMs": 500
+      },
+      "type": "custom",
+      "beats": [
+        {
+          "visual": "Seguridad de Tipos comparison",
+          "emphasis": "medium",
+          "startMs": 1500,
+          "id": "comp-types"
+        },
+        {
+          "id": "comp-api",
+          "startMs": 6000,
+          "visual": "Dataset API comparison",
+          "emphasis": "medium"
+        },
+        {
+          "startMs": 10500,
+          "id": "comp-ml",
+          "visual": "Machine Learning comparison",
+          "emphasis": "medium"
+        }
+      ],
+      "durationInSeconds": 15,
+      "props": {
+        "title": "Scala vs PySpark en Databricks",
+        "leftColumn": {
+          "header": "Scala",
+          "items": [
+            "Seguridad de Tipos: Compile-time (Robusto)",
+            "Dataset API: Nativo y Extensible",
+            "Machine Learning: Soporte básico"
+          ]
+        },
+        "rightColumn": {
+          "header": "PySpark",
+          "items": [
+            "Seguridad de Tipos: Runtime (Propenso a fallos)",
+            "Dataset API: No soportado",
+            "Machine Learning: Dominante (MLflow, PyTorch)"
+          ]
+        }
+      }
+    },
+    {
+      "durationInSeconds": 12,
+      "beats": [
+        {
+          "startMs": 500,
+          "id": "outro-title",
+          "visual": "Arquitectura de Éxito",
+          "emphasis": "high"
+        },
+        {
+          "startMs": 2000,
+          "id": "outro-point1",
+          "visual": "Desarrollo local",
+          "emphasis": "low"
+        },
+        {
+          "visual": "Seguridad de tipos",
+          "emphasis": "low",
+          "id": "outro-point2",
+          "startMs": 4000
+        },
+        {
+          "startMs": 6000,
+          "id": "outro-point3",
+          "visual": "Spark SQL nativo",
+          "emphasis": "low"
+        },
+        {
+          "startMs": 8000,
+          "id": "outro-point4",
+          "visual": "Infraestructura como código",
+          "emphasis": "low"
+        }
+      ],
+      "type": "outro",
+      "timing": {
+        "audioStartMs": 500,
+        "transitionMs": 1000,
+        "leadInMs": 500,
+        "tailHoldMs": 1000
+      },
+      "title": "Arquitectura de Éxito",
+      "bullets": [
+        "Desarrollo local en IDE (Databricks Connect)",
+        "Seguridad de tipos con Dataset API",
+        "Spark SQL nativo sin UDFs serializados",
+        "Infraestructura como código (DABs)"
+      ]
+    }
+  ],
+  "voiceover": {
+    "language": "es-ES",
+    "enabled": true,
+    "scenes": {
+      "0": "[excited] Dominar Databricks con Scala no es solo escribir código Spark; es diseñar pipelines inquebrantables con tipos estrictos.",
+      "1": "Al combinar la API de Datasets con el motor vectorizado Photon, exprimes cada ciclo de CPU logrando un rendimiento extremo.",
+      "2": "Olvídate de descubrir errores en ejecución. La validación en tiempo de compilación hace de Scala el estándar de oro en Spark.",
+      "3": "Abandona los notebooks monolíticos. Estructura tu repositorio separando código, tests y manifiestos de infraestructura como código.",
+      "4": "Acorta tu ciclo de desarrollo. Con Databricks Connect puedes levantar sesiones Spark en tu IDE y pasar tests localmente en segundos.",
+      "5": "[serious] Jamás empaquetes Spark en tu fat-jar. Márcalo siempre como 'provided' para evitar infernales colisiones de clases en el clúster.",
+      "6": "Aquí tienes la regla de oro del rendimiento: bajo ningún concepto uses UDFs si existe una alternativa nativa en el API de funciones.",
+      "7": "Las UDFs fuerzan una costosa deserialización en la JVM, cegando por completo al Catalyst Optimizer. Prioriza siempre expresiones nativas.",
+      "8": "Gobierna tus entornos mediante Databricks Asset Bundles. Empaqueta y despliega tu lógica directamente desde flujos de integración continua.",
+      "9": "[calm] PySpark puede ser el rey en Machine Learning, pero Scala no tiene rival para construir procesos ETL tipados de misión crítica.",
+      "10": "[excited] Entornos locales, seguridad al compilar y código modular. Aplica estos principios para construir arquitecturas de datos de alto nivel."
+    },
+    "voiceId": "Orus",
+    "provider": "gemini"
+  },
+  "soundDesign": {
+    "sfx": [],
+    "musicBed": {
+      "volume": -18,
+      "duckingVolume": -26,
+      "fadeInMs": 2000,
+      "fadeOutMs": 3000,
+      "duckingFadeMs": 400,
+      "libraryId": "lofi-tech-2"
+    },
+    "enabled": true
+  },
+  "title": "Buenas Prácticas de Databricks en Scala",
+  "description": "Guía avanzada para desarrolladores sobre estructura, testing, optimización de Photon y CI/CD en Databricks usando Scala.",
+  "subtitles": {
+    "enabled": false
+  }
+}

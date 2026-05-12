@@ -12,6 +12,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- Render service stderr noise — filter timestamps.json 404s from Remotion's embedded Chromium, increase stderr buffer to 8KB, extract progress from both stdout and stderr
+- Frontend video detection — scan completed agent tool outputs (`submit_render`, `check_render_status`) as fallback when jobId is not in the final text message
+- Databricks Scala config — fix comparison-table props format, add explicit musicBed ducking/fade fields to prevent NaN crash in `computeMusicVolume`
 - Render bundle cache stale audio — `scripts/render.ts` now syncs `public/voiceover/` and `public/audio/` into the cached bundle after generating audio, so Remotion's server can find newly generated MP3s
 - Validator rejected explicit `"ClaudeCodeTutorial"` composition — `scripts/validate-config.ts` now uses a `KNOWN_COMPOSITIONS` whitelist instead of only accepting `undefined` or `"ProductShort"`
 - `claude-code-memory` TTS provider switched from ElevenLabs to Gemini (no API key required)

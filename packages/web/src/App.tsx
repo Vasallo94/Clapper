@@ -36,6 +36,25 @@ import {
 } from "./lib/threadStorage"
 import { stripTargetMetadata } from "./lib/targetMetadata"
 
+function extractJobIdFromAgents(
+  agents: Array<{ tools: Array<{ name: string; output?: string; status: string }> }>,
+): string | null {
+  for (const agent of agents) {
+    for (const tool of agent.tools) {
+      if (tool.status !== "done" || !tool.output) continue
+      if (tool.name !== "submit_render" && tool.name !== "check_render_status") continue
+      try {
+        const result = JSON.parse(tool.output)
+        const id = result.jobId || result.id
+        if (typeof id === "string" && /^[a-f0-9-]+$/.test(id)) return id
+      } catch {
+        /* skip non-JSON */
+      }
+    }
+  }
+  return null
+}
+
 function artifactFromCompletedJob(job: {
   id: string
   config_id: string | null
@@ -125,6 +144,8 @@ export default function App() {
     setThreadId(undefined)
     setCurrentThreadId(null)
     setMessages([])
+    setActiveVideoTarget(null)
+    setActiveTargetState(null)
     stream.resetStream()
     pipeline.reset()
   }, [stream, pipeline])
@@ -287,26 +308,51 @@ export default function App() {
             }
           })
           .catch((err) => console.warn("[auto-lookup] fetchJobStatus failed:", err))
-      } else if (activeTargetRef.current?.configId) {
-        const targetConfigId = activeTargetRef.current.configId
-        fetchLatestRender(targetConfigId)
-          .then((job) => {
-            if (job) {
-              addMessage(
-                "assistant",
-                "Video listo:",
-                { jobId: job.id, title: job.title, fileSize: job.file_size },
-                "video_result",
-              )
-            } else {
-              const targetTitle = activeTargetRef.current?.title || targetConfigId
-              addMessage(
-                "assistant",
-                `No hay un video renderizado para **${targetTitle}**. Puedes usar "Renderiza otra vez" para generar uno, o pedir que se regeneren los recursos de audio primero.`,
-              )
-            }
-          })
-          .catch((err) => console.warn("[auto-lookup] fetchLatestRender failed:", err))
+      } else {
+        const fallbackJobId = activeTargetRef.current?.configId
+          ? null
+          : extractJobIdFromAgents(stream.streamState.completedAgents)
+        if (fallbackJobId) {
+          fetchJobStatus(fallbackJobId)
+            .then((job) => {
+              if (job.status === "done") {
+                const artifact = artifactFromCompletedJob(job)
+                saveVideoArtifact(artifact)
+                setVideoArtifacts(getVideoArtifacts())
+                setActiveVideoTarget(artifact)
+                setActiveTargetState(artifact)
+                addMessage(
+                  "assistant",
+                  "Video listo:",
+                  { jobId: job.id, title: job.title, fileSize: job.file_size, target: artifact },
+                  "video_result",
+                )
+              } else if (job.status === "error") {
+                addMessage("assistant", `El render falló: ${job.error?.slice(0, 200) || "Error desconocido"}`)
+              }
+            })
+            .catch((err) => console.warn("[auto-lookup] fetchJobStatus from tools failed:", err))
+        } else if (activeTargetRef.current?.configId) {
+          const targetConfigId = activeTargetRef.current.configId
+          fetchLatestRender(targetConfigId)
+            .then((job) => {
+              if (job) {
+                addMessage(
+                  "assistant",
+                  "Video listo:",
+                  { jobId: job.id, title: job.title, fileSize: job.file_size },
+                  "video_result",
+                )
+              } else {
+                const targetTitle = activeTargetRef.current?.title || targetConfigId
+                addMessage(
+                  "assistant",
+                  `No hay un video renderizado para **${targetTitle}**. Puedes usar "Renderiza otra vez" para generar uno, o pedir que se regeneren los recursos de audio primero.`,
+                )
+              }
+            })
+            .catch((err) => console.warn("[auto-lookup] fetchLatestRender failed:", err))
+        }
       }
     }
   }, [stream.result, addMessage, pipeline])

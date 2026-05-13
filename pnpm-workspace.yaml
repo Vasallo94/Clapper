@@ -3,3 +3,5 @@ packages:
   - packages/web
 allowBuilds:
   better-sqlite3: true
+  esbuild: true
+  protobufjs: true

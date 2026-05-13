@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- `SubagentCard` component — collapsible card driven by SDK `SubagentStreamInterface`, replaces custom `StreamingBubble` with auto-collapse on completion, tool call status icons, and thinking text extraction
+
 ### Changed
 
 - `MessageRole` type narrowed from `"user" | "assistant" | "agent"` to `"user" | "assistant"` — SDK handles subagent lifecycle internally

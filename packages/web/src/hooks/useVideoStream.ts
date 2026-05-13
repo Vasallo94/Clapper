@@ -128,6 +128,9 @@ export function useVideoStream(options: UseVideoStreamOptions = {}): VideoStream
   // Track which subagent types we have already reported to avoid duplicates
   const reportedSubagentsRef = useRef<Set<string>>(new Set())
 
+  // Track loading transitions for auto-done
+  const wasLoadingRef = useRef(false)
+
   // ----- SDK useStream -----
   // The backend is a DeepAgent but we lack its TS type on the frontend.
   // We cast the options to include filterSubagentMessages / subagentToolNames
@@ -177,6 +180,15 @@ export function useVideoStream(options: UseVideoStreamOptions = {}): VideoStream
   })()
 
   const isInterrupted = interrupt != null
+
+  // ----- Auto-advance pipeline to "done" on stream finish -----
+  useEffect(() => {
+    const wasLoading = wasLoadingRef.current
+    wasLoadingRef.current = stream.isLoading
+    if (wasLoading && !stream.isLoading && !stream.error && !isInterrupted && stream.messages.length > 0) {
+      onPipelineAdvanceRef.current?.("done", "Pipeline completado")
+    }
+  }, [stream.isLoading, stream.error, isInterrupted, stream.messages.length])
 
   // ----- Enrichments -----
   const addEnrichment = useCallback((enrichment: Enrichment) => {

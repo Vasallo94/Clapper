@@ -191,8 +191,12 @@ export function useVideoStream(options: UseVideoStreamOptions = {}): VideoStream
   }, [stream.isLoading, stream.error, isInterrupted, stream.messages.length])
 
   // ----- Enrichments -----
+  const messagesRef = useRef(stream.messages)
+  messagesRef.current = stream.messages
+
   const addEnrichment = useCallback((enrichment: Enrichment) => {
-    setEnrichments((prev) => [...prev, enrichment])
+    const lastId = messagesRef.current[messagesRef.current.length - 1]?.id
+    setEnrichments((prev) => [...prev, { ...enrichment, afterMessageId: enrichment.afterMessageId ?? lastId }])
   }, [])
 
   const clearEnrichments = useCallback(() => {

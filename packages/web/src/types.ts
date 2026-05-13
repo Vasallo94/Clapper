@@ -46,6 +46,7 @@ export interface Enrichment {
   type: "video_result" | "system" | "resolved_checkpoint"
   content: string
   data?: Record<string, unknown>
+  afterMessageId?: string
 }
 
 export interface CheckpointData {

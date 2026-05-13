@@ -166,6 +166,35 @@ function renderCheckpointCard(
 }
 
 // ---------------------------------------------------------------------------
+// Enrichment renderer
+// ---------------------------------------------------------------------------
+
+function renderEnrichmentItem(enrichment: Enrichment): React.ReactNode {
+  if (enrichment.type === "resolved_checkpoint" && enrichment.data) {
+    const cpType = enrichment.data.checkpointType as CheckpointType
+    const cpData = enrichment.data.checkpointData as Record<string, unknown>
+    const userDecision = enrichment.data.userDecision as Record<string, unknown>
+    if (!cpType || !cpData) return null
+    return (
+      <div key={enrichment.id} style={{ marginTop: 8, opacity: 0.7, pointerEvents: "none" }}>
+        {renderCheckpointCard(cpType, cpData, DISABLED_HANDLERS, true)}
+        <UserDecisionBadge decision={userDecision} />
+      </div>
+    )
+  }
+  if (enrichment.type === "video_result" && enrichment.data) {
+    const data = enrichment.data as { jobId: string; title: string | null; fileSize: number | null }
+    return <VideoResultCard key={enrichment.id} jobId={data.jobId} title={data.title} fileSize={data.fileSize} />
+  }
+  return (
+    <MessageBubble
+      key={enrichment.id}
+      message={{ id: enrichment.id, role: "assistant", content: enrichment.content }}
+    />
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -213,6 +242,23 @@ export function ChatThread({
   // Determine if there's any active subagent (for loading indicator logic)
   const hasActiveSubagent = activeSubagents.length > 0
 
+  // Build enrichment lookup: messageId → enrichments anchored after that message.
+  // Enrichments without an anchor (created before any messages) go to orphans.
+  const { enrichmentsByMsg, orphanEnrichments } = useMemo(() => {
+    const byMsg = new Map<string, Enrichment[]>()
+    const orphans: Enrichment[] = []
+    for (const e of enrichments) {
+      if (e.afterMessageId) {
+        const list = byMsg.get(e.afterMessageId) || []
+        list.push(e)
+        byMsg.set(e.afterMessageId, list)
+      } else {
+        orphans.push(e)
+      }
+    }
+    return { enrichmentsByMsg: byMsg, orphanEnrichments: orphans }
+  }, [enrichments])
+
   return (
     <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
       {/* Empty state */}
@@ -245,16 +291,24 @@ export function ChatThread({
         </div>
       )}
 
-      {/* Message list */}
+      {/* Unified timeline: messages interleaved with their anchored enrichments */}
       {messages.map((msg, i) => {
         const msgId = msg.id ?? `msg-${i}`
         const rawContent = getMessageContent(msg)
+        const inlineEnrichments = msg.id ? enrichmentsByMsg.get(msg.id) : undefined
 
         // --- Human messages → user bubble ---
         if (msg.type === "human") {
           const displayContent = stripTargetMetadata(rawContent)
-          if (!displayContent.trim()) return null
-          return <MessageBubble key={msgId} message={{ id: msgId, role: "user", content: displayContent }} />
+          if (!displayContent.trim() && !inlineEnrichments?.length) return null
+          return (
+            <React.Fragment key={msgId}>
+              {displayContent.trim() && (
+                <MessageBubble message={{ id: msgId, role: "user", content: displayContent }} />
+              )}
+              {inlineEnrichments?.map(renderEnrichmentItem)}
+            </React.Fragment>
+          )
         }
 
         // --- AI messages ---
@@ -262,15 +316,11 @@ export function ChatThread({
           const linkedSubs = msg.id ? getSubagentsByMessage(msg.id) : []
           const hasContent = rawContent.trim().length > 0
 
-          // AI message with no content and no linked subagents → skip
-          if (!hasContent && linkedSubs.length === 0) return null
+          if (!hasContent && linkedSubs.length === 0 && !inlineEnrichments?.length) return null
 
           return (
             <React.Fragment key={msgId}>
-              {/* Render the text bubble only if there is content */}
               {hasContent && <MessageBubble message={{ id: msgId, role: "assistant", content: rawContent }} />}
-
-              {/* Render linked subagent cards underneath */}
               {linkedSubs.map((sub) => (
                 <SubagentCard
                   key={sub.id}
@@ -278,13 +328,20 @@ export function ChatThread({
                   defaultExpanded={sub.status === "running" || sub.status === "pending"}
                 />
               ))}
+              {inlineEnrichments?.map(renderEnrichmentItem)}
             </React.Fragment>
           )
         }
 
-        // Other message types (tool, system, etc.) — skip rendering
+        // Non-rendered message types — still render any anchored enrichments
+        if (inlineEnrichments?.length) {
+          return <React.Fragment key={msgId}>{inlineEnrichments.map(renderEnrichmentItem)}</React.Fragment>
+        }
         return null
       })}
+
+      {/* Orphan enrichments (no anchor, e.g. created before any messages) */}
+      {orphanEnrichments.map(renderEnrichmentItem)}
 
       {/* Unlinked active subagents (still running, not yet associated with a message) */}
       {unlinkedActiveSubagents.map((sub) => (
@@ -297,33 +354,6 @@ export function ChatThread({
           {renderCheckpointCard(checkpointType, checkpointData, checkpointHandlers[checkpointType], isLoading)}
         </div>
       )}
-
-      {/* Enrichments (resolved checkpoints, video results, system messages) */}
-      {enrichments.map((enrichment) => {
-        if (enrichment.type === "resolved_checkpoint" && enrichment.data) {
-          const cpType = enrichment.data.checkpointType as CheckpointType
-          const cpData = enrichment.data.checkpointData as Record<string, unknown>
-          const userDecision = enrichment.data.userDecision as Record<string, unknown>
-          if (!cpType || !cpData) return null
-          return (
-            <div key={enrichment.id} style={{ marginTop: 8, opacity: 0.7, pointerEvents: "none" }}>
-              {renderCheckpointCard(cpType, cpData, DISABLED_HANDLERS, true)}
-              <UserDecisionBadge decision={userDecision} />
-            </div>
-          )
-        }
-        if (enrichment.type === "video_result" && enrichment.data) {
-          const data = enrichment.data as { jobId: string; title: string | null; fileSize: number | null }
-          return <VideoResultCard key={enrichment.id} jobId={data.jobId} title={data.title} fileSize={data.fileSize} />
-        }
-        // System enrichment — render as assistant message
-        return (
-          <MessageBubble
-            key={enrichment.id}
-            message={{ id: enrichment.id, role: "assistant", content: enrichment.content }}
-          />
-        )
-      })}
 
       {/* Error banner */}
       {error != null && <ErrorBanner message={typeof error === "string" ? error : String(error)} onRetry={onRetry} />}

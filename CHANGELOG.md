@@ -15,6 +15,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Checkpoint card entrance animation has 200ms delay for smoother UX
 - Thread ID passed from agent runtime to render service for job-conversation association
 - Code review fixes: wasLoadingRef reset on thread switch, UUID regex scoped to render context, safe Array.isArray guard on selectedOptions, findTitleInProps traverses arrays
+- Chat timeline unified: enrichments (resolved checkpoints, video results) now render inline after their anchor message instead of jumping to the bottom
 
 ### Added
 

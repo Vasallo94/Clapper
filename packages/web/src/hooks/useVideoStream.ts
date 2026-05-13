@@ -178,6 +178,15 @@ export function useVideoStream(options: UseVideoStreamOptions = {}): VideoStream
 
   const isInterrupted = interrupt != null
 
+  // ----- Enrichments -----
+  const addEnrichment = useCallback((enrichment: Enrichment) => {
+    setEnrichments((prev) => [...prev, enrichment])
+  }, [])
+
+  const clearEnrichments = useCallback(() => {
+    setEnrichments([])
+  }, [])
+
   // ----- Submit (new message) -----
   const submit = useCallback(
     (message: string) => {
@@ -190,12 +199,24 @@ export function useVideoStream(options: UseVideoStreamOptions = {}): VideoStream
   // ----- Resume (from interrupt) -----
   const resume = useCallback(
     (decision: Record<string, unknown>) => {
+      if (checkpointType && interruptValue) {
+        addEnrichment({
+          id: crypto.randomUUID(),
+          type: "resolved_checkpoint",
+          content: "",
+          data: {
+            checkpointType,
+            checkpointData: { ...interruptValue },
+            userDecision: decision,
+          },
+        })
+      }
       stream.submit(null, {
         command: { resume: decision },
         streamSubgraphs: true,
       })
     },
-    [stream],
+    [stream, checkpointType, interruptValue, addEnrichment],
   )
 
   // ----- Thread switching -----
@@ -207,15 +228,6 @@ export function useVideoStream(options: UseVideoStreamOptions = {}): VideoStream
     },
     [stream],
   )
-
-  // ----- Enrichments -----
-  const addEnrichment = useCallback((enrichment: Enrichment) => {
-    setEnrichments((prev) => [...prev, enrichment])
-  }, [])
-
-  const clearEnrichments = useCallback(() => {
-    setEnrichments([])
-  }, [])
 
   return {
     // SDK passthrough

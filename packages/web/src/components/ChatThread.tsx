@@ -34,6 +34,44 @@ import { WorkingIndicator } from "./WorkingIndicator"
 import { theme } from "../theme"
 
 // ---------------------------------------------------------------------------
+// Helpers — resolved checkpoint badge
+// ---------------------------------------------------------------------------
+
+function UserDecisionBadge({ decision }: { decision: Record<string, unknown> }) {
+  let label = "Respondido"
+  if (decision.approved === true && decision.selectedValue) {
+    label = `Seleccionado: ${decision.selectedValue}`
+  } else if (decision.approved === true && decision.selectedOptions) {
+    const opts = decision.selectedOptions as Array<{ label: string }>
+    label = `Seleccionados: ${opts.map((o) => o.label).join(", ")}`
+  } else if (decision.approved === true && decision.answer) {
+    label = "Respuesta enviada"
+  } else if (decision.approved === true) {
+    label = "Aprobado"
+  } else if (decision.approved === false) {
+    label = "Cambios solicitados"
+  }
+  return (
+    <div
+      style={{
+        fontSize: 11,
+        color: theme.colors.text.muted,
+        fontFamily: theme.fonts.mono,
+        padding: "4px 8px",
+        marginTop: 4,
+      }}
+    >
+      {label}
+    </div>
+  )
+}
+
+const DISABLED_HANDLERS = {
+  onApprove: () => {},
+  onRequestChanges: () => {},
+}
+
+// ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
 
@@ -258,8 +296,20 @@ export function ChatThread({
         </div>
       )}
 
-      {/* Enrichments (video results, system messages) */}
+      {/* Enrichments (resolved checkpoints, video results, system messages) */}
       {enrichments.map((enrichment) => {
+        if (enrichment.type === "resolved_checkpoint" && enrichment.data) {
+          const cpType = enrichment.data.checkpointType as CheckpointType
+          const cpData = enrichment.data.checkpointData as Record<string, unknown>
+          const userDecision = enrichment.data.userDecision as Record<string, unknown>
+          if (!cpType || !cpData) return null
+          return (
+            <div key={enrichment.id} style={{ marginTop: 8, opacity: 0.7, pointerEvents: "none" }}>
+              {renderCheckpointCard(cpType, cpData, DISABLED_HANDLERS, true)}
+              <UserDecisionBadge decision={userDecision} />
+            </div>
+          )
+        }
         if (enrichment.type === "video_result" && enrichment.data) {
           const data = enrichment.data as { jobId: string; title: string | null; fileSize: number | null }
           return <VideoResultCard key={enrichment.id} jobId={data.jobId} title={data.title} fileSize={data.fileSize} />

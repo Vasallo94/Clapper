@@ -1,21 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import type {
-  AgentSummary,
-  AudioChartData,
-  ChatMessage,
-  ChatResponse,
-  CheckpointData,
-  CheckpointType,
-  DirectionData,
-  RevisionPlanData,
-  SoundChartData,
-  StoredVideoArtifact,
-  TargetSelectionData,
-  ValidationReportData,
-  VariantPlanData,
-} from "./types"
-import { client, createThread, fetchConfigs, fetchJobStatus, fetchLatestRender } from "./api"
-import { useAgentStream } from "./hooks/useAgentStream"
+import type { StoredVideoArtifact } from "./types"
+import { fetchConfigs, fetchJobStatus, fetchLatestRender } from "./api"
+import { useVideoStream } from "./hooks/useVideoStream"
 import { usePipelineTracker } from "./hooks/usePipelineTracker"
 import { AppLayout } from "./components/AppLayout"
 import { Sidebar } from "./components/Sidebar"
@@ -34,26 +20,10 @@ import {
   setActiveVideoTarget,
   type StoredThread,
 } from "./lib/threadStorage"
-import { stripTargetMetadata } from "./lib/targetMetadata"
 
-function extractJobIdFromAgents(
-  agents: Array<{ tools: Array<{ name: string; output?: string; status: string }> }>,
-): string | null {
-  for (const agent of agents) {
-    for (const tool of agent.tools) {
-      if (tool.status !== "done" || !tool.output) continue
-      if (tool.name !== "submit_render" && tool.name !== "check_render_status") continue
-      try {
-        const result = JSON.parse(tool.output)
-        const id = result.jobId || result.id
-        if (typeof id === "string" && /^[a-f0-9-]+$/.test(id)) return id
-      } catch {
-        /* skip non-JSON */
-      }
-    }
-  }
-  return null
-}
+// ---------------------------------------------------------------------------
+// Helpers — kept from previous version
+// ---------------------------------------------------------------------------
 
 function artifactFromCompletedJob(job: {
   id: string
@@ -69,33 +39,53 @@ function artifactFromCompletedJob(job: {
     composition: job.composition,
     title: job.title ?? job.config_id ?? job.id,
     createdAt: new Date().toISOString(),
+    source: "render",
   }
 }
 
 function artifactFromConfig(config: {
   configPath: string
   configId?: string
+  jobId?: string
   title?: string
   composition?: string
   sceneCount?: number
   durationSeconds?: number
+  source?: "content" | "render"
 }): StoredVideoArtifact {
   return {
-    id: config.configPath,
+    id: config.jobId ?? config.configPath,
     configPath: config.configPath,
     configId: config.configId,
+    jobId: config.jobId,
     composition: config.composition,
     title: config.title ?? config.configId ?? config.configPath,
     createdAt: new Date().toISOString(),
     sceneCount: config.sceneCount,
     durationSeconds: config.durationSeconds,
+    source: config.source,
   }
 }
 
+function mergeArtifacts(primary: StoredVideoArtifact[], secondary: StoredVideoArtifact[]): StoredVideoArtifact[] {
+  const seen = new Set<string>()
+  const merged: StoredVideoArtifact[] = []
+  for (const artifact of [...primary, ...secondary]) {
+    const key = artifact.jobId ? `job:${artifact.jobId}` : `config:${artifact.configPath}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    merged.push(artifact)
+  }
+  return merged
+}
+
+// ---------------------------------------------------------------------------
+// App
+// ---------------------------------------------------------------------------
+
 export default function App() {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
-  const [threadId, setThreadId] = useState<string | undefined>(() => getCurrentThreadId() ?? undefined)
+  const [threadId, setThreadId] = useState<string | null>(() => getCurrentThreadId())
   const [storedThreads, setStoredThreads] = useState<StoredThread[]>(() => getThreads())
   const [videoArtifacts, setVideoArtifacts] = useState<StoredVideoArtifact[]>(() => getVideoArtifacts())
   const [activeTarget, setActiveTargetState] = useState(() => getActiveVideoTarget())
@@ -103,112 +93,108 @@ export default function App() {
   activeTargetRef.current = activeTarget
   const pipeline = usePipelineTracker()
 
-  const handleAgentComplete = useCallback((summary: AgentSummary) => {
-    if (summary.tools.length === 0 && summary.artifacts.length === 0 && !summary.llmText?.trim()) return
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        role: "agent" as const,
-        content: summary.name,
-        agentSummary: summary,
-      },
-    ])
-  }, [])
+  // ----- Core stream hook -----
+  const videoStream = useVideoStream({
+    threadId,
+    onThreadId: (id) => {
+      setThreadId(id)
+      setCurrentThreadId(id)
+      saveThread({
+        threadId: id,
+        title: input.trim().slice(0, 60) || "Nueva conversacion",
+        createdAt: new Date().toISOString(),
+        lastActiveAt: new Date().toISOString(),
+      })
+      setStoredThreads(getThreads())
+    },
+    onPipelineAdvance: (stage, message) => {
+      pipeline.advance(stage, message)
+    },
+    onError: (error) => {
+      const msg = error instanceof Error ? error.message : String(error)
+      pipeline.advance("error", msg)
+    },
+    activeTarget,
+  })
 
-  const stream = useAgentStream(pipeline.advanceFromStream, handleAgentComplete)
-
-  useEffect(() => {
-    const allArtifacts = [
-      ...stream.streamState.artifacts,
-      ...stream.streamState.completedAgents.flatMap((a) => a.artifacts),
-    ]
-    const decision = allArtifacts.find((a) => a.kind === "intent_decision")
-    if (decision?.data?.mode && !pipeline.state.mode) {
-      pipeline.setMode(decision.data.mode as Parameters<typeof pipeline.setMode>[0])
-    }
-  }, [stream.streamState.artifacts, stream.streamState.completedAgents, pipeline])
-
+  // ----- Load configs on mount -----
   useEffect(() => {
     fetchConfigs()
       .then((response) => {
         const fromConfigs = response.configs
           .filter((config) => !config.error)
           .map((config) => artifactFromConfig(config))
-        setVideoArtifacts(fromConfigs)
+        const merged = mergeArtifacts(fromConfigs, getVideoArtifacts())
+        setVideoArtifacts(merged)
       })
       .catch((err) => console.warn("[init] fetchConfigs failed:", err))
   }, [])
 
+  // ----- Detect video results when stream finishes -----
+  useEffect(() => {
+    if (videoStream.isLoading) return
+    if (!videoStream.messages.length) return
+    if (videoStream.isInterrupted) return
+
+    const lastMsg = videoStream.messages[videoStream.messages.length - 1]
+    if ((lastMsg as { type: string }).type !== "ai") return
+    const content = typeof lastMsg.content === "string" ? lastMsg.content : ""
+    const jobIdMatch = content.match(/jobId[:\s]*["']?([a-f0-9-]+)["']?/i)
+
+    if (jobIdMatch) {
+      fetchJobStatus(jobIdMatch[1])
+        .then((job) => {
+          if (job.status === "done") {
+            const artifact = artifactFromCompletedJob(job)
+            saveVideoArtifact(artifact)
+            setVideoArtifacts(getVideoArtifacts())
+            setActiveVideoTarget(artifact)
+            setActiveTargetState(artifact)
+            videoStream.addEnrichment({
+              id: crypto.randomUUID(),
+              type: "video_result",
+              content: "Video listo:",
+              data: { jobId: job.id, title: job.title, fileSize: job.file_size },
+            })
+          }
+        })
+        .catch((err) => console.warn("[auto-lookup] fetchJobStatus failed:", err))
+    } else if (activeTargetRef.current?.configId) {
+      fetchLatestRender(activeTargetRef.current.configId)
+        .then((job) => {
+          if (job) {
+            videoStream.addEnrichment({
+              id: crypto.randomUUID(),
+              type: "video_result",
+              content: "Video listo:",
+              data: { jobId: job.id, title: job.title, fileSize: job.file_size },
+            })
+          }
+        })
+        .catch(() => {})
+    }
+  }, [videoStream.isLoading]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ----- Thread management -----
+
   const handleNewThread = useCallback(() => {
-    setThreadId(undefined)
+    setThreadId(null)
     setCurrentThreadId(null)
-    setMessages([])
+    videoStream.switchThread(null)
+    videoStream.clearEnrichments()
     setActiveVideoTarget(null)
     setActiveTargetState(null)
-    stream.resetStream()
     pipeline.reset()
-  }, [stream, pipeline])
-
-  const addMessage = useCallback(
-    (
-      role: ChatMessage["role"],
-      content: string,
-      checkpoint?: ChatMessage["checkpoint"],
-      checkpointType?: CheckpointType,
-    ) => {
-      const id = crypto.randomUUID()
-      setMessages((prev) => [...prev, { id, role, content, checkpoint, checkpointType }])
-      return id
-    },
-    [],
-  )
-
-  const handleSelectTarget = useCallback(
-    (target: StoredVideoArtifact | null) => {
-      setActiveVideoTarget(target)
-      setActiveTargetState(target)
-      if (target?.configId) {
-        fetchLatestRender(target.configId)
-          .then((job) => {
-            if (job) {
-              addMessage(
-                "assistant",
-                "Video listo:",
-                { jobId: job.id, title: job.title, fileSize: job.file_size },
-                "video_result",
-              )
-            }
-          })
-          .catch(() => {})
-      }
-    },
-    [addMessage],
-  )
+  }, [videoStream, pipeline])
 
   const handleSelectThread = useCallback(
-    async (tid: string) => {
+    (tid: string) => {
       setThreadId(tid)
       setCurrentThreadId(tid)
-      setMessages([])
-      stream.resetStream()
+      videoStream.switchThread(tid)
       pipeline.reset()
-      try {
-        const state = await client.threads.getState(tid)
-        const msgs =
-          ((state.values as Record<string, unknown>)?.messages as Array<{ type: string; content: string }>) ?? []
-        for (const m of msgs) {
-          addMessage(
-            m.type === "human" ? "user" : "assistant",
-            stripTargetMetadata(typeof m.content === "string" ? m.content : JSON.stringify(m.content)),
-          )
-        }
-      } catch {
-        removeThread(tid)
-        setStoredThreads(getThreads())
-      }
     },
-    [addMessage, stream, pipeline],
+    [videoStream, pipeline],
   )
 
   const handleDeleteThread = useCallback(
@@ -220,228 +206,83 @@ export default function App() {
     [threadId, handleNewThread],
   )
 
-  const lastProcessedResult = useRef<ChatResponse | null>(null)
-  const lastProcessedError = useRef<string | null>(null)
+  // ----- Target management -----
 
-  useEffect(() => {
-    if (!stream.result || stream.result === lastProcessedResult.current) return
-    lastProcessedResult.current = stream.result
-    const res = stream.result
-    setThreadId(res.thread_id)
-
-    if (res.type === "checkpoint" && res.data) {
-      const cpType = (res.data as unknown as Record<string, unknown>).type as string
-      if (cpType === "sound_chart_checkpoint") {
-        pipeline.advance("sound_review", "Carta de sonido generada")
-        addMessage(
-          "assistant",
-          "He preparado una propuesta de carta de sonido:",
-          res.data as SoundChartData,
-          "sound_chart",
-        )
-      } else if (cpType === "audio_chart_checkpoint") {
-        pipeline.advance("sound_review", "Carta de audio generada")
-        addMessage(
-          "assistant",
-          "He preparado una propuesta de audio y guion:",
-          res.data as AudioChartData,
-          "audio_chart",
-        )
-      } else if (cpType === "direction_checkpoint") {
-        pipeline.advance("director", "Direccion editorial lista")
-        addMessage(
-          "assistant",
-          "El director ha preparado el timing y beats narrativos:",
-          res.data as DirectionData,
-          "direction",
-        )
-      } else if (cpType === "escaleta_checkpoint") {
-        pipeline.advance("escaleta_review", "Escaleta generada")
-        addMessage("assistant", "He preparado una propuesta de escaleta:", res.data as CheckpointData, "escaleta")
-      } else if (cpType === "validation_report") {
-        pipeline.advance("rendering", "Validacion generada")
-        addMessage("assistant", "Resultado de validacion:", res.data as ValidationReportData, "validation")
-      } else if (cpType === "target_selection_checkpoint") {
-        pipeline.advance("orchestrator", "Seleccion de target requerida")
-        addMessage(
-          "assistant",
-          "Necesito que elijas el config objetivo:",
-          res.data as TargetSelectionData,
-          "target_selection",
-        )
-      } else if (cpType === "revision_plan_checkpoint") {
-        pipeline.advance("escaleta_review", "Plan de revision preparado")
-        addMessage("assistant", "He preparado un plan de revision:", res.data as RevisionPlanData, "revision_plan")
-      } else if (cpType === "variant_plan_checkpoint") {
-        pipeline.advance("escaleta_review", "Plan de variante preparado")
-        addMessage("assistant", "He preparado un plan de variante:", res.data as VariantPlanData, "variant_plan")
-      } else {
-        pipeline.advance("escaleta_review", `Checkpoint: ${cpType}`)
-        addMessage(
-          "assistant",
-          `Checkpoint recibido (${cpType}):`,
-          res.data as unknown as Record<string, unknown>,
-          "generic",
-        )
+  const handleSelectTarget = useCallback(
+    (target: StoredVideoArtifact | null) => {
+      setActiveVideoTarget(target)
+      setActiveTargetState(target)
+      if (target?.jobId) {
+        videoStream.addEnrichment({
+          id: crypto.randomUUID(),
+          type: "video_result",
+          content: "Video listo:",
+          data: { jobId: target.jobId, title: target.title ?? target.configId ?? target.jobId, fileSize: null },
+        })
+        return
       }
-    } else if (res.type === "message") {
-      const content = res.content?.trim() || "Proceso completado."
-      pipeline.advance("done", "Pipeline completado")
-      addMessage("assistant", content)
-
-      const jobIdMatch = content.match(/jobId[:\s]*["']?([a-f0-9-]+)["']?/i)
-      if (jobIdMatch) {
-        fetchJobStatus(jobIdMatch[1])
+      if (target?.configId) {
+        fetchLatestRender(target.configId)
           .then((job) => {
-            if (job.status === "done") {
-              const artifact = artifactFromCompletedJob(job)
-              saveVideoArtifact(artifact)
-              setVideoArtifacts(getVideoArtifacts())
-              setActiveVideoTarget(artifact)
-              setActiveTargetState(artifact)
-              addMessage(
-                "assistant",
-                "Video listo:",
-                { jobId: job.id, title: job.title, fileSize: job.file_size, target: artifact },
-                "video_result",
-              )
+            if (job) {
+              videoStream.addEnrichment({
+                id: crypto.randomUUID(),
+                type: "video_result",
+                content: "Video listo:",
+                data: { jobId: job.id, title: job.title, fileSize: job.file_size },
+              })
             }
           })
-          .catch((err) => console.warn("[auto-lookup] fetchJobStatus failed:", err))
-      } else {
-        const fallbackJobId = activeTargetRef.current?.configId
-          ? null
-          : extractJobIdFromAgents(stream.streamState.completedAgents)
-        if (fallbackJobId) {
-          fetchJobStatus(fallbackJobId)
-            .then((job) => {
-              if (job.status === "done") {
-                const artifact = artifactFromCompletedJob(job)
-                saveVideoArtifact(artifact)
-                setVideoArtifacts(getVideoArtifacts())
-                setActiveVideoTarget(artifact)
-                setActiveTargetState(artifact)
-                addMessage(
-                  "assistant",
-                  "Video listo:",
-                  { jobId: job.id, title: job.title, fileSize: job.file_size, target: artifact },
-                  "video_result",
-                )
-              } else if (job.status === "error") {
-                addMessage("assistant", `El render falló: ${job.error?.slice(0, 200) || "Error desconocido"}`)
-              }
-            })
-            .catch((err) => console.warn("[auto-lookup] fetchJobStatus from tools failed:", err))
-        } else if (activeTargetRef.current?.configId) {
-          const targetConfigId = activeTargetRef.current.configId
-          fetchLatestRender(targetConfigId)
-            .then((job) => {
-              if (job) {
-                addMessage(
-                  "assistant",
-                  "Video listo:",
-                  { jobId: job.id, title: job.title, fileSize: job.file_size },
-                  "video_result",
-                )
-              } else {
-                const targetTitle = activeTargetRef.current?.title || targetConfigId
-                addMessage(
-                  "assistant",
-                  `No hay un video renderizado para **${targetTitle}**. Puedes usar "Renderiza otra vez" para generar uno, o pedir que se regeneren los recursos de audio primero.`,
-                )
-              }
-            })
-            .catch((err) => console.warn("[auto-lookup] fetchLatestRender failed:", err))
-        }
+          .catch(() => {})
       }
-    }
-  }, [stream.result, addMessage, pipeline])
+    },
+    [videoStream],
+  )
 
-  useEffect(() => {
-    const err = stream.streamState.error
-    if (!err || err === lastProcessedError.current) return
-    lastProcessedError.current = err
-    pipeline.advance("error", err)
-  }, [stream.streamState.error, pipeline])
+  // ----- Send message -----
 
-  const handleSend = async () => {
+  const handleSend = useCallback(() => {
     const text = input.trim()
-    if (!text || stream.isStreaming) return
+    if (!text || videoStream.isLoading) return
     setInput("")
-    addMessage("user", text)
-    stream.resetStream()
     pipeline.reset()
     pipeline.advance("orchestrator", "Mensaje recibido: " + text.slice(0, 60))
+    videoStream.submit(text)
+  }, [input, videoStream, pipeline])
 
-    try {
-      const tid = await resolveThreadForSend(text)
-      stream.startStream(tid, text, activeTarget)
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err)
-      pipeline.advance("error", message)
-      addMessage("assistant", `No he podido conectar con el backend: ${message}`)
-    }
-  }
+  // ----- Checkpoint handlers -----
 
   const createCheckpointHandlers = useCallback(
-    (approvedMessage: string, feedbackPrefix: string) => ({
+    () => ({
       onApprove: (payload?: Record<string, unknown>) => {
-        if (!threadId || stream.isStreaming) return
-        addMessage("user", approvedMessage)
-        stream.resumeStream(threadId, { approved: true, ...payload })
+        if (videoStream.isLoading) return
+        videoStream.resume({ approved: true, ...payload })
       },
       onRequestChanges: (feedback: string) => {
-        if (!threadId || stream.isStreaming) return
-        addMessage("user", `${feedbackPrefix}: ${feedback}`)
-        stream.resumeStream(threadId, { approved: false, feedback })
+        if (videoStream.isLoading) return
+        videoStream.resume({ approved: false, feedback })
       },
     }),
-    [threadId, stream, addMessage],
+    [videoStream],
   )
 
   const checkpointHandlers = useMemo(
     () => ({
-      escaleta: createCheckpointHandlers("Aprobado", "Cambios solicitados"),
-      direction: createCheckpointHandlers("Direccion aprobada", "Ajustes de direccion"),
-      sound_chart: createCheckpointHandlers("Sonido aprobado", "Ajustes de sonido"),
-      audio_chart: createCheckpointHandlers("Audio aprobado", "Ajustes de audio"),
-      validation: createCheckpointHandlers("Validacion aprobada", "Ajustes de validacion"),
-      target_selection: createCheckpointHandlers("Target seleccionado", "Seleccion de target"),
-      revision_plan: createCheckpointHandlers("Plan aprobado", "Ajustes del plan"),
-      variant_plan: createCheckpointHandlers("Variante aprobada", "Ajustes de variante"),
-      generic: createCheckpointHandlers("Aprobado", "Cambios"),
+      escaleta: createCheckpointHandlers(),
+      direction: createCheckpointHandlers(),
+      sound_chart: createCheckpointHandlers(),
+      audio_chart: createCheckpointHandlers(),
+      interaction: createCheckpointHandlers(),
+      validation: createCheckpointHandlers(),
+      target_selection: createCheckpointHandlers(),
+      revision_plan: createCheckpointHandlers(),
+      variant_plan: createCheckpointHandlers(),
+      generic: createCheckpointHandlers(),
     }),
     [createCheckpointHandlers],
   )
 
-  const resolveThreadForSend = useCallback(
-    async (initialMessage: string) => {
-      if (threadId) {
-        try {
-          await client.threads.getState(threadId)
-          return threadId
-        } catch {
-          removeThread(threadId)
-          setStoredThreads(getThreads())
-          setCurrentThreadId(null)
-          setThreadId(undefined)
-        }
-      }
-
-      const tid = await createThread()
-      setThreadId(tid)
-      setCurrentThreadId(tid)
-      saveThread({
-        threadId: tid,
-        title: initialMessage.slice(0, 60),
-        createdAt: new Date().toISOString(),
-        lastActiveAt: new Date().toISOString(),
-      })
-      setStoredThreads(getThreads())
-      return tid
-    },
-    [threadId],
-  )
+  // ----- Render -----
 
   return (
     <AppLayout
@@ -451,7 +292,7 @@ export default function App() {
           mode={pipeline.state.mode}
           events={pipeline.state.events}
           threads={storedThreads}
-          currentThreadId={threadId}
+          currentThreadId={threadId ?? undefined}
           onSelectThread={handleSelectThread}
           onDeleteThread={handleDeleteThread}
           onNewThread={handleNewThread}
@@ -461,19 +302,24 @@ export default function App() {
         <>
           <Header artifacts={videoArtifacts} activeTarget={activeTarget} onSelectTarget={handleSelectTarget} />
           <ChatThread
-            messages={messages}
-            streamState={stream.streamState}
+            messages={videoStream.messages}
+            getSubagentsByMessage={videoStream.getSubagentsByMessage}
+            activeSubagents={videoStream.activeSubagents}
+            checkpointType={videoStream.checkpointType}
+            checkpointData={videoStream.checkpointData}
             checkpointHandlers={checkpointHandlers}
-            loading={stream.isStreaming}
+            enrichments={videoStream.enrichments}
+            isLoading={videoStream.isLoading}
             loadingLabel={pipeline.getLoadingLabel()}
-            onRetry={stream.clearError}
+            error={videoStream.error}
+            onRetry={() => {}}
             currentStage={pipeline.state.currentStage}
           />
           <InputBar
             value={input}
             onChange={setInput}
             onSend={handleSend}
-            disabled={stream.isStreaming}
+            disabled={videoStream.isLoading}
             activeTarget={activeTarget}
           />
         </>

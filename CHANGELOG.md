@@ -14,6 +14,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - `MessageRole` type narrowed from `"user" | "assistant" | "agent"` to `"user" | "assistant"` — SDK handles subagent lifecycle internally
 - Removed `AgentSummary`, `AgentArtifact`, `AgentArtifactKind` types from web types (replaced by SDK-native subagent tracking)
 - Added `Enrichment` type for injecting video results and system messages into the conversational UI
+- `App.tsx` rewritten to use `useVideoStream` hook — eliminates local `ChatMessage[]` state, manual thread creation, `extractResponse` polling, `handleAgentComplete` callback splitting, and `resolveThreadForSend` pattern; SDK messages are now single source of truth
 
 ### Added
 

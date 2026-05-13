@@ -41,10 +41,20 @@ function findTitleInProps(props: Record<string, unknown>, depth = 0): string {
     if (val.length >= 3 && val.length <= 100) return val
   }
   for (const value of Object.values(props)) {
-    const record = asRecord(value)
-    if (record) {
-      const found = findTitleInProps(record, depth + 1)
-      if (found) return found
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const record = asRecord(item)
+        if (record) {
+          const found = findTitleInProps(record, depth + 1)
+          if (found) return found
+        }
+      }
+    } else {
+      const record = asRecord(value)
+      if (record) {
+        const found = findTitleInProps(record, depth + 1)
+        if (found) return found
+      }
     }
   }
   return ""

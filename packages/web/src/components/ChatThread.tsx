@@ -41,9 +41,11 @@ function UserDecisionBadge({ decision }: { decision: Record<string, unknown> }) 
   let label = "Respondido"
   if (decision.approved === true && decision.selectedValue) {
     label = `Seleccionado: ${decision.selectedValue}`
-  } else if (decision.approved === true && decision.selectedOptions) {
-    const opts = decision.selectedOptions as Array<{ label: string }>
-    label = `Seleccionados: ${opts.map((o) => o.label).join(", ")}`
+  } else if (decision.approved === true && Array.isArray(decision.selectedOptions)) {
+    const opts = (decision.selectedOptions as Array<unknown>).filter(
+      (o): o is { label: string } => typeof o === "object" && o !== null && "label" in o,
+    )
+    label = opts.length ? `Seleccionados: ${opts.map((o) => o.label).join(", ")}` : "Seleccionado"
   } else if (decision.approved === true && decision.answer) {
     label = "Respuesta enviada"
   } else if (decision.approved === true) {

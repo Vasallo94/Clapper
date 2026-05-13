@@ -64,6 +64,15 @@ describe("getSceneTitle", () => {
     ).toBe("Project Timeline")
   })
 
+  it("extracts title from array of objects in generic fallback", () => {
+    expect(
+      getSceneTitle({
+        componentId: "unknown-list",
+        props: { items: [{ title: "First Item" }, { title: "Second" }] },
+      }),
+    ).toBe("First Item")
+  })
+
   it("returns dash when no title can be extracted", () => {
     expect(getSceneTitle({ componentId: "empty", props: {} })).toBe("-")
   })

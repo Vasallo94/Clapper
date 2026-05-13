@@ -144,7 +144,7 @@ export default function App() {
       const content = typeof msg.content === "string" ? msg.content : ""
       const match =
         content.match(/jobId[:\s]*["']?([a-f0-9-]{36})["']?/i) ||
-        content.match(/\b([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\b/)
+        content.match(/(?:render|job|video)[^]*?\b([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\b/i)
       if (match) {
         jobId = match[1]
         break

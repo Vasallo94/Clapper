@@ -235,6 +235,7 @@ export function useVideoStream(options: UseVideoStreamOptions = {}): VideoStream
   const switchThread = useCallback(
     (newThreadId: string | null) => {
       reportedSubagentsRef.current.clear()
+      wasLoadingRef.current = false
       setEnrichments([])
       stream.switchThread(newThreadId)
     },

@@ -5,6 +5,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Markdown now renders in assistant chat messages (bold, headings, lists, code blocks) instead of showing raw syntax
+- Custom scene types (problem-solution, before-after, flow-diagram) show meaningful titles in escaleta and direction cards instead of "-"
+- Checkpoint cards persist after user selection, showing the chosen option as a disabled card with decision badge
+- VideoResultCard auto-detects render completion from broader jobId patterns across recent messages
+- Pipeline tracker advances to "Completado" when stream finishes instead of staying stuck on last active stage
+- Checkpoint card entrance animation has 200ms delay for smoother UX
+- Thread ID passed from agent runtime to render service for job-conversation association
+
 ### Added
 
 - `pnpm-workspace.yaml` for pnpm workspace configuration with `better-sqlite3` build approval

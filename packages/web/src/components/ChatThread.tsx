@@ -1,9 +1,13 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useMemo, useRef } from "react"
+import type { Message } from "@langchain/langgraph-sdk"
+import type { SubagentStreamInterface } from "@langchain/langgraph-sdk/react"
 import type {
   AudioChartData,
-  ChatMessage,
   CheckpointData,
+  CheckpointType,
   DirectionData,
+  Enrichment,
+  InteractionRequestData,
   PipelineStageId,
   RevisionPlanData,
   SoundChartData,
@@ -11,12 +15,13 @@ import type {
   ValidationReportData,
   VariantPlanData,
 } from "../types"
-import type { StreamState } from "../hooks/useAgentStream"
+import { stripTargetMetadata } from "../lib/targetMetadata"
 import { CheckpointCard } from "./CheckpointCard"
 import { DirectionCard } from "./DirectionCard"
 import { GenericCheckpointCard } from "./GenericCheckpointCard"
+import { InteractionRequestCard } from "./InteractionRequestCard"
 import { SoundChartCard } from "./SoundChartCard"
-import { StreamingBubble } from "./StreamingBubble"
+import { SubagentCard } from "./SubagentCard"
 import { ErrorBanner } from "./ErrorBanner"
 import { MessageBubble } from "./MessageBubble"
 import { VideoResultCard } from "./VideoResultCard"
@@ -28,37 +33,150 @@ import { VariantPlanCard } from "./VariantPlanCard"
 import { WorkingIndicator } from "./WorkingIndicator"
 import { theme } from "../theme"
 
+// ---------------------------------------------------------------------------
+// Props
+// ---------------------------------------------------------------------------
+
 interface Props {
-  messages: ChatMessage[]
-  streamState: StreamState
+  messages: Message[]
+  getSubagentsByMessage: (msgId: string) => SubagentStreamInterface[]
+  activeSubagents: SubagentStreamInterface[]
+  checkpointType: CheckpointType | null
+  checkpointData: Record<string, unknown> | null
   checkpointHandlers: Record<
     string,
-    { onApprove: (payload?: Record<string, unknown>) => void; onRequestChanges: (feedback: string) => void }
+    {
+      onApprove: (payload?: Record<string, unknown>) => void
+      onRequestChanges: (feedback: string) => void
+    }
   >
-  loading: boolean
+  enrichments: Enrichment[]
+  isLoading: boolean
   loadingLabel: string
+  error: unknown
   onRetry?: () => void
   currentStage?: PipelineStageId
 }
 
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Extract displayable text from an SDK Message whose content may be
+ * `string | MessageContentComplex[]`.
+ */
+function getMessageContent(msg: Message): string {
+  if (typeof msg.content === "string") return msg.content
+  if (Array.isArray(msg.content))
+    return msg.content
+      .filter(
+        (c): c is { type: "text"; text: string } =>
+          typeof c === "object" && c !== null && "type" in c && c.type === "text",
+      )
+      .map((c) => c.text)
+      .join("")
+  return ""
+}
+
+/**
+ * Render the appropriate checkpoint card for the given type/data.
+ */
+function renderCheckpointCard(
+  type: CheckpointType,
+  data: Record<string, unknown>,
+  handlers: {
+    onApprove: (payload?: Record<string, unknown>) => void
+    onRequestChanges: (feedback: string) => void
+  },
+  disabled: boolean,
+): React.ReactNode {
+  const cardProps = {
+    onApprove: handlers.onApprove,
+    onRequestChanges: handlers.onRequestChanges,
+    disabled,
+  }
+
+  switch (type) {
+    case "interaction":
+      return <InteractionRequestCard data={data as unknown as InteractionRequestData} {...cardProps} />
+    case "sound_chart":
+      return <SoundChartCard data={data as unknown as SoundChartData} {...cardProps} />
+    case "audio_chart":
+      return <SoundChartCard data={data as unknown as AudioChartData} {...cardProps} />
+    case "direction":
+      return <DirectionCard data={data as unknown as DirectionData} {...cardProps} />
+    case "escaleta":
+      return <CheckpointCard data={data as unknown as CheckpointData} {...cardProps} />
+    case "validation":
+      return <ValidationReportCard data={data as unknown as ValidationReportData} {...cardProps} />
+    case "target_selection":
+      return <TargetSelectionCard data={data as unknown as TargetSelectionData} {...cardProps} />
+    case "revision_plan":
+      return <RevisionPlanCard data={data as unknown as RevisionPlanData} {...cardProps} />
+    case "variant_plan":
+      return <VariantPlanCard data={data as unknown as VariantPlanData} {...cardProps} />
+    case "video_result":
+      return null // handled via enrichments
+    case "generic":
+      return <GenericCheckpointCard data={data} {...cardProps} />
+    default:
+      return null
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
 export function ChatThread({
   messages,
-  streamState,
+  getSubagentsByMessage,
+  activeSubagents,
+  checkpointType,
+  checkpointData,
   checkpointHandlers,
-  loading,
+  enrichments,
+  isLoading,
   loadingLabel,
+  error,
   onRetry,
   currentStage,
 }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
+  // Scroll to bottom when content changes
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages.length, loading, streamState.activeAgent, streamState.tools.length])
+  }, [messages.length, isLoading, activeSubagents.length, enrichments.length])
+
+  // Collect subagent IDs already rendered inline under a message so we skip
+  // them in the "unlinked active subagents" section at the bottom.
+  const linkedSubagentIds = useMemo(() => {
+    const ids = new Set<string>()
+    for (const msg of messages) {
+      const msgId = msg.id
+      if (!msgId) continue
+      for (const sub of getSubagentsByMessage(msgId)) {
+        ids.add(sub.id)
+      }
+    }
+    return ids
+  }, [messages, getSubagentsByMessage])
+
+  // Active subagents not yet linked to any message
+  const unlinkedActiveSubagents = useMemo(
+    () => activeSubagents.filter((sub) => !linkedSubagentIds.has(sub.id)),
+    [activeSubagents, linkedSubagentIds],
+  )
+
+  // Determine if there's any active subagent (for loading indicator logic)
+  const hasActiveSubagent = activeSubagents.length > 0
 
   return (
     <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
-      {messages.length === 0 && !loading && (
+      {/* Empty state */}
+      {messages.length === 0 && !isLoading && (
         <div
           style={{
             display: "flex",
@@ -87,94 +205,85 @@ export function ChatThread({
         </div>
       )}
 
-      {messages.map((msg) => {
-        if (msg.role === "agent" && msg.agentSummary) {
+      {/* Message list */}
+      {messages.map((msg, i) => {
+        const msgId = msg.id ?? `msg-${i}`
+        const rawContent = getMessageContent(msg)
+
+        // --- Human messages → user bubble ---
+        if (msg.type === "human") {
+          const displayContent = stripTargetMetadata(rawContent)
+          if (!displayContent.trim()) return null
+          return <MessageBubble key={msgId} message={{ id: msgId, role: "user", content: displayContent }} />
+        }
+
+        // --- AI messages ---
+        if (msg.type === "ai") {
+          const linkedSubs = msg.id ? getSubagentsByMessage(msg.id) : []
+          const hasContent = rawContent.trim().length > 0
+
+          // AI message with no content and no linked subagents → skip
+          if (!hasContent && linkedSubs.length === 0) return null
+
           return (
-            <StreamingBubble
-              key={msg.id}
-              agentName={msg.agentSummary.name}
-              tools={msg.agentSummary.tools}
-              artifacts={msg.agentSummary.artifacts}
-              llmText={msg.agentSummary.llmText}
-              status="completed"
-              durationMs={msg.agentSummary.durationMs}
-              defaultExpanded={false}
-            />
+            <React.Fragment key={msgId}>
+              {/* Render the text bubble only if there is content */}
+              {hasContent && <MessageBubble message={{ id: msgId, role: "assistant", content: rawContent }} />}
+
+              {/* Render linked subagent cards underneath */}
+              {linkedSubs.map((sub) => (
+                <SubagentCard
+                  key={sub.id}
+                  subagent={sub}
+                  defaultExpanded={sub.status === "running" || sub.status === "pending"}
+                />
+              ))}
+            </React.Fragment>
           )
         }
-        if (msg.checkpointType === "video_result" && msg.checkpoint) {
-          const data = msg.checkpoint as { jobId: string; title: string | null; fileSize: number | null }
-          return (
-            <div key={msg.id}>
-              <MessageBubble message={{ ...msg, checkpoint: undefined }} />
-              <VideoResultCard jobId={data.jobId} title={data.title} fileSize={data.fileSize} />
-            </div>
-          )
-        }
-        if (msg.checkpointType && msg.checkpoint && checkpointHandlers[msg.checkpointType]) {
-          const handlers = checkpointHandlers[msg.checkpointType]
-          const bubble = <MessageBubble message={{ ...msg, checkpoint: undefined }} />
-          const cardProps = {
-            onApprove: handlers.onApprove,
-            onRequestChanges: handlers.onRequestChanges,
-            disabled: loading,
-          }
 
-          let card: React.ReactNode = null
-          if (msg.checkpointType === "sound_chart")
-            card = <SoundChartCard data={msg.checkpoint as SoundChartData} {...cardProps} />
-          else if (msg.checkpointType === "audio_chart")
-            card = <SoundChartCard data={msg.checkpoint as AudioChartData} {...cardProps} />
-          else if (msg.checkpointType === "direction")
-            card = <DirectionCard data={msg.checkpoint as DirectionData} {...cardProps} />
-          else if (msg.checkpointType === "escaleta")
-            card = <CheckpointCard data={msg.checkpoint as CheckpointData} {...cardProps} />
-          else if (msg.checkpointType === "validation")
-            card = <ValidationReportCard data={msg.checkpoint as ValidationReportData} {...cardProps} />
-          else if (msg.checkpointType === "target_selection")
-            card = <TargetSelectionCard data={msg.checkpoint as TargetSelectionData} {...cardProps} />
-          else if (msg.checkpointType === "revision_plan")
-            card = <RevisionPlanCard data={msg.checkpoint as RevisionPlanData} {...cardProps} />
-          else if (msg.checkpointType === "variant_plan")
-            card = <VariantPlanCard data={msg.checkpoint as VariantPlanData} {...cardProps} />
-          else if (msg.checkpointType === "generic")
-            card = <GenericCheckpointCard data={msg.checkpoint as Record<string, unknown>} {...cardProps} />
-
-          if (card) {
-            return (
-              <div key={msg.id}>
-                {bubble}
-                {card}
-              </div>
-            )
-          }
-        }
-        return <MessageBubble key={msg.id} message={msg} />
+        // Other message types (tool, system, etc.) — skip rendering
+        return null
       })}
 
-      {/* Active agent bubble (only the currently running one) */}
-      {streamState.activeAgent && (
-        <div style={{ marginBottom: 8 }}>
-          <StreamingBubble
-            agentName={streamState.activeAgent}
-            tools={streamState.tools}
-            artifacts={streamState.artifacts}
-            llmText={streamState.llmText}
-            status="active"
-            defaultExpanded={true}
-          />
+      {/* Unlinked active subagents (still running, not yet associated with a message) */}
+      {unlinkedActiveSubagents.map((sub) => (
+        <SubagentCard key={sub.id} subagent={sub} defaultExpanded={true} />
+      ))}
+
+      {/* Checkpoint card (from active interrupt) */}
+      {checkpointType && checkpointData && checkpointHandlers[checkpointType] && (
+        <div style={{ marginTop: 8 }}>
+          {renderCheckpointCard(checkpointType, checkpointData, checkpointHandlers[checkpointType], isLoading)}
         </div>
       )}
 
+      {/* Enrichments (video results, system messages) */}
+      {enrichments.map((enrichment) => {
+        if (enrichment.type === "video_result" && enrichment.data) {
+          const data = enrichment.data as { jobId: string; title: string | null; fileSize: number | null }
+          return <VideoResultCard key={enrichment.id} jobId={data.jobId} title={data.title} fileSize={data.fileSize} />
+        }
+        // System enrichment — render as assistant message
+        return (
+          <MessageBubble
+            key={enrichment.id}
+            message={{ id: enrichment.id, role: "assistant", content: enrichment.content }}
+          />
+        )
+      })}
+
       {/* Error banner */}
-      {streamState.error && <ErrorBanner message={streamState.error} onRetry={onRetry} />}
+      {error != null && <ErrorBanner message={typeof error === "string" ? error : String(error)} onRetry={onRetry} />}
 
-      {currentStage === "rendering" && loading && !streamState.activeAgent && <RenderProgress progress={0} />}
+      {/* Render progress bar */}
+      {currentStage === "rendering" && isLoading && !hasActiveSubagent && <RenderProgress progress={0} />}
 
-      {/* Loading indicator (only when streaming but no active agent detected yet) */}
-      {loading && !streamState.activeAgent && !streamState.error && currentStage !== "rendering" && (
+      {/* Loading indicator (only when streaming but no active subagent detected yet) */}
+      {isLoading && !hasActiveSubagent && !error && currentStage !== "rendering" && (
         <WorkingIndicator label={loadingLabel} />
       )}
+
       <div ref={bottomRef} />
     </div>
   )

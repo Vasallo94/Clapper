@@ -7,16 +7,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
-- `SubagentCard` component — collapsible card driven by SDK `SubagentStreamInterface`, replaces custom `StreamingBubble` with auto-collapse on completion, tool call status icons, and thinking text extraction
-
-### Changed
-
-- `MessageRole` type narrowed from `"user" | "assistant" | "agent"` to `"user" | "assistant"` — SDK handles subagent lifecycle internally
-- Removed `AgentSummary`, `AgentArtifact`, `AgentArtifactKind` types from web types (replaced by SDK-native subagent tracking)
-- Added `Enrichment` type for injecting video results and system messages into the conversational UI
-- `App.tsx` rewritten to use `useVideoStream` hook — eliminates local `ChatMessage[]` state, manual thread creation, `extractResponse` polling, `handleAgentComplete` callback splitting, and `resolveThreadForSend` pattern; SDK messages are now single source of truth
-
-### Added
+- `SubagentCard` component — collapsible card driven by SDK `SubagentStreamInterface` with auto-collapse on completion, tool call status icons, and thinking text
+- `useVideoStream` hook — wraps SDK `useStream` with pipeline stage tracking, checkpoint extraction from interrupts, target metadata injection, and video-result enrichment
+- `Enrichment` type for injecting video results and system messages into the conversational UI
 
 - Generic `interaction_request` protocol for lightweight DeepAgent human input (text, single choice, multi choice, approval)
 - `ask_user_interaction` agent tool for conversational onboarding, blocking clarifications, and small creative choices via LangGraph interrupts
@@ -112,6 +105,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- **Frontend conversational UI**: Coordinator messages now appear as first-class chat bubbles instead of collapsible agent cards; subagent work renders as collapsible `SubagentCard` details underneath the coordinator message that launched them
+- **Streaming infrastructure**: Replaced manual event parser (`useAgentStream`, `streamEvents.ts`) with SDK-native `useStream` hook from `@langchain/langgraph-sdk/react` (`filterSubagentMessages: true`, `streamSubgraphs: true`)
+- `ChatThread` now consumes SDK `Message[]` directly instead of internal `ChatMessage[]`; rendering splits messages into user bubbles, assistant bubbles, and linked subagent cards
+- `App.tsx` reduced from ~323 to ~170 lines by delegating stream management to `useVideoStream` hook
 - Orchestrator prompt now defines when to ask lightweight conversational questions vs continuing automatically or using rich checkpoint cards
 - Onboarding prompt policy now keeps the same run alive after "Crear un video nuevo" by asking for the video topic/brief instead of ending with "Proceso completado"
 - Orchestrator, copywriter, director, audio planner, and voice generator prompts now force Spanish from Spain (`es-ES`) unless the user explicitly requests another language
@@ -164,6 +161,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Removed
 
+- `useAgentStream` hook, `streamEvents.ts`, `streamEvents.test.ts`, `artifacts.ts` — replaced by SDK-native `useStream` via `useVideoStream` hook
+- `StreamingBubble`, `AgentArtifactCard`, `IntentDecisionCard` components — replaced by `SubagentCard` and SDK message rendering
+- `extractResponse`, `createThread`, `TaskEntry` from `api.ts` — thread creation and response extraction handled by SDK internally
+- `AgentSummary`, `AgentArtifact`, `AgentArtifactKind`, `ChatResponse` types from `types.ts` — no longer needed with SDK message types
+- ~1,060 lines of manual stream parsing infrastructure removed in total
 - Regex-based intent classification from `modes.py` (~80 lines of pattern constants, `_classify()`, `_matches()`, `import re`) — replaced by LLM-driven mode selection in the orchestrator
 - `host.docker.internal` dependency for agent→render-service communication
 - `.agents/skills/` duplicate skills directory (44 files) — `packages/agent/skills/` is the single authoritative source

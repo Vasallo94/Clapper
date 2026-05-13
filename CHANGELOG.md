@@ -5,8 +5,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+
+- `MessageRole` type narrowed from `"user" | "assistant" | "agent"` to `"user" | "assistant"` — SDK handles subagent lifecycle internally
+- Removed `AgentSummary`, `AgentArtifact`, `AgentArtifactKind` types from web types (replaced by SDK-native subagent tracking)
+- Added `Enrichment` type for injecting video results and system messages into the conversational UI
+
 ### Added
 
+- Generic `interaction_request` protocol for lightweight DeepAgent human input (text, single choice, multi choice, approval)
+- `ask_user_interaction` agent tool for conversational onboarding, blocking clarifications, and small creative choices via LangGraph interrupts
+- `InteractionRequestCard` frontend renderer for text inputs, radio options, checkbox choices, and simple approvals
+- ADR 0012 documenting the generic conversational interaction protocol for DeepAgent workflows
+- Exact prop contracts for `split-screen`, `icon-grid`, and `bullet-slide` in scene-catalog and scene_creator guidance
+- Nested custom-component prop validation for `split-screen`, `icon-grid`, and `bullet-slide` before render
 - Official Linea Directa brand assets in `public/branding/` plus an animated `LineaDirectaBrandLockup` that uses the official SVG with Remotion frame-driven reveal/glint effects
 - ADR 0011 documenting the decision to animate official Linea Directa assets instead of hand-redrawing the logo
 - `WorkingIndicator` component with animated SVG clapperboard — replaces plain loading dots in ChatThread with a visually engaging CSS-animated claqueta de cine during agent processing
@@ -15,10 +27,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Voiceover-slide word overlap check in `audit_content_quality` — warns when voiceover text repeats slide content instead of complementing it
 - Custom component prop schemas in scene-catalog skill — agents can now query exact required props for big-number, comparison-table, file-explorer, code-block, and 20+ other components
 - Voiceover-slide complementarity rules in audio planner prompt — explicit guidance on how voice should explain (not repeat) visual content
+- Callout-specific voiceover rule in audio planner — callout scenes must never repeat the callout text; voice should add evidence or the "so what" behind the statement
+- Orphaned render job recovery in render service — `recoverOrphanedJobs()` marks stale `validating`/`rendering` jobs as `error` on startup, preventing permanently stuck jobs after container restarts
 
 ### Fixed
 
+- Target dropdown now includes recent completed `.generated/renders` configs, not only curated `content/**` configs
+- Render stream/download endpoints can serve completed CLI-generated render folders even when no render-service DB job exists
+- `SplitScreenScene` render crash when LLM-generated panels used `title/subtitle` instead of required `label/items`
+- `IconGridScene` and `BulletSlideScene` now tolerate common LLM prop-shape mistakes without blank/crashing renders
+- Escaleta custom scenes now show useful summaries for `split-screen`, `icon-grid`, and `bullet-slide` instead of `-`
+- Pipeline tracker now distinguishes `scene_creator` and `validator` from sound/render stages
 - Existing lint warnings from Zod `transition` schema fields and `CompositionShell` memo dependencies
+- Copywriter prompt missing `composition` field and malformed `brief` — added explicit template with `composition` (required, not empty string), full `brief` object example, and `narrativeArc` as array (not string)
 - Render service stderr noise — filter timestamps.json 404s from Remotion's embedded Chromium, increase stderr buffer to 8KB, extract progress from both stdout and stderr
 - Frontend video detection — scan completed agent tool outputs (`submit_render`, `check_render_status`) as fallback when jobId is not in the final text message
 - Databricks Scala config — fix comparison-table props format, add explicit musicBed ducking/fade fields to prevent NaN crash in `computeMusicVolume`
@@ -86,6 +107,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- Orchestrator prompt now defines when to ask lightweight conversational questions vs continuing automatically or using rich checkpoint cards
+- Onboarding prompt policy now keeps the same run alive after "Crear un video nuevo" by asking for the video topic/brief instead of ending with "Proceso completado"
+- Orchestrator, copywriter, director, audio planner, and voice generator prompts now force Spanish from Spain (`es-ES`) unless the user explicitly requests another language
+- Orchestrator user-facing text is surfaced as a first-level chat message, leaving agent cards for technical tools/artifacts
 - `PipelineStepper` is now mode-aware: shows contextual steps for each routing mode (new_video, revise_existing, render_only, audit_only, question, etc.) instead of hardcoded 5-stage new_video pipeline; shows mode label badge and idle state
 - `usePipelineTracker` tracks active mode (`PipelineMode`) via `setMode()`, detected from `route_intent` intent_decision artifacts in the stream
 - `Sidebar` and `App.tsx` pass mode through to PipelineStepper

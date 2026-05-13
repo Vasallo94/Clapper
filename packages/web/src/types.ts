@@ -1,5 +1,6 @@
-export type MessageRole = "user" | "assistant" | "agent"
+export type MessageRole = "user" | "assistant"
 export type CheckpointType =
+  | "interaction"
   | "escaleta"
   | "direction"
   | "sound_chart"
@@ -21,12 +22,12 @@ export interface ChatMessage {
     | AudioChartData
     | DirectionData
     | ValidationReportData
+    | InteractionRequestData
     | TargetSelectionData
     | RevisionPlanData
     | VariantPlanData
     | Record<string, unknown>
   checkpointType?: CheckpointType
-  agentSummary?: AgentSummary
 }
 
 export interface ToolEntry {
@@ -40,26 +41,11 @@ export interface ToolEntry {
   startedAt: number
 }
 
-export interface AgentSummary {
-  id?: string
-  name: string
-  tools: ToolEntry[]
-  artifacts: AgentArtifact[]
-  llmText?: string
-  durationMs: number
-  startedAt: number
-}
-
-export type AgentArtifactKind = "validation" | "script" | "audio_chart" | "intent_decision" | "tool_output"
-
-export interface AgentArtifact {
+export interface Enrichment {
   id: string
-  kind: AgentArtifactKind
-  title: string
-  source?: string
-  content?: string
+  type: "video_result" | "system"
+  content: string
   data?: Record<string, unknown>
-  createdAt: number
 }
 
 export interface CheckpointData {
@@ -91,6 +77,7 @@ export interface ChatResponse {
     | AudioChartData
     | DirectionData
     | ValidationReportData
+    | InteractionRequestData
     | TargetSelectionData
     | RevisionPlanData
     | VariantPlanData
@@ -110,6 +97,47 @@ export interface IntentDecisionData {
   rationale?: string
   missing_target?: boolean
   checkpoints?: string[]
+}
+
+export interface InteractionOption {
+  id: string
+  label: string
+  value: string
+  description?: string
+}
+
+export type InteractionInput =
+  | {
+      kind: "text"
+      required?: boolean
+      placeholder?: string
+    }
+  | {
+      kind: "single_choice"
+      required?: boolean
+      options: InteractionOption[]
+    }
+  | {
+      kind: "multi_choice"
+      required?: boolean
+      options: InteractionOption[]
+      min?: number
+      max?: number
+    }
+  | {
+      kind: "approval"
+      required?: boolean
+      approveLabel?: string
+      rejectLabel?: string
+    }
+
+export interface InteractionRequestData {
+  type: "interaction_request"
+  sourceAgent?: string
+  intent?: "clarification" | "creative_choice" | "approval" | "onboarding" | "explanation" | string
+  title: string
+  body?: string
+  input: InteractionInput
 }
 
 export interface TargetSelectionData {
@@ -173,6 +201,8 @@ export type PipelineStageId =
   | "director"
   | "sound_engineer"
   | "sound_review"
+  | "scene_creator"
+  | "validator"
   | "rendering"
   | "done"
   | "error"
@@ -213,6 +243,7 @@ export interface ActiveVideoTarget {
   jobId?: string
   composition?: string
   title?: string
+  source?: "content" | "render"
 }
 
 export interface StoredVideoArtifact extends ActiveVideoTarget {

@@ -184,7 +184,7 @@ export function useVideoStream(options: UseVideoStreamOptions = {}): VideoStream
       const content = appendTargetMetadata(message, activeTargetRef.current)
       stream.submit({ messages: [{ type: "human" as const, content }] }, { streamSubgraphs: true })
     },
-    [stream.submit],
+    [stream],
   )
 
   // ----- Resume (from interrupt) -----
@@ -195,7 +195,7 @@ export function useVideoStream(options: UseVideoStreamOptions = {}): VideoStream
         streamSubgraphs: true,
       })
     },
-    [stream.submit],
+    [stream],
   )
 
   // ----- Thread switching -----
@@ -205,7 +205,7 @@ export function useVideoStream(options: UseVideoStreamOptions = {}): VideoStream
       setEnrichments([])
       stream.switchThread(newThreadId)
     },
-    [stream.switchThread],
+    [stream],
   )
 
   // ----- Enrichments -----

@@ -68,37 +68,6 @@ export interface DirectionData {
   warnings: string[]
 }
 
-export interface ChatResponse {
-  type: "message" | "checkpoint"
-  content?: string
-  data?:
-    | CheckpointData
-    | SoundChartData
-    | AudioChartData
-    | DirectionData
-    | ValidationReportData
-    | InteractionRequestData
-    | TargetSelectionData
-    | RevisionPlanData
-    | VariantPlanData
-  thread_id: string
-}
-
-export interface IntentDecisionData {
-  mode: string
-  confidence?: number
-  requires_target?: boolean
-  target?: ActiveVideoTarget | null
-  agent_scope?: string[]
-  forbidden_agents?: string[]
-  requires_checkpoint?: boolean
-  can_write_files?: boolean
-  can_render?: boolean
-  rationale?: string
-  missing_target?: boolean
-  checkpoints?: string[]
-}
-
 export interface InteractionOption {
   id: string
   label: string

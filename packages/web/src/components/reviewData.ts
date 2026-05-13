@@ -16,6 +16,8 @@ export function labelize(value: string): string {
 
 export function getSceneTitle(scene: Record<string, unknown>): string {
   const props = asRecord(scene.props)
+  const componentId = asString(scene.componentId)
+  const customSummary = props ? getCustomSceneSummary(componentId, props) : ""
   return (
     asString(scene.title) ||
     asString(scene.headline) ||
@@ -23,8 +25,76 @@ export function getSceneTitle(scene: Record<string, unknown>): string {
     asString(props?.title) ||
     asString(props?.label) ||
     asString(props?.description) ||
+    customSummary ||
     "-"
   )
+}
+
+function joinLabels(values: string[]): string {
+  return values.filter(Boolean).slice(0, 3).join(" · ")
+}
+
+function findTitleInProps(props: Record<string, unknown>, depth = 0): string {
+  if (depth > 3) return ""
+  for (const key of ["title", "label", "heading", "name"]) {
+    const val = asString(props[key])
+    if (val.length >= 3 && val.length <= 100) return val
+  }
+  for (const value of Object.values(props)) {
+    const record = asRecord(value)
+    if (record) {
+      const found = findTitleInProps(record, depth + 1)
+      if (found) return found
+    }
+  }
+  return ""
+}
+
+function getCustomSceneSummary(componentId: string, props: Record<string, unknown>): string {
+  if (componentId === "split-screen" || componentId === "problem-solution" || componentId === "before-after") {
+    const keyPairs: [string, string][] = [
+      ["left", "right"],
+      ["problem", "solution"],
+      ["before", "after"],
+    ]
+    for (const [a, b] of keyPairs) {
+      const aRec = asRecord(props[a])
+      const bRec = asRecord(props[b])
+      if (aRec || bRec) {
+        return joinLabels([
+          asString(aRec?.label) || asString(aRec?.title),
+          asString(bRec?.label) || asString(bRec?.title),
+        ])
+      }
+    }
+  }
+
+  if (componentId === "icon-grid" || componentId === "bullet-slide") {
+    const items = asArray(props.items)
+      .map((item) => {
+        if (typeof item === "string") return item
+        const record = asRecord(item)
+        return (
+          asString(record?.title) || asString(record?.label) || asString(record?.text) || asString(record?.description)
+        )
+      })
+      .filter(Boolean)
+    return joinLabels(items)
+  }
+
+  if (componentId === "flow-diagram") {
+    const directTitle = asString(props.title)
+    if (directTitle) return directTitle
+    const steps = asArray(props.steps)
+      .map((s) => {
+        const rec = asRecord(s)
+        return asString(rec?.label) || asString(rec?.title)
+      })
+      .filter(Boolean)
+    if (steps.length) return joinLabels(steps)
+  }
+
+  return findTitleInProps(props)
 }
 
 export function getSceneScript(scene: Record<string, unknown>): string {

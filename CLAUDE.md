@@ -13,15 +13,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev                # Remotion Studio (preview in browser)
-npm run build              # Bundle composition
-npm run lint               # ESLint + TypeScript check
+pnpm run dev               # Remotion Studio (preview in browser)
+pnpm run build             # Bundle composition
+pnpm run lint              # ESLint + TypeScript check
 
 # Render a tutorial to MP4
-npx tsx scripts/render.ts content/tutorials/[slug]/config.json
+pnpm exec tsx scripts/render.ts content/tutorials/[slug]/config.json
 
 # If Chromium missing
-npx remotion browser ensure
+pnpm exec remotion browser ensure
 ```
 
 ## Architecture

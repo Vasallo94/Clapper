@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- `pnpm-workspace.yaml` for pnpm workspace configuration with `better-sqlite3` build approval
 - `SubagentCard` component — collapsible card driven by SDK `SubagentStreamInterface` with auto-collapse on completion, tool call status icons, and thinking text
 - `useVideoStream` hook — wraps SDK `useStream` with pipeline stage tracking, checkpoint extraction from interrupts, target metadata injection, and video-result enrichment
 - `Enrichment` type for injecting video results and system messages into the conversational UI
@@ -105,6 +106,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- **Package manager**: Migrated from npm to pnpm — Dockerfiles use `corepack enable` + `pnpm install --frozen-lockfile`, Makefile targets use `pnpm run`/`pnpm install`, workspaces defined in `pnpm-workspace.yaml`
 - **Frontend conversational UI**: Coordinator messages now appear as first-class chat bubbles instead of collapsible agent cards; subagent work renders as collapsible `SubagentCard` details underneath the coordinator message that launched them
 - **Streaming infrastructure**: Replaced manual event parser (`useAgentStream`, `streamEvents.ts`) with SDK-native `useStream` hook from `@langchain/langgraph-sdk/react` (`filterSubagentMessages: true`, `streamSubgraphs: true`)
 - `ChatThread` now consumes SDK `Message[]` directly instead of internal `ChatMessage[]`; rendering splits messages into user bubbles, assistant bubbles, and linked subagent cards
@@ -166,6 +168,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - `extractResponse`, `createThread`, `TaskEntry` from `api.ts` — thread creation and response extraction handled by SDK internally
 - `AgentSummary`, `AgentArtifact`, `AgentArtifactKind`, `ChatResponse` types from `types.ts` — no longer needed with SDK message types
 - ~1,060 lines of manual stream parsing infrastructure removed in total
+- `package-lock.json` and npm `workspaces` field from `package.json` — replaced by pnpm lockfile and `pnpm-workspace.yaml`
 - Regex-based intent classification from `modes.py` (~80 lines of pattern constants, `_classify()`, `_matches()`, `import re`) — replaced by LLM-driven mode selection in the orchestrator
 - `host.docker.internal` dependency for agent→render-service communication
 - `.agents/skills/` duplicate skills directory (44 files) — `packages/agent/skills/` is the single authoritative source

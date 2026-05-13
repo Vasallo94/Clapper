@@ -24,7 +24,7 @@ help: ## Show this help
 dev: studio ## Alias for studio
 
 studio: ## Start Remotion Studio (native, needs browser)
-	npm run dev
+	pnpm run dev
 
 up: ## Start all services (Docker Compose)
 	docker compose up --build
@@ -56,10 +56,10 @@ agent-native: ## Start LangGraph agent (native, no Docker)
 	    --port $(AGENT_PORT) --allow-blocking
 
 renderer-native: ## Start render service (native, no Docker)
-	cd $(RENDER_DIR) && npm run dev
+	cd $(RENDER_DIR) && pnpm run dev
 
 web-native: ## Start web UI (native, no Docker)
-	cd $(WEB_DIR) && npm run dev
+	cd $(WEB_DIR) && pnpm run dev
 
 # ─── Video pipeline ─────────────────────────────────────────
 render: ## Render tutorial to MP4 (TUTORIAL=slug)
@@ -71,7 +71,7 @@ validate: ## Validate tutorial config (TUTORIAL=slug)
 	npx tsx scripts/validate-config.ts content/tutorials/$(TUTORIAL)/config.json
 
 catalog: ## Regenerate scene catalog
-	npm run generate:catalog
+	pnpm run generate:catalog
 
 voiceover: ## Generate voiceover (TUTORIAL=slug)
 	@test -n "$(TUTORIAL)" || { echo "Usage: make voiceover TUTORIAL=<slug>"; exit 1; }
@@ -94,16 +94,16 @@ test: ## Run all tests
 	npx vitest run
 
 test-visual: ## Run visual snapshot tests
-	npm run test:visual
+	pnpm run test:visual
 
 test-visual-update: ## Update visual snapshots
-	npm run test:visual:update
+	pnpm run test:visual:update
 
 # ─── Setup ───────────────────────────────────────────────────
 install: ## Install root dependencies
-	npm install
+	pnpm install
 
-install-all: install ## Install all workspace dependencies (npm workspaces + agent)
+install-all: install ## Install all workspace dependencies (pnpm workspaces + agent)
 	cd $(AGENT_DIR) && uv sync
 
 browser-ensure: ## Ensure Chromium is available for Remotion

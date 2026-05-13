@@ -1,5 +1,7 @@
 FROM node:22-slim
 
+RUN corepack enable && corepack prepare pnpm@11.1.1 --activate
+
 # Chromium headless dependencies for Remotion rendering
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libnss3 libatk-bridge2.0-0 libx11-xcb1 libdrm2 \
@@ -11,14 +13,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Copy workspace root manifests + render-service package
-COPY package.json package-lock.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/render-service/package.json packages/render-service/
-# Web workspace must exist for npm ci to resolve all workspaces
+# Web workspace must exist for pnpm to resolve all workspaces
 COPY packages/web/package.json packages/web/
 
-RUN npm ci
+RUN pnpm install --frozen-lockfile
 
-# Copy source after npm ci to leverage Docker layer cache for dependencies
+# Copy source after install to leverage Docker layer cache for dependencies
 COPY packages/render-service/src packages/render-service/src
 # Remotion compositions + shared render scripts
 COPY src src
@@ -30,4 +32,4 @@ RUN npx remotion browser ensure
 
 EXPOSE 3100
 
-CMD ["npm", "run", "--workspace=packages/render-service", "start"]
+CMD ["pnpm", "run", "--filter=render-service", "start"]

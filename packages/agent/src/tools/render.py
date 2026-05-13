@@ -130,6 +130,17 @@ def submit_render(
         config["title"] = title
         config["description"] = description
 
+    # Pass thread_id so the render service can associate job with conversation
+    if runtime:
+        try:
+            rt_config = getattr(runtime, "config", None)
+            if isinstance(rt_config, dict):
+                thread_id = rt_config.get("configurable", {}).get("thread_id")
+                if isinstance(thread_id, str) and thread_id:
+                    config["_threadId"] = thread_id
+        except (AttributeError, TypeError):
+            pass
+
     # ── Sanitize LLM output before validation ────────────────────────────
     config, mutations = sanitize_config(config)
     if mutations:

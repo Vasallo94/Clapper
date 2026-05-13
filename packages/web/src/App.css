@@ -115,7 +115,7 @@ body {
 }
 
 .animate-card-reveal {
-  animation: cardReveal 300ms ease-out both;
+  animation: cardReveal 300ms ease-out 200ms both;
 }
 
 .animate-fade-in {

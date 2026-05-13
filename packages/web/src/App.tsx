@@ -136,13 +136,23 @@ export default function App() {
     if (!videoStream.messages.length) return
     if (videoStream.isInterrupted) return
 
-    const lastMsg = videoStream.messages[videoStream.messages.length - 1]
-    if ((lastMsg as { type: string }).type !== "ai") return
-    const content = typeof lastMsg.content === "string" ? lastMsg.content : ""
-    const jobIdMatch = content.match(/jobId[:\s]*["']?([a-f0-9-]+)["']?/i)
+    const aiMessages = videoStream.messages.filter((m) => (m as { type: string }).type === "ai")
+    const lastFew = aiMessages.slice(-3)
 
-    if (jobIdMatch) {
-      fetchJobStatus(jobIdMatch[1])
+    let jobId: string | null = null
+    for (const msg of lastFew) {
+      const content = typeof msg.content === "string" ? msg.content : ""
+      const match =
+        content.match(/jobId[:\s]*["']?([a-f0-9-]{36})["']?/i) ||
+        content.match(/\b([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\b/)
+      if (match) {
+        jobId = match[1]
+        break
+      }
+    }
+
+    if (jobId) {
+      fetchJobStatus(jobId)
         .then((job) => {
           if (job.status === "done") {
             const artifact = artifactFromCompletedJob(job)

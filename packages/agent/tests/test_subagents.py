@@ -118,3 +118,23 @@ def test_reviewer_exported():
     from src.subagents import create_reviewer
 
     assert callable(create_reviewer)
+
+
+def test_scene_qa_definition():
+    from src.subagents.scene_qa import create_scene_qa
+
+    defn = create_scene_qa()
+    assert defn["name"] == "scene_qa"
+    assert "description" in defn
+    assert "system_prompt" in defn
+    tool_names = [t.__name__ for t in defn["tools"]]
+    assert "render_scene_stills" in tool_names
+    assert "qa_scenes" in tool_names
+    assert "present_qa_report" in tool_names
+    assert len(defn["tools"]) == 3
+
+
+def test_scene_qa_exported():
+    from src.subagents import create_scene_qa
+
+    assert callable(create_scene_qa)

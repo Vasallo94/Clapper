@@ -7,6 +7,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **`packages/agent/src/tools/qa.py`** — three QA tools for visual scene review:
+  - `render_scene_stills`: calls `render-scene-stills.ts` via subprocess, returns PNG manifest JSON
+  - `qa_scenes`: sends each scene still + 5-layer context payload to Gemini multimodal LLM for structured verdict (PASS/MINOR_FIX/MAJOR_ISSUE), score, issues, and suggested changes
+  - `present_qa_report`: checkpoint interrupt that pauses the pipeline for human review when issues are found
+  - Helpers `_classify_position`, `_summarize_scene`, `_build_context`, `_build_qa_prompt` for rich scene context assembly
+- **`packages/agent/tests/test_tools_qa.py`** — 12 tests covering render, skip logic, LLM success/error paths, context builder, and checkpoint behavior
 - **`scripts/render-scene-stills.ts`** — renders individual scene stills (PNG) at the 60% frame point using Remotion `renderStill` API; outputs a JSON manifest to stdout for QA agent consumption; shares bundle caching logic with `render.ts`
 - **Audio-Visual Sync Platform** — eliminates dead air (blank screens while voice plays) across the entire pipeline
   - `usePhase1Entry` hook: instant ≤200ms entry for core layout elements (title, frame, background)

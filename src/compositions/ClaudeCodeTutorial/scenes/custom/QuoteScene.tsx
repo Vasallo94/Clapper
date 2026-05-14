@@ -1,9 +1,10 @@
 import React from "react"
-import { AbsoluteFill, Img, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { AbsoluteFill, Img, interpolate } from "remotion"
 import { useThemeTokens } from "../../../../shared/themes"
 import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
 import type { Beat, Timing } from "../../../../utils/direction"
-import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
+import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
+import { useBeatReveal } from "../../../../shared/hooks/useBeatReveal"
 
 interface QuoteProps {
   text: string
@@ -15,55 +16,52 @@ interface QuoteProps {
   beats?: Beat[]
 }
 
+const QuoteAttribution: React.FC<{
+  author: string
+  role?: string
+  avatarUrl?: string
+  beat: Beat | null
+  tokens: ReturnType<typeof useThemeTokens>
+}> = ({ author, role, avatarUrl, beat, tokens }) => {
+  const { opacity, y } = useBeatReveal({
+    beat: beat ?? undefined,
+    fallbackDelayMs: 500,
+    animationMs: 250,
+  })
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        opacity,
+        transform: `translateY(${y}px)`,
+      }}
+    >
+      {avatarUrl && <Img src={avatarUrl} style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover" }} />}
+      <div>
+        <div style={{ fontSize: 16, fontWeight: 600, color: tokens.foreground, fontFamily: tokens.fontFamily }}>
+          {author}
+        </div>
+        {role && <div style={{ fontSize: 13, color: tokens.foregroundMid, fontFamily: tokens.fontFamily }}>{role}</div>}
+      </div>
+    </div>
+  )
+}
+
 export const QuoteScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as QuoteProps
-  const { text, author, role, avatarUrl, accentColor, timing, beats } = props
-  const frame = useCurrentFrame()
-  const { fps } = useVideoConfig()
+  const { text, author, role, avatarUrl, accentColor, beats } = props
   const tokens = useThemeTokens()
-  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
-  const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
+  const phase1 = usePhase1Entry({ durationMs: 100 })
 
   const accent = accentColor ?? tokens.primary
 
-  // Quote marks
-  const marksDelay = beatStartFrames?.[0] ?? motionStartFrame
-  const marksOpacity = interpolate(frame, [marksDelay, marksDelay + Math.ceil(fps * 0.2)], [0, 0.25], {
+  const lineWidth = interpolate(phase1.progress, [0.3, 1], [0, 60], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   })
-
-  // Quote text
-  const textDelay = beatStartFrames?.[1] ?? marksDelay + Math.ceil(fps * 0.15)
-  const textSpring = spring({
-    frame: Math.max(0, frame - textDelay),
-    fps,
-    config: { damping: 20, stiffness: 180 },
-    durationInFrames: Math.ceil(fps * 0.5),
-  })
-  const textOpacity = interpolate(textSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-  const textScale = interpolate(textSpring, [0, 1], [0.97, 1])
-
-  // Divider line
-  const lineDelay = textDelay + Math.ceil(fps * 0.3)
-  const lineSpring = spring({
-    frame: Math.max(0, frame - lineDelay),
-    fps,
-    config: { damping: 200 },
-    durationInFrames: Math.ceil(fps * 0.4),
-  })
-  const lineWidth = interpolate(lineSpring, [0, 1], [0, 60])
-
-  // Attribution
-  const attrDelay = beatStartFrames?.[2] ?? lineDelay + Math.ceil(fps * 0.15)
-  const attrSpring = spring({
-    frame: Math.max(0, frame - attrDelay),
-    fps,
-    config: { damping: 20, stiffness: 180 },
-    durationInFrames: Math.ceil(fps * 0.5),
-  })
-  const attrOpacity = interpolate(attrSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-  const attrY = interpolate(attrSpring, [0, 1], [15, 0])
 
   return (
     <AbsoluteFill
@@ -76,22 +74,20 @@ export const QuoteScene: React.FC<Record<string, unknown>> = (rawProps) => {
         padding: "60px 100px",
       }}
     >
-      {/* Decorative quote marks */}
       <div
         style={{
           fontSize: 120,
           fontFamily: "Georgia, serif",
           color: accent,
-          opacity: marksOpacity,
+          opacity: phase1.opacity * 0.25,
           lineHeight: 0.8,
           marginBottom: -20,
           userSelect: "none",
         }}
       >
-        {"\u201C"}
+        {"“"}
       </div>
 
-      {/* Quote text */}
       <div
         style={{
           fontSize: 28,
@@ -101,14 +97,13 @@ export const QuoteScene: React.FC<Record<string, unknown>> = (rawProps) => {
           lineHeight: 1.6,
           textAlign: "center",
           maxWidth: 700,
-          opacity: textOpacity,
-          transform: `scale(${textScale})`,
+          opacity: phase1.opacity,
+          transform: `scale(${phase1.scale})`,
         }}
       >
         {text}
       </div>
 
-      {/* Divider */}
       <div
         style={{
           width: lineWidth,
@@ -119,29 +114,8 @@ export const QuoteScene: React.FC<Record<string, unknown>> = (rawProps) => {
         }}
       />
 
-      {/* Attribution */}
       {author && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            opacity: attrOpacity,
-            transform: `translateY(${attrY}px)`,
-          }}
-        >
-          {avatarUrl && (
-            <Img src={avatarUrl} style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover" }} />
-          )}
-          <div>
-            <div style={{ fontSize: 16, fontWeight: 600, color: tokens.foreground, fontFamily: tokens.fontFamily }}>
-              {author}
-            </div>
-            {role && (
-              <div style={{ fontSize: 13, color: tokens.foregroundMid, fontFamily: tokens.fontFamily }}>{role}</div>
-            )}
-          </div>
-        </div>
+        <QuoteAttribution author={author} role={role} avatarUrl={avatarUrl} beat={beats?.[2] ?? null} tokens={tokens} />
       )}
 
       <MascotWatermark animation="idle" />

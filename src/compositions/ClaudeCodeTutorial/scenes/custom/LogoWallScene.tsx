@@ -1,9 +1,10 @@
 import React from "react"
-import { AbsoluteFill, Img, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { AbsoluteFill, Img } from "remotion"
 import { useThemeTokens } from "../../../../shared/themes"
 import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
 import type { Beat, Timing } from "../../../../utils/direction"
-import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
+import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
+import { useBeatReveal } from "../../../../shared/hooks/useBeatReveal"
 
 interface LogoItem {
   src?: string
@@ -18,25 +19,60 @@ interface LogoWallProps {
   beats?: Beat[]
 }
 
+const LogoCell: React.FC<{
+  item: LogoItem
+  beat: Beat | null
+  index: number
+  cellWidth: number
+  tokens: ReturnType<typeof useThemeTokens>
+}> = ({ item, beat, index, cellWidth, tokens }) => {
+  const { opacity, y } = useBeatReveal({
+    beat: beat ?? undefined,
+    fallbackDelayMs: 200 + index * 100,
+    animationMs: 250,
+  })
+
+  return (
+    <div
+      style={{
+        width: cellWidth,
+        height: 60,
+        background: tokens.card.bg,
+        border: `1px solid ${tokens.card.border}`,
+        borderRadius: 8,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        opacity,
+        transform: `translateY(${y}px)`,
+      }}
+    >
+      {item.src ? (
+        <Img src={item.src} style={{ maxWidth: cellWidth - 24, maxHeight: 36, objectFit: "contain" }} />
+      ) : (
+        <span
+          style={{
+            fontSize: 13,
+            color: tokens.foregroundMid,
+            fontFamily: tokens.fontFamily,
+            fontWeight: 500,
+          }}
+        >
+          {item.label ?? "Logo"}
+        </span>
+      )}
+    </div>
+  )
+}
+
 export const LogoWallScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as LogoWallProps
-  const { title, items, columns, timing, beats } = props
-  const frame = useCurrentFrame()
-  const { fps } = useVideoConfig()
+  const { title, items, columns, beats } = props
   const tokens = useThemeTokens()
-  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
-  const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
+  const phase1 = usePhase1Entry({ durationMs: 100 })
 
   const cols = columns ?? (items.length <= 3 ? 3 : items.length <= 8 ? 4 : 6)
   const cellWidth = cols === 6 ? 120 : cols === 4 ? 140 : 180
-
-  // Title
-  const titleDelay = beatStartFrames?.[0] ?? motionStartFrame
-  const titleOpacity = interpolate(frame, [titleDelay, titleDelay + Math.ceil(fps * 0.2)], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  })
-
   const beatOffset = title ? 1 : 0
 
   return (
@@ -56,7 +92,7 @@ export const LogoWallScene: React.FC<Record<string, unknown>> = (rawProps) => {
             fontSize: 20,
             color: tokens.foregroundMid,
             fontFamily: tokens.fontFamily,
-            opacity: titleOpacity,
+            opacity: phase1.opacity,
             marginBottom: 32,
           }}
         >
@@ -73,51 +109,16 @@ export const LogoWallScene: React.FC<Record<string, unknown>> = (rawProps) => {
           maxWidth: (cellWidth + 20) * cols,
         }}
       >
-        {items.map((item, i) => {
-          const cellDelay =
-            beatStartFrames?.[i + beatOffset] ?? motionStartFrame + Math.ceil(fps * 0.2) + i * Math.ceil(fps * 0.1)
-          const cellSpring = spring({
-            frame: Math.max(0, frame - cellDelay),
-            fps,
-            config: { damping: 20, stiffness: 180 },
-            durationInFrames: Math.ceil(fps * 0.4),
-          })
-          const cellOpacity = interpolate(cellSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-          const cellScale = interpolate(cellSpring, [0, 1], [0.7, 1])
-
-          return (
-            <div
-              key={i}
-              style={{
-                width: cellWidth,
-                height: 60,
-                background: tokens.card.bg,
-                border: `1px solid ${tokens.card.border}`,
-                borderRadius: 8,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: cellOpacity,
-                transform: `scale(${cellScale})`,
-              }}
-            >
-              {item.src ? (
-                <Img src={item.src} style={{ maxWidth: cellWidth - 24, maxHeight: 36, objectFit: "contain" }} />
-              ) : (
-                <span
-                  style={{
-                    fontSize: 13,
-                    color: tokens.foregroundMid,
-                    fontFamily: tokens.fontFamily,
-                    fontWeight: 500,
-                  }}
-                >
-                  {item.label ?? "Logo"}
-                </span>
-              )}
-            </div>
-          )
-        })}
+        {items.map((item, i) => (
+          <LogoCell
+            key={i}
+            item={item}
+            beat={beats?.[i + beatOffset] ?? null}
+            index={i}
+            cellWidth={cellWidth}
+            tokens={tokens}
+          />
+        ))}
       </div>
 
       <MascotWatermark animation="idle" />

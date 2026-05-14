@@ -3,7 +3,8 @@ import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } fr
 import { useThemeTokens } from "../../../../shared/themes"
 import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
 import type { Beat, Timing } from "../../../../utils/direction"
-import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
+import { getBeatStartFrame } from "../../../../utils/direction"
+import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
 
 interface StatRevealProps {
   value: number
@@ -19,22 +20,14 @@ interface StatRevealProps {
 
 export const StatRevealScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as StatRevealProps
-  const { value, suffix, prefix, label, sublabel, showBar, barPercent, timing, beats } = props
+  const { value, suffix, prefix, label, sublabel, showBar, barPercent, beats } = props
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
-  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
-  const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
+  const phase1 = usePhase1Entry({ durationMs: 100 })
 
-  // Label
-  const labelDelay = beatStartFrames?.[0] ?? motionStartFrame
-  const labelOpacity = interpolate(frame, [labelDelay, labelDelay + Math.ceil(fps * 0.2)], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  })
-
-  // Number counter
-  const counterDelay = beatStartFrames?.[1] ?? labelDelay + Math.ceil(fps * 0.15)
+  // Number counter is Phase 2 content animation
+  const counterDelay = beats?.[1] ? getBeatStartFrame(beats[1], fps) : Math.ceil(fps * 0.15)
   const counterDuration = Math.ceil(fps * 0.8)
   const counterProgress = interpolate(frame, [counterDelay, counterDelay + counterDuration], [0, 1], {
     extrapolateLeft: "clamp",
@@ -42,15 +35,10 @@ export const StatRevealScene: React.FC<Record<string, unknown>> = (rawProps) => 
   })
   const displayValue = Math.round(value * counterProgress)
 
-  // Entrance spring for number
-  const numSpring = spring({
-    frame: Math.max(0, frame - counterDelay),
-    fps,
-    config: { damping: 20, stiffness: 180 },
-    durationInFrames: Math.ceil(fps * 0.5),
+  const numOpacity = interpolate(frame, [counterDelay, counterDelay + Math.ceil(fps * 0.15)], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
   })
-  const numY = interpolate(numSpring, [0, 1], [30, 0])
-  const numOpacity = interpolate(numSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
 
   // Prefix/suffix bounce
   const affixDelay = counterDelay + Math.ceil(counterDuration * 0.6)
@@ -64,7 +52,7 @@ export const StatRevealScene: React.FC<Record<string, unknown>> = (rawProps) => 
   const affixScale = interpolate(affixSpring, [0, 1], [0.5, 1])
 
   // Sublabel
-  const subDelay = beatStartFrames?.[2] ?? counterDelay + counterDuration + Math.ceil(fps * 0.1)
+  const subDelay = beats?.[2] ? getBeatStartFrame(beats[2], fps) : counterDelay + counterDuration + Math.ceil(fps * 0.1)
   const subOpacity = interpolate(frame, [subDelay, subDelay + Math.ceil(fps * 0.2)], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -90,14 +78,13 @@ export const StatRevealScene: React.FC<Record<string, unknown>> = (rawProps) => 
         justifyContent: "center",
       }}
     >
-      {/* Label */}
       {label && (
         <div
           style={{
             fontSize: 16,
             color: tokens.foregroundMid,
             fontFamily: tokens.fontFamily,
-            opacity: labelOpacity,
+            opacity: phase1.opacity,
             marginBottom: 12,
           }}
         >
@@ -105,13 +92,11 @@ export const StatRevealScene: React.FC<Record<string, unknown>> = (rawProps) => 
         </div>
       )}
 
-      {/* Number */}
       <div
         style={{
           display: "flex",
           alignItems: "baseline",
           opacity: numOpacity,
-          transform: `translateY(${numY}px)`,
         }}
       >
         {prefix && (
@@ -156,7 +141,6 @@ export const StatRevealScene: React.FC<Record<string, unknown>> = (rawProps) => 
         )}
       </div>
 
-      {/* Sublabel */}
       {sublabel && (
         <div
           style={{
@@ -171,7 +155,6 @@ export const StatRevealScene: React.FC<Record<string, unknown>> = (rawProps) => 
         </div>
       )}
 
-      {/* Progress bar */}
       {showBar && (
         <div
           style={{

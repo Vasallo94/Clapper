@@ -1,9 +1,10 @@
 import React from "react"
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion"
 import { useThemeTokens } from "../../../../shared/themes"
 import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
 import type { Beat, Timing } from "../../../../utils/direction"
-import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
+import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
+import { useBeatReveal } from "../../../../shared/hooks/useBeatReveal"
 
 interface CountdownProps {
   title?: string
@@ -16,18 +17,101 @@ interface CountdownProps {
   beats?: Beat[]
 }
 
+const CountdownBox: React.FC<{
+  value: number
+  label: string
+  isLast: boolean
+  beat: Beat | null
+  index: number
+  tokens: ReturnType<typeof useThemeTokens>
+}> = ({ value, label, isLast, beat, index, tokens }) => {
+  const { opacity, y } = useBeatReveal({
+    beat: beat ?? undefined,
+    fallbackDelayMs: 150 + index * 100,
+    animationMs: 250,
+  })
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 8,
+        opacity,
+        transform: `translateY(${y}px)`,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 56,
+          fontWeight: 900,
+          color: isLast ? tokens.primary : tokens.foreground,
+          fontFamily: tokens.monoFontFamily,
+          background: tokens.card.bg,
+          border: `1px solid ${isLast ? tokens.primary : tokens.card.border}`,
+          borderRadius: 10,
+          padding: "8px 20px",
+          minWidth: 80,
+          textAlign: "center",
+          boxShadow: tokens.card.shadow,
+        }}
+      >
+        {String(value).padStart(2, "0")}
+      </div>
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 600,
+          color: tokens.foregroundMid,
+          fontFamily: tokens.fontFamily,
+          letterSpacing: 1.5,
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  )
+}
+
+const CountdownSeparator: React.FC<{
+  beat: Beat | null
+  index: number
+  tokens: ReturnType<typeof useThemeTokens>
+}> = ({ beat, index, tokens }) => {
+  const { opacity } = useBeatReveal({
+    beat: beat ?? undefined,
+    fallbackDelayMs: 150 + index * 100,
+    animationMs: 250,
+  })
+
+  return (
+    <div
+      style={{
+        fontSize: 48,
+        fontWeight: 900,
+        color: tokens.foregroundLow,
+        fontFamily: tokens.monoFontFamily,
+        marginBottom: 24,
+        opacity,
+      }}
+    >
+      :
+    </div>
+  )
+}
+
 export const CountdownScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as CountdownProps
-  const { title, targetLabel, days = 0, hours = 0, minutes = 0, seconds = 0, timing, beats } = props
+  const { title, targetLabel, days = 0, hours = 0, minutes = 0, seconds = 0, beats } = props
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
-  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
-  const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
+  const phase1 = usePhase1Entry({ durationMs: 100 })
 
-  // Total seconds and countdown
+  // Countdown is Phase 2 content animation
   const totalStartSeconds = days * 86400 + hours * 3600 + minutes * 60 + seconds
-  const elapsedSeconds = Math.max(0, (frame - motionStartFrame) / fps)
+  const elapsedSeconds = Math.max(0, frame / fps)
   const remaining = Math.max(0, totalStartSeconds - elapsedSeconds)
 
   const d = Math.floor(remaining / 86400)
@@ -40,20 +124,6 @@ export const CountdownScene: React.FC<Record<string, unknown>> = (rawProps) => {
   if (days > 0 || hours > 0) segments.push({ value: h, label: "HOURS" })
   segments.push({ value: m, label: "MINS" })
   segments.push({ value: s, label: "SECS" })
-
-  // Title
-  const titleDelay = beatStartFrames?.[0] ?? motionStartFrame
-  const titleOpacity = interpolate(frame, [titleDelay, titleDelay + Math.ceil(fps * 0.2)], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  })
-
-  // Target label
-  const labelDelay = beatStartFrames?.[2] ?? motionStartFrame + Math.ceil(fps * 0.6)
-  const labelOpacity = interpolate(frame, [labelDelay, labelDelay + Math.ceil(fps * 0.3)], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  })
 
   return (
     <AbsoluteFill
@@ -71,7 +141,7 @@ export const CountdownScene: React.FC<Record<string, unknown>> = (rawProps) => {
             fontSize: 18,
             color: tokens.foregroundMid,
             fontFamily: tokens.fontFamily,
-            opacity: titleOpacity,
+            opacity: phase1.opacity,
             marginBottom: 24,
           }}
         >
@@ -80,78 +150,19 @@ export const CountdownScene: React.FC<Record<string, unknown>> = (rawProps) => {
       )}
 
       <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-        {segments.map((seg, i) => {
-          const boxesStartFrame = beatStartFrames?.[1] ?? motionStartFrame + Math.ceil(fps * 0.15)
-          const boxDelay = boxesStartFrame + i * Math.ceil(fps * 0.1)
-          const boxSpring = spring({
-            frame: Math.max(0, frame - boxDelay),
-            fps,
-            config: { damping: 20, stiffness: 180 },
-            durationInFrames: Math.ceil(fps * 0.4),
-          })
-          const boxScale = interpolate(boxSpring, [0, 1], [0.7, 1])
-          const boxOpacity = interpolate(boxSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-
-          const isLast = i === segments.length - 1
-
-          return (
-            <React.Fragment key={i}>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 8,
-                  opacity: boxOpacity,
-                  transform: `scale(${boxScale})`,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 56,
-                    fontWeight: 900,
-                    color: isLast ? tokens.primary : tokens.foreground,
-                    fontFamily: tokens.monoFontFamily,
-                    background: tokens.card.bg,
-                    border: `1px solid ${isLast ? tokens.primary : tokens.card.border}`,
-                    borderRadius: 10,
-                    padding: "8px 20px",
-                    minWidth: 80,
-                    textAlign: "center",
-                    boxShadow: tokens.card.shadow,
-                  }}
-                >
-                  {String(seg.value).padStart(2, "0")}
-                </div>
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: tokens.foregroundMid,
-                    fontFamily: tokens.fontFamily,
-                    letterSpacing: 1.5,
-                  }}
-                >
-                  {seg.label}
-                </div>
-              </div>
-              {i < segments.length - 1 && (
-                <div
-                  style={{
-                    fontSize: 48,
-                    fontWeight: 900,
-                    color: tokens.foregroundLow,
-                    fontFamily: tokens.monoFontFamily,
-                    marginBottom: 24,
-                    opacity: boxOpacity,
-                  }}
-                >
-                  :
-                </div>
-              )}
-            </React.Fragment>
-          )
-        })}
+        {segments.map((seg, i) => (
+          <React.Fragment key={i}>
+            <CountdownBox
+              value={seg.value}
+              label={seg.label}
+              isLast={i === segments.length - 1}
+              beat={beats?.[1] ?? null}
+              index={i}
+              tokens={tokens}
+            />
+            {i < segments.length - 1 && <CountdownSeparator beat={beats?.[1] ?? null} index={i} tokens={tokens} />}
+          </React.Fragment>
+        ))}
       </div>
 
       {targetLabel && (
@@ -160,7 +171,7 @@ export const CountdownScene: React.FC<Record<string, unknown>> = (rawProps) => {
             fontSize: 18,
             color: tokens.foregroundMid,
             fontFamily: tokens.fontFamily,
-            opacity: labelOpacity,
+            opacity: phase1.opacity,
             marginTop: 28,
           }}
         >

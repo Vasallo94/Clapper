@@ -1,9 +1,10 @@
 import React from "react"
-import { AbsoluteFill, Img, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { AbsoluteFill, Img } from "remotion"
 import { useThemeTokens } from "../../../../shared/themes"
 import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
 import type { Beat, Timing } from "../../../../utils/direction"
-import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
+import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
+import { useBeatReveal } from "../../../../shared/hooks/useBeatReveal"
 
 interface MediaCardProps {
   imageSrc?: string
@@ -16,65 +17,20 @@ interface MediaCardProps {
   beats?: Beat[]
 }
 
-export const MediaCardScene: React.FC<Record<string, unknown>> = (rawProps) => {
-  const props = rawProps as unknown as MediaCardProps
-  const { imageSrc, imageAlt, title, description, cta, layout = "image-left", timing, beats } = props
-  const frame = useCurrentFrame()
-  const { fps } = useVideoConfig()
-  const tokens = useThemeTokens()
-  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
-  const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
-
-  const isRight = layout === "image-right"
-
-  // Image
-  const imgDelay = beatStartFrames?.[0] ?? motionStartFrame
-  const imgSpring = spring({
-    frame: Math.max(0, frame - imgDelay),
-    fps,
-    config: { damping: 20, stiffness: 180 },
-    durationInFrames: Math.ceil(fps * 0.5),
-  })
-  const imgOpacity = interpolate(imgSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-  const imgScale = interpolate(imgSpring, [0, 1], [0.95, 1])
-
-  // Title
-  const titleDelay = beatStartFrames?.[1] ?? imgDelay + Math.ceil(fps * 0.2)
-  const titleSpring = spring({
-    frame: Math.max(0, frame - titleDelay),
-    fps,
-    config: { damping: 20, stiffness: 180 },
-    durationInFrames: Math.ceil(fps * 0.5),
-  })
-  const titleOpacity = interpolate(titleSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-  const titleY = interpolate(titleSpring, [0, 1], [15, 0])
-
-  // Description
-  const descDelay = beatStartFrames?.[2] ?? titleDelay + Math.ceil(fps * 0.15)
-  const descOpacity = interpolate(frame, [descDelay, descDelay + Math.ceil(fps * 0.2)], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
+const MediaImage: React.FC<{
+  imageSrc?: string
+  imageAlt?: string
+  beat: Beat | null
+  tokens: ReturnType<typeof useThemeTokens>
+}> = ({ imageSrc, imageAlt, beat, tokens }) => {
+  const { opacity, y } = useBeatReveal({
+    beat: beat ?? undefined,
+    fallbackDelayMs: 200,
+    animationMs: 300,
   })
 
-  // CTA
-  const ctaDelay = beatStartFrames?.[3] ?? descDelay + Math.ceil(fps * 0.15)
-  const ctaSpring = spring({
-    frame: Math.max(0, frame - ctaDelay),
-    fps,
-    config: { damping: 20, stiffness: 180 },
-    durationInFrames: Math.ceil(fps * 0.4),
-  })
-  const ctaOpacity = interpolate(ctaSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-  const ctaY = interpolate(ctaSpring, [0, 1], [10, 0])
-
-  const imageEl = (
-    <div
-      style={{
-        flex: 1,
-        opacity: imgOpacity,
-        transform: `scale(${imgScale})`,
-      }}
-    >
+  return (
+    <div style={{ flex: 1, opacity, transform: `translateY(${y}px)` }}>
       {imageSrc ? (
         <Img
           src={imageSrc}
@@ -107,6 +63,48 @@ export const MediaCardScene: React.FC<Record<string, unknown>> = (rawProps) => {
       )}
     </div>
   )
+}
+
+const MediaCta: React.FC<{
+  text: string
+  beat: Beat | null
+  tokens: ReturnType<typeof useThemeTokens>
+}> = ({ text, beat, tokens }) => {
+  const { opacity, y } = useBeatReveal({
+    beat: beat ?? undefined,
+    fallbackDelayMs: 600,
+    animationMs: 250,
+  })
+
+  return (
+    <div
+      style={{
+        display: "inline-block",
+        background: tokens.primary,
+        color: tokens.primaryForeground,
+        fontSize: 14,
+        fontWeight: 600,
+        padding: "10px 24px",
+        borderRadius: 6,
+        fontFamily: tokens.fontFamily,
+        opacity,
+        transform: `translateY(${y}px)`,
+      }}
+    >
+      {text}
+    </div>
+  )
+}
+
+export const MediaCardScene: React.FC<Record<string, unknown>> = (rawProps) => {
+  const props = rawProps as unknown as MediaCardProps
+  const { imageSrc, imageAlt, title, description, cta, layout = "image-left", beats } = props
+  const tokens = useThemeTokens()
+  const phase1 = usePhase1Entry({ durationMs: 100 })
+
+  const isRight = layout === "image-right"
+
+  const imageEl = <MediaImage imageSrc={imageSrc} imageAlt={imageAlt} beat={beats?.[0] ?? null} tokens={tokens} />
 
   const textEl = (
     <div style={{ flex: 1 }}>
@@ -117,8 +115,8 @@ export const MediaCardScene: React.FC<Record<string, unknown>> = (rawProps) => {
           color: tokens.foreground,
           fontFamily: tokens.fontFamily,
           marginBottom: 12,
-          opacity: titleOpacity,
-          transform: `translateY(${titleY}px)`,
+          opacity: phase1.opacity,
+          transform: `scale(${phase1.scale})`,
         }}
       >
         {title}
@@ -130,31 +128,14 @@ export const MediaCardScene: React.FC<Record<string, unknown>> = (rawProps) => {
             color: tokens.foregroundMid,
             fontFamily: tokens.fontFamily,
             lineHeight: 1.6,
-            opacity: descOpacity,
+            opacity: phase1.opacity,
             marginBottom: 20,
           }}
         >
           {description}
         </div>
       )}
-      {cta && (
-        <div
-          style={{
-            display: "inline-block",
-            background: tokens.primary,
-            color: tokens.primaryForeground,
-            fontSize: 14,
-            fontWeight: 600,
-            padding: "10px 24px",
-            borderRadius: 6,
-            fontFamily: tokens.fontFamily,
-            opacity: ctaOpacity,
-            transform: `translateY(${ctaY}px)`,
-          }}
-        >
-          {cta}
-        </div>
-      )}
+      {cta && <MediaCta text={cta} beat={beats?.[3] ?? null} tokens={tokens} />}
     </div>
   )
 

@@ -5,6 +5,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+
+- `director.md`: removed deprecated `leadInMs`/`audioStartMs` timing fields, added `scene-timing-guide` skill reference, added Audio Sync (auto-calculated) section
+- `audio_planner.md`: removed `leadInMs` object format from voiceover scenes example, added note that audio sync is automatic, added `scene-timing-guide` skill reference
+- `scene_creator.md`: mandated Two-Phase Animation Pattern with `usePhase1Entry`/`useBeatReveal`, replaced deprecated `useSlideIn` rule, added MANDATORY section with template
+- `copywriter.md`: added `scene-timing-guide` skill reference, added Duration-Content Density section with bullet/timing density guidance
+
 ### Fixed
 
 - Markdown now renders in assistant chat messages (bold, headings, lists, code blocks) instead of showing raw syntax

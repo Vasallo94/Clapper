@@ -13,6 +13,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
   - `present_qa_report`: checkpoint interrupt that pauses the pipeline for human review when issues are found
   - Helpers `_classify_position`, `_summarize_scene`, `_build_context`, `_build_qa_prompt` for rich scene context assembly
 - **`packages/agent/tests/test_tools_qa.py`** — 12 tests covering render, skip logic, LLM success/error paths, context builder, and checkpoint behavior
+- **`packages/agent/prompts/scene_qa.md`** — Scene QA agent prompt with QA workflow, feedback routing (ALL PASS → continue, MINOR_FIX → auto-fix, MAJOR_ISSUE → human checkpoint), and report/feedback JSON formats
+- **`packages/agent/src/subagents/scene_qa.py`** — `create_scene_qa()` factory following DeepAgents subagent pattern with 3 QA tools and skills directory
+- **Scene QA orchestrator integration** — `scene_qa` added as 10th subagent in `orchestrator.py`; new step 2f in `orchestrator.md` between direction validation and audio planning with retry logic for MINOR_FIX and human checkpoint for MAJOR_ISSUE
 - **`scripts/render-scene-stills.ts`** — renders individual scene stills (PNG) at the 60% frame point using Remotion `renderStill` API; outputs a JSON manifest to stdout for QA agent consumption; shares bundle caching logic with `render.ts`
 - **Audio-Visual Sync Platform** — eliminates dead air (blank screens while voice plays) across the entire pipeline
   - `usePhase1Entry` hook: instant ≤200ms entry for core layout elements (title, frame, background)

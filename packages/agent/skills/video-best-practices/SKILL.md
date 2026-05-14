@@ -73,6 +73,17 @@ Two composition formats:
 - CSS transitions, CSS animations, and Tailwind animation classes are FORBIDDEN — Remotion renders frame-by-frame, CSS animations produce blank frames
 - `spring()` for organic motion (entry, bounce, scale)
 - `interpolate()` for linear progress (wipes, countdowns, progress bars)
+- Entry animations: use `usePhase1Entry()` for core elements, `useBeatReveal()` for items
+- Never use `useSlideIn` for new scenes — it is being phased out
+
+## Two-Phase Animation Pattern
+
+All scenes follow a Two-Phase entry pattern. See `scene-timing-guide` skill for details.
+
+- **Phase 1** (≤200ms): Core layout via `usePhase1Entry()` — title, frame, background appear instantly
+- **Phase 2** (beat-driven): Supporting elements via `useBeatReveal()` — items, stats, diagrams appear on beats
+
+Agents do NOT set `leadInMs` or `audioStartMs`. The runtime auto-calculates audio delay from each scene's `visualReadyMs`.
 
 ## Scenes
 
@@ -84,10 +95,10 @@ Two composition formats:
 
 Optional on all scenes. Added by the director agent, not the copywriter.
 
-**Timing** controls when motion/audio starts within a scene:
+**Timing** controls holds and transitions:
 
-- `leadInMs` — delay before motion starts
-- `audioStartMs` — delay before narration starts
+- ~~`leadInMs`~~ — **DEPRECATED**: auto-calculated from scene timing registry
+- ~~`audioStartMs`~~ — **DEPRECATED**: auto-calculated from scene timing registry
 - `tailHoldMs` — hold last frame before transition
 - `transitionMs` — cross-fade duration (0 = hard cut)
 

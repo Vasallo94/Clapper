@@ -7,6 +7,8 @@ description: Remata configs de vídeo de Remotion con dirección editorial, sinc
 
 Usa esta skill cuando ya existe un draft de `config.json` y hay que convertirlo en una pieza con ritmo, intención y sincronía clara entre lo que se dice y lo que se ve.
 
+**Prerequisite:** Read the `scene-timing-guide` skill for the Two-Phase timing model. Your beats drive Phase 2 reveals.
+
 ## Cuándo usarla
 
 - Tutoriales que explican una idea y se sienten atropellados o demasiado bloque
@@ -24,8 +26,7 @@ Usa esta skill cuando ya existe un draft de `config.json` y hay que convertirlo 
 
 ## Reglas obligatorias
 
-- Ningún vídeo empieza con voz y movimiento mayor en el mismo frame
-- Si hay `voiceover`, el `intro` necesita `leadInMs`
+- Audio sync is auto-calculated from `visualReadyMs` — do NOT set `leadInMs` or `audioStartMs`
 - Cada frase importante del guion debe mapear a un beat o a una transición explícita
 - Una animación relevante no debe adelantarse a la mención verbal del concepto
 - Cada beat debe empujar una sola idea dominante
@@ -59,10 +60,7 @@ Estas reglas se aplican siempre, ya que el sound-engineer actuara despues del di
 
 ### Escena
 
-- `timing.leadInMs`
-- `timing.audioStartMs`
 - `timing.tailHoldMs`
-- `timing.minVisualHoldMs`
 - `timing.transitionMs` — silencio antes de esta escena (0-1500ms, para que la musica respire)
 - `beats[]`
 
@@ -80,7 +78,7 @@ Estas reglas se aplican siempre, ya que el sound-engineer actuara despues del di
 
 ### Intro
 
-- Deja el lockup visible antes de la primera palabra
+- Phase 1 makes the lockup visible automatically (≤200ms). Focus beats on Phase 2 reveals.
 - Define cuándo empieza el primer gesto visual fuerte
 - Ancla el hook verbal al primer beat narrado
 

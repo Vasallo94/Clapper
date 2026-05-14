@@ -7,7 +7,16 @@ description: Catalogo completo de escenas disponibles para generacion de videos 
 
 Reference catalog of all available scene types for video generation. Every scene requires `type` and `durationInSeconds` fields.
 
-All scenes accept optional direction fields: `timing` (leadInMs, audioStartMs, tailHoldMs, transitionMs) and `beats` (array of narration/visual/animation cues with startMs/endMs).
+## Two-Phase Animation Timing
+
+Every scene uses the Two-Phase pattern. Agents do NOT set `leadInMs` or `audioStartMs` — audio delay is auto-calculated from each scene's `visualReadyMs`.
+
+- **Phase 1** (≤200ms): Core layout elements appear instantly (title, frame, background)
+- **Phase 2** (beat-driven): Supporting elements reveal on beats or auto-stagger
+
+See `scene-timing-guide` skill for beat placement rules and duration-content density.
+
+All scenes accept optional direction fields: `timing` (tailHoldMs, transitionMs) and `beats` (array of narration/visual/animation cues with startMs/endMs). Audio sync is auto-calculated — see `scene-timing-guide` skill.
 
 ## How agents should use the catalog
 
@@ -60,6 +69,8 @@ Opening title card with animated lockup.
 | pixelLogo         | object | no       | `{ enabled, scale (1-12), animation: "none"\|"build"\|"glint"\|"pulse" }` |
 | durationInSeconds | number | yes      | 1-30                                                                      |
 
+**Timing:** visualReadyMs = 100. Phase 1: title + lockup. Phase 2: subtitle.
+
 ```json
 { "type": "intro", "title": "...", "subtitle": "...", "durationInSeconds": 3 }
 ```
@@ -80,6 +91,8 @@ Line kinds and rendering speeds:
 - `claude`: AI response (streaming, ~1 char/frame, 18-frame gap between lines)
 - `output`: tool output (instant reveal, 8 frames)
 - `blank`: visual separator
+
+**Timing:** visualReadyMs = 100. Phase 1: terminal frame + status bar. Phase 2: lines stream progressively.
 
 ```json
 {
@@ -104,6 +117,8 @@ Highlighted text overlay for key points.
 | background        | enum   | no       | `"overlay"` (default) \| `"solid"`               |
 | durationInSeconds | number | yes      | 1-15                                             |
 
+**Timing:** visualReadyMs = 100. Phase 1: text overlay. Phase 2: none (single-element scene).
+
 ### outro
 
 Closing card with summary bullets.
@@ -114,6 +129,8 @@ Closing card with summary bullets.
 | bullets           | string[] | no       | Summary points |
 | durationInSeconds | number   | yes      | 2-20           |
 
+**Timing:** visualReadyMs = 100. Phase 1: title. Phase 2: bullet items stagger in.
+
 ### custom
 
 Renders a registered custom component by `componentId`. See Custom Components below.
@@ -123,6 +140,8 @@ Renders a registered custom component by `componentId`. See Custom Components be
 | componentId       | string | yes      | Must match a registered ID                 |
 | props             | object | no       | Arbitrary props forwarded to the component |
 | durationInSeconds | number | yes      | 1-120                                      |
+
+**Timing:** visualReadyMs varies by componentId (see scene-timing-guide). Phase 1: frame/title. Phase 2: items/content.
 
 ## ProductShort (1080x1920 vertical)
 
@@ -135,6 +154,8 @@ Opening vertical hero card.
 | title             | string | yes      | Hero title      |
 | subtitle          | string | no       | Supporting text |
 | durationInSeconds | number | yes      | 1-10            |
+
+**Timing:** visualReadyMs = 100. Phase 1: mascot + title. Phase 2: subtitle.
 
 ### benefits
 
@@ -158,6 +179,8 @@ Correct format:
 "items": [{ "text": "Correct" }, { "text": "Also correct" }]
 ```
 
+**Timing:** visualReadyMs = 100. Phase 1: title. Phase 2: benefit items stagger in.
+
 ### pricing
 
 Price display card.
@@ -170,6 +193,8 @@ Price display card.
 | variant           | enum   | yes      | `"light"` \| `"dark"`    |
 | durationInSeconds | number | yes      | 1-10                     |
 
+**Timing:** visualReadyMs = 100. Phase 1: price + period. Phase 2: note.
+
 ### cta
 
 Call-to-action closing card.
@@ -179,6 +204,8 @@ Call-to-action closing card.
 | text              | string | yes      | CTA text   |
 | url               | string | no       | Target URL |
 | durationInSeconds | number | yes      | 1-10       |
+
+**Timing:** visualReadyMs = 100. Phase 1: text + mascot. Phase 2: pulse waves.
 
 ## Custom Components
 
@@ -290,6 +317,107 @@ Bullet point slide with title.
 | title    | string                            | yes      | Slide heading          |
 | items    | `{text: string, icon?: string}[]` | yes      | Bullet items           |
 | subtitle | string                            | no       | Subtitle below heading |
+
+Exact interface:
+
+```ts
+type BulletSlideProps = {
+  title: string
+  subtitle?: string
+  items: Array<{
+    text: string
+    icon?:
+      | "terminal"
+      | "cloud"
+      | "code"
+      | "folder"
+      | "shield"
+      | "gear"
+      | "user"
+      | "book"
+      | "lightbulb"
+      | "layers"
+      | "link"
+      | "check"
+      | "file"
+      | "arrow"
+  }>
+}
+```
+
+Do not use `bullets`, `points`, `title` inside each item, or bare objects without `text`.
+
+### icon-grid
+
+Grid of icon cards.
+
+| Prop    | Type                                                   | Required | Notes           |
+| ------- | ------------------------------------------------------ | -------- | --------------- |
+| items   | `{icon: string, title: string, description: string}[]` | yes      | Grid cards      |
+| title   | string                                                 | no       | Section heading |
+| columns | `2 \| 3 \| 4`                                          | no       | Defaults to 3   |
+
+Exact interface:
+
+```ts
+type IconGridProps = {
+  title?: string
+  columns?: 2 | 3 | 4
+  items: Array<{
+    icon:
+      | "terminal"
+      | "cloud"
+      | "code"
+      | "folder"
+      | "shield"
+      | "gear"
+      | "user"
+      | "book"
+      | "lightbulb"
+      | "layers"
+      | "link"
+      | "check"
+      | "file"
+    title: string
+    description: string
+    accent?: string
+  }>
+}
+```
+
+Do not use `label` instead of `title`. Do not omit `description`.
+
+### split-screen
+
+Two-panel comparison layout.
+
+| Prop  | Type                                                               | Required | Notes           |
+| ----- | ------------------------------------------------------------------ | -------- | --------------- |
+| left  | `{label: string, items: string[], icon?: string, accent?: string}` | yes      | Left panel      |
+| right | `{label: string, items: string[], icon?: string, accent?: string}` | yes      | Right panel     |
+| title | string                                                             | no       | Section heading |
+
+Exact interface:
+
+```ts
+type SplitScreenProps = {
+  title?: string
+  left: {
+    label: string
+    icon?: "check" | "cross" | "folder" | "user" | "code"
+    items: string[]
+    accent?: string
+  }
+  right: {
+    label: string
+    icon?: "check" | "cross" | "folder" | "user" | "code"
+    items: string[]
+    accent?: string
+  }
+}
+```
+
+Do not use `{title, subtitle}` inside `left` or `right`. Use `{label, items}`.
 
 ### quote
 

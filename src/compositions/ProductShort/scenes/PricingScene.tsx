@@ -1,34 +1,18 @@
 import React from "react"
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion"
 import type { PricingSceneProps } from "../schema"
 import { useThemeTokens } from "../../../shared/themes"
-import { getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
+import { usePhase1Entry } from "../../../shared/hooks/usePhase1Entry"
 
-export const PricingScene: React.FC<PricingSceneProps> = ({ price, period, note, variant, timing }) => {
+export const PricingScene: React.FC<PricingSceneProps> = ({ price, period, note, variant }) => {
   const frame = useCurrentFrame()
-  const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
-  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
+  const phase1 = usePhase1Entry({ durationMs: 100 })
 
   const isDark = variant === "dark"
   const bg = isDark ? tokens.primary : tokens.background
   const priceColor = isDark ? tokens.primaryForeground : tokens.primary
   const textColor = isDark ? `${tokens.primaryForeground}d9` : tokens.foregroundMid
-
-  const priceSpring = spring({
-    frame: Math.max(0, frame - motionStartFrame),
-    fps,
-    config: { damping: 10, mass: 0.6 },
-    durationInFrames: 25,
-  })
-  const priceScale = interpolate(priceSpring, [0, 1], [0.3, 1])
-
-  const detailSpring = spring({
-    frame: Math.max(0, frame - motionStartFrame - 10),
-    fps,
-    config: { damping: 200 },
-    durationInFrames: 20,
-  })
 
   return (
     <AbsoluteFill
@@ -64,7 +48,7 @@ export const PricingScene: React.FC<PricingSceneProps> = ({ price, period, note,
           fontSize: 120,
           fontWeight: 900,
           color: priceColor,
-          transform: `scale(${priceScale})`,
+          transform: `scale(${phase1.scale})`,
         }}
       >
         {price}
@@ -76,7 +60,7 @@ export const PricingScene: React.FC<PricingSceneProps> = ({ price, period, note,
             fontFamily: tokens.fontFamily,
             fontSize: 36,
             color: textColor,
-            opacity: detailSpring,
+            opacity: phase1.opacity,
           }}
         >
           {period}
@@ -89,7 +73,7 @@ export const PricingScene: React.FC<PricingSceneProps> = ({ price, period, note,
             fontFamily: tokens.fontFamily,
             fontSize: 28,
             color: textColor,
-            opacity: detailSpring,
+            opacity: phase1.opacity,
             marginTop: 8,
           }}
         >

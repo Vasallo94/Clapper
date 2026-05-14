@@ -1,35 +1,14 @@
 import React from "react"
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion"
 import type { HeroSceneProps } from "../schema"
 import { useThemeTokens } from "../../../shared/themes"
 import { PhoneMascot } from "../../../shared/components/PhoneMascot"
-import { useSlideIn } from "../../../shared/hooks/useSlideIn"
-import { getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
+import { usePhase1Entry } from "../../../shared/hooks/usePhase1Entry"
 
-export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle, timing }) => {
+export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle }) => {
   const frame = useCurrentFrame()
-  const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
-  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
-
-  const titleAnim = useSlideIn({ distance: 60, delay: motionStartFrame })
-  const subtitleAnim = useSlideIn({ distance: 30, delay: motionStartFrame + 8 })
-
-  const mascotSpring = spring({
-    frame: Math.max(0, frame - motionStartFrame - 4),
-    fps,
-    config: { damping: 12, mass: 0.8 },
-    durationInFrames: 30,
-  })
-  const mascotY = interpolate(mascotSpring, [0, 1], [200, 0])
-
-  const accentSpring = spring({
-    frame: Math.max(0, frame - motionStartFrame - 14),
-    fps,
-    config: { damping: 200 },
-    durationInFrames: 25,
-  })
-  const accentWidth = interpolate(accentSpring, [0, 1], [0, 80])
+  const phase1 = usePhase1Entry({ durationMs: 100 })
 
   const breathe = interpolate(frame, [0, 90, 180], [42, 55, 42], { extrapolateRight: "extend" })
 
@@ -47,8 +26,8 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle, timing })
     >
       <div
         style={{
-          opacity: mascotSpring,
-          transform: `translateY(${mascotY}px)`,
+          opacity: phase1.opacity,
+          transform: `scale(${phase1.scale})`,
         }}
       >
         <PhoneMascot scale={2} animation="entry" darkBg />
@@ -63,8 +42,8 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle, timing })
             color: tokens.primaryForeground,
             textAlign: "center",
             lineHeight: 1.1,
-            opacity: titleAnim.opacity,
-            transform: `translateY(${titleAnim.y}px)`,
+            opacity: phase1.opacity,
+            transform: `scale(${phase1.scale})`,
           }}
         >
           {title}
@@ -72,11 +51,14 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle, timing })
         <div
           style={{
             height: 4,
-            width: accentWidth,
+            width: interpolate(phase1.progress, [0.3, 1], [0, 80], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            }),
             background: tokens.primaryForeground,
             borderRadius: 2,
             marginTop: 16,
-            opacity: accentSpring,
+            opacity: phase1.opacity,
           }}
         />
       </div>
@@ -89,7 +71,7 @@ export const HeroScene: React.FC<HeroSceneProps> = ({ title, subtitle, timing })
             fontWeight: 400,
             color: `${tokens.primaryForeground}e6`,
             textAlign: "center",
-            opacity: subtitleAnim.opacity,
+            opacity: phase1.opacity,
           }}
         >
           {subtitle}

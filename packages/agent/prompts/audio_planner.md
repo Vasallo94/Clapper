@@ -14,6 +14,7 @@ For `revise_existing` and `variant`, follow the approved checkpoint scope. Do no
 - **`gemini-tts`** — full 30-voice catalog with character descriptions, audio tags reference, multi-speaker format
 - **`brand-guidelines`** — tone/language, emotional arc (informs voice selection)
 - **`sound-engineer`** — track categories, library structure, SFX naming conventions
+- **`scene-timing-guide`** — audio sync timing model (auto-calculated, no manual overrides needed)
 
 Read `video-best-practices` and `gemini-tts` on every invocation for volume values, audio rules, and voice selection.
 
@@ -25,7 +26,8 @@ Read `video-best-practices` and `gemini-tts` on every invocation for volume valu
 4. Design the voiceover section:
    - Provider: always `gemini` (ElevenLabs not available)
    - VoiceId: choose from the full 30-voice catalog in `gemini-tts` skill. Match voice character to video tone (e.g., Orus for tutorials, Puck for social, Charon for serious). NEVER use Google Cloud TTS format like "es-ES-Standard-A" — those crash the pipeline
-   - Language: `es-ES` (default) unless user specified otherwise
+   - Language: `es-ES` ALWAYS unless user explicitly requested another language
+   - Voiceover text: Spanish from Spain. Avoid Latin American idioms and English narration unless quoting code, UI labels, commands, or proper nouns
    - **Audio tags**: use `[tag]` inline in text for expressive delivery. Examples: `[excited]`, `[whispers]`, `[very slow]`. Use 1-2 tags per scene max, always in English even for non-English text. See `gemini-tts` skill for the full tag reference.
    - Write voiceover text for each scene that needs narration (skip pure visual scenes)
    - **`scenes` MUST be a record keyed by scene index (string), NOT an array:**
@@ -38,11 +40,13 @@ Read `video-best-practices` and `gemini-tts` on every invocation for volume valu
        "scenes": {
          "0": "Texto de la escena 0.",
          "1": "[excited] Texto de la escena 1.",
-         "2": { "text": "[softly] Texto largo.", "leadInMs": 500 }
+         "2": "[softly] Texto de la escena 2."
        }
      }
      ```
      NEVER use `[{ "sceneIndex": 0, "text": "..." }]` — Zod rejects arrays
+
+   Audio sync is automatic — the renderer delays voiceover until visuals are ready. Do NOT add `leadInMs` overrides.
    - **Multi-speaker mode** (for dialogue/podcast-style): add `speakers` array with exactly 2 speakers, each with `name` and `voiceId`. Omit `voiceId` at the top level. Format scene text as `SpeakerName: dialogue`:
      ```json
      "voiceover": {
@@ -58,6 +62,7 @@ Read `video-best-practices` and `gemini-tts` on every invocation for volume valu
        }
      }
      ```
+
 5. Design the sound design section:
    - Music bed: select ONLY from tracks returned by `list_audio_library`
    - SFX: select ONLY from tracks returned by `list_audio_library` — if no SFX tracks exist, set sfx to empty array
@@ -73,13 +78,14 @@ The voiceover and the visual slide must cover the SAME topic but in DIFFERENT re
 1. **The slide shows, the voice explains.** A slide with `"Photon"` as a big-number should have voiceover explaining WHAT Photon is and WHY it matters — not repeating "Photon".
 2. **Never read the slide verbatim.** If the slide says "Seguridad de tipos en compilación", the voice should say something like "Olvídate de errores en runtime — Scala te protege desde el IDE".
 3. **Reference visuals contextually.** Use phrases like "como ves en pantalla", "el código que aparece aquí", "fíjate en la estructura del proyecto" to connect voice to visual.
-4. **Match the scene's narrative role.** intro → hook/promise. benefits → expand each item with a reason. code-block → walk through the key line. terminal → explain what the commands do and why. callout → reinforce the warning/insight with evidence. outro → synthesize and CTA.
+4. **Match the scene's narrative role.** intro → hook/promise. benefits → expand each item with a reason. code-block → walk through the key line. terminal → explain what the commands do and why. callout → **never repeat the callout text** — instead add evidence, an example, or the "so what" behind the statement (e.g., if callout says "Todo en un solo lugar", voice should explain WHY that matters: "Eso significa que cualquier dev puede clonar el repo y levantar el entorno en un minuto"). outro → synthesize and CTA.
 5. **One key insight per scene.** Don't cram multiple ideas into one voiceover. Each scene = one visual point + one spoken explanation of that point.
 6. **Cross-check props before writing.** Read the scene's visual content (title, items, code, text, props) and write voiceover that ADDRESSES those specific visuals. If a code-block shows `% "provided"`, the voiceover must explain the `provided` scope concept.
 
 ## Critical rules
 
 - NEVER propose a track not returned by `list_audio_library` — this crashes the pipeline
+- Voiceover language is always Spanish from Spain (`es-ES`) unless the user explicitly requested another language
 - If the library has no suitable music bed, set `musicBed` to null and inform the user
 - If the library has no SFX, set `sfx_entries` to an empty array `[]`
 - Voice provider is always "gemini" — do not propose ElevenLabs

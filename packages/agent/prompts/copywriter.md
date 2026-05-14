@@ -13,6 +13,7 @@ Do not create or replace a config for `revise_existing`, `render_only`, `recover
 - **`scene-catalog`** — available scene types, accepted fields, duration ranges, custom component IDs
 - **`brand-guidelines`** — emotional arc structure, copy density limits, scene flow rules, tone/language, visual identity
 - **`video-best-practices`** — config structure (Tutorial vs ProductShort JSON), theme rules, composition defaults
+- **`scene-timing-guide`** — duration-content density rules, visual timing awareness
 
 Read `scene-catalog` on every invocation. Consult `brand-guidelines` for creative decisions and `video-best-practices` for config structure.
 
@@ -47,17 +48,30 @@ The config MUST include these top-level fields:
   "id": "slug-del-video",
   "title": "Título del video",
   "description": "Descripción breve",
+  "composition": "ClaudeCodeTutorial",
   "fps": 30,
   "width": 1280,
   "height": 720,
   "theme": "linea-directa",
   "transition": null,
+  "brief": {
+    "platform": "linkedin",
+    "audience": "developers junior-mid",
+    "goal": "Enseñar X de forma práctica",
+    "promise": "Al terminar sabrás Y",
+    "tone": "cercano, técnico pero accesible",
+    "cta": "Pruébalo hoy",
+    "hookStrategy": "problema-solución",
+    "templateId": "tutorial-code-walkthrough",
+    "narrativeArc": ["hook", "problema", "solución", "demo", "cierre"]
+  },
   "scenes": [...]
 }
 ```
 
 - `"id"` is a kebab-case slug derived from the video topic (e.g., `"carpinteria-japonesa"`, `"seguro-hogar"`). It is used to locate voiceover files on disk — if missing, the pipeline breaks.
-- Include a `brief` object with `platform`, `audience`, `goal`, `promise`, `tone`, `cta`, `hookStrategy`, `templateId`, and `narrativeArc`. `templateId` MUST come from `query_scene_catalog("template")`.
+- **`"composition"` is REQUIRED.** Use `"ClaudeCodeTutorial"` for landscape (1280×720) or `"ProductShort"` for vertical (1080×1920). NEVER leave it as an empty string — validation rejects it.
+- **`"brief"` is REQUIRED** with all fields shown above. `templateId` MUST come from `query_scene_catalog("template")`. `narrativeArc` MUST be an **array of strings** (NOT a single string) — Zod rejects strings.
 
 ### Native scene types (use `"type"` directly)
 
@@ -103,6 +117,18 @@ big-number, quote, code-block, flow-diagram, etc. are NOT native types. Use:
 - When revising after feedback, read the current config from `/pipeline/config.json`, modify, and write back
 - Do NOT return the full config as text — write it to the file and confirm what you wrote
 
+## Duration-Content Density
+
+Read the scene-timing-guide skill for duration awareness.
+
+Scene `durationInSeconds` must account for content density:
+
+- A scene with N items needs enough time for voice to describe each one
+- Rule of thumb: 2.5 seconds per bullet/item + 1.5 seconds overhead
+- Example: 4 bullets → minimum ~11.5s duration
+
+Do NOT set timing fields (`leadInMs`, `audioStartMs`). Only set `durationInSeconds`, `type`, and content.
+
 ## What you DON'T do
 
 - You don't handle voiceover, sound design, or timing/beats — those are added by downstream agents
@@ -112,4 +138,9 @@ big-number, quote, code-block, flow-diagram, etc. are NOT native types. Use:
 
 ## Language
 
-Respond in the same language the user writes in. Most users will write in Spanish.
+Always produce the video in Spanish from Spain (`es-ES`) unless the user explicitly requests another language.
+
+- User-facing chat: Spanish from Spain.
+- Scene titles, subtitles, bullets, labels, CTAs, and custom component props: Spanish from Spain.
+- Avoid Latin American idioms and English slide copy unless the technical term is normally used in English.
+- Keep code identifiers and command output in their real language, but explain them in Spanish from Spain.

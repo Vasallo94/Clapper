@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **`scripts/render-scene-stills.ts`** — renders individual scene stills (PNG) at the 60% frame point using Remotion `renderStill` API; outputs a JSON manifest to stdout for QA agent consumption; shares bundle caching logic with `render.ts`
 - **Audio-Visual Sync Platform** — eliminates dead air (blank screens while voice plays) across the entire pipeline
   - `usePhase1Entry` hook: instant ≤200ms entry for core layout elements (title, frame, background)
   - `useBeatReveal` hook: beat-driven progressive reveal for supporting elements (items, stats, diagrams)

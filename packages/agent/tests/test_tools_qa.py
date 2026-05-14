@@ -145,7 +145,7 @@ class TestQaScenes:
             "suggested_changes": {},
         })
 
-        with patch("src.tools.qa.ChatGoogleGenerativeAI", create=True) as MockModel:
+        with patch("langchain_google_genai.ChatGoogleGenerativeAI") as MockModel:
             MockModel.return_value.invoke.return_value = llm_response
 
             from src.tools.qa import qa_scenes
@@ -169,7 +169,7 @@ class TestQaScenes:
         llm_response = MagicMock()
         llm_response.content = "I think this scene looks great!"
 
-        with patch("src.tools.qa.ChatGoogleGenerativeAI", create=True) as MockModel:
+        with patch("langchain_google_genai.ChatGoogleGenerativeAI") as MockModel:
             MockModel.return_value.invoke.return_value = llm_response
 
             from src.tools.qa import qa_scenes

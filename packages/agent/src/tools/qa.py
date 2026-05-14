@@ -185,15 +185,9 @@ def qa_scenes(
         stills_manifest_json: JSON string from render_scene_stills output.
     """
     import base64
-    import sys
 
-    import langchain_google_genai as _genai
     from langchain_core.messages import HumanMessage
-
-    # Inject lazy imports as module-level names so tests can patch them
-    import src.tools.qa as _self_mod  # noqa: PLC0415
-    if not hasattr(_self_mod, "ChatGoogleGenerativeAI"):
-        _self_mod.ChatGoogleGenerativeAI = _genai.ChatGoogleGenerativeAI
+    from langchain_google_genai import ChatGoogleGenerativeAI
 
     config = json.loads(config_json)
     manifest = json.loads(stills_manifest_json)
@@ -208,7 +202,7 @@ def qa_scenes(
             results.append({"index": index, "verdict": "SKIP", "reason": "No still available"})
             continue
 
-        model = _self_mod.ChatGoogleGenerativeAI(model=QA_MODEL)
+        model = ChatGoogleGenerativeAI(model=QA_MODEL)
         context = _build_context(config, scene, index, still_path)
         image_data = base64.b64encode(Path(still_path).read_bytes()).decode("utf-8")
         prompt = _build_qa_prompt(context)

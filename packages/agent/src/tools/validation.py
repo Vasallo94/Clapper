@@ -43,6 +43,75 @@ CUSTOM_COMPONENT_REQUIRED_PROPS: dict[str, list[str]] = {
     "two-column-text": ["left", "right"],
 }
 
+SCENE_VISUAL_READY_MS: dict[str, int] = {
+    "intro": 100, "terminal": 150, "callout": 100, "outro": 100,
+    "hero": 100, "benefits": 100, "pricing": 100, "cta": 100,
+    "bullet-slide": 100, "icon-grid": 100, "split-screen": 100,
+    "code-block": 150, "flow-diagram": 150, "comparison-table": 100,
+    "stat-reveal": 100, "file-explorer": 150, "quote": 100,
+    "block-diagram": 150, "annotated-image": 100, "api-request": 150,
+    "bar-chart": 100, "before-after": 100, "big-number": 100,
+    "browser-mockup": 150, "chapter-card": 100, "code-diff": 150,
+    "countdown": 100, "logo-wall": 100, "media-card": 100,
+    "problem-solution": 100, "progress-bars": 100, "step-list": 100,
+    "timeline": 100, "two-column-text": 100,
+}
+DEFAULT_VISUAL_READY_MS = 200
+
+ITEM_COUNT_SCENE_TYPES = {"bullet-slide", "icon-grid", "benefits", "progress-bars", "step-list", "timeline"}
+
+
+def _is_non_empty_string(value: Any) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
+def _validate_custom_component_props(index: int, component_id: str, props: dict, errors: list[str], warnings: list[str]) -> None:
+    if component_id == "split-screen":
+        for side in ("left", "right"):
+            panel = props.get(side)
+            if not isinstance(panel, dict):
+                errors.append(f"Scene {index}: custom 'split-screen' prop '{side}' must be an object")
+                continue
+            if not _is_non_empty_string(panel.get("label")):
+                errors.append(
+                    f"Scene {index}: custom 'split-screen' prop '{side}.label' is required. "
+                    "Use label/items, not title/subtitle."
+                )
+            items = panel.get("items")
+            if not isinstance(items, list) or not all(_is_non_empty_string(item) for item in items):
+                errors.append(
+                    f"Scene {index}: custom 'split-screen' prop '{side}.items' must be a non-empty string array. "
+                    "Use { label: string, items: string[] } for each panel."
+                )
+
+    if component_id == "icon-grid":
+        items = props.get("items")
+        if not isinstance(items, list) or not items:
+            errors.append(f"Scene {index}: custom 'icon-grid' prop 'items' must be a non-empty array")
+            return
+        for item_index, item in enumerate(items):
+            if not isinstance(item, dict):
+                errors.append(f"Scene {index}: custom 'icon-grid' item {item_index} must be an object")
+                continue
+            if not _is_non_empty_string(item.get("title")):
+                errors.append(f"Scene {index}: custom 'icon-grid' item {item_index} missing required 'title'")
+            if not _is_non_empty_string(item.get("description")):
+                warnings.append(f"Scene {index}: custom 'icon-grid' item {item_index} missing 'description'")
+
+    if component_id == "bullet-slide":
+        items = props.get("items")
+        if not isinstance(items, list) or not items:
+            errors.append(f"Scene {index}: custom 'bullet-slide' prop 'items' must be a non-empty array")
+            return
+        for item_index, item in enumerate(items):
+            if isinstance(item, str):
+                continue
+            if not isinstance(item, dict):
+                errors.append(f"Scene {index}: custom 'bullet-slide' item {item_index} must be a string or object")
+                continue
+            if not _is_non_empty_string(item.get("text")):
+                errors.append(f"Scene {index}: custom 'bullet-slide' item {item_index} missing required 'text'")
+
 
 def _project_path(*parts: str) -> Path:
     return Path(PROJECT_ROOT).joinpath(*parts)
@@ -242,6 +311,9 @@ def audit_content_quality(config_input: str) -> str:
         if scene_type == "custom":
             component_id = scene.get("componentId", "")
             props = scene.get("props") or {}
+            if not isinstance(props, dict):
+                errors.append(f"Scene {index}: custom '{component_id}' props must be an object")
+                props = {}
             required = CUSTOM_COMPONENT_REQUIRED_PROPS.get(component_id, [])
             for field in required:
                 val = props.get(field)
@@ -253,6 +325,7 @@ def audit_content_quality(config_input: str) -> str:
                     warnings.append(
                         f"Scene {index}: custom '{component_id}' prop '{field}' is an empty array — scene will render blank"
                     )
+            _validate_custom_component_props(index, component_id, props, errors, warnings)
 
         text_words = _word_count(_scene_text(scene))
         if duration > 0 and text_words / duration > 5:
@@ -262,9 +335,7 @@ def audit_content_quality(config_input: str) -> str:
 
         timing = scene.get("timing")
         if not isinstance(timing, dict):
-            recommendations.append(f"Scene {index}: add timing fields so voice, motion, and hold are intentional")
-        elif index == 0 and not timing.get("leadInMs"):
-            recommendations.append("Scene 0: add leadInMs before narration or major movement")
+            recommendations.append(f"Scene {index}: add timing.tailHoldMs for intentional pacing")
 
         beats = scene.get("beats")
         if isinstance(beats, list):
@@ -276,6 +347,78 @@ def audit_content_quality(config_input: str) -> str:
                     errors.append(f"Scene {index}: beat '{beat.get('id', '?')}' starts after the scene ends")
         elif scene_type in {"terminal", "custom", "benefits"} and duration >= 4:
             recommendations.append(f"Scene {index}: add beats for the main reveal points")
+
+        # --- Timing sync rules ---
+        timing_obj = scene.get("timing") if isinstance(scene.get("timing"), dict) else {}
+        beat_list = scene.get("beats", [])
+        if not isinstance(beat_list, list):
+            beat_list = []
+
+        # Rule 1: Legacy timing fields warning
+        if timing_obj.get("leadInMs") or timing_obj.get("audioStartMs"):
+            warnings.append(
+                f"Scene {index}: leadInMs/audioStartMs are deprecated. "
+                "Audio sync is auto-calculated from visualReadyMs. Remove these fields."
+            )
+
+        # Rule 2: Dead air detection — first beat before visuals ready
+        scene_type_key = scene.get("componentId", "") if scene_type == "custom" else scene_type
+        visual_ready_ms = SCENE_VISUAL_READY_MS.get(scene_type_key, DEFAULT_VISUAL_READY_MS)
+        if beat_list:
+            first_beat = beat_list[0] if isinstance(beat_list[0], dict) else {}
+            first_beat_ms = first_beat.get("startMs", 0)
+            if isinstance(first_beat_ms, (int, float)) and first_beat_ms < visual_ready_ms:
+                errors.append(
+                    f"Scene {index}: first beat at {first_beat_ms}ms starts before "
+                    f"visuals are ready ({visual_ready_ms}ms). Move beat to >= {visual_ready_ms}ms."
+                )
+
+        # Rule 3: Beat density check — beats too close together
+        for bi in range(len(beat_list) - 1):
+            b_curr = beat_list[bi] if isinstance(beat_list[bi], dict) else {}
+            b_next = beat_list[bi + 1] if isinstance(beat_list[bi + 1], dict) else {}
+            curr_ms = b_curr.get("startMs", 0)
+            next_ms = b_next.get("startMs", 0)
+            if isinstance(curr_ms, (int, float)) and isinstance(next_ms, (int, float)):
+                gap = next_ms - curr_ms
+                if gap < 500:
+                    warnings.append(
+                        f"Scene {index}: beats '{b_curr.get('id', '?')}' and '{b_next.get('id', '?')}' "
+                        f"are only {gap:.0f}ms apart. Minimum recommended: 500ms."
+                    )
+
+        # Rule 4: Tail breathing room — last beat too close to scene end
+        if beat_list and duration > 0:
+            last_beat = beat_list[-1] if isinstance(beat_list[-1], dict) else {}
+            last_beat_ms = last_beat.get("startMs", 0)
+            if isinstance(last_beat_ms, (int, float)):
+                tail_room = (duration * 1000) - last_beat_ms
+                if tail_room < 300:
+                    warnings.append(
+                        f"Scene {index}: last beat ends {tail_room:.0f}ms before scene ends. "
+                        "Content may feel rushed. Recommend >= 500ms tail."
+                    )
+
+        # Rule 5: Duration vs content density
+        if scene_type == "custom" and scene_type_key in ITEM_COUNT_SCENE_TYPES:
+            props = scene.get("props") or {}
+            items = props.get("items", []) if isinstance(props, dict) else []
+            if isinstance(items, list) and len(items) > 0:
+                min_duration = (len(items) * 2.5) + 1.5
+                if duration > 0 and duration < min_duration:
+                    warnings.append(
+                        f"Scene {index}: {len(items)} items in {duration:.1f}s may feel rushed. "
+                        f"Minimum recommended: {min_duration:.1f}s."
+                    )
+        elif scene_type in ITEM_COUNT_SCENE_TYPES:
+            items = scene.get("items", [])
+            if isinstance(items, list) and len(items) > 0:
+                min_duration = (len(items) * 2.5) + 1.5
+                if duration > 0 and duration < min_duration:
+                    warnings.append(
+                        f"Scene {index}: {len(items)} items in {duration:.1f}s may feel rushed. "
+                        f"Minimum recommended: {min_duration:.1f}s."
+                    )
 
     voiceover = config.get("voiceover")
     if isinstance(voiceover, dict) and voiceover.get("enabled"):

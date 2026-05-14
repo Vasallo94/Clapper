@@ -170,6 +170,136 @@ class TestValidateConfig:
         parsed = json.loads(result)
         assert any("not-registered" in e for e in parsed["errors"])
 
+    def test_split_screen_requires_label_and_items(self):
+        from src.tools.validation import audit_content_quality
+
+        config = {
+            "id": "bad-split",
+            "scenes": [
+                {
+                    "type": "custom",
+                    "componentId": "split-screen",
+                    "durationInSeconds": 5,
+                    "props": {
+                        "left": {"title": "Algorithm", "subtitle": "Lines of code"},
+                        "right": {"title": "Recipe", "subtitle": "Step-by-step instructions"},
+                    },
+                }
+            ],
+        }
+
+        parsed = json.loads(audit_content_quality(json.dumps(config)))
+        assert any("left.label" in error for error in parsed["errors"])
+        assert any("left.items" in error for error in parsed["errors"])
+
+    def test_legacy_timing_fields_warning(self):
+        from src.tools.validation import audit_content_quality
+
+        config = {
+            "scenes": [
+                {
+                    "type": "callout",
+                    "text": "Hello",
+                    "position": "center",
+                    "durationInSeconds": 5,
+                    "timing": {"leadInMs": 200, "audioStartMs": 150},
+                }
+            ],
+        }
+        parsed = json.loads(audit_content_quality(json.dumps(config)))
+        assert any("deprecated" in w.lower() for w in parsed["warnings"])
+
+    def test_dead_air_detection_early_beat(self):
+        from src.tools.validation import audit_content_quality
+
+        config = {
+            "scenes": [
+                {
+                    "type": "custom",
+                    "componentId": "bullet-slide",
+                    "durationInSeconds": 10,
+                    "props": {"title": "Test", "items": [{"text": "a"}]},
+                    "beats": [{"id": "b1", "startMs": 50}],
+                }
+            ],
+        }
+        parsed = json.loads(audit_content_quality(json.dumps(config)))
+        assert any("before visuals are ready" in e for e in parsed["errors"])
+
+    def test_beat_density_warning(self):
+        from src.tools.validation import audit_content_quality
+
+        config = {
+            "scenes": [
+                {
+                    "type": "intro",
+                    "title": "Hello",
+                    "durationInSeconds": 5,
+                    "beats": [
+                        {"id": "b1", "startMs": 200},
+                        {"id": "b2", "startMs": 500},
+                    ],
+                }
+            ],
+        }
+        parsed = json.loads(audit_content_quality(json.dumps(config)))
+        assert any("300ms apart" in w for w in parsed["warnings"])
+
+    def test_tail_breathing_room_warning(self):
+        from src.tools.validation import audit_content_quality
+
+        config = {
+            "scenes": [
+                {
+                    "type": "intro",
+                    "title": "Hello",
+                    "durationInSeconds": 5,
+                    "beats": [{"id": "b1", "startMs": 4900}],
+                }
+            ],
+        }
+        parsed = json.loads(audit_content_quality(json.dumps(config)))
+        assert any("rushed" in w.lower() for w in parsed["warnings"])
+
+    def test_duration_content_density_warning(self):
+        from src.tools.validation import audit_content_quality
+
+        config = {
+            "scenes": [
+                {
+                    "type": "benefits",
+                    "title": "Benefits",
+                    "items": [{"text": "a"}, {"text": "b"}, {"text": "c"}, {"text": "d"}],
+                    "durationInSeconds": 5,
+                }
+            ],
+        }
+        parsed = json.loads(audit_content_quality(json.dumps(config)))
+        assert any("rushed" in w.lower() for w in parsed["warnings"])
+
+    def test_no_warning_when_timing_is_valid(self):
+        from src.tools.validation import audit_content_quality
+
+        config = {
+            "scenes": [
+                {
+                    "type": "intro",
+                    "title": "Hello",
+                    "durationInSeconds": 10,
+                    "timing": {"tailHoldMs": 500},
+                    "beats": [
+                        {"id": "b1", "startMs": 200},
+                        {"id": "b2", "startMs": 2000},
+                    ],
+                }
+            ],
+        }
+        parsed = json.loads(audit_content_quality(json.dumps(config)))
+        assert not any("deprecated" in w.lower() for w in parsed["warnings"])
+        assert not any("before visuals are ready" in e for e in parsed["errors"])
+        assert not any("apart" in w for w in parsed["warnings"])
+        assert not any("rushed" in w.lower() for w in parsed["warnings"])
+
 
 class TestReviewRender:
     def test_review_render_success(self, tmp_path, monkeypatch):

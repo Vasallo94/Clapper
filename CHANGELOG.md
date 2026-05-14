@@ -5,12 +5,27 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- **Audio-Visual Sync Platform** — eliminates dead air (blank screens while voice plays) across the entire pipeline
+  - `usePhase1Entry` hook: instant ≤200ms entry for core layout elements (title, frame, background)
+  - `useBeatReveal` hook: beat-driven progressive reveal for supporting elements (items, stats, diagrams)
+  - `sceneTimingRegistry.ts`: central registry mapping 34+ scene types to `visualReadyMs` thresholds
+  - Runtime guardrails in `calculateMetadata.ts` and `useScenePrecomputation.ts` auto-clamp audio delay to `max(visualReadyMs, agentValue)`
+  - `scene-timing-guide` skill teaching agents the Two-Phase pattern and beat placement rules
+  - 5 timing validation rules in `validation.py`: legacy field detection, dead-air detection, beat density, tail room, duration-content density
+  - 6 new validation tests (188 total passing)
+- Refactored 35 scene components to Two-Phase pattern (3 custom templates, 23 batch custom, 3 built-in, 4 ProductShort)
+
 ### Changed
 
 - `director.md`: removed deprecated `leadInMs`/`audioStartMs` timing fields, added `scene-timing-guide` skill reference, added Audio Sync (auto-calculated) section
 - `audio_planner.md`: removed `leadInMs` object format from voiceover scenes example, added note that audio sync is automatic, added `scene-timing-guide` skill reference
 - `scene_creator.md`: mandated Two-Phase Animation Pattern with `usePhase1Entry`/`useBeatReveal`, replaced deprecated `useSlideIn` rule, added MANDATORY section with template
 - `copywriter.md`: added `scene-timing-guide` skill reference, added Duration-Content Density section with bullet/timing density guidance
+- `scene-catalog/SKILL.md`: added Two-Phase timing info and `visualReadyMs` per scene type, deprecated `leadInMs`/`audioStartMs` from direction fields
+- `remotion-director/SKILL.md`: removed deprecated timing rules, added scene-timing-guide prerequisite, simplified Escena model
+- `video-best-practices/SKILL.md`: marked `leadInMs`/`audioStartMs` as DEPRECATED, added Two-Phase section, deprecated `useSlideIn`
 
 ### Fixed
 

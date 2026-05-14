@@ -1,3 +1,8 @@
+---
+name: scene-timing-guide
+description: Two-Phase animation timing model for Remotion scenes. Teaches agents beat placement rules, visualReadyMs registry, and duration-content density. Read before directing or creating scenes.
+---
+
 # Scene Timing Guide
 
 ## Two-Phase Animation Pattern

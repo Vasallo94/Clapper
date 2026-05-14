@@ -1,6 +1,7 @@
 import type { SceneAudioInfo } from "../utils/audioMix"
 import { getMergedBeats, getMergedTiming, getSceneAudioDelayMs, getVoiceoverText, msToFrames } from "../utils/direction"
 import type { Beat, Timing, VoiceoverConfig } from "./schemas"
+import { getVisualReadyMs } from "./sceneTimingRegistry"
 
 export interface SceneInfo<S> {
   directedScene: S
@@ -47,7 +48,9 @@ export function precomputeScenes<S extends PrecomputableScene>(
       ...(beats ? { beats } : {}),
     } as S
     const durationInFrames = Math.ceil(directedScene.durationInSeconds * config.fps)
-    const audioDelayFrames = msToFrames(getSceneAudioDelayMs(timing), config.fps)
+    const visualReadyMs = getVisualReadyMs(scene.type, scene.componentId)
+    const effectiveAudioDelayMs = Math.max(visualReadyMs, getSceneAudioDelayMs(timing) || 0)
+    const audioDelayFrames = msToFrames(effectiveAudioDelayMs, config.fps)
     const hasVoiceover = Boolean(config.voiceover?.enabled && getVoiceoverText(voiceScene))
 
     sceneInfos.push({ directedScene, durationInFrames, timing, hasVoiceover, audioDelayFrames })

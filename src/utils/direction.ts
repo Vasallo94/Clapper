@@ -107,6 +107,8 @@ export const getBeatProgress = (frame: number, beat: Beat, fps: number, fallback
 
 export const getBeatById = (beats: Beat[] | undefined, beatId: string) => beats?.find((beat) => beat.id === beatId)
 
+export { getVisualReadyMs, DEFAULT_VISUAL_READY_MS } from "../shared/sceneTimingRegistry"
+
 export const mergeSceneDirection = <T extends DirectionalScene>(scene: T, voiceScene?: VoiceoverScene) => {
   const timing = getMergedTiming(scene.timing, voiceScene)
   const beats = getMergedBeats(scene.beats, voiceScene)

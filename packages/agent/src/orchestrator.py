@@ -9,6 +9,7 @@ from langgraph.checkpoint.memory import MemorySaver  # used when running standal
 from .tools.render import check_render_status, submit_render
 from .tools.validation import audit_content_quality, validate_config
 from .modes import get_mode_contract, list_mode_contracts, route_intent
+from .tools.interactions import ask_user_interaction
 from .tools.configs import (
     list_video_configs,
     load_video_config,
@@ -73,6 +74,7 @@ def create_video_orchestrator(*, checkpointer=None):
         create_researcher,
         create_reviewer,
         create_scene_creator,
+        create_scene_qa,
         create_sound_engineer,
         create_validator,
         create_voice_generator,
@@ -93,6 +95,7 @@ def create_video_orchestrator(*, checkpointer=None):
         create_researcher(),
         create_copywriter(),
         create_director(),
+        create_scene_qa(),
         create_audio_planner(),
         create_voice_generator(),
         create_sound_engineer(),
@@ -118,6 +121,7 @@ def create_video_orchestrator(*, checkpointer=None):
             route_intent,
             get_mode_contract,
             list_mode_contracts,
+            ask_user_interaction,
             list_video_configs,
             load_video_config,
             stage_existing_config,

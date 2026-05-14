@@ -1,16 +1,10 @@
 // src/compositions/ClaudeCodeTutorial/scenes/CalloutScene.tsx
 import React from "react"
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { AbsoluteFill } from "remotion"
 import type { CalloutSceneProps } from "../schema"
 import { useThemeTokens } from "../../../shared/themes"
 import { MascotWatermark } from "../../../shared/components/MascotWatermark"
-
-const ORIGIN: Record<"top" | "center" | "bottom" | "right", { x: number; y: number }> = {
-  top: { x: 0, y: -30 },
-  center: { x: 0, y: 20 },
-  bottom: { x: 0, y: 30 },
-  right: { x: 40, y: 0 },
-}
+import { usePhase1Entry } from "../../../shared/hooks/usePhase1Entry"
 
 const ALIGN_MAP: Record<"top" | "center" | "bottom" | "right", string> = {
   top: "flex-start",
@@ -20,20 +14,9 @@ const ALIGN_MAP: Record<"top" | "center" | "bottom" | "right", string> = {
 }
 
 export const CalloutScene: React.FC<CalloutSceneProps> = ({ text, position, background }) => {
-  const frame = useCurrentFrame()
-  const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
 
-  const enterSpring = spring({
-    frame,
-    fps,
-    config: { damping: 20, stiffness: 200 },
-    durationInFrames: Math.ceil(fps * 0.6),
-  })
-  const origin = ORIGIN[position]
-  const tx = interpolate(enterSpring, [0, 1], [origin.x, 0])
-  const ty = interpolate(enterSpring, [0, 1], [origin.y, 0])
-  const opacity = interpolate(enterSpring, [0, 0.4], [0, 1], { extrapolateRight: "clamp" })
+  const phase1 = usePhase1Entry({ durationMs: 100 })
 
   const justify = position === "right" ? "flex-end" : ("center" as const)
   const align = ALIGN_MAP[position]
@@ -58,8 +41,8 @@ export const CalloutScene: React.FC<CalloutSceneProps> = ({ text, position, back
           borderLeft: `4px solid ${tokens.card.accentBorder}`,
           borderRadius: 10,
           padding: "28px 36px",
-          opacity,
-          transform: `translate(${tx}px, ${ty}px)`,
+          opacity: phase1.opacity,
+          transform: `scale(${phase1.scale})`,
           boxShadow: tokens.card.shadow,
         }}
       >

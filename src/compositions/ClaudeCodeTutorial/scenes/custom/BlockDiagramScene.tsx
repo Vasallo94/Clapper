@@ -2,7 +2,8 @@ import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { useThemeTokens } from "../../../../shared/themes"
 import type { Beat, Timing } from "../../../../utils/direction"
-import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
+import { getBeatStartFrame } from "../../../../utils/direction"
+import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
 
 interface BlockDiagramBlock {
   label: string
@@ -16,33 +17,85 @@ interface BlockDiagramProps {
   beats?: Beat[]
 }
 
+const DiagramBlock: React.FC<{
+  block: BlockDiagramBlock
+  beat: Beat | null
+  index: number
+  blockWidth: number
+  blockMinHeight: number
+  tokens: ReturnType<typeof useThemeTokens>
+}> = ({ block, beat, index, blockWidth, blockMinHeight, tokens }) => {
+  const frame = useCurrentFrame()
+  const { fps } = useVideoConfig()
+
+  const delay = beat ? getBeatStartFrame(beat, fps) : Math.round((0.3 + index * 0.4) * fps)
+  const s = spring({
+    frame: Math.max(0, frame - delay),
+    fps,
+    config: { damping: 20, stiffness: 180 },
+    durationInFrames: Math.ceil(fps * 0.6),
+  })
+  const y = interpolate(s, [0, 1], [30, 0])
+  const opacity = interpolate(s, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
+
+  return (
+    <div
+      style={{
+        width: blockWidth,
+        minHeight: blockMinHeight,
+        background: tokens.card.bg,
+        border: `2px solid ${tokens.card.border}`,
+        borderTop: `4px solid ${tokens.primary}`,
+        borderRadius: 12,
+        padding: "24px",
+        opacity,
+        transform: `translateY(${y}px)`,
+        boxShadow: tokens.card.shadow,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        position: "relative",
+        zIndex: 1,
+      }}
+    >
+      <div
+        style={{
+          fontFamily: tokens.fontFamily,
+          fontSize: 24,
+          fontWeight: 700,
+          color: tokens.primary,
+          marginBottom: 12,
+        }}
+      >
+        {block.label}
+      </div>
+      <div
+        style={{
+          fontFamily: tokens.fontFamily,
+          fontSize: 18,
+          color: tokens.foreground,
+          opacity: 0.8,
+          lineHeight: 1.5,
+        }}
+      >
+        {block.detail}
+      </div>
+    </div>
+  )
+}
+
 export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as BlockDiagramProps
-  const { blocks = [], title, timing, beats } = props
+  const { blocks = [], title, beats } = props
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
-
-  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
-  const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
+  const phase1 = usePhase1Entry({ durationMs: 100 })
 
   const blockWidth = 280
   const blockGap = 60
   const blockMinHeight = 160
   const rowWidth = blocks.length * blockWidth + (blocks.length - 1) * blockGap
-
-  // Title animation on Beat 0
-  const titleDelay = beatStartFrames?.[0] ?? motionStartFrame
-  const titleOpacity = title
-    ? interpolate(frame, [titleDelay, titleDelay + Math.ceil(fps * 0.4)], [0, 1], {
-        extrapolateLeft: "clamp",
-        extrapolateRight: "clamp",
-      })
-    : 0
-
-  const titleY = title
-    ? interpolate(spring({ frame: Math.max(0, frame - titleDelay), fps, config: { damping: 20 } }), [0, 1], [20, 0])
-    : 0
 
   return (
     <AbsoluteFill
@@ -64,8 +117,8 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
             fontWeight: 700,
             color: tokens.foreground,
             textAlign: "center",
-            opacity: titleOpacity,
-            transform: `translateY(${titleY}px)`,
+            opacity: phase1.opacity,
+            transform: `scale(${phase1.scale})`,
           }}
         >
           {title}
@@ -101,8 +154,9 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
             const x1 = i * (blockWidth + blockGap) + blockWidth
             const x2 = (i + 1) * (blockWidth + blockGap)
 
-            // Connection appears with the target block
-            const targetBlockDelay = beatStartFrames?.[i + 2] ?? motionStartFrame + (i + 1) * Math.ceil(fps * 0.4)
+            const targetBlockDelay = beats?.[i + 2]
+              ? getBeatStartFrame(beats[i + 2], fps)
+              : Math.round((0.3 + (i + 1) * 0.4) * fps)
             const lineDelay = targetBlockDelay - Math.ceil(fps * 0.15)
 
             const lineProgress = spring({
@@ -146,64 +200,17 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
           })}
         </svg>
 
-        {blocks.map((block, i) => {
-          // Beat index mapping: beat 0 is title, beat 1 is block 1, beat 2 is block 2, etc.
-          const delay = beatStartFrames?.[i + 1] ?? motionStartFrame + i * Math.ceil(fps * 0.4)
-          const s = spring({
-            frame: Math.max(0, frame - delay),
-            fps,
-            config: { damping: 20, stiffness: 180 },
-            durationInFrames: Math.ceil(fps * 0.6),
-          })
-          const y = interpolate(s, [0, 1], [30, 0])
-          const opacity = interpolate(s, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-
-          return (
-            <div
-              key={i}
-              style={{
-                width: blockWidth,
-                minHeight: blockMinHeight,
-                background: tokens.card.bg,
-                border: `2px solid ${tokens.card.border}`,
-                borderTop: `4px solid ${tokens.primary}`,
-                borderRadius: 12,
-                padding: "24px",
-                opacity,
-                transform: `translateY(${y}px)`,
-                boxShadow: tokens.card.shadow,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                position: "relative",
-                zIndex: 1,
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: tokens.fontFamily,
-                  fontSize: 24,
-                  fontWeight: 700,
-                  color: tokens.primary,
-                  marginBottom: 12,
-                }}
-              >
-                {block.label}
-              </div>
-              <div
-                style={{
-                  fontFamily: tokens.fontFamily,
-                  fontSize: 18,
-                  color: tokens.foreground,
-                  opacity: 0.8,
-                  lineHeight: 1.5,
-                }}
-              >
-                {block.detail}
-              </div>
-            </div>
-          )
-        })}
+        {blocks.map((block, i) => (
+          <DiagramBlock
+            key={i}
+            block={block}
+            beat={beats?.[i + 1] ?? null}
+            index={i}
+            blockWidth={blockWidth}
+            blockMinHeight={blockMinHeight}
+            tokens={tokens}
+          />
+        ))}
       </div>
     </AbsoluteFill>
   )

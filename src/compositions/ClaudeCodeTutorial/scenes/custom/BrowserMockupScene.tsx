@@ -1,8 +1,9 @@
 import React from "react"
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion"
 import { useThemeTokens } from "../../../../shared/themes"
 import type { Beat, Timing } from "../../../../utils/direction"
-import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
+import { getBeatStartFrame } from "../../../../utils/direction"
+import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
 
 interface ContentBlock {
   type: "header" | "card-row" | "text" | "placeholder" | "button"
@@ -20,38 +21,19 @@ interface BrowserMockupProps {
 
 export const BrowserMockupScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as BrowserMockupProps
-  const { url, title, variant = "light", content, timing, beats } = props
+  const { url, title, variant = "light", content, beats } = props
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
-  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
-  const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
+  const phase1 = usePhase1Entry({ durationMs: 100 })
 
   const isLight = variant === "light"
   const pageBg = isLight ? "#ffffff" : "#1e1e2e"
   const pageText = isLight ? "#333333" : "#cccccc"
   const blockBg = isLight ? "#f0f0f0" : "#2a2a3a"
 
-  // Title
-  const titleDelay = beatStartFrames?.[0] ?? motionStartFrame
-  const titleSpring = spring({
-    frame: Math.max(0, frame - titleDelay),
-    fps,
-    config: { damping: 20, stiffness: 180 },
-    durationInFrames: Math.ceil(fps * 0.5),
-  })
-  const titleOpacity = interpolate(titleSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-  const titleY = interpolate(titleSpring, [0, 1], [20, 0])
-
-  // Chrome
-  const chromeDelay = (title ? beatStartFrames?.[1] : beatStartFrames?.[0]) ?? motionStartFrame + Math.ceil(fps * 0.2)
-  const chromeOpacity = interpolate(frame, [chromeDelay, chromeDelay + Math.ceil(fps * 0.2)], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  })
-
-  // URL typewriter
-  const urlDelay = chromeDelay + Math.ceil(fps * 0.15)
+  // URL typewriter (Phase 2 content animation)
+  const urlDelay = Math.ceil(fps * 0.2)
   const urlChars = Math.floor(
     interpolate(frame, [urlDelay, urlDelay + Math.ceil(fps * 0.4)], [0, url.length], {
       extrapolateLeft: "clamp",
@@ -62,7 +44,9 @@ export const BrowserMockupScene: React.FC<Record<string, unknown>> = (rawProps) 
   const beatOffset = title ? 2 : 1
 
   const renderBlock = (block: ContentBlock, i: number) => {
-    const blockDelay = beatStartFrames?.[i + beatOffset] ?? urlDelay + Math.ceil(fps * 0.3) + i * Math.ceil(fps * 0.15)
+    const blockDelay = beats?.[i + beatOffset]
+      ? getBeatStartFrame(beats[i + beatOffset], fps)
+      : urlDelay + Math.ceil(fps * 0.3) + i * Math.ceil(fps * 0.15)
     const blockOpacity = interpolate(frame, [blockDelay, blockDelay + Math.ceil(fps * 0.15)], [0, 1], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
@@ -145,8 +129,8 @@ export const BrowserMockupScene: React.FC<Record<string, unknown>> = (rawProps) 
             color: tokens.foreground,
             fontFamily: tokens.fontFamily,
             marginBottom: 20,
-            opacity: titleOpacity,
-            transform: `translateY(${titleY}px)`,
+            opacity: phase1.opacity,
+            transform: `scale(${phase1.scale})`,
           }}
         >
           {title}
@@ -160,7 +144,7 @@ export const BrowserMockupScene: React.FC<Record<string, unknown>> = (rawProps) 
           borderRadius: "10px 10px 8px 8px",
           overflow: "hidden",
           boxShadow: tokens.card.shadow,
-          opacity: chromeOpacity,
+          opacity: phase1.opacity,
         }}
       >
         {/* Browser chrome */}

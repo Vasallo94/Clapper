@@ -1,9 +1,10 @@
 import React from "react"
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { AbsoluteFill, interpolate } from "remotion"
 import { useThemeTokens } from "../../../../shared/themes"
 import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
 import type { Beat, Timing } from "../../../../utils/direction"
-import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
+import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
+import { useBeatReveal } from "../../../../shared/hooks/useBeatReveal"
 
 interface ChapterCardProps {
   number?: string
@@ -14,57 +15,62 @@ interface ChapterCardProps {
   beats?: Beat[]
 }
 
+const ChapterSubtitle: React.FC<{ text: string; beat: Beat | null }> = ({ text, beat }) => {
+  const tokens = useThemeTokens()
+  const { opacity, y } = useBeatReveal({
+    beat: beat ?? undefined,
+    fallbackDelayMs: 400,
+    animationMs: 250,
+  })
+
+  return (
+    <div
+      style={{
+        fontSize: 20,
+        color: tokens.foregroundMid,
+        fontFamily: tokens.fontFamily,
+        opacity,
+        transform: `translateY(${y}px)`,
+        marginBottom: 12,
+      }}
+    >
+      {text}
+    </div>
+  )
+}
+
+const ChapterDescription: React.FC<{ text: string; beat: Beat | null }> = ({ text, beat }) => {
+  const tokens = useThemeTokens()
+  const { opacity, y } = useBeatReveal({
+    beat: beat ?? undefined,
+    fallbackDelayMs: 550,
+    animationMs: 250,
+  })
+
+  return (
+    <div
+      style={{
+        fontSize: 16,
+        color: tokens.foregroundMid,
+        fontFamily: tokens.fontFamily,
+        opacity,
+        transform: `translateY(${y}px)`,
+        maxWidth: 500,
+        lineHeight: 1.5,
+      }}
+    >
+      {text}
+    </div>
+  )
+}
+
 export const ChapterCardScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as ChapterCardProps
-  const { number, title, subtitle, description, timing, beats } = props
-  const frame = useCurrentFrame()
-  const { fps } = useVideoConfig()
+  const { number, title, subtitle, description, beats } = props
   const tokens = useThemeTokens()
-  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
-  const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
+  const phase1 = usePhase1Entry({ durationMs: 100 })
 
-  // Number background
-  const numberDelay = beatStartFrames?.[0] ?? motionStartFrame
-  const numberSpring = spring({
-    frame: Math.max(0, frame - numberDelay),
-    fps,
-    config: { damping: 20, stiffness: 180 },
-    durationInFrames: Math.ceil(fps * 0.5),
-  })
-  const numberOpacity = interpolate(numberSpring, [0, 0.3], [0, 0.15], { extrapolateRight: "clamp" })
-  const numberScale = interpolate(numberSpring, [0, 1], [0.8, 1])
-
-  // Title
-  const titleDelay = beatStartFrames?.[1] ?? numberDelay + Math.ceil(fps * 0.1)
-  const titleSpring = spring({
-    frame: Math.max(0, frame - titleDelay),
-    fps,
-    config: { damping: 20, stiffness: 180 },
-    durationInFrames: Math.ceil(fps * 0.5),
-  })
-  const titleOpacity = interpolate(titleSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-  const titleY = interpolate(titleSpring, [0, 1], [20, 0])
-
-  // Accent line
-  const lineDelay = titleDelay + Math.ceil(fps * 0.1)
-  const lineProgress = spring({
-    frame: Math.max(0, frame - lineDelay),
-    fps,
-    config: { damping: 200 },
-    durationInFrames: Math.ceil(fps * 0.5),
-  })
-  const lineWidth = interpolate(lineProgress, [0, 1], [0, 80])
-
-  // Subtitle
-  const subtitleDelay = beatStartFrames?.[2] ?? lineDelay + Math.ceil(fps * 0.15)
-  const subtitleOpacity = interpolate(frame, [subtitleDelay, subtitleDelay + Math.ceil(fps * 0.2)], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  })
-
-  // Description
-  const descDelay = beatStartFrames?.[3] ?? subtitleDelay + Math.ceil(fps * 0.15)
-  const descOpacity = interpolate(frame, [descDelay, descDelay + Math.ceil(fps * 0.2)], [0, 1], {
+  const lineWidth = interpolate(phase1.progress, [0.3, 1], [0, 80], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   })
@@ -79,7 +85,6 @@ export const ChapterCardScene: React.FC<Record<string, unknown>> = (rawProps) =>
         justifyContent: "center",
       }}
     >
-      {/* Large background number */}
       {number && (
         <div
           style={{
@@ -87,8 +92,8 @@ export const ChapterCardScene: React.FC<Record<string, unknown>> = (rawProps) =>
             fontSize: 160,
             fontWeight: 900,
             color: tokens.foreground,
-            opacity: numberOpacity,
-            transform: `scale(${numberScale})`,
+            opacity: phase1.opacity * 0.15,
+            transform: `scale(${phase1.scale})`,
             fontFamily: tokens.fontFamily,
             userSelect: "none",
           }}
@@ -97,7 +102,6 @@ export const ChapterCardScene: React.FC<Record<string, unknown>> = (rawProps) =>
         </div>
       )}
 
-      {/* Content overlaying the number */}
       <div style={{ position: "relative", textAlign: "center", zIndex: 1 }}>
         <div
           style={{
@@ -105,14 +109,13 @@ export const ChapterCardScene: React.FC<Record<string, unknown>> = (rawProps) =>
             fontWeight: 700,
             color: tokens.foreground,
             fontFamily: tokens.fontFamily,
-            opacity: titleOpacity,
-            transform: `translateY(${titleY}px)`,
+            opacity: phase1.opacity,
+            transform: `scale(${phase1.scale})`,
           }}
         >
           {title}
         </div>
 
-        {/* Accent line */}
         <div
           style={{
             width: lineWidth,
@@ -122,34 +125,8 @@ export const ChapterCardScene: React.FC<Record<string, unknown>> = (rawProps) =>
           }}
         />
 
-        {subtitle && (
-          <div
-            style={{
-              fontSize: 20,
-              color: tokens.foregroundMid,
-              fontFamily: tokens.fontFamily,
-              opacity: subtitleOpacity,
-              marginBottom: 12,
-            }}
-          >
-            {subtitle}
-          </div>
-        )}
-
-        {description && (
-          <div
-            style={{
-              fontSize: 16,
-              color: tokens.foregroundMid,
-              fontFamily: tokens.fontFamily,
-              opacity: descOpacity,
-              maxWidth: 500,
-              lineHeight: 1.5,
-            }}
-          >
-            {description}
-          </div>
-        )}
+        {subtitle && <ChapterSubtitle text={subtitle} beat={beats?.[2] ?? null} />}
+        {description && <ChapterDescription text={description} beat={beats?.[3] ?? null} />}
       </div>
 
       <MascotWatermark animation="idle" />

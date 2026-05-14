@@ -3,7 +3,8 @@ import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } fr
 import { useThemeTokens } from "../../../../shared/themes"
 import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
 import type { Beat, Timing } from "../../../../utils/direction"
-import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
+import { getBeatStartFrame } from "../../../../utils/direction"
+import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
 
 interface BarChartItem {
   label: string
@@ -20,36 +21,80 @@ interface BarChartProps {
   beats?: Beat[]
 }
 
-export const BarChartScene: React.FC<Record<string, unknown>> = (rawProps) => {
-  const props = rawProps as unknown as BarChartProps
-  const { title, items, highlightIndex, showValues = true, timing, beats } = props
+const ChartBar: React.FC<{
+  item: BarChartItem
+  index: number
+  beat: Beat | null
+  maxValue: number
+  chartHeight: number
+  barWidth: number
+  isHighlighted: boolean
+  showValues: boolean
+  tokens: ReturnType<typeof useThemeTokens>
+}> = ({ item, beat, maxValue, chartHeight, barWidth, isHighlighted, showValues, tokens }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
-  const tokens = useThemeTokens()
-  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
-  const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
 
-  const maxValue = Math.max(...items.map((d) => d.value), 1)
-  const chartHeight = 280
-  const barWidth = Math.min(60, Math.floor(500 / items.length))
-
-  // Title
-  const titleDelay = beatStartFrames?.[0] ?? motionStartFrame
-  const titleSpring = spring({
-    frame: Math.max(0, frame - titleDelay),
+  const barDelay = beat ? getBeatStartFrame(beat, fps) : Math.round((fps * 0.5) / 1)
+  const barSpring = spring({
+    frame: Math.max(0, frame - barDelay),
     fps,
     config: { damping: 20, stiffness: 180 },
     durationInFrames: Math.ceil(fps * 0.5),
   })
-  const titleOpacity = interpolate(titleSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-  const titleY = interpolate(titleSpring, [0, 1], [20, 0])
+  const barHeight = interpolate(barSpring, [0, 1], [0, (item.value / maxValue) * chartHeight])
+  const barOpacity = interpolate(barSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
+  const barColor = item.color ?? (isHighlighted ? tokens.primary : tokens.secondary)
+  const displayValue = Math.round(item.value * interpolate(barSpring, [0, 1], [0, 1]))
 
-  // Baseline
-  const baseDelay = (title ? beatStartFrames?.[1] : beatStartFrames?.[0]) ?? motionStartFrame + Math.ceil(fps * 0.3)
-  const baseOpacity = interpolate(frame, [baseDelay, baseDelay + Math.ceil(fps * 0.15)], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  })
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+      {showValues && (
+        <div
+          style={{
+            fontSize: 13,
+            color: tokens.foreground,
+            fontFamily: tokens.monoFontFamily,
+            opacity: barOpacity,
+          }}
+        >
+          {displayValue}
+        </div>
+      )}
+      <div
+        style={{
+          width: barWidth,
+          height: barHeight,
+          background: `linear-gradient(0deg, ${barColor}, ${barColor}cc)`,
+          borderRadius: "4px 4px 0 0",
+          opacity: barOpacity,
+        }}
+      />
+      <div
+        style={{
+          fontSize: 12,
+          color: tokens.foregroundMid,
+          fontFamily: tokens.fontFamily,
+          opacity: barOpacity,
+          textAlign: "center",
+          maxWidth: barWidth + 20,
+        }}
+      >
+        {item.label}
+      </div>
+    </div>
+  )
+}
+
+export const BarChartScene: React.FC<Record<string, unknown>> = (rawProps) => {
+  const props = rawProps as unknown as BarChartProps
+  const { title, items, highlightIndex, showValues = true, beats } = props
+  const tokens = useThemeTokens()
+  const phase1 = usePhase1Entry({ durationMs: 100 })
+
+  const maxValue = Math.max(...items.map((d) => d.value), 1)
+  const chartHeight = 280
+  const barWidth = Math.min(60, Math.floor(500 / items.length))
 
   const beatOffset = title ? 2 : 1
 
@@ -72,8 +117,8 @@ export const BarChartScene: React.FC<Record<string, unknown>> = (rawProps) => {
             color: tokens.foreground,
             fontFamily: tokens.fontFamily,
             marginBottom: 32,
-            opacity: titleOpacity,
-            transform: `translateY(${titleY}px)`,
+            opacity: phase1.opacity,
+            transform: `scale(${phase1.scale})`,
           }}
         >
           {title}
@@ -81,7 +126,6 @@ export const BarChartScene: React.FC<Record<string, unknown>> = (rawProps) => {
       )}
 
       <div style={{ position: "relative", height: chartHeight + 40 }}>
-        {/* Bars */}
         <div
           style={{
             display: "flex",
@@ -91,66 +135,22 @@ export const BarChartScene: React.FC<Record<string, unknown>> = (rawProps) => {
             height: chartHeight,
           }}
         >
-          {items.map((item, i) => {
-            const barDelay = beatStartFrames?.[i + beatOffset] ?? baseDelay + Math.ceil(fps * 0.15) * (i + 1)
-            const barSpring = spring({
-              frame: Math.max(0, frame - barDelay),
-              fps,
-              config: { damping: 20, stiffness: 180 },
-              durationInFrames: Math.ceil(fps * 0.5),
-            })
-            const barHeight = interpolate(barSpring, [0, 1], [0, (item.value / maxValue) * chartHeight])
-            const barOpacity = interpolate(barSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-
-            const isHighlighted = highlightIndex === i
-            const barColor = item.color ?? (isHighlighted ? tokens.primary : tokens.secondary)
-
-            const displayValue = Math.round(item.value * interpolate(barSpring, [0, 1], [0, 1]))
-
-            return (
-              <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                {/* Value label */}
-                {showValues && (
-                  <div
-                    style={{
-                      fontSize: 13,
-                      color: tokens.foreground,
-                      fontFamily: tokens.monoFontFamily,
-                      opacity: barOpacity,
-                    }}
-                  >
-                    {displayValue}
-                  </div>
-                )}
-                {/* Bar */}
-                <div
-                  style={{
-                    width: barWidth,
-                    height: barHeight,
-                    background: `linear-gradient(0deg, ${barColor}, ${barColor}cc)`,
-                    borderRadius: "4px 4px 0 0",
-                    opacity: barOpacity,
-                  }}
-                />
-                {/* Label */}
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: tokens.foregroundMid,
-                    fontFamily: tokens.fontFamily,
-                    opacity: barOpacity,
-                    textAlign: "center",
-                    maxWidth: barWidth + 20,
-                  }}
-                >
-                  {item.label}
-                </div>
-              </div>
-            )
-          })}
+          {items.map((item, i) => (
+            <ChartBar
+              key={i}
+              item={item}
+              index={i}
+              beat={beats?.[i + beatOffset] ?? null}
+              maxValue={maxValue}
+              chartHeight={chartHeight}
+              barWidth={barWidth}
+              isHighlighted={highlightIndex === i}
+              showValues={showValues}
+              tokens={tokens}
+            />
+          ))}
         </div>
 
-        {/* Baseline */}
         <div
           style={{
             position: "absolute",
@@ -159,7 +159,7 @@ export const BarChartScene: React.FC<Record<string, unknown>> = (rawProps) => {
             right: -10,
             height: 1,
             background: tokens.foregroundLow,
-            opacity: baseOpacity,
+            opacity: phase1.opacity,
           }}
         />
       </div>

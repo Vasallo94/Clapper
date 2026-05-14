@@ -1,8 +1,10 @@
 import React from "react"
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion"
 import { useThemeTokens } from "../../../../shared/themes"
 import type { Beat, Timing } from "../../../../utils/direction"
-import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
+import { getBeatStartFrame } from "../../../../utils/direction"
+import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
+import { useBeatReveal } from "../../../../shared/hooks/useBeatReveal"
 
 interface ApiRequestProps {
   title?: string
@@ -24,58 +26,60 @@ const METHOD_COLORS: Record<string, string> = {
   PATCH: "#d2a8ff",
 }
 
+const MethodBadge: React.FC<{
+  method: string
+  color: string
+  beat: Beat | null
+}> = ({ method, color, beat }) => {
+  const { opacity, y } = useBeatReveal({
+    beat: beat ?? undefined,
+    fallbackDelayMs: 200,
+    animationMs: 250,
+  })
+
+  return (
+    <div
+      style={{
+        fontSize: 11,
+        fontWeight: 700,
+        color,
+        background: `${color}20`,
+        padding: "2px 8px",
+        borderRadius: 4,
+        opacity,
+        transform: `translateY(${y}px)`,
+        display: "inline-block",
+      }}
+    >
+      {method}
+    </div>
+  )
+}
+
 export const ApiRequestScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as ApiRequestProps
-  const { title, method, endpoint, requestBody, responseStatus, responseBody, timing, beats } = props
+  const { title, method, endpoint, requestBody, responseStatus, responseBody, beats } = props
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
-  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
-  const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
+  const phase1 = usePhase1Entry({ durationMs: 100 })
 
   const methodColor = METHOD_COLORS[method] ?? tokens.primary
   const statusColor = responseStatus < 400 ? tokens.terminal.successColor : tokens.primary
 
-  // Title
-  const titleDelay = beatStartFrames?.[0] ?? motionStartFrame
-  const titleSpring = spring({
-    frame: Math.max(0, frame - titleDelay),
-    fps,
-    config: { damping: 20, stiffness: 180 },
-    durationInFrames: Math.ceil(fps * 0.5),
-  })
-  const titleOpacity = interpolate(titleSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-  const titleY = interpolate(titleSpring, [0, 1], [20, 0])
-
-  // Method badge
-  const badgeDelay = beatStartFrames?.[1] ?? motionStartFrame + Math.ceil(fps * 0.2)
-  const badgeSpring = spring({
-    frame: Math.max(0, frame - badgeDelay),
-    fps,
-    config: { damping: 20, stiffness: 180 },
-    durationInFrames: Math.ceil(fps * 0.3),
-  })
-  const badgeScale = interpolate(badgeSpring, [0, 1], [0.5, 1])
-  const badgeOpacity = interpolate(badgeSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-
-  // Request panel
-  const reqDelay = beatStartFrames?.[2] ?? badgeDelay + Math.ceil(fps * 0.2)
   const reqLines = [endpoint, ...(requestBody?.split("\n") ?? [])]
+  const resLines = [`${responseStatus} ${responseStatus < 400 ? "OK" : "Error"}`, ...responseBody.split("\n")]
+
+  const reqDelay = beats?.[2] ? getBeatStartFrame(beats[2], fps) : Math.round((fps * 0.4) / 1)
   const reqDuration = Math.ceil(fps * 0.5)
 
-  // Arrow
   const arrowDelay = reqDelay + reqDuration
-  const arrowSpring = spring({
-    frame: Math.max(0, frame - arrowDelay),
-    fps,
-    config: { damping: 200 },
-    durationInFrames: Math.ceil(fps * 0.3),
+  const arrowOpacity = interpolate(frame, [arrowDelay, arrowDelay + 8], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
   })
-  const arrowOpacity = interpolate(arrowSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
 
-  // Response panel
-  const resDelay = beatStartFrames?.[3] ?? arrowDelay + Math.ceil(fps * 0.2)
-  const resLines = [`${responseStatus} ${responseStatus < 400 ? "OK" : "Error"}`, ...responseBody.split("\n")]
+  const resDelay = beats?.[3] ? getBeatStartFrame(beats[3], fps) : arrowDelay + Math.ceil(fps * 0.2)
   const resDuration = Math.ceil(fps * 0.5)
 
   const panelStyle: React.CSSProperties = {
@@ -124,8 +128,8 @@ export const ApiRequestScene: React.FC<Record<string, unknown>> = (rawProps) => 
             color: tokens.foreground,
             fontFamily: tokens.fontFamily,
             marginBottom: 20,
-            opacity: titleOpacity,
-            transform: `translateY(${titleY}px)`,
+            opacity: phase1.opacity,
+            transform: `scale(${phase1.scale})`,
           }}
         >
           {title}
@@ -133,24 +137,9 @@ export const ApiRequestScene: React.FC<Record<string, unknown>> = (rawProps) => 
       )}
 
       <div style={{ display: "flex", gap: 16, alignItems: "flex-start", width: "100%", maxWidth: 800 }}>
-        {/* Request */}
         <div style={panelStyle}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-            <div
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                color: methodColor,
-                background: `${methodColor}20`,
-                padding: "2px 8px",
-                borderRadius: 4,
-                opacity: badgeOpacity,
-                transform: `scale(${badgeScale})`,
-                display: "inline-block",
-              }}
-            >
-              {method}
-            </div>
+            <MethodBadge method={method} color={methodColor} beat={beats?.[1] ?? null} />
             <div
               style={{
                 fontSize: 10,
@@ -165,7 +154,6 @@ export const ApiRequestScene: React.FC<Record<string, unknown>> = (rawProps) => 
           {renderLines(reqLines, reqDelay, reqDuration)}
         </div>
 
-        {/* Arrow */}
         <div
           style={{
             fontSize: 28,
@@ -178,7 +166,6 @@ export const ApiRequestScene: React.FC<Record<string, unknown>> = (rawProps) => 
           →
         </div>
 
-        {/* Response */}
         <div style={panelStyle}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
             <div

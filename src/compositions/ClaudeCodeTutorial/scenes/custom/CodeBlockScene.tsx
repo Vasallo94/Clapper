@@ -1,9 +1,9 @@
 import React from "react"
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion"
 import { useThemeTokens } from "../../../../shared/themes"
 import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
 import type { Beat, Timing } from "../../../../utils/direction"
-import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
+import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
 
 interface CodeBlockProps {
   code: string
@@ -22,7 +22,7 @@ interface Token {
 }
 
 function tokenizeLine(line: string, language: string): Token[] {
-  if (!line.trim()) return [{ text: line || "\u00A0", type: "default" }]
+  if (!line.trim()) return [{ text: line || " ", type: "default" }]
 
   if (language === "yaml") {
     if (line.trimStart().startsWith("#")) return [{ text: line, type: "comment" }]
@@ -77,7 +77,6 @@ function tokenizeLine(line: string, language: string): Token[] {
 }
 
 function getTokenColor(type: TokenType, tokens: ReturnType<typeof useThemeTokens>): string {
-  // All colors must work on dark terminal.bg — never use page-level foreground tokens here
   switch (type) {
     case "key":
       return tokens.terminal.claude
@@ -98,34 +97,17 @@ function getTokenColor(type: TokenType, tokens: ReturnType<typeof useThemeTokens
 
 export const CodeBlockScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as CodeBlockProps
-  const { code = "", language = "yaml", title, highlightLines = [], timing, beats } = props
+  const { code = "", language = "yaml", title, highlightLines = [] } = props
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
-  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
-  const beatStartFrames = beats?.map((beat) => getBeatStartFrame(beat, fps))
-  const localFrame = Math.max(0, frame - motionStartFrame)
+  const phase1 = usePhase1Entry({ durationMs: 100 })
 
   const lines = code.split("\n")
   const revealDuration = Math.ceil(fps * 1.5)
   const lineGap = revealDuration / Math.max(lines.length, 1)
-
-  // Card entrance
-  const cardSpring = spring({
-    frame: localFrame,
-    fps,
-    config: { damping: 20, stiffness: 180 },
-    durationInFrames: Math.ceil(fps * 0.5),
-  })
-  const cardOpacity = interpolate(cardSpring, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-  const cardY = interpolate(cardSpring, [0, 1], [20, 0])
-
-  // Title animation (use first beat if available)
-  const titleDelay = beatStartFrames?.[0] ?? motionStartFrame
-  const titleOpacity = interpolate(frame, [titleDelay, titleDelay + Math.ceil(fps * 0.3)], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  })
+  // Line reveal uses frame directly relative to scene start (Phase 2 content animation)
+  const contentStartFrame = Math.ceil(fps * 0.15)
 
   return (
     <AbsoluteFill
@@ -146,7 +128,8 @@ export const CodeBlockScene: React.FC<Record<string, unknown>> = (rawProps) => {
             fontSize: 32,
             fontWeight: 700,
             color: tokens.foreground,
-            opacity: titleOpacity,
+            opacity: phase1.opacity,
+            transform: `scale(${phase1.scale})`,
           }}
         >
           {title}
@@ -161,8 +144,7 @@ export const CodeBlockScene: React.FC<Record<string, unknown>> = (rawProps) => {
           border: `1px solid ${tokens.terminal.borderColor}`,
           borderRadius: 10,
           overflow: "hidden",
-          opacity: cardOpacity,
-          transform: `translateY(${cardY}px)`,
+          opacity: phase1.opacity,
           boxShadow: tokens.terminal.shadow,
         }}
       >
@@ -196,18 +178,18 @@ export const CodeBlockScene: React.FC<Record<string, unknown>> = (rawProps) => {
           </span>
         </div>
 
-        {/* Code content */}
+        {/* Code content — line-by-line typing is Phase 2 content animation */}
         <div style={{ padding: "20px 0", overflow: "hidden" }}>
           {lines.map((line, li) => {
-            const lineRevealFrame = li * lineGap
-            const lineOpacity = interpolate(localFrame, [lineRevealFrame, lineRevealFrame + 8], [0, 1], {
+            const lineRevealFrame = contentStartFrame + li * lineGap
+            const lineOpacity = interpolate(frame, [lineRevealFrame, lineRevealFrame + 8], [0, 1], {
               extrapolateLeft: "clamp",
               extrapolateRight: "clamp",
             })
 
             const isHighlighted = highlightLines.includes(li + 1)
             const highlightProgress = isHighlighted
-              ? interpolate(localFrame, [lineRevealFrame + 10, lineRevealFrame + 20], [0, 1], {
+              ? interpolate(frame, [lineRevealFrame + 10, lineRevealFrame + 20], [0, 1], {
                   extrapolateLeft: "clamp",
                   extrapolateRight: "clamp",
                 })
@@ -227,7 +209,6 @@ export const CodeBlockScene: React.FC<Record<string, unknown>> = (rawProps) => {
                   position: "relative",
                 }}
               >
-                {/* Line number */}
                 <span
                   style={{
                     fontFamily: tokens.monoFontFamily,
@@ -243,7 +224,6 @@ export const CodeBlockScene: React.FC<Record<string, unknown>> = (rawProps) => {
                   {li + 1}
                 </span>
 
-                {/* Highlight bar */}
                 {isHighlighted && (
                   <div
                     style={{
@@ -258,7 +238,6 @@ export const CodeBlockScene: React.FC<Record<string, unknown>> = (rawProps) => {
                   />
                 )}
 
-                {/* Code tokens */}
                 <span style={{ fontFamily: tokens.monoFontFamily, fontSize: 17, lineHeight: 1.7 }}>
                   {lineTokens.map((token, ti) => (
                     <span key={ti} style={{ color: getTokenColor(token.type, tokens) }}>

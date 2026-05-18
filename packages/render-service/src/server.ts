@@ -2,10 +2,10 @@ import express from "express"
 import cors from "cors"
 import { randomUUID } from "crypto"
 import { spawn } from "child_process"
-import { mkdirSync, writeFileSync, readdirSync, statSync, readFileSync } from "fs"
+import { existsSync, mkdirSync, writeFileSync, readdirSync, statSync, readFileSync } from "fs"
 import { pathToFileURL } from "url"
 import path from "path"
-import { insertJob, updateJob, getJob, getJobByConfigId, listJobs } from "./db"
+import { insertJob, updateJob, getJob, getJobByConfigId, listJobs, recoverOrphanedJobs } from "./db"
 
 const app = express()
 app.use(cors())
@@ -28,6 +28,16 @@ function summarizeConfig(configPath: string) {
       (sum: number, scene: { durationInSeconds?: number }) => sum + Number(scene.durationInSeconds || 0),
       0,
     ),
+  }
+}
+
+function summarizeGeneratedRender(configPath: string) {
+  const summary = summarizeConfig(configPath)
+  const jobId = path.basename(path.dirname(configPath))
+  return {
+    ...summary,
+    jobId,
+    source: "render",
   }
 }
 
@@ -55,6 +65,20 @@ function listConfigFiles(): string[] {
   return files
 }
 
+function listGeneratedRenderConfigFiles(limit = 25): string[] {
+  try {
+    return readdirSync(JOBS_DIR, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && !entry.name.startsWith("validate-"))
+      .map((entry) => path.join(JOBS_DIR, entry.name))
+      .filter((dir) => existsSync(path.join(dir, "config.json")) && existsSync(path.join(dir, "output.mp4")))
+      .sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs)
+      .slice(0, limit)
+      .map((dir) => path.join(dir, "config.json"))
+  } catch {
+    return []
+  }
+}
+
 // POST /api/validate — validate config against Zod schemas
 app.post("/api/validate", (req, res) => {
   const jobDir = path.join(JOBS_DIR, `validate-${randomUUID()}`)
@@ -80,6 +104,43 @@ app.post("/api/validate", (req, res) => {
       res.status(code === 0 ? 200 : 400).json(result)
     } catch {
       res.status(500).json({ error: "Validation script error", details: stderr || stdout })
+    }
+  })
+})
+
+// POST /api/render-stills — render a PNG still per scene for QA (called by the Python agent)
+app.post("/api/render-stills", (req, res) => {
+  const configJson = typeof req.body === "string" ? req.body : JSON.stringify(req.body)
+  const config = typeof req.body === "string" ? JSON.parse(req.body) : req.body
+  const configId = (config.id as string | undefined) ?? `stills-${randomUUID()}`
+
+  const stillsDir = path.join(JOBS_DIR, `stills-${configId}-${Date.now()}`)
+  mkdirSync(stillsDir, { recursive: true })
+
+  const configPath = path.join(stillsDir, "config.json")
+  writeFileSync(configPath, configJson)
+
+  const child = spawn("npx", ["tsx", "scripts/render-scene-stills.ts", configPath, stillsDir], {
+    cwd: ROOT_DIR,
+    shell: true,
+  })
+
+  let stdout = ""
+  let stderr = ""
+  child.stdout.on("data", (d) => (stdout += d.toString()))
+  child.stderr.on("data", (d) => (stderr += d.toString()))
+
+  child.on("close", (code) => {
+    if (code !== 0) {
+      res.status(500).json({ error: stderr.trim() || "render-scene-stills failed" })
+      return
+    }
+    try {
+      const jsonMatch = stdout.match(/(\{[\s\S]*\}|\[[\s\S]*\])\s*$/)
+      const result = JSON.parse(jsonMatch ? jsonMatch[1] : stdout)
+      res.status(200).json(result)
+    } catch {
+      res.status(500).json({ error: "Failed to parse stills manifest", raw: stdout })
     }
   })
 })
@@ -213,16 +274,30 @@ app.get("/api/render/jobs", (req, res) => {
 
 // GET /api/configs — list selectable video configs
 app.get("/api/configs", (_req, res) => {
-  const configs = listConfigFiles().map((configPath) => {
+  const curated = listConfigFiles().map((configPath) => {
     try {
-      return summarizeConfig(configPath)
+      return { ...summarizeConfig(configPath), source: "content" }
     } catch (error) {
       return {
         configPath: path.relative(ROOT_DIR, configPath),
+        source: "content",
         error: error instanceof Error ? error.message : String(error),
       }
     }
   })
+  const generated = listGeneratedRenderConfigFiles().map((configPath) => {
+    try {
+      return summarizeGeneratedRender(configPath)
+    } catch (error) {
+      return {
+        configPath: path.relative(ROOT_DIR, configPath),
+        source: "render",
+        jobId: path.basename(path.dirname(configPath)),
+        error: error instanceof Error ? error.message : String(error),
+      }
+    }
+  })
+  const configs = [...generated, ...curated]
   res.json({ configs })
 })
 
@@ -244,15 +319,15 @@ function resolveOutputPath(jobId: string): string {
 // GET /api/render/:id/stream — serve video for in-browser playback (supports Range)
 app.get("/api/render/:id/stream", (req, res) => {
   const job = getJob(req.params.id)
-  if (!job || job.status !== "done") {
+  const filePath = resolveOutputPath(req.params.id)
+  if (job && job.status !== "done") {
     res.status(404).json({ error: "Video not available" })
     return
   }
-  const filePath = resolveOutputPath(req.params.id)
   try {
     statSync(filePath)
   } catch {
-    res.status(410).json({ error: "Video file deleted" })
+    res.status(job ? 410 : 404).json({ error: job ? "Video file deleted" : "Video not available" })
     return
   }
   res.sendFile(filePath, { headers: { "Content-Type": "video/mp4" }, dotfiles: "allow" })
@@ -261,18 +336,18 @@ app.get("/api/render/:id/stream", (req, res) => {
 // GET /api/render/:id/download — download rendered video
 app.get("/api/render/:id/download", (req, res) => {
   const job = getJob(req.params.id)
-  if (!job || job.status !== "done") {
+  const filePath = resolveOutputPath(req.params.id)
+  if (job && job.status !== "done") {
     res.status(404).json({ error: "Video not available" })
     return
   }
-  const filePath = resolveOutputPath(req.params.id)
   try {
     statSync(filePath)
   } catch {
-    res.status(410).json({ error: "Video file deleted" })
+    res.status(job ? 410 : 404).json({ error: job ? "Video file deleted" : "Video not available" })
     return
   }
-  res.download(filePath, `${job.config_id || job.id}.mp4`)
+  res.download(filePath, `${job?.config_id || req.params.id}.mp4`)
 })
 
 // GET /api/audio/library — list available music tracks
@@ -290,6 +365,8 @@ app.get("/api/audio/library", (_req, res) => {
 
 const PORT = parseInt(process.env.PORT || "3100")
 if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+  const recovered = recoverOrphanedJobs()
+  if (recovered > 0) console.log(`Recovered ${recovered} orphaned job(s) from previous run`)
   app.listen(PORT, () => {
     console.log(`Render service listening on :${PORT}`)
   })

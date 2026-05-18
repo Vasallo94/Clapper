@@ -30,10 +30,12 @@ Read `scene-catalog` on every invocation. Consult `brand-guidelines` for creativ
 9. **Present for approval**: Call `present_escaleta` with your proposed scenes and brief. It pauses for human review. Include `templateId`, `narrativeArc`, and any template deviation in the brief object.
 10. **Check the result**:
 
-- If "APPROVED": write the complete config JSON to `/pipeline/config.json` using `write_file`, then return confirmation
+- If "APPROVED": write the complete config JSON to `/pipeline/config.json` using `write_file`. Run `audit_content_quality` **exactly once** on the written file to fix any ERROR-level schema violations (ignore warnings). Then **immediately return** — do not audit again, do not loop further.
 - If "CHANGES REQUESTED": revise based on feedback, call `present_escaleta` again
 
 11. Repeat until APPROVED — there is no round limit
+
+**STOP CONDITION**: After escaleta is APPROVED and config is written + audited once → STOP. You must return immediately. Any further `audit_content_quality` calls after the first post-write audit are forbidden.
 
 ## Scene schema — MANDATORY field names
 
@@ -92,6 +94,28 @@ big-number, quote, code-block, flow-diagram, etc. are NOT native types. Use:
 ```
 
 **CRITICAL:** Before using any custom componentId, read the `scene-catalog` skill's prop tables. Using wrong prop names produces blank scenes that waste render time. The `audit_content_quality` tool also validates required props — never skip it.
+
+### Scene content quality — CRITICAL
+
+Every scene's visual content MUST be specific, insightful, and directly relevant to the video topic. Generic or superficial content wastes the viewer's time.
+
+**Anti-patterns to avoid:**
+
+- Flow diagrams with vague labels like "Inicio" → "Proceso" → "Resultado". Use real names: "Prompt del usuario" → "Orquestador LangGraph" → "9 agentes especializados" → "config.json" → "Remotion render" → "MP4"
+- Icon grids listing features with one-word descriptions. Add concrete detail: not "Motor de render" but "Remotion: renderizado frame-by-frame con React, 30fps, resolución configurable"
+- Scenes that could belong to any video. Each scene must answer: "Why does THIS scene exist in THIS video?"
+- Big-number scenes with arbitrary metrics. Only use real, meaningful numbers from the research brief.
+
+**Requirements for good scene content:**
+
+1. **Specificity**: Use real system names, real technical terms, real numbers from the research. No placeholder text.
+2. **Insight**: Each scene should teach the viewer something they didn't know. If a scene only states the obvious, cut it or deepen it.
+3. **Relevance**: Every scene must directly serve the video's promise/goal. Ask: "Does this scene help the viewer understand/do what the brief promises?"
+4. **Depth over breadth**: 8 deep, insightful scenes beat 14 shallow ones. When in doubt, merge two shallow scenes into one richer scene.
+5. **Internal flows and architecture**: When explaining a technical system, show its INTERNAL workings — not just the external interface. Show how components communicate, where data transforms, what decisions happen at each step.
+6. **Concrete examples**: Prefer showing a real config snippet, a real terminal session, or a real data flow over describing it abstractly.
+
+**Before presenting the escaleta**, review each scene and ask: "If I were the target audience, would this scene teach me something specific and useful, or is it filler?" Remove or rework filler scenes.
 
 ### Rules
 

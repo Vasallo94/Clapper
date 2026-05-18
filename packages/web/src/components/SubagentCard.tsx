@@ -32,17 +32,26 @@ function toolIcon(tc: ToolCallWithResult): { char: string; color: string } {
   return { char: "✓", color: "#22c55e" } // ✓
 }
 
+function extractMessageText(msg: { content: unknown }): string {
+  const content = msg.content
+  if (typeof content === "string") return content.trim()
+  if (Array.isArray(content)) {
+    return (content.filter((c: { type: string }) => c.type === "text") as { type: "text"; text: string }[])
+      .map((t) => t.text)
+      .join("")
+      .trim()
+  }
+  return ""
+}
+
 function extractThinkingText(subagent: SubagentStreamInterface): string {
   const aiMessages = subagent.messages.filter((m) => (m as { type: string }).type === "ai")
   if (aiMessages.length === 0) return ""
-  const last = aiMessages[aiMessages.length - 1]
-  const content = (last as { content: unknown }).content
-  if (typeof content === "string") return content
-  if (Array.isArray(content)) {
-    const textParts = content.filter((c: { type: string }) => c.type === "text") as { type: "text"; text: string }[]
-    return textParts.map((t) => t.text).join("")
-  }
-  return ""
+  // Show all AI reasoning steps, not just the last, so intermediate decisions are visible
+  return aiMessages
+    .map((m) => extractMessageText(m as { content: unknown }))
+    .filter(Boolean)
+    .join("\n\n─────\n\n")
 }
 
 export function SubagentCard({ subagent, defaultExpanded = true }: Props) {

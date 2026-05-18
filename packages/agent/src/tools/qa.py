@@ -1,18 +1,19 @@
+import base64
 import json
 import os
 import re
-import subprocess
-import tempfile
 from pathlib import Path
 from typing import Annotated, Any
 
+import requests
 from langchain_core.tools import InjectedToolArg
 
 from ._checkpoint import checkpoint_interrupt
 from ..context import get_pipeline_context
-from ..paths import PROJECT_ROOT
 
-QA_MODEL = os.environ.get("SCENE_QA_MODEL", "gemini-2.0-flash")
+QA_MODEL = os.environ.get("SCENE_QA_MODEL", "gemini-3.1-flash-preview")
+
+_DEFAULT_RENDER_SERVICE_URL = os.environ.get("RENDER_SERVICE_URL", "http://localhost:3100")
 
 
 def render_scene_stills(
@@ -21,34 +22,28 @@ def render_scene_stills(
 ) -> str:
     """Render a PNG still of each scene for visual QA.
 
-    Takes the full config JSON string (NOT a file path). Calls the
-    render-scene-stills.ts script which uses Remotion's renderStill() API.
-    Returns a JSON manifest with PNG paths.
+    Takes the full config JSON string (NOT a file path). Delegates to the
+    render-service's /api/render-stills endpoint which runs render-scene-stills.ts
+    inside the Node.js container. Returns a JSON manifest with PNG paths.
 
     Args:
         config_json: Full config as a JSON string.
     """
     ctx = get_pipeline_context(runtime)
+    render_url = (ctx.render_service_url if ctx else None) or _DEFAULT_RENDER_SERVICE_URL
+
     config = json.loads(config_json)
-    config_id = config.get("id") or (ctx.config_id if ctx else "unknown")
-
-    output_dir = Path(tempfile.mkdtemp(prefix=f"scene-qa-{config_id}-"))
-    config_path = output_dir / "config.json"
-    config_path.write_text(config_json, encoding="utf-8")
-
-    script = Path(PROJECT_ROOT) / "scripts" / "render-scene-stills.ts"
-    result = subprocess.run(
-        ["npx", "tsx", str(script), str(config_path), str(output_dir)],
-        capture_output=True,
-        text=True,
-        timeout=120,
-        cwd=str(PROJECT_ROOT),
-    )
-
-    if result.returncode != 0:
-        return json.dumps({"error": result.stderr.strip()})
-
-    return result.stdout
+    try:
+        resp = requests.post(
+            f"{render_url}/api/render-stills",
+            data=config_json,
+            headers={"Content-Type": "application/json"},
+            timeout=180,
+        )
+        resp.raise_for_status()
+        return resp.text
+    except requests.RequestException as exc:
+        return json.dumps({"error": str(exc)})
 
 
 def _classify_position(index: int, total: int) -> str:

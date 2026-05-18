@@ -7,8 +7,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **`packages/render-service/src/server.ts`** — added `POST /api/render-stills` endpoint; accepts config JSON, spawns `render-scene-stills.ts` inside the Node.js container, returns PNG manifest JSON; allows the pure-Python agent container to delegate stills rendering without needing Node.js
 - **`packages/agent/src/tools/qa.py`** — three QA tools for visual scene review:
-  - `render_scene_stills`: calls `render-scene-stills.ts` via subprocess, returns PNG manifest JSON
+  - `render_scene_stills`: delegates to render-service `/api/render-stills` via HTTP POST (replaces subprocess npx call); default model updated to `gemini-3.1-flash-preview`
   - `qa_scenes`: sends each scene still + 5-layer context payload to Gemini multimodal LLM for structured verdict (PASS/MINOR_FIX/MAJOR_ISSUE), score, issues, and suggested changes
   - `present_qa_report`: checkpoint interrupt that pauses the pipeline for human review when issues are found
   - Helpers `_classify_position`, `_summarize_scene`, `_build_context`, `_build_qa_prompt` for rich scene context assembly
@@ -39,6 +40,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- **`packages/agent/src/tools/qa.py`** — `render_scene_stills` now calls render-service via HTTP instead of spawning `npx tsx` (agent container is pure Python, no Node.js); fixed default model from `gemini-2.0-flash` to `gemini-3.1-flash-preview`; restored missing `import base64` and `from pathlib import Path` that were accidentally dropped during refactor
+- **`packages/agent/prompts/copywriter.md`** — limited post-approval `audit_content_quality` to exactly one call with an explicit STOP CONDITION to break the infinite audit loop
+- **`packages/web/src/components/SubagentCard.tsx`** — `extractThinkingText` now shows all intermediate AI reasoning steps separated by `─────` dividers (not just the last message) for better debugging of long-running subagents
 - **`scripts/render-scene-stills.ts`** — proportional frame scaling: raw `durationInSeconds * fps` accumulation diverged from actual composition length when audio sync compresses total duration; now scales frame positions proportionally so scenes 6+ are captured at the correct frame rather than being clamped to the last frame
 - **`packages/agent/src/tools/qa.py`** — multimodal response parsing: `langchain_google_genai` returns `[{'type': 'text', 'text': '...'}]` for image+text messages; added list-of-dicts extraction and markdown fence stripping before JSON parsing; also fixed `_build_context` to include all top-level scene fields (not just `props`) so built-in scene types (intro, outro, benefits, callout) pass full data to the QA model
 - **`src/compositions/ClaudeCodeTutorial/scenes/custom/BeforeAfterScene.tsx`** — swapped beat indices: left panel was using `beats[1]` (the 3000ms "after" beat) and right panel using `beats[2]` (undefined → fallback); corrected to `beats[0]`/`beats[1]` so Antes reveals at 1000ms and Ahora at 3000ms

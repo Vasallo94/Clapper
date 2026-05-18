@@ -66,14 +66,24 @@ async function main() {
   })
 
   const fps = config.fps || 30
-  const scenes: Array<{ index: number; path: string; frameNumber: number }> = []
-  let cumulativeFrames = 0
+  const configScenes: Array<{ durationInSeconds?: number }> = config.scenes ?? []
 
-  for (let i = 0; i < (config.scenes?.length ?? 0); i++) {
-    const scene = config.scenes[i]
-    const durationSec = scene.durationInSeconds || 5
-    const durationFrames = Math.round(durationSec * fps)
-    const targetFrame = cumulativeFrames + Math.floor(durationFrames * 0.6)
+  // Scale config durations proportionally to actual composition length.
+  // calculateMetadata may compress total duration (audio sync, transitions),
+  // so raw durationInSeconds * fps diverges from real frame positions.
+  const totalConfigFrames = configScenes.reduce((sum, s) => sum + Math.round((s.durationInSeconds ?? 5) * fps), 0)
+  const scaleFactor = totalConfigFrames > 0 ? composition.durationInFrames / totalConfigFrames : 1
+
+  const scenes: Array<{ index: number; path: string; frameNumber: number }> = []
+  let cumulativeConfigFrames = 0
+
+  for (let i = 0; i < configScenes.length; i++) {
+    const scene = configScenes[i]
+    const durationFrames = Math.round((scene.durationInSeconds ?? 5) * fps)
+
+    const scaledStart = Math.floor(cumulativeConfigFrames * scaleFactor)
+    const scaledDuration = Math.floor(durationFrames * scaleFactor)
+    const targetFrame = scaledStart + Math.floor(scaledDuration * 0.6)
     const clampedFrame = Math.min(targetFrame, composition.durationInFrames - 1)
 
     const outputPath = path.join(outputDir, `scene-${i}.png`)
@@ -88,7 +98,7 @@ async function main() {
     })
 
     scenes.push({ index: i, path: outputPath, frameNumber: clampedFrame })
-    cumulativeFrames += durationFrames
+    cumulativeConfigFrames += durationFrames
   }
 
   const manifest = { scenes }

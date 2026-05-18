@@ -160,7 +160,7 @@ export const BeforeAfterScene: React.FC<Record<string, unknown>> = (rawProps) =>
           label={leftLabel}
           items={leftItems}
           accent={leftColor}
-          beat={beats?.[1] ?? null}
+          beat={beats?.[0] ?? null}
           index={0}
           tokens={tokens}
         />
@@ -169,7 +169,7 @@ export const BeforeAfterScene: React.FC<Record<string, unknown>> = (rawProps) =>
           label={rightLabel}
           items={rightItems}
           accent={rightColor}
-          beat={beats?.[2] ?? null}
+          beat={beats?.[1] ?? null}
           index={1}
           tokens={tokens}
         />

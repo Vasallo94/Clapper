@@ -39,6 +39,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- **`scripts/render-scene-stills.ts`** — proportional frame scaling: raw `durationInSeconds * fps` accumulation diverged from actual composition length when audio sync compresses total duration; now scales frame positions proportionally so scenes 6+ are captured at the correct frame rather than being clamped to the last frame
+- **`packages/agent/src/tools/qa.py`** — multimodal response parsing: `langchain_google_genai` returns `[{'type': 'text', 'text': '...'}]` for image+text messages; added list-of-dicts extraction and markdown fence stripping before JSON parsing; also fixed `_build_context` to include all top-level scene fields (not just `props`) so built-in scene types (intro, outro, benefits, callout) pass full data to the QA model
+- **`src/compositions/ClaudeCodeTutorial/scenes/custom/BeforeAfterScene.tsx`** — swapped beat indices: left panel was using `beats[1]` (the 3000ms "after" beat) and right panel using `beats[2]` (undefined → fallback); corrected to `beats[0]`/`beats[1]` so Antes reveals at 1000ms and Ahora at 3000ms
 - Markdown now renders in assistant chat messages (bold, headings, lists, code blocks) instead of showing raw syntax
 - Custom scene types (problem-solution, before-after, flow-diagram) show meaningful titles in escaleta and direction cards instead of "-"
 - Checkpoint cards persist after user selection, showing the chosen option as a disabled card with decision badge

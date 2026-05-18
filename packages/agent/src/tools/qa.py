@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -97,9 +98,14 @@ def _build_context(config: dict, scene: dict, index: int, still_path: str) -> di
             "index": index,
             "type": scene.get("type", ""),
             "componentId": scene.get("componentId", ""),
-            "props": scene.get("props", {}),
+            # For built-in scene types (intro, outro, benefits, callout…) data lives
+            # at top level. For custom scenes it lives inside props. Merge both so
+            # the QA model sees the full data regardless of scene type.
+            "data": {
+                k: v for k, v in scene.items()
+                if k not in ("type", "componentId", "beats", "timing", "durationInSeconds")
+            },
             "durationInSeconds": scene.get("durationInSeconds", 0),
-            "title": scene.get("title", scene.get("props", {}).get("title", "")),
         },
         "narrative_context": {
             "previous_scene": _summarize_scene(scenes[index - 1]) if index > 0 else None,
@@ -145,7 +151,7 @@ def _build_qa_prompt(context: dict) -> str:
 {beats_formatted}
 
 ## Scene data (what the component renders from):
-{json.dumps(sc.get('props', {}), indent=2, ensure_ascii=False)}
+{json.dumps(sc.get('data', {}), indent=2, ensure_ascii=False)}
 
 ## The rendered frame is attached.
 
@@ -213,15 +219,21 @@ def qa_scenes(
         ])
 
         response = model.invoke([message])
+        content = response.content
+        if isinstance(content, list):
+            raw = next((c["text"] for c in content if isinstance(c, dict) and c.get("type") == "text"), str(content))
+        else:
+            raw = str(content)
+        raw = re.sub(r"```(?:json)?\s*|\s*```", "", raw).strip()
         try:
-            parsed = json.loads(response.content)
+            parsed = json.loads(raw)
             parsed["index"] = index
             results.append(parsed)
         except (json.JSONDecodeError, TypeError):
             results.append({
                 "index": index,
                 "verdict": "ERROR",
-                "raw_response": str(response.content)[:500],
+                "raw_response": raw[:500],
             })
 
     return json.dumps({"scenes": results})

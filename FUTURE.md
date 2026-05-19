@@ -25,9 +25,9 @@ Video autoreferencial que documente el proceso de crear este mismo repositorio d
 
 ### Mejoras a composiciones existentes
 
-- **Voiceover con ElevenLabs** — flag `--voiceover` ya definido en el schema de tutorial-generator pero no implementado. Generar narración TTS y sincronizar con escenas.
+- **Voiceover con ElevenLabs** — Gemini TTS integrado en el pipeline del agente (voice_generator subagent). ElevenLabs pendiente de acceso API. (Parcialmente implementado 2026-04-21)
 - **Transiciones entre escenas** — actualmente es corte directo. Usar `@remotion/transitions` para fades, wipes o slides.
-- **Música de fondo** — añadir pista de audio con volumen bajo que se duck durante voiceover.
+- **Música de fondo** — implementado en modo library-only (sound_engineer copia tracks de `public/audio/library/`). Generación via API (Lyria/ElevenLabs) pendiente. (Parcialmente implementado 2026-04-21)
 - **Pixel logo hero variant** — crear una segunda versión del sprite del logo en `96x144`, con limpieza manual adicional en barba, humo y gafas para planos grandes o intros de marca.
 - **Animación de humo real en pixel art (GIF sprite sheet)** — el humo del logo debe moverse orgánicamente como un GIF de pixel art real: crear varios frames del sprite con el humo en distintas posiciones/formas y ciclarlos. No superponer partículas encima del logo estático. Approach: diseñar 4-6 frames de humo en el propio sprite `64×96`, exportar como sprite sheet, y reproducirlos con `useCurrentFrame()` + frame hold. (2026-03-28)
 
@@ -35,8 +35,19 @@ Video autoreferencial que documente el proceso de crear este mismo repositorio d
 
 - **Catálogo web** — página estática (Astro o similar) que liste todos los vídeos generados con preview y metadatos del config.
 - **CI/CD render** — GitHub Action que renderice automáticamente cuando se pushea un config.json nuevo.
+- **Modo revisión sobre vídeo existente para DeepAgent** — evitar que una nueva sesión trate una petición de mejora como vídeo nuevo. El orquestador debería resolver primero el artifact objetivo (`content/**/config.json` o job renderizado), cargarlo en `/pipeline/config.json`, declarar modo `modify`, y limitar el grafo a agentes de parche (`director`, `audio_planner`, `sound_engineer`, `validator`, `render`) según el tipo de cambio. Prioridad por confirmar. (2026-05-11)
+- **Router de modos operativos del agente** — formalizar modos como `new_video`, `revise_existing`, `render_only`, `recover_failed_render`, `variant`, `audit_only`, `asset_regeneration` y `question`, con contratos de entrada/salida distintos para evitar que todo caiga en el pipeline completo. Prioridad por confirmar. (2026-05-11)
+- **DeepAgent conversacional y autoexplicativo** — añadir una capa de interacción para que el DeepAgent pueda conversar durante procesos creativos, explicar qué está haciendo, guiar a usuarios nuevos, y pedir input en distintos formatos: texto plano, opciones, checkboxes y cards enriquecidas. Debe complementar el flujo actual de aprobación creativa sin obligar a que todo sea una card. Prioridad por confirmar. (2026-05-13)
+- **Rediseño UIUX tipo agente moderno** — evolucionar el web frontend hacia una experiencia tipo Codex/Claude Cowork: chat conversacional como eje principal, tools/progreso como detalles secundarios colapsables, checkpoints integrados naturalmente en el chat, y pipeline como indicador sutil en vez de panel dominante. Prioridad alta para la siguiente iteración. (2026-05-13)
+- **Modos operativos posteriores** — incorporar, cuando los 8 modos base estén estabilizados, modos especializados como `director_pass`, `sound_pass`, `copy_pass`, `catalog`, `compare_versions`, `publish_package` y `migration`. Prioridad media; dependen de observar el uso real del router base. (2026-05-11)
 - **Extraer shared/** — parcialmente hecho: `createCalculateMetadata` extraído a `src/utils/`, `MascotWatermark` componetizado. Pendiente: mover ThemeContext y PhoneMascot a `src/shared/` cuando haya una 3ª composición (cross-import entre ProductShort y ClaudeCodeTutorial aún existe).
-- **Tests visuales** — snapshot testing con `@remotion/test` para detectar regresiones en los frames.
+- **Tests visuales** — ~~snapshot testing con `@remotion/test`~~ Implementado (2026-04-27): vitest + pixelmatch + renderStill. `npm run test:visual`.
+- **Mover `src/` a `packages/remotion/`** — unificar todo bajo packages/ por consistencia. Requiere reconfigurar remotion.config.ts, scripts/render.ts, render-service paths y Remotion Studio entrypoint. Hacer cuando las features actuales estén estabilizadas. (2026-04-27)
+- **Reactivar generación de audio via API** — cuando ElevenLabs/Lyria estén disponibles, reactivar `generate_audio` en sound_engineer y añadir fallback chain en audio_planner. El diseño ya lo soporta. (2026-04-21)
+- **Paralelismo voice_generator/sound_engineer via LangGraph Send()** — el orquestador actual pide al modelo despachar ambos en paralelo via prompt. Para garantizarlo, implementar fork/join con `Send()` API de LangGraph. (2026-04-21)
+- **Scene Creator integración como CompiledSubAgent** — el scene_creator se registra como subagente dict pero su grafo interno (lint → register → validate) no se ejecuta como subgrafo LangGraph. Verificar API CompiledSubAgent de DeepAgents. (2026-04-21)
+- **Separar VideoResultCard del chat** — sacar el reproductor de vídeo del flujo de mensajes y llevarlo a un panel dedicado (el Header ya tiene el selector de targets). El chat solo tendría mensajes + cards de decisión. Evita que el player ocupe espacio en el scroll conversacional y simplifica el modelo mental. Prioridad por confirmar. (2026-05-13)
+- **Feedback visual con capturas de slides rotas** — permitir al usuario enviar screenshots de slides renderizadas que tienen errores visuales (layout roto, texto cortado, colores incorrectos) como contexto al DeepAgent. El agente recibiría la imagen + el config.json de la escena y podría diagnosticar el problema y generar un patch. Requiere: soporte multimodal en el chat (image upload), mapeo screenshot→escena del config, y prompt de diagnóstico visual para el orquestador/scene_creator. (2026-05-13)
 
 ### Más productos Línea Directa
 

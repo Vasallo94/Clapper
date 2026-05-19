@@ -13,15 +13,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev                # Remotion Studio (preview in browser)
-npm run build              # Bundle composition
-npm run lint               # ESLint + TypeScript check
+pnpm run dev               # Remotion Studio (preview in browser)
+pnpm run build             # Bundle composition
+pnpm run lint              # ESLint + TypeScript check
 
 # Render a tutorial to MP4
-npx tsx scripts/render.ts tutorials/[slug]/config.json
+pnpm exec tsx scripts/render.ts content/tutorials/[slug]/config.json
 
 # If Chromium missing
-npx remotion browser ensure
+pnpm exec remotion browser ensure
 ```
 
 ## Architecture
@@ -29,6 +29,32 @@ npx remotion browser ensure
 Remotion-based video pipeline that generates Claude Code tutorial videos from JSON configs.
 
 **Data flow:** `config.json` → Zod validation → React composition → frame-by-frame render → MP4
+
+### Directory layout
+
+```
+remotion-playground/
+  src/                          # Remotion rendering code (compositions, schemas, themes, utils)
+  content/                      # Video project configs (committed JSON, gitignored MP4s)
+    tutorials/{slug}/config.json
+    shorts/{slug}/config.json
+  public/                       # Static assets + generated audio (library is committed)
+    audio/library/              # Static music & SFX tracks (committed)
+    audio/{config_id}/          # Generated per-video audio (gitignored)
+    voiceover/{config_id}/      # Generated TTS MP3s (gitignored)
+  packages/
+    agent/                      # Python LangGraph agent (DeepAgents orchestrator)
+      skills/                   # DeepAgents runtime skills (authoritative, single source)
+      prompts/                  # Agent prompt files
+      src/paths.py              # All path constants — single source of truth
+    render-service/             # Express.js render job server
+    web/                        # Vite React frontend (Remotion Player + chat UI)
+  .generated/                   # All transient pipeline outputs (gitignored)
+    renders/                    # Render job configs, MP4s, SQLite DB
+  scripts/                      # CLI render, voiceover, sound design, catalog generation
+```
+
+See `docs/agent-io-convention.md` for the complete agent read/write path reference.
 
 ### Composition system
 
@@ -77,7 +103,7 @@ Key token groups:
 
 - **All animations must use `useCurrentFrame()` + `spring()`/`interpolate()`**. CSS transitions and Tailwind animation classes are forbidden (Remotion renders frame-by-frame, CSS animations don't work).
 - **`config.json` is the source of truth.** To adjust a tutorial, edit the JSON and re-render.
-- **`tutorials/*/output.mp4` is gitignored.** Config files are committed, rendered videos are not.
+- **`content/**/output.mp4` is gitignored.\*\* Config files are committed, rendered videos are not.
 - **Render script uses `@remotion/bundler` with Tailwind webpack override** — `remotion.config.ts` does NOT apply to the Node.js render API, the override is passed manually in `scripts/render.ts`.
 - **Never check theme name directly in scenes.** Use `useThemeTokens()` and read token values. The `isLD` / `useTheme()` pattern is deprecated.
 - **Scene prop types are exported from `schema.ts`.** Import `IntroSceneProps` etc. directly — don't use `Extract<z.infer<...>>`.

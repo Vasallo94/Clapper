@@ -1,20 +1,17 @@
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import type { CtaSceneProps } from "../schema"
-import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
-import { PhoneMascot } from "../../ClaudeCodeTutorial/components/PhoneMascot"
-import { useSlideIn } from "../../ClaudeCodeTutorial/hooks/useSlideIn"
-import { getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
+import { useThemeTokens } from "../../../shared/themes"
+import { PhoneMascot } from "../../../shared/components/PhoneMascot"
+import { usePhase1Entry } from "../../../shared/hooks/usePhase1Entry"
 
 const PULSE_COUNT = 3
 
-export const CtaScene: React.FC<CtaSceneProps> = ({ text, url, timing }) => {
+export const CtaScene: React.FC<CtaSceneProps> = ({ text, url }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
-  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
-
-  const ctaAnim = useSlideIn({ distance: 30, delay: motionStartFrame })
+  const phase1 = usePhase1Entry({ durationMs: 100 })
 
   return (
     <AbsoluteFill
@@ -41,7 +38,7 @@ export const CtaScene: React.FC<CtaSceneProps> = ({ text, url, timing }) => {
         {Array.from({ length: PULSE_COUNT }).map((_, i) => {
           const pulseDelay = i * 8
           const pulseSpring = spring({
-            frame: Math.max(0, frame - motionStartFrame - pulseDelay),
+            frame: Math.max(0, frame - pulseDelay),
             fps,
             config: { damping: 30, mass: 1.5 },
             durationInFrames: 40,
@@ -79,8 +76,8 @@ export const CtaScene: React.FC<CtaSceneProps> = ({ text, url, timing }) => {
           fontWeight: 700,
           color: tokens.primary,
           textAlign: "center",
-          opacity: ctaAnim.opacity,
-          transform: `translateY(${ctaAnim.y}px)`,
+          opacity: phase1.opacity,
+          transform: `scale(${phase1.scale})`,
         }}
       >
         {text}
@@ -92,7 +89,7 @@ export const CtaScene: React.FC<CtaSceneProps> = ({ text, url, timing }) => {
             fontFamily: tokens.fontFamily,
             fontSize: 28,
             color: tokens.foregroundMid,
-            opacity: ctaAnim.opacity,
+            opacity: phase1.opacity,
           }}
         >
           {url}

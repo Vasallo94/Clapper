@@ -15,6 +15,7 @@
 ### Task 1: Schema changes — add `theme` and `ScreenRecordingScene`
 
 **Files:**
+
 - Modify: `src/compositions/ClaudeCodeTutorial/schema.ts`
 
 - [ ] **Step 1: Add `ScreenRecordingSceneSchema` after `CustomSceneSchema`**
@@ -87,6 +88,7 @@ git commit -m "feat: add screenRecording scene and theme to tutorial schema"
 ### Task 2: ThemeContext
 
 **Files:**
+
 - Create: `src/compositions/ClaudeCodeTutorial/ThemeContext.ts`
 
 - [ ] **Step 1: Create ThemeContext file**
@@ -116,6 +118,7 @@ git commit -m "feat: add ThemeContext for brand theming"
 ### Task 3: PixelPhoneMascot component
 
 **Files:**
+
 - Create: `src/compositions/ClaudeCodeTutorial/components/PixelPhoneMascot.tsx`
 
 The mascot is the Linea Directa logo: a red rotary telephone mounted on car wheels. Implemented as an inline SVG with pixel-art style (sharp edges, no anti-aliasing). Each "pixel" is a `<rect>` in a 32x24 grid, scaled by `props.scale`.
@@ -135,35 +138,35 @@ type Props = {
 // 0=transparent, 1=#CC3333 (red body), 2=#1A1A1A (black), 3=#FF5555 (highlight), 4=#999999 (gray wheel)
 const PIXEL_MAP: number[][] = [
   // Row 0-3: handset
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,0,0,0,0,0,0],
-  [0,0,0,0,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,0,0,0,0,0],
-  [0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0],
   // Row 4-7: handset bar + top of body
-  [0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,1,1,1,3,3,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,1,1,1,3,3,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],
+  [0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   // Row 8-11: body with dial
-  [0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,2,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,1,1,1,1,2,0,2,0,2,0,2,0,2,1,1,1,1,1,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,2,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
+  [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
   // Row 12-15: body bottom + dial bottom
-  [0,0,0,0,0,0,1,1,1,1,2,0,2,0,2,0,2,0,2,1,1,1,1,1,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,2,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],
+  [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   // Row 16-19: base
-  [0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0],
-  [0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0],
-  [0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0],
+  [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
   // Row 20-23: wheels
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,0,0,0,0],
-  [0,0,2,2,4,4,4,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,4,4,4,2,2,0,0,0],
-  [0,0,0,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,0,0,0,0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0],
+  [0, 0, 2, 2, 4, 4, 4, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 4, 4, 4, 2, 2, 0, 0, 0],
+  [0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0],
 ]
 
 const COLORS: Record<number, string> = {
@@ -184,7 +187,7 @@ export const PixelPhoneMascot: React.FC<Props> = ({ scale = 1, animate = true })
     ? interpolate(
         spring({ frame, fps, config: { damping: 8, stiffness: 120 }, durationInFrames: Math.ceil(fps * 0.8) }),
         [0, 1],
-        [20, 0]
+        [20, 0],
       )
     : 0
 
@@ -214,7 +217,7 @@ export const PixelPhoneMascot: React.FC<Props> = ({ scale = 1, animate = true })
               fill={COLORS[colorIdx]}
             />
           )
-        })
+        }),
       )}
     </svg>
   )
@@ -240,6 +243,7 @@ git commit -m "feat: add PixelPhoneMascot component for Linea Directa branding"
 ### Task 4: ScreenRecordingScene component
 
 **Files:**
+
 - Create: `src/compositions/ClaudeCodeTutorial/scenes/ScreenRecordingScene.tsx`
 
 This component renders a VHS-recorded `.mp4` inside a styled frame. It uses `staticFile()` with the `resolvedSrc` path injected by `render.ts`.
@@ -248,15 +252,7 @@ This component renders a VHS-recorded `.mp4` inside a styled frame. It uses `sta
 
 ```tsx
 import React from "react"
-import {
-  AbsoluteFill,
-  Video,
-  interpolate,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-  staticFile,
-} from "remotion"
+import { AbsoluteFill, Video, interpolate, spring, useCurrentFrame, useVideoConfig, staticFile } from "remotion"
 import { z } from "zod"
 import { TutorialConfigSchema } from "../schema"
 
@@ -351,6 +347,7 @@ git commit -m "feat: add ScreenRecordingScene for embedded VHS recordings"
 ### Task 5: Update IntroScene with theme support
 
 **Files:**
+
 - Modify: `src/compositions/ClaudeCodeTutorial/scenes/IntroScene.tsx`
 
 - [ ] **Step 1: Add theme import and mascot**
@@ -388,7 +385,9 @@ color: isLD ? "#CC3333" : "#7ee787",
 Change text to:
 
 ```tsx
-{isLD ? "Línea Directa · Claude Code" : "Claude Code · Tutorial"}
+{
+  isLD ? "Línea Directa · Claude Code" : "Claude Code · Tutorial"
+}
 ```
 
 Replace the title color:
@@ -412,11 +411,13 @@ color: isLD ? "#888888" : "#8b949e",
 Add the mascot above the label (inside the `AbsoluteFill`, as the first child):
 
 ```tsx
-{isLD && (
-  <div style={{ marginBottom: 24 }}>
-    <PixelPhoneMascot scale={1} animate={true} />
-  </div>
-)}
+{
+  isLD && (
+    <div style={{ marginBottom: 24 }}>
+      <PixelPhoneMascot scale={1} animate={true} />
+    </div>
+  )
+}
 ```
 
 - [ ] **Step 4: Verify it compiles**
@@ -436,6 +437,7 @@ git commit -m "feat: add Linea Directa theme support to IntroScene"
 ### Task 6: Update CalloutScene with theme support
 
 **Files:**
+
 - Modify: `src/compositions/ClaudeCodeTutorial/scenes/CalloutScene.tsx`
 
 - [ ] **Step 1: Add theme import**
@@ -510,6 +512,7 @@ git commit -m "feat: add Linea Directa theme support to CalloutScene"
 ### Task 7: Update OutroScene with theme support
 
 **Files:**
+
 - Modify: `src/compositions/ClaudeCodeTutorial/scenes/OutroScene.tsx`
 
 - [ ] **Step 1: Add imports**
@@ -557,7 +560,9 @@ color: isLD ? "#555555" : "#8b949e",
 Footer text — replace "Claude Code Tutorials" with:
 
 ```tsx
-{isLD ? "Línea Directa · Claude Code" : "Claude Code Tutorials"}
+{
+  isLD ? "Línea Directa · Claude Code" : "Claude Code Tutorials"
+}
 ```
 
 Footer text color:
@@ -571,11 +576,13 @@ color: isLD ? "#CC3333" : "#484f58",
 After the footer div, add:
 
 ```tsx
-{isLD && (
-  <div style={{ position: "absolute", bottom: 30, right: 40, opacity: 0.6 }}>
-    <PixelPhoneMascot scale={0.6} animate={false} />
-  </div>
-)}
+{
+  isLD && (
+    <div style={{ position: "absolute", bottom: 30, right: 40, opacity: 0.6 }}>
+      <PixelPhoneMascot scale={0.6} animate={false} />
+    </div>
+  )
+}
 ```
 
 - [ ] **Step 5: Verify it compiles**
@@ -595,6 +602,7 @@ git commit -m "feat: add Linea Directa theme support to OutroScene"
 ### Task 8: Update ClaudeCodeTutorial.tsx — ThemeContext + ScreenRecordingScene
 
 **Files:**
+
 - Modify: `src/compositions/ClaudeCodeTutorial/ClaudeCodeTutorial.tsx`
 
 - [ ] **Step 1: Add imports**
@@ -652,6 +660,7 @@ git commit -m "feat: integrate ThemeContext and ScreenRecordingScene in main com
 ### Task 9: Update render.ts — asset resolution
 
 **Files:**
+
 - Modify: `scripts/render.ts`
 
 - [ ] **Step 1: Add fs imports and asset copy logic**
@@ -737,6 +746,7 @@ git commit -m "feat: add asset resolution and cleanup for screenRecording scenes
 ### Task 10: Update .gitignore
 
 **Files:**
+
 - Modify: `.gitignore`
 
 - [ ] **Step 1: Add new gitignore entries**
@@ -762,6 +772,7 @@ git commit -m "chore: gitignore VHS recordings and temp tutorial assets"
 > **Note:** The spec says Root.tsx is "not modified", but `defaultTutorialProps` must satisfy the updated schema which now includes `theme`. This is a necessary correction.
 
 **Files:**
+
 - Modify: `src/Root.tsx`
 
 - [ ] **Step 1: Add `theme` to defaultTutorialProps**
@@ -789,6 +800,7 @@ git commit -m "feat: add theme to default tutorial props"
 ### Task 12: Smoke test — render existing tutorial with linea-directa theme
 
 **Files:**
+
 - Modify: `tutorials/git-worktrees-claude-code/config.json`
 
 - [ ] **Step 1: Add `theme` field to config**
@@ -803,6 +815,7 @@ Expected: Renders successfully with white background, red accents, mascot in int
 - [ ] **Step 3: Visually verify the output**
 
 Open `tutorials/git-worktrees-claude-code/output.mp4` and check:
+
 - Intro: white bg, red accent line, mascot pixel art, "Línea Directa · Claude Code" label
 - Callout: white bg, red left border
 - Outro: white bg, red bullets, small mascot in corner, "Línea Directa · Claude Code" footer
@@ -823,6 +836,7 @@ git commit -m "feat: apply linea-directa theme to git-worktrees tutorial"
 ### Task 13: Update SKILL.md with VHS workflow and theme docs
 
 **Files:**
+
 - Modify: `.claude/skills/tutorial-generator/SKILL.md`
 
 - [ ] **Step 1: Update the skill description**
@@ -832,6 +846,7 @@ Change the first line from "terminal simulada" to "terminal real (VHS) o simulad
 - [ ] **Step 2: Add VHS step between Research and config.json generation**
 
 Add a new "Paso 2.5: Genera recording.tape" section documenting:
+
 - Tape file format with the key VHS commands (Output, Set, Type, Enter, Wait, Sleep)
 - Default theme: Catppuccin Mocha, FontSize 18, Width 1200, Height 600
 - WaitTimeout 60s
@@ -841,6 +856,7 @@ Add a new "Paso 2.5: Genera recording.tape" section documenting:
 - [ ] **Step 3: Document `theme` field and `screenRecording` scene**
 
 Add to the config.json section:
+
 - `theme: "default" | "linea-directa"` — controls brand styling across all scenes
 - `screenRecording` scene type with `src`, `trim`, `frame`, `durationInSeconds`
 - When to prefer `screenRecording` over `terminal`: when you need authentic terminal output

@@ -1,0 +1,413 @@
+{
+  "id": "que-es-claude-code",
+  "title": "¿Qué es Claude Code?",
+  "description": "Una guía práctica para desarrolladores sobre el nuevo agente de Anthropic.",
+  "composition": "ClaudeCodeTutorial",
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "theme": "linea-directa",
+  "transition": null,
+  "brief": {
+    "platform": "linkedin",
+    "audience": "desarrolladores experimentados",
+    "goal": "Explicar qué es Claude Code, sus casos de uso diarios y por qué probarlo",
+    "promise": "Entenderás cómo este agente autónomo transforma tu flujo de trabajo en la terminal",
+    "tone": "cercano, práctico, sin hype",
+    "cta": "Pruébalo hoy",
+    "hookStrategy": "problema-solución",
+    "templateId": "tutorial-code-walkthrough",
+    "narrativeArc": ["hook", "mental-model", "setup", "demo", "why-it-matters", "pitfalls", "summary"]
+  },
+  "scenes": [
+    {
+      "type": "intro",
+      "title": "¿Qué es Claude Code?",
+      "subtitle": "Del asistente conversacional al agente autónomo en tu terminal local.",
+      "durationInSeconds": 8,
+      "timing": {
+        "tailHoldMs": 400,
+        "transitionMs": 500
+      },
+      "beats": [
+        {
+          "id": "hook",
+          "startMs": 400,
+          "narration": "¿Qué es exactamente Claude Code?",
+          "visual": "Aparición del título",
+          "emphasis": "high"
+        },
+        {
+          "id": "subtitle",
+          "startMs": 3500,
+          "narration": "Es la evolución del asistente conversacional tradicional, convertido en un agente autónomo que vive en tu terminal local.",
+          "visual": "Aparición del subtítulo",
+          "emphasis": "medium"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "block-diagram",
+      "props": {
+        "title": "Arquitectura Local",
+        "description": "Orquestación directa en tu sistema",
+        "blocks": [
+          {
+            "label": "CLI Interactiva (Usuario)"
+          },
+          {
+            "label": "Orquestador (Herramientas OS)"
+          },
+          {
+            "label": "Claude 3.7 (Razonamiento)"
+          }
+        ]
+      },
+      "durationInSeconds": 15,
+      "timing": {
+        "tailHoldMs": 400,
+        "transitionMs": 500
+      },
+      "beats": [
+        {
+          "id": "intro-diagram",
+          "startMs": 500,
+          "narration": "A nivel de arquitectura, funciona orquestando procesos directamente en tu sistema.",
+          "visual": "Diagrama de arquitectura",
+          "emphasis": "medium"
+        },
+        {
+          "id": "block-1",
+          "startMs": 4500,
+          "narration": "Todo comienza desde una interfaz de línea de comandos interactiva.",
+          "visual": "Resalta CLI",
+          "emphasis": "low"
+        },
+        {
+          "id": "block-2",
+          "startMs": 8000,
+          "narration": "Un orquestador que maneja las herramientas de tu sistema operativo...",
+          "visual": "Resalta Orquestador",
+          "emphasis": "medium"
+        },
+        {
+          "id": "block-3",
+          "startMs": 11500,
+          "narration": "...y utiliza el razonamiento avanzado de Claude 3.7 para tomar decisiones.",
+          "visual": "Resalta Claude 3.7",
+          "emphasis": "high"
+        }
+      ]
+    },
+    {
+      "type": "benefits",
+      "title": "El fin del copy-paste",
+      "items": [
+        {
+          "text": "Contexto nativo del proyecto desde tu entorno de desarrollo"
+        },
+        {
+          "text": "Lee y edita múltiples archivos de forma automática y paralela"
+        },
+        {
+          "text": "Ejecuta comandos bash y control de versiones con git"
+        }
+      ],
+      "durationInSeconds": 16,
+      "timing": {
+        "tailHoldMs": 400,
+        "transitionMs": 500
+      },
+      "beats": [
+        {
+          "id": "title",
+          "startMs": 500,
+          "narration": "Esto significa el fin del tradicional copy-paste entre tu editor y el navegador.",
+          "visual": "Título del fin de copy-paste",
+          "emphasis": "high"
+        },
+        {
+          "id": "item-1",
+          "startMs": 4500,
+          "narration": "Claude Code obtiene contexto nativo de tu proyecto directamente desde tu entorno.",
+          "visual": "Aparición punto 1",
+          "emphasis": "medium"
+        },
+        {
+          "id": "item-2",
+          "startMs": 9000,
+          "narration": "Puede leer y editar múltiples archivos de forma automática y paralela.",
+          "visual": "Aparición punto 2",
+          "emphasis": "high"
+        },
+        {
+          "id": "item-3",
+          "startMs": 13000,
+          "narration": "Y ejecuta comandos bash o de control de versiones con git de forma segura.",
+          "visual": "Aparición punto 3",
+          "emphasis": "medium"
+        }
+      ]
+    },
+    {
+      "type": "terminal",
+      "lines": [
+        {
+          "kind": "command",
+          "text": "claude"
+        },
+        {
+          "kind": "claude",
+          "text": "I can help you code. What would you like to do?"
+        },
+        {
+          "kind": "command",
+          "text": "Fix the failing tests in src/auth.ts"
+        },
+        {
+          "kind": "claude",
+          "text": "Running pytest to see the errors... [Tool: bash]"
+        },
+        {
+          "kind": "output",
+          "text": "1 failed, 2 passed in 1.43s"
+        },
+        {
+          "kind": "claude",
+          "text": "I see the AuthError. Editing src/auth.ts... [Tool: edit]"
+        }
+      ],
+      "durationInSeconds": 20,
+      "timing": {
+        "tailHoldMs": 500,
+        "transitionMs": 500
+      },
+      "beats": [
+        {
+          "id": "start-cli",
+          "startMs": 500,
+          "narration": "En la práctica, invocas a Claude desde la terminal y le pides que resuelva un problema.",
+          "visual": "Comando inicial claude",
+          "emphasis": "medium"
+        },
+        {
+          "id": "request",
+          "startMs": 5500,
+          "narration": "Por ejemplo, arreglar los tests fallidos en tu módulo de autenticación.",
+          "visual": "Petición del usuario en CLI",
+          "emphasis": "high"
+        },
+        {
+          "id": "execution",
+          "startMs": 11000,
+          "narration": "El agente ejecuta las pruebas automáticamente, analiza los errores resultantes...",
+          "visual": "Resultados del bash",
+          "emphasis": "medium"
+        },
+        {
+          "id": "fix",
+          "startMs": 16000,
+          "narration": "...y aplica las correcciones directamente en el código.",
+          "visual": "Acción de edición",
+          "emphasis": "high"
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "text": "El verdadero poder de Claude Code: opera como un bucle iterativo (Agent Loop). Si un test falla, analiza el error y corrige de forma autónoma.",
+      "position": "center",
+      "durationInSeconds": 12,
+      "timing": {
+        "tailHoldMs": 400,
+        "transitionMs": 500
+      },
+      "beats": [
+        {
+          "id": "core-concept",
+          "startMs": 500,
+          "narration": "Aquí radica su verdadero poder: opera como un bucle iterativo o Agent Loop.",
+          "visual": "Texto Agent Loop",
+          "emphasis": "high"
+        },
+        {
+          "id": "iteration",
+          "startMs": 6000,
+          "narration": "Si un test falla, vuelve a analizar el error y corrige de forma autónoma hasta que pasa.",
+          "visual": "Explicación de corrección autónoma",
+          "emphasis": "medium"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "flow-diagram",
+      "props": {
+        "title": "El Bucle del Agente (Agent Loop)",
+        "description": "Iteración impulsada por tests y resultados",
+        "steps": [
+          {
+            "label": "Analiza CWD y estado de git"
+          },
+          {
+            "label": "Decide herramienta (Tool Use)"
+          },
+          {
+            "label": "Ejecuta comandos localmente"
+          },
+          {
+            "label": "Evalúa stdout y corrige"
+          }
+        ]
+      },
+      "durationInSeconds": 16,
+      "timing": {
+        "tailHoldMs": 400,
+        "transitionMs": 500
+      },
+      "beats": [
+        {
+          "id": "flow-intro",
+          "startMs": 500,
+          "narration": "Este proceso de iteración es impulsado por los resultados en tiempo real.",
+          "visual": "Diagrama de flujo",
+          "emphasis": "medium"
+        },
+        {
+          "id": "step-1-2",
+          "startMs": 4500,
+          "narration": "Primero analiza tu directorio de trabajo y decide qué herramienta utilizar.",
+          "visual": "Pasos 1 y 2",
+          "emphasis": "medium"
+        },
+        {
+          "id": "step-3",
+          "startMs": 9500,
+          "narration": "Luego ejecuta los comandos localmente en tu máquina.",
+          "visual": "Paso 3",
+          "emphasis": "high"
+        },
+        {
+          "id": "step-4",
+          "startMs": 13000,
+          "narration": "Finalmente, evalúa la salida y decide el siguiente paso o corrección.",
+          "visual": "Paso 4",
+          "emphasis": "high"
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "text": "Claude Code no compite con el autocompletado en tiempo real de tu IDE. Su fuerte es la resolución asíncrona de tareas complejas en múltiples ficheros.",
+      "position": "bottom",
+      "durationInSeconds": 10,
+      "timing": {
+        "tailHoldMs": 400,
+        "transitionMs": 500
+      },
+      "beats": [
+        {
+          "id": "positioning",
+          "startMs": 500,
+          "narration": "Es importante destacar que Claude Code no compite con el autocompletado en tiempo real de tu IDE.",
+          "visual": "Texto sobre IDE",
+          "emphasis": "medium"
+        },
+        {
+          "id": "strength",
+          "startMs": 5500,
+          "narration": "Su fuerte es la resolución asíncrona de tareas complejas que afectan múltiples ficheros.",
+          "visual": "Texto sobre resolución de tareas",
+          "emphasis": "high"
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "text": "Usa Claude Code para refactorizaciones, solucionar bugs difíciles o explorar código, mientras tu IDE se encarga del código al instante.",
+      "position": "center",
+      "durationInSeconds": 14,
+      "timing": {
+        "tailHoldMs": 400,
+        "transitionMs": 500
+      },
+      "beats": [
+        {
+          "id": "when-to-use",
+          "startMs": 500,
+          "narration": "Ideal para refactorizaciones profundas o solucionar bugs difíciles que afectan a varios ficheros.",
+          "visual": "Texto cuándo usar Claude Code",
+          "emphasis": "high"
+        }
+      ]
+    },
+    {
+      "type": "outro",
+      "title": "¿Listo para probarlo?",
+      "items": [
+        {
+          "text": "Baja fricción: se integra en tu CLI sin cambiar de IDE"
+        },
+        {
+          "text": "Modelo de pago por uso (Tokens de API de Anthropic)"
+        },
+        {
+          "text": "Consulta la documentación en docs.anthropic.com"
+        }
+      ],
+      "durationInSeconds": 12,
+      "timing": {
+        "tailHoldMs": 1000,
+        "transitionMs": 500
+      },
+      "beats": [
+        {
+          "id": "outro-title",
+          "startMs": 500,
+          "narration": "¿Listo para incorporar este agente a tu flujo de trabajo?",
+          "visual": "Título de cierre",
+          "emphasis": "medium"
+        },
+        {
+          "id": "points",
+          "startMs": 4000,
+          "narration": "Tiene baja fricción y un modelo de pago por uso muy accesible.",
+          "visual": "Puntos de venta",
+          "emphasis": "medium"
+        },
+        {
+          "id": "cta",
+          "startMs": 8000,
+          "narration": "Consulta la documentación oficial en Anthropic para empezar hoy mismo.",
+          "visual": "Call to action y docs",
+          "emphasis": "high"
+        }
+      ]
+    }
+  ],
+  "voiceover": {
+    "enabled": true,
+    "provider": "gemini",
+    "voiceId": "Orus",
+    "language": "es-ES",
+    "scenes": {
+      "0": "[excited] ¿Qué es exactamente Claude Code? Es la evolución del asistente tradicional, ahora un agente autónomo en tu terminal.",
+      "1": "A nivel de arquitectura, Claude 3.7 orquesta procesos directamente en tu sistema local, empezando desde una interfaz interactiva.",
+      "2": "Dile adiós al clásico copiar y pegar. Ahora tienes contexto nativo, edición paralela de archivos y ejecución segura de comandos.",
+      "3": "Fíjate en la terminal: le pides a Claude que arregle los tests, él ejecuta las pruebas, analiza errores y edita el código por ti.",
+      "4": "[excited] Y aquí está la magia: opera como un bucle iterativo. Si el test falla, el agente vuelve a analizar el error y lo corrige solo.",
+      "5": "Todo este proceso, o Agent Loop, se basa en leer tu entorno, elegir la herramienta correcta y evaluar la salida localmente.",
+      "6": "Ten en cuenta que esto no reemplaza el autocompletado de tu IDE, sino que es perfecto para tareas complejas que tocan múltiples archivos.",
+      "7": "Ideal para refactorizaciones profundas o solucionar bugs difíciles que afectan a varios ficheros.",
+      "8": "¿Listo para probarlo? Integrarlo es muy fácil con el pago por uso. Revisa la documentación de Anthropic para empezar."
+    }
+  },
+  "soundDesign": {
+    "musicBed": {
+      "track": "lofi-tech",
+      "volume": -20
+    },
+    "sfxEntries": []
+  }
+}

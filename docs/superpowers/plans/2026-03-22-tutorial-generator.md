@@ -12,22 +12,22 @@
 
 ## File Map
 
-| File | Action | Responsibility |
-|------|--------|----------------|
-| `src/compositions/ClaudeCodeTutorial/schema.ts` | Create | Zod schema — contrato JSON entre skill y template |
-| `src/compositions/ClaudeCodeTutorial/calculateMetadata.ts` | Create | Duración dinámica sumando escenas |
-| `src/compositions/ClaudeCodeTutorial/customSceneRegistry.ts` | Create | Registro estático de componentes custom |
-| `src/compositions/ClaudeCodeTutorial/scenes/IntroScene.tsx` | Create | Slide de título animado |
-| `src/compositions/ClaudeCodeTutorial/scenes/TerminalScene.tsx` | Create | Terminal simulada — el componente estrella |
-| `src/compositions/ClaudeCodeTutorial/scenes/CalloutScene.tsx` | Create | Callout overlay animado |
-| `src/compositions/ClaudeCodeTutorial/scenes/OutroScene.tsx` | Create | Slide de cierre con bullets |
-| `src/compositions/ClaudeCodeTutorial/scenes/CustomScene.tsx` | Create | Wrapper que lee componentId del registry |
-| `src/compositions/ClaudeCodeTutorial/ClaudeCodeTutorial.tsx` | Create | Composición raíz — mapea config.scenes a Series |
-| `src/Root.tsx` | Modify | Añadir registro de ClaudeCodeTutorial |
-| `scripts/render.ts` | Create | CLI script: bundle + renderMedia |
-| `skills/tutorial-generator/index.md` | Create | Skill de Claude Code — instrucciones del agente |
-| `.gitignore` | Modify | Ignorar tutorials/*/output.mp4 y public/voiceover/ |
-| `package.json` | Modify | Instalar @remotion/bundler, tsx, @remotion/google-fonts |
+| File                                                           | Action | Responsibility                                          |
+| -------------------------------------------------------------- | ------ | ------------------------------------------------------- |
+| `src/compositions/ClaudeCodeTutorial/schema.ts`                | Create | Zod schema — contrato JSON entre skill y template       |
+| `src/compositions/ClaudeCodeTutorial/calculateMetadata.ts`     | Create | Duración dinámica sumando escenas                       |
+| `src/compositions/ClaudeCodeTutorial/customSceneRegistry.ts`   | Create | Registro estático de componentes custom                 |
+| `src/compositions/ClaudeCodeTutorial/scenes/IntroScene.tsx`    | Create | Slide de título animado                                 |
+| `src/compositions/ClaudeCodeTutorial/scenes/TerminalScene.tsx` | Create | Terminal simulada — el componente estrella              |
+| `src/compositions/ClaudeCodeTutorial/scenes/CalloutScene.tsx`  | Create | Callout overlay animado                                 |
+| `src/compositions/ClaudeCodeTutorial/scenes/OutroScene.tsx`    | Create | Slide de cierre con bullets                             |
+| `src/compositions/ClaudeCodeTutorial/scenes/CustomScene.tsx`   | Create | Wrapper que lee componentId del registry                |
+| `src/compositions/ClaudeCodeTutorial/ClaudeCodeTutorial.tsx`   | Create | Composición raíz — mapea config.scenes a Series         |
+| `src/Root.tsx`                                                 | Modify | Añadir registro de ClaudeCodeTutorial                   |
+| `scripts/render.ts`                                            | Create | CLI script: bundle + renderMedia                        |
+| `skills/tutorial-generator/index.md`                           | Create | Skill de Claude Code — instrucciones del agente         |
+| `.gitignore`                                                   | Modify | Ignorar tutorials/\*/output.mp4 y public/voiceover/     |
+| `package.json`                                                 | Modify | Instalar @remotion/bundler, tsx, @remotion/google-fonts |
 
 ---
 
@@ -75,6 +75,7 @@ git commit -m "chore: add bundler, tsx, google-fonts deps for tutorial generator
 ## Task 2: Zod Schema
 
 **Files:**
+
 - Create: `src/compositions/ClaudeCodeTutorial/schema.ts`
 
 - [ ] **Step 2.1: Crear directorio**
@@ -146,7 +147,7 @@ export const TutorialConfigSchema = z.object({
         CalloutSceneSchema,
         OutroSceneSchema,
         CustomSceneSchema,
-      ])
+      ]),
     )
     .min(1),
   voiceover: z
@@ -182,6 +183,7 @@ git commit -m "feat: add Zod schema for ClaudeCodeTutorial config"
 ## Task 3: calculateMetadata
 
 **Files:**
+
 - Create: `src/compositions/ClaudeCodeTutorial/calculateMetadata.ts`
 
 - [ ] **Step 3.1: Escribir calculateMetadata.ts**
@@ -191,13 +193,8 @@ git commit -m "feat: add Zod schema for ClaudeCodeTutorial config"
 import { CalculateMetadataFunction } from "remotion"
 import { TutorialConfig } from "./schema"
 
-export const calculateMetadata: CalculateMetadataFunction<TutorialConfig> = async ({
-  props,
-}) => {
-  const totalSeconds = props.scenes.reduce(
-    (sum, scene) => sum + scene.durationInSeconds,
-    0
-  )
+export const calculateMetadata: CalculateMetadataFunction<TutorialConfig> = async ({ props }) => {
+  const totalSeconds = props.scenes.reduce((sum, scene) => sum + scene.durationInSeconds, 0)
   return {
     durationInFrames: Math.ceil(totalSeconds * props.fps),
     fps: props.fps,
@@ -227,6 +224,7 @@ git commit -m "feat: add calculateMetadata for dynamic tutorial duration"
 ## Task 4: customSceneRegistry
 
 **Files:**
+
 - Create: `src/compositions/ClaudeCodeTutorial/customSceneRegistry.ts`
 
 - [ ] **Step 4.1: Escribir customSceneRegistry.ts**
@@ -261,6 +259,7 @@ git commit -m "feat: add customSceneRegistry for escape-hatch custom scenes"
 ## Task 5: IntroScene
 
 **Files:**
+
 - Create: `src/compositions/ClaudeCodeTutorial/scenes/IntroScene.tsx`
 
 - [ ] **Step 5.1: Escribir IntroScene.tsx**
@@ -272,10 +271,7 @@ import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } fr
 import { z } from "zod"
 import { TutorialConfigSchema } from "../schema"
 
-type IntroSceneProps = Extract<
-  z.infer<typeof TutorialConfigSchema>["scenes"][number],
-  { type: "intro" }
->
+type IntroSceneProps = Extract<z.infer<typeof TutorialConfigSchema>["scenes"][number], { type: "intro" }>
 
 export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle }) => {
   const frame = useCurrentFrame()
@@ -392,6 +388,7 @@ git commit -m "feat: add IntroScene with spring title animation"
 ## Task 6: TerminalScene (componente estrella)
 
 **Files:**
+
 - Create: `src/compositions/ClaudeCodeTutorial/scenes/TerminalScene.tsx`
 
 `TerminalScene` precalcula un `startFrame` acumulativo para cada línea. Las líneas de tipo `command` usan typewriter (string slicing). Las de `output` aparecen instantáneamente. Las de `claude` aparecen línea a línea.
@@ -401,13 +398,7 @@ git commit -m "feat: add IntroScene with spring title animation"
 ```tsx
 // src/compositions/ClaudeCodeTutorial/scenes/TerminalScene.tsx
 import React from "react"
-import {
-  AbsoluteFill,
-  interpolate,
-  useCurrentFrame,
-  useVideoConfig,
-  spring,
-} from "remotion"
+import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig, spring } from "remotion"
 import { loadFont } from "@remotion/google-fonts/JetBrainsMono"
 import { z } from "zod"
 import { TutorialConfigSchema, TerminalLine } from "../schema"
@@ -415,15 +406,14 @@ import { TutorialConfigSchema, TerminalLine } from "../schema"
 const { fontFamily } = loadFont("normal", { weights: ["400", "700"] })
 
 // Velocidades en frames (a 30fps)
-const COMMAND_CHARS_PER_FRAME = 2   // typewriter speed
-const OUTPUT_REVEAL_FRAMES = 4      // pequeña pausa antes de mostrar output
-const CLAUDE_LINE_GAP_FRAMES = 12   // gap entre líneas de Claude
-const CLAUDE_CHARS_PER_FRAME = 3    // velocidad de "streaming" de Claude
+const COMMAND_CHARS_PER_FRAME = 2 // typewriter speed
+const OUTPUT_REVEAL_FRAMES = 4 // pequeña pausa antes de mostrar output
+const CLAUDE_LINE_GAP_FRAMES = 12 // gap entre líneas de Claude
+const CLAUDE_CHARS_PER_FRAME = 3 // velocidad de "streaming" de Claude
 
-type TerminalSceneProps = Extract<
-  z.infer<typeof TutorialConfigSchema>["scenes"][number],
-  { type: "terminal" }
-> & { fps: number }
+type TerminalSceneProps = Extract<z.infer<typeof TutorialConfigSchema>["scenes"][number], { type: "terminal" }> & {
+  fps: number
+}
 
 type LineWithTiming = TerminalLine & {
   startFrame: number
@@ -501,9 +491,7 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
 
   // Cursor parpadeante (solo visible si el último comando aún está escribiendo)
   const lastCommand = [...timedLines].reverse().find((l) => l.kind === "command")
-  const lastCommandDone = lastCommand
-    ? frame >= lastCommand.startFrame + lastCommand.durationFrames
-    : true
+  const lastCommandDone = lastCommand ? frame >= lastCommand.startFrame + lastCommand.durationFrames : true
   const cursorVisible = !lastCommandDone && Math.floor(frame / 15) % 2 === 0
 
   return (
@@ -555,10 +543,7 @@ export const TerminalScene: React.FC<TerminalSceneProps> = ({ title, lines }) =>
           }}
         >
           {["#ff5f57", "#febc2e", "#28c840"].map((color, i) => (
-            <div
-              key={i}
-              style={{ width: 12, height: 12, borderRadius: "50%", background: color }}
-            />
+            <div key={i} style={{ width: 12, height: 12, borderRadius: "50%", background: color }} />
           ))}
           <div
             style={{
@@ -626,6 +611,7 @@ git commit -m "feat: add TerminalScene with typewriter and streaming effects"
 ## Task 7: CalloutScene
 
 **Files:**
+
 - Create: `src/compositions/ClaudeCodeTutorial/scenes/CalloutScene.tsx`
 
 - [ ] **Step 7.1: Escribir CalloutScene.tsx**
@@ -637,10 +623,7 @@ import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } fr
 import { z } from "zod"
 import { TutorialConfigSchema } from "../schema"
 
-type CalloutSceneProps = Extract<
-  z.infer<typeof TutorialConfigSchema>["scenes"][number],
-  { type: "callout" }
->
+type CalloutSceneProps = Extract<z.infer<typeof TutorialConfigSchema>["scenes"][number], { type: "callout" }>
 
 const ORIGIN: Record<"top" | "bottom" | "right", { x: number; y: number }> = {
   top: { x: 0, y: -30 },
@@ -648,11 +631,7 @@ const ORIGIN: Record<"top" | "bottom" | "right", { x: number; y: number }> = {
   right: { x: 40, y: 0 },
 }
 
-export const CalloutScene: React.FC<CalloutSceneProps> = ({
-  text,
-  position,
-  background,
-}) => {
+export const CalloutScene: React.FC<CalloutSceneProps> = ({ text, position, background }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
 
@@ -668,10 +647,7 @@ export const CalloutScene: React.FC<CalloutSceneProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background:
-          background === "overlay"
-            ? "rgba(0,0,0,0.65)"
-            : "#0d1117",
+        background: background === "overlay" ? "rgba(0,0,0,0.65)" : "#0d1117",
         display: "flex",
         alignItems: align,
         justifyContent: justify,
@@ -721,6 +697,7 @@ git commit -m "feat: add CalloutScene with spring entrance"
 ## Task 8: OutroScene
 
 **Files:**
+
 - Create: `src/compositions/ClaudeCodeTutorial/scenes/OutroScene.tsx`
 
 - [ ] **Step 8.1: Escribir OutroScene.tsx**
@@ -732,10 +709,7 @@ import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } fr
 import { z } from "zod"
 import { TutorialConfigSchema } from "../schema"
 
-type OutroSceneProps = Extract<
-  z.infer<typeof TutorialConfigSchema>["scenes"][number],
-  { type: "outro" }
->
+type OutroSceneProps = Extract<z.infer<typeof TutorialConfigSchema>["scenes"][number], { type: "outro" }>
 
 export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
   const frame = useCurrentFrame()
@@ -774,18 +748,14 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
       {bullets && bullets.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 700 }}>
           {bullets.map((bullet, i) => {
-            const bulletOpacity = interpolate(
-              frame,
-              [fps * (0.5 + i * 0.25), fps * (0.9 + i * 0.25)],
-              [0, 1],
-              { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-            )
-            const bulletX = interpolate(
-              frame,
-              [fps * (0.5 + i * 0.25), fps * (0.9 + i * 0.25)],
-              [-20, 0],
-              { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-            )
+            const bulletOpacity = interpolate(frame, [fps * (0.5 + i * 0.25), fps * (0.9 + i * 0.25)], [0, 1], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            })
+            const bulletX = interpolate(frame, [fps * (0.5 + i * 0.25), fps * (0.9 + i * 0.25)], [-20, 0], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            })
             return (
               <div
                 key={i}
@@ -833,7 +803,8 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ title, bullets }) => {
           letterSpacing: 2,
           textTransform: "uppercase",
           opacity: interpolate(frame, [fps * 1.5, fps * 2], [0, 1], {
-            extrapolateLeft: "clamp", extrapolateRight: "clamp",
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
           }),
         }}
       >
@@ -857,6 +828,7 @@ git commit -m "feat: add OutroScene with staggered bullet animations"
 ## Task 9: CustomScene
 
 **Files:**
+
 - Create: `src/compositions/ClaudeCodeTutorial/scenes/CustomScene.tsx`
 
 - [ ] **Step 9.1: Escribir CustomScene.tsx**
@@ -909,6 +881,7 @@ git commit -m "feat: add CustomScene wrapper with registry lookup"
 ## Task 10: ClaudeCodeTutorial (composición raíz)
 
 **Files:**
+
 - Create: `src/compositions/ClaudeCodeTutorial/ClaudeCodeTutorial.tsx`
 
 - [ ] **Step 10.1: Escribir ClaudeCodeTutorial.tsx**
@@ -958,6 +931,7 @@ git commit -m "feat: add ClaudeCodeTutorial root composition with Series scene r
 ## Task 11: Registrar en Root.tsx
 
 **Files:**
+
 - Modify: `src/Root.tsx`
 
 - [ ] **Step 11.1: Añadir ClaudeCodeTutorial a Root.tsx**
@@ -980,22 +954,13 @@ const defaultTutorialProps = {
   fps: 30 as const,
   width: 1280 as const,
   height: 720 as const,
-  scenes: [
-    { type: "intro" as const, title: "Tutorial", durationInSeconds: 3 },
-  ],
+  scenes: [{ type: "intro" as const, title: "Tutorial", durationInSeconds: 3 }],
 }
 
 export const RemotionRoot: React.FC = () => {
   return (
     <>
-      <Composition
-        id="MyComp"
-        component={MyComposition}
-        durationInFrames={60}
-        fps={30}
-        width={1280}
-        height={720}
-      />
+      <Composition id="MyComp" component={MyComposition} durationInFrames={60} fps={30} width={1280} height={720} />
       <Composition
         id="ClaudeCodeTutorial"
         component={ClaudeCodeTutorial}
@@ -1034,6 +999,7 @@ git commit -m "feat: register ClaudeCodeTutorial in Root.tsx with calculateMetad
 ## Task 12: Smoke test con config.json manual
 
 **Files:**
+
 - Create: `tutorials/compact-command/config.json` (temporal para test)
 
 - [ ] **Step 12.1: Crear config.json de prueba**
@@ -1110,6 +1076,7 @@ git commit -m "test: add smoke test config for compact-command tutorial"
 ## Task 13: scripts/render.ts
 
 **Files:**
+
 - Create: `scripts/render.ts`
 
 - [ ] **Step 13.1: Crear directorio scripts/**
@@ -1198,6 +1165,7 @@ git commit -m "feat: add render.ts script for programmatic MP4 generation"
 ## Task 14: Skill `tutorial-generator`
 
 **Files:**
+
 - Create: `skills/tutorial-generator/index.md`
 
 Este es el archivo que Claude Code carga cuando el usuario invoca `/tutorial-generator`. Contiene las instrucciones en prosa que guían al agente.
@@ -1210,7 +1178,7 @@ mkdir -p skills/tutorial-generator
 
 Crear `skills/tutorial-generator/index.md`:
 
-```markdown
+````markdown
 ---
 name: tutorial-generator
 description: Genera vídeos educativos de Claude Code features usando Remotion. Invoca con /tutorial-generator "instrucción" [--voiceover] [--no-demo]
@@ -1223,6 +1191,7 @@ Genera un vídeo MP4 educativo sobre una feature de Claude Code con terminal sim
 ## Cuando se te invoca
 
 El usuario te pasa una instrucción en lenguaje natural. Puede incluir:
+
 - Un tema: `/tutorial-generator "explica /compact"`
 - Una URL de referencia + tema: `/tutorial-generator "https://docs.anthropic.com/..." "explica esta feature"`
 - Flags: `--voiceover` (activa ElevenLabs TTS), `--no-demo` (omite el subagente de demostración)
@@ -1236,6 +1205,7 @@ El usuario te pasa una instrucción en lenguaje natural. Puede incluir:
 ## Paso 1: Research
 
 Lanza en paralelo:
+
 - **Context7 MCP** → busca la feature en documentación de Claude Code / Anthropic
 - **WebSearch** → busca ejemplos, posts, guías relacionadas
 - **WebFetch** → si se pasó una URL, léela directamente
@@ -1263,12 +1233,14 @@ Con toda la información recopilada, escribe `tutorials/[slug]/config.json`.
 El JSON debe ser válido según el schema en `src/compositions/ClaudeCodeTutorial/schema.ts`.
 
 ### Estructura mínima de un buen tutorial:
+
 1. `intro` (3-5s): título llamativo que explique qué va a aprender el usuario
 2. `terminal` (6-15s): demostración real del comando con líneas de tipo command, output, claude
 3. `callout` (3-5s): explicación del "por qué" o "cuándo usar" en lenguaje natural
 4. `outro` (4-8s): resumen con bullets accionables
 
 ### Reglas para el tipo "terminal":
+
 - `kind: "command"` → lo que escribe el usuario (usa los comandos exactos del subagente)
 - `kind: "output"` → respuesta inmediata del sistema
 - `kind: "claude"` → respuesta de Claude (aparece como streaming)
@@ -1276,6 +1248,7 @@ El JSON debe ser válido según el schema en `src/compositions/ClaudeCodeTutoria
 - Usa `delayAfterMs` para pausas dramáticas (ej: 800ms antes de que aparezca el output)
 
 ### Si necesitas una escena custom (escape hatch):
+
 1. Escribe el componente React en `src/compositions/ClaudeCodeTutorial/scenes/custom/[NombreComponente].tsx`
 2. Añade el import y la entrada en `src/compositions/ClaudeCodeTutorial/customSceneRegistry.ts`
 3. Referencia en config.json con `"type": "custom", "componentId": "nombre-componente"`
@@ -1287,8 +1260,10 @@ Ejecuta:
 ```bash
 npx tsx scripts/render.ts tutorials/[slug]/config.json
 ```
+````
 
 Si falla con error de browser/Chromium:
+
 ```bash
 npx remotion browser ensure
 npx tsx scripts/render.ts tutorials/[slug]/config.json
@@ -1297,6 +1272,7 @@ npx tsx scripts/render.ts tutorials/[slug]/config.json
 ## Paso 5: Resumen
 
 Informa al usuario:
+
 - Escenas generadas (tipos y duraciones)
 - Duración total del vídeo
 - Ruta: `tutorials/[slug]/output.mp4`
@@ -1308,7 +1284,8 @@ Informa al usuario:
 - **Todas las animaciones deben derivar de `useCurrentFrame()`** via `spring()` o `interpolate()`.
 - El `config.json` es el source of truth. Si el usuario quiere ajustes, edita el JSON y re-renderiza.
 - Los vídeos se guardan en `tutorials/[slug]/output.mp4` (gitignored). Los `config.json` sí se commitean.
-```
+
+````
 
 - [ ] **Step 14.2: Verificar que el skill es accesible**
 
@@ -1320,7 +1297,7 @@ Comprueba que el archivo existe en `skills/tutorial-generator/index.md`.
 ```bash
 git add skills/tutorial-generator/index.md tutorials/compact-command/config.json
 git commit -m "feat: add tutorial-generator Claude Code skill"
-```
+````
 
 ---
 
@@ -1340,6 +1317,7 @@ claude
 ```
 
 Expected:
+
 1. Claude investiga con Context7 + WebSearch
 2. Lanza subagente demo
 3. Genera `tutorials/compact-command/config.json`

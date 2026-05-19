@@ -1,0 +1,212 @@
+{
+  "id": "vida-de-los-grillos",
+  "title": "La Vida Secreta de los Grillos",
+  "description": "Video educativo sobre la biología, comportamiento y curiosidades de los grillos",
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "theme": "linea-directa",
+  "transition": null,
+  "scenes": [
+    {
+      "type": "hero",
+      "title": "La Vida Secreta de los Grillos",
+      "subtitle": "Más que un simple cri-cri en la noche",
+      "durationInSeconds": 7
+    },
+    {
+      "type": "custom",
+      "componentId": "big-number",
+      "durationInSeconds": 8,
+      "props": {
+        "title": "Los Grillos en Cifras",
+        "metrics": [
+          {
+            "value": "900",
+            "suffix": "+",
+            "label": "Especies conocidas"
+          },
+          {
+            "value": "300",
+            "label": "Millones de años de evolución"
+          },
+          {
+            "value": "100",
+            "suffix": "dB",
+            "label": "Volumen de su canto"
+          }
+        ]
+      }
+    },
+    {
+      "type": "custom",
+      "componentId": "step-list",
+      "durationInSeconds": 12,
+      "props": {
+        "title": "Ciclo de Vida",
+        "steps": [
+          {
+            "title": "Huevo",
+            "description": "La hembra deposita hasta 200 huevos en tierra húmeda con su ovipositor"
+          },
+          {
+            "title": "Ninfa",
+            "description": "Pasan por 8-10 mudas durante 2-3 meses, creciendo sin alas"
+          },
+          {
+            "title": "Adulto",
+            "description": "Desarrollan alas funcionales y viven entre 2 y 3 meses más"
+          },
+          {
+            "title": "Reproducción",
+            "description": "El macho canta para atraer hembras frotando sus alas (estridulación)"
+          }
+        ]
+      }
+    },
+    {
+      "type": "callout",
+      "text": "El canto del grillo es un termómetro natural: cuenta los chirridos en 15 segundos, suma 40, y obtendrás la temperatura en grados Fahrenheit. Se llama la Ley de Dolbear, descubierta en 1897.",
+      "position": "center",
+      "durationInSeconds": 12
+    },
+    {
+      "type": "custom",
+      "componentId": "comparison-table",
+      "durationInSeconds": 12,
+      "props": {
+        "title": "Grillo de Campo vs Grillo Doméstico",
+        "leftColumn": {
+          "header": "Campo",
+          "items": ["2-3 cm", "Negro/marrón oscuro", "Pradera, jardín", "Fuerte, rítmico", "Nocturno"]
+        },
+        "rightColumn": {
+          "header": "Doméstico",
+          "items": ["1.5-2 cm", "Marrón claro/amarillo", "Casas, edificios", "Suave, continuo", "Día y noche"]
+        }
+      }
+    },
+    {
+      "type": "custom",
+      "componentId": "bar-chart",
+      "durationInSeconds": 10,
+      "props": {
+        "title": "Proteína por cada 100g (vs otras fuentes)",
+        "items": [
+          {
+            "label": "Grillos",
+            "value": 65
+          },
+          {
+            "label": "Pollo",
+            "value": 31
+          },
+          {
+            "label": "Ternera",
+            "value": 26
+          },
+          {
+            "label": "Huevo",
+            "value": 13
+          },
+          {
+            "label": "Tofu",
+            "value": 8
+          }
+        ],
+        "highlightIndex": 0,
+        "showValues": true
+      }
+    },
+    {
+      "type": "benefits",
+      "title": "Superpoderes del Grillo",
+      "durationInSeconds": 12,
+      "items": [
+        {
+          "text": "Oídos en las patas: sus tímpanos están en las tibias delanteras"
+        },
+        {
+          "text": "Saltan 30 veces su tamaño corporal — equivalente a un humano saltando un edificio"
+        },
+        {
+          "text": "Son omnívoros: comen plantas, insectos, tela, papel y hasta otros grillos"
+        },
+        {
+          "text": "En China y Japón se crían como mascotas desde hace más de 2.000 años"
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "text": "En 2013, la FAO recomendó oficialmente los grillos como fuente de proteína sostenible. Producir 1 kg de proteína de grillo requiere 12 veces menos alimento y 2.000 veces menos agua que la ternera.",
+      "position": "right",
+      "durationInSeconds": 12
+    },
+    {
+      "type": "custom",
+      "componentId": "icon-grid",
+      "durationInSeconds": 10,
+      "props": {
+        "title": "Datos curiosos",
+        "items": [
+          {
+            "icon": "lightbulb",
+            "label": "Solo cantan los machos"
+          },
+          {
+            "icon": "shield",
+            "label": "Son criados como alimento en 80+ países"
+          },
+          {
+            "icon": "gear",
+            "label": "Sus antenas detectan vibraciones mínimas"
+          },
+          {
+            "icon": "book",
+            "label": "Símbolo de buena suerte en muchas culturas"
+          },
+          {
+            "icon": "check",
+            "label": "Polinizan algunas flores silvestres"
+          },
+          {
+            "icon": "layers",
+            "label": "Su exoesqueleto contiene quitina antimicrobiana"
+          }
+        ]
+      }
+    },
+    {
+      "type": "cta",
+      "text": "La próxima vez que oigas un grillo, recuerda: lleva 300 millones de años perfeccionando su canto.",
+      "durationInSeconds": 7
+    }
+  ],
+  "voiceover": {
+    "enabled": true,
+    "provider": "gemini",
+    "voiceId": "Orus",
+    "language": "es-ES",
+    "scenes": {
+      "0": "La vida secreta de los grillos. Más que un simple cri-cri en la noche.",
+      "1": "Más de novecientas especies. Trescientos millones de años de evolución. Y un canto que alcanza los cien decibelios.",
+      "2": "Su ciclo de vida empieza con hasta doscientos huevos depositados en tierra húmeda. Las ninfas pasan por hasta diez mudas antes de convertirse en adultos con alas funcionales. Solo entonces el macho puede cantar para atraer a la hembra, frotando sus alas en un proceso llamado estridulación.",
+      "3": "¿Sabías que el canto del grillo es un termómetro natural? Cuenta los chirridos en quince segundos, súmale cuarenta, y obtendrás la temperatura en Fahrenheit. Es la Ley de Dolbear, descubierta en mil ochocientos noventa y siete.",
+      "4": "No todos los grillos son iguales. El grillo de campo es negro, vive en praderas y tiene un canto fuerte y rítmico. El doméstico es más pequeño, de color claro, y canta de forma continua tanto de día como de noche.",
+      "5": "Y aquí viene lo sorprendente. Cien gramos de grillos contienen sesenta y cinco gramos de proteína. Más del doble que el pollo y ocho veces más que el tofu.",
+      "6": "Los grillos tienen los oídos en las patas. Pueden saltar treinta veces su tamaño corporal. Son omnívoros que comen prácticamente de todo. Y en China y Japón se crían como mascotas desde hace más de dos mil años.",
+      "7": "En dos mil trece, la FAO los recomendó oficialmente como fuente de proteína sostenible. Producir un kilo de proteína de grillo requiere doce veces menos alimento y dos mil veces menos agua que la ternera.",
+      "8": "Solo cantan los machos. Se crían como alimento en más de ochenta países. Sus antenas detectan las vibraciones más sutiles. Y en muchas culturas son símbolo de buena suerte.",
+      "9": "La próxima vez que oigas un grillo, recuerda: lleva trescientos millones de años perfeccionando su canto."
+    }
+  },
+  "soundDesign": {
+    "enabled": false,
+    "musicBed": null,
+    "sfx": []
+  },
+  "subtitles": {
+    "enabled": false
+  }
+}

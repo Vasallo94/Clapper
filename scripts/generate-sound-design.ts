@@ -1,6 +1,10 @@
 // scripts/generate-sound-design.ts
 // Usage: npx tsx scripts/generate-sound-design.ts <path-to-config.json>
+//
+// Generates music bed via Google Lyria 3, SFX via Lyria (with library fallback).
+// Falls back to ElevenLabs if ELEVENLABS_API_KEY is set and Google fails.
 
+import { GoogleGenAI } from "@google/genai"
 import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync } from "fs"
 import { createHash } from "crypto"
 import path from "path"
@@ -37,9 +41,45 @@ if (!config.soundDesign?.enabled) {
   process.exit(0)
 }
 
-const apiKey = process.env.ELEVENLABS_API_KEY as string
-if (!apiKey) {
-  console.error("❌ Set ELEVENLABS_API_KEY environment variable")
+// --- Google GenAI / Vertex AI setup ---
+
+const googleCredentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS
+let ai: GoogleGenAI | null = null
+
+if (googleCredentialsPath && existsSync(path.resolve(googleCredentialsPath))) {
+  const absPath = path.resolve(googleCredentialsPath)
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = absPath
+  const saContent = JSON.parse(readFileSync(absPath, "utf-8"))
+  const projectId = saContent.project_id
+  if (projectId) {
+    ai = new GoogleGenAI({
+      vertexai: true,
+      project: projectId,
+      location: "global",
+      googleAuthOptions: {
+        credentials: {
+          client_email: saContent.client_email,
+          private_key: saContent.private_key,
+        },
+      },
+    })
+    console.log(`🔑 Using Vertex AI with service account (project: ${projectId})`)
+  }
+}
+
+if (!ai) {
+  const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
+  if (apiKey) {
+    ai = new GoogleGenAI({ apiKey })
+    console.log("🔑 Using Google AI Studio with API key")
+  }
+}
+
+// --- ElevenLabs fallback ---
+const elevenLabsApiKey = process.env.ELEVENLABS_API_KEY
+
+if (!ai && !elevenLabsApiKey) {
+  console.error("❌ Set GOOGLE_APPLICATION_CREDENTIALS or ELEVENLABS_API_KEY")
   process.exit(1)
 }
 
@@ -74,10 +114,61 @@ function getTotalDurationSeconds(): number {
   }, 0)
 }
 
-async function fetchWithRetry(url: string, options: RequestInit, label: string): Promise<Response> {
+// --- Lyria 3 (Google) ---
+
+async function generateWithLyria(prompt: string, outputPath: string, label: string): Promise<boolean> {
+  if (!ai) return false
+
   const maxRetries = 3
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const response = await fetch(url, options)
+    try {
+      const response = await ai.models.generateContent({
+        model: "lyria-3-clip-preview",
+        contents: prompt,
+        config: {
+          responseModalities: ["AUDIO", "TEXT"],
+        },
+      })
+
+      const parts = response.candidates?.[0]?.content?.parts || []
+      for (const part of parts) {
+        if (part.inlineData?.data) {
+          const buffer = Buffer.from(part.inlineData.data, "base64")
+          writeFileSync(outputPath, buffer)
+          console.log(`  ✅ ${label} → ${outputPath} (${buffer.length} bytes, Lyria 3)`)
+          return true
+        }
+      }
+      console.warn(`  ⚠️  Lyria returned no audio data for ${label}`)
+      return false
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err)
+      const isRateLimit = msg.includes("429")
+      if (isRateLimit && attempt < maxRetries) {
+        const waitSec = 15 * (attempt + 1)
+        console.log(`  ⏳ Rate limited on ${label}, waiting ${waitSec}s (attempt ${attempt + 1}/${maxRetries})...`)
+        await new Promise((r) => setTimeout(r, waitSec * 1000))
+      } else {
+        console.warn(`  ⚠️  Lyria failed for ${label}: ${msg.slice(0, 120)}`)
+        return false
+      }
+    }
+  }
+  return false
+}
+
+// --- ElevenLabs fallback ---
+
+async function fetchElevenLabs(url: string, body: object, label: string): Promise<Buffer | null> {
+  if (!elevenLabsApiKey) return null
+
+  const maxRetries = 3
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "xi-api-key": elevenLabsApiKey, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
 
     if (response.status === 429 && attempt < maxRetries) {
       const waitSec = 15 * (attempt + 1)
@@ -88,14 +179,16 @@ async function fetchWithRetry(url: string, options: RequestInit, label: string):
 
     if (!response.ok) {
       const errorText = await response.text()
-      throw new Error(`ElevenLabs error ${response.status} for ${label}: ${errorText}`)
+      console.warn(`  ⚠️  ElevenLabs error ${response.status} for ${label}: ${errorText.slice(0, 100)}`)
+      return null
     }
 
-    return response
+    return Buffer.from(await response.arrayBuffer())
   }
-
-  throw new Error(`Max retries exceeded for ${label}`)
+  return null
 }
+
+// --- Music bed ---
 
 async function generateMusicBed(fingerprints: Fingerprints) {
   const musicBed = config.soundDesign.musicBed
@@ -103,6 +196,7 @@ async function generateMusicBed(fingerprints: Fingerprints) {
 
   const outputPath = path.join(outputDir, "music-bed.mp3")
 
+  // Library track (local copy)
   if (musicBed.libraryId) {
     const libraryPath = path.resolve("public", "audio", "library", `${musicBed.libraryId}.mp3`)
     if (!existsSync(libraryPath)) {
@@ -123,12 +217,14 @@ async function generateMusicBed(fingerprints: Fingerprints) {
     return
   }
 
+  // Generated music bed
   if (musicBed.customPrompt) {
     const totalDurationSeconds = getTotalDurationSeconds()
     const fp = createFingerprint({
       type: "music-bed-generated",
       prompt: musicBed.customPrompt,
       durationSeconds: totalDurationSeconds + 5,
+      provider: ai ? "lyria" : "elevenlabs",
     })
 
     if (fingerprints["music-bed"] === fp && existsSync(outputPath)) {
@@ -136,34 +232,40 @@ async function generateMusicBed(fingerprints: Fingerprints) {
       return
     }
 
-    console.log(`🎵 Generating music bed: "${musicBed.customPrompt.slice(0, 60)}..."`)
+    const prompt = `Create a ${totalDurationSeconds}-second background music track. Style: ${musicBed.customPrompt}. This is instrumental background music for a video, keep it clean and loopable.`
+    console.log(`🎵 Generating music bed: "${prompt.slice(0, 80)}..."`)
 
-    const musicUrl = new URL("https://api.elevenlabs.io/v1/music")
-    musicUrl.searchParams.set("output_format", "mp3_44100_128")
+    // Try Lyria first
+    const lyriaOk = await generateWithLyria(prompt, outputPath, "music-bed")
+    if (lyriaOk) {
+      fingerprints["music-bed"] = fp
+      return
+    }
 
-    const response = await fetchWithRetry(
-      musicUrl.toString(),
-      {
-        method: "POST",
-        headers: {
-          "xi-api-key": apiKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt: musicBed.customPrompt,
-          music_length_ms: (totalDurationSeconds + 5) * 1000,
-          force_instrumental: true,
-        }),
-      },
-      "music-bed",
-    )
+    // Fallback to ElevenLabs
+    if (elevenLabsApiKey) {
+      console.log("  🔄 Falling back to ElevenLabs for music bed...")
+      const musicUrl = new URL("https://api.elevenlabs.io/v1/music")
+      musicUrl.searchParams.set("output_format", "mp3_44100_128")
+      const audioBuffer = await fetchElevenLabs(musicUrl.toString(), {
+        prompt: musicBed.customPrompt,
+        music_length_ms: (totalDurationSeconds + 5) * 1000,
+        force_instrumental: true,
+      }, "music-bed")
 
-    const audioBuffer = Buffer.from(await response.arrayBuffer())
-    writeFileSync(outputPath, audioBuffer)
-    fingerprints["music-bed"] = fp
-    console.log(`  ✅ Music bed → ${outputPath}`)
+      if (audioBuffer) {
+        writeFileSync(outputPath, audioBuffer)
+        fingerprints["music-bed"] = fp
+        console.log(`  ✅ Music bed → ${outputPath} (ElevenLabs fallback)`)
+        return
+      }
+    }
+
+    console.warn("  ⚠️  Music bed generation failed on all providers")
   }
 }
+
+// --- SFX ---
 
 interface SfxEntry {
   id: string
@@ -194,40 +296,56 @@ async function generateSfx(fingerprints: Fingerprints) {
       continue
     }
 
+    // Check local library first
+    const localPath = path.resolve("public", "audio", "library", `sfx-${sfx.id}.mp3`)
+    if (existsSync(localPath)) {
+      console.log(`  📁 SFX ${sfx.id}: using local library`)
+      copyFileSync(localPath, outputPath)
+      fingerprints[fpKey] = fp
+      continue
+    }
+
     console.log(`  🔊 SFX ${sfx.id}: "${sfx.prompt.slice(0, 60)}..."`)
 
-    const sfxUrl = new URL("https://api.elevenlabs.io/v1/sound-generation")
-    sfxUrl.searchParams.set("output_format", "mp3_44100_128")
+    const durationHint = sfx.durationMs ? ` Duration: ${sfx.durationMs / 1000} seconds.` : ""
+    const sfxPrompt = `Sound effect: ${sfx.prompt}. Short, clean, suitable for video production.${durationHint}`
 
-    const response = await fetchWithRetry(
-      sfxUrl.toString(),
-      {
-        method: "POST",
-        headers: {
-          "xi-api-key": apiKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text: sfx.prompt,
-          ...(sfx.durationMs ? { duration_seconds: sfx.durationMs / 1000 } : {}),
-          ...(sfx.loop ? { loop: true } : {}),
-        }),
-      },
-      `sfx-${sfx.id}`,
-    )
+    // Try Lyria
+    const lyriaOk = await generateWithLyria(sfxPrompt, outputPath, `sfx-${sfx.id}`)
+    if (lyriaOk) {
+      fingerprints[fpKey] = fp
+      continue
+    }
 
-    const audioBuffer = Buffer.from(await response.arrayBuffer())
-    writeFileSync(outputPath, audioBuffer)
-    fingerprints[fpKey] = fp
-    console.log(`  ✅ SFX ${sfx.id} → ${outputPath}`)
+    // Fallback to ElevenLabs
+    if (elevenLabsApiKey) {
+      console.log(`  🔄 Falling back to ElevenLabs for sfx-${sfx.id}...`)
+      const sfxUrl = new URL("https://api.elevenlabs.io/v1/sound-generation")
+      sfxUrl.searchParams.set("output_format", "mp3_44100_128")
+      const audioBuffer = await fetchElevenLabs(sfxUrl.toString(), {
+        text: sfx.prompt,
+        ...(sfx.durationMs ? { duration_seconds: sfx.durationMs / 1000 } : {}),
+        ...(sfx.loop ? { loop: true } : {}),
+      }, `sfx-${sfx.id}`)
+
+      if (audioBuffer) {
+        writeFileSync(outputPath, audioBuffer)
+        fingerprints[fpKey] = fp
+        console.log(`  ✅ SFX ${sfx.id} → ${outputPath} (ElevenLabs fallback)`)
+        continue
+      }
+    }
+
+    console.warn(`  ⚠️  SFX ${sfx.id}: generation failed on all providers, skipping`)
   }
 }
+
+// --- Main ---
 
 async function main() {
   console.log(`🎬 Sound design generation for "${config.id}"`)
 
   const fingerprints = loadFingerprints()
-
   const warnings: string[] = []
 
   try {

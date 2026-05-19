@@ -1,0 +1,24 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	model(model)
+	tools(tools)
+	TodoListMiddleware\2eafter_model(TodoListMiddleware.after_model)
+	SkillsMiddleware\2ebefore_agent(SkillsMiddleware.before_agent)
+	PatchToolCallsMiddleware\2ebefore_agent(PatchToolCallsMiddleware.before_agent)
+	__end__([<p>__end__</p>]):::last
+	PatchToolCallsMiddleware\2ebefore_agent --> model;
+	SkillsMiddleware\2ebefore_agent --> PatchToolCallsMiddleware\2ebefore_agent;
+	TodoListMiddleware\2eafter_model -.-> __end__;
+	TodoListMiddleware\2eafter_model -.-> model;
+	TodoListMiddleware\2eafter_model -.-> tools;
+	__start__ --> SkillsMiddleware\2ebefore_agent;
+	model --> TodoListMiddleware\2eafter_model;
+	tools -.-> model;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

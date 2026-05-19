@@ -1,0 +1,72 @@
+services:
+  render-service:
+    build:
+      context: .
+      dockerfile: packages/render-service/Dockerfile
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./src:/app/src
+      - ./content:/app/content
+      - ./public/audio:/app/public/audio
+      - ./public/voiceover:/app/public/voiceover
+      - ./.generated:/app/.generated
+      - ./gemini_flash_tts_testing_sa.json:/app/gemini_flash_tts_testing_sa.json:ro
+    env_file: .env
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/gemini_flash_tts_testing_sa.json
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3100/api/render/jobs"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  agent:
+    build:
+      context: .
+      dockerfile: packages/agent/Dockerfile
+    ports:
+      - "2024:2024"
+    volumes:
+      - ./src:/app/src
+      - ./content:/app/content
+      - ./public/audio:/app/public/audio
+      - ./public/voiceover:/app/public/voiceover
+      - ./.generated:/app/.generated
+      - ./gemini_flash_tts_testing_sa.json:/app/gemini_flash_tts_testing_sa.json:ro
+    env_file: .env
+    environment:
+      - PROJECT_ROOT=/app
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/gemini_flash_tts_testing_sa.json
+      - RENDER_SERVICE_URL=http://render-service:3100
+      - BG_JOB_ISOLATED_LOOPS=true
+    depends_on:
+      render-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2024/ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  web:
+    build:
+      context: .
+      dockerfile: packages/web/Dockerfile
+    ports:
+      - "5173:5173"
+    env_file: .env
+    environment:
+      - VITE_LANGGRAPH_URL=http://localhost:2024
+      - VITE_RENDER_URL=http://localhost:3100
+    depends_on:
+      agent:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

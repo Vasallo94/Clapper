@@ -5,9 +5,9 @@ import type { Beat, Timing } from "../../../utils/direction"
 
 interface CustomSceneProps {
   componentId: string
-  props?: Record<string, unknown>
-  timing?: Timing
-  beats?: Beat[]
+  props?: Record<string, unknown> | null
+  timing?: Timing | null
+  beats?: Beat[] | null
 }
 
 export const CustomScene: React.FC<CustomSceneProps> = ({ componentId, props = {}, timing, beats }) => {

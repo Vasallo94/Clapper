@@ -43,19 +43,23 @@ When `"linea-directa"`, all scenes use the LD color palette and the pixel art ma
 ```typescript
 const ScreenRecordingSceneSchema = z.object({
   type: z.literal("screenRecording"),
-  src: z.string(),                    // relative to tutorial dir, e.g. "assets/recording.mp4"
-  trim: z.object({
-    startSec: z.number().min(0),
-    endSec: z.number().min(0),
-  }).refine(t => t.endSec > t.startSec, "endSec must be greater than startSec")
-   .optional(),
-  frame: z.object({
-    background: z.string().default("#FFFFFF"),
-    borderRadius: z.number().default(12),
-    padding: z.number().default(40),
-    shadow: z.boolean().default(true),
-  }).optional(),
-  resolvedSrc: z.string().optional(),  // injected by render.ts at runtime, not in config.json
+  src: z.string(), // relative to tutorial dir, e.g. "assets/recording.mp4"
+  trim: z
+    .object({
+      startSec: z.number().min(0),
+      endSec: z.number().min(0),
+    })
+    .refine((t) => t.endSec > t.startSec, "endSec must be greater than startSec")
+    .optional(),
+  frame: z
+    .object({
+      background: z.string().default("#FFFFFF"),
+      borderRadius: z.number().default(12),
+      padding: z.number().default(40),
+      shadow: z.boolean().default(true),
+    })
+    .optional(),
+  resolvedSrc: z.string().optional(), // injected by render.ts at runtime, not in config.json
   durationInSeconds: z.number().min(1).max(120),
 })
 ```
@@ -83,17 +87,18 @@ This avoids permanent changes to `public/` and works within Remotion's bundler c
 
 ### Color palette
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| Primary red | `#CC3333` | Accents, lines, bullet points, borders |
-| Text primary | `#1A1A1A` | Headings, body text |
-| Text secondary | `#888888` | Subtitles, muted text |
-| Background | `#FFFFFF` | All scene backgrounds |
-| Highlight red | `#FF5555` | Pixel art highlights |
+| Token          | Hex       | Usage                                  |
+| -------------- | --------- | -------------------------------------- |
+| Primary red    | `#CC3333` | Accents, lines, bullet points, borders |
+| Text primary   | `#1A1A1A` | Headings, body text                    |
+| Text secondary | `#888888` | Subtitles, muted text                  |
+| Background     | `#FFFFFF` | All scene backgrounds                  |
+| Highlight red  | `#FF5555` | Pixel art highlights                   |
 
 ### Scene theming
 
 **IntroScene (linea-directa):**
+
 - Background: white
 - Title: `#1A1A1A`, no gradient
 - Decorative line: solid `#CC3333` (replaces green/blue gradient)
@@ -101,17 +106,20 @@ This avoids permanent changes to `public/` and works within Remotion's bundler c
 - Subtitle prefix: "Linea Directa · Claude Code"
 
 **CalloutScene (linea-directa):**
+
 - Background: white
 - Left border: 4px solid `#CC3333`
 - Text: `#1A1A1A`
 - No overlay
 
 **OutroScene (linea-directa):**
+
 - Background: white
 - Bullet points: red dot `#CC3333`
 - Small pixel art mascot in corner
 
 **ScreenRecordingScene:**
+
 - White background with padded, rounded frame
 - Drop shadow on the video embed
 - Theme-agnostic (the VHS recording has its own dark terminal theme)
@@ -170,9 +178,10 @@ Implemented as pure React (grid of styled divs or inline SVG), no external image
    - Add `public/tutorial-assets/` to prevent temp copies from being committed
 
 10. **`.claude/skills/tutorial-generator/SKILL.md`**
-   - Add VHS tape generation step
-   - Add VHS execution step with fallback
-   - Document `theme` field and `screenRecording` scene
+
+- Add VHS tape generation step
+- Add VHS execution step with fallback
+- Document `theme` field and `screenRecording` scene
 
 ### Files NOT modified
 
@@ -220,6 +229,7 @@ cd tutorials/[slug] && vhs recording.tape
 ### Fallback
 
 If VHS fails (missing deps, timeout), the skill:
+
 1. Informs the user of the failure
 2. Offers manual recording (drop `.mp4` in `assets/`)
 3. Offers `TerminalScene` simulation as alternative

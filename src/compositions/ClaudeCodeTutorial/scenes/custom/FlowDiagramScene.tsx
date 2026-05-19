@@ -1,161 +1,545 @@
-// src/compositions/ClaudeCodeTutorial/scenes/custom/FlowDiagramScene.tsx
 import React from "react"
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
-import { useThemeTokens } from "../../themes"
-import type { Timing } from "../../../../utils/direction"
-import { getSceneMotionDelayMs, msToFrames } from "../../../../utils/direction"
+import { useThemeTokens } from "../../../../shared/themes"
+import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
+import type { Beat, Timing } from "../../../../utils/direction"
+import { getBeatStartFrame } from "../../../../utils/direction"
+import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
+import { useBeatReveal } from "../../../../shared/hooks/useBeatReveal"
 
 interface FlowNode {
   id: string
   title: string
-  description: string
-  color: string
+  description?: string
+  color?: string
+  icon?: string
+}
+
+interface FlowEdge {
+  from: string
+  to: string
+  label?: string
+  style?: "solid" | "dashed"
 }
 
 interface FlowDiagramProps {
-  nodes: FlowNode[]
+  title: string
+  description?: string
+  nodes?: FlowNode[]
+  edges?: FlowEdge[]
+  layout?: "horizontal" | "vertical"
   introText?: string
   outroText?: string
   showParticle?: boolean
-  title?: string
   timing?: Timing
+  beats?: Beat[]
 }
 
-const NODE_WIDTH = 270
-const NODE_HEIGHT = 110
-const NODE_GAP = 50
+const normalizeNodes = (raw: unknown): FlowNode[] => {
+  if (!Array.isArray(raw)) return []
+  const result: FlowNode[] = []
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue
+    const r = item as Record<string, unknown>
+    const title = typeof r.title === "string" ? r.title : typeof r.label === "string" ? r.label : ""
+    if (!title) continue
+    result.push({
+      id: typeof r.id === "string" ? r.id : title,
+      title,
+      description: typeof r.description === "string" ? r.description : undefined,
+      color: typeof r.color === "string" ? r.color : undefined,
+      icon: typeof r.icon === "string" ? r.icon : undefined,
+    })
+  }
+  return result
+}
 
-// Per-node animation phases (in seconds):
-// 0.0 - 0.4s: box glows bright
-// 0.4 - 0.7s: glow attenuates, orb appears at right edge
-// 0.7 - 1.8s: orb travels to next box
-// 1.8 - 2.2s: next box glows (handled by next node's cycle)
-const NODE_CYCLE_DURATION = 2.0 // seconds per node
+const normalizeEdges = (raw: unknown): FlowEdge[] => {
+  if (!Array.isArray(raw)) return []
+  const result: FlowEdge[] = []
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue
+    const r = item as Record<string, unknown>
+    const from = typeof r.from === "string" ? r.from : ""
+    const to = typeof r.to === "string" ? r.to : ""
+    if (!from || !to) continue
+    result.push({
+      from,
+      to,
+      label: typeof r.label === "string" ? r.label : undefined,
+      style: r.style === "dashed" ? "dashed" : "solid",
+    })
+  }
+  return result
+}
+
+const FlowNodeCard: React.FC<{
+  node: FlowNode
+  beat: Beat | null
+  index: number
+  tokens: ReturnType<typeof useThemeTokens>
+  layout: "horizontal" | "vertical"
+  nodeCount: number
+}> = ({ node, beat, index, tokens, layout, nodeCount }) => {
+  const { opacity, y } = useBeatReveal({
+    beat: beat ?? undefined,
+    fallbackDelayMs: 400 + index * 200,
+    animationMs: 300,
+  })
+
+  const color = node.color || tokens.primary
+
+  const width = layout === "horizontal" ? Math.min(220, Math.floor(900 / nodeCount)) : 400
+
+  return (
+    <div
+      style={{
+        width,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 8,
+        opacity,
+        transform: layout === "horizontal" ? `translateY(${y}px)` : `translateX(${y}px)`,
+      }}
+    >
+      <div
+        style={{
+          width: 56,
+          height: 56,
+          borderRadius: 14,
+          background: `${color}20`,
+          border: `2px solid ${color}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: node.icon ? 28 : 20,
+          fontWeight: 700,
+          color,
+          fontFamily: tokens.fontFamily,
+        }}
+      >
+        {node.icon || String(index + 1)}
+      </div>
+      <div
+        style={{
+          fontFamily: tokens.fontFamily,
+          fontSize: 18,
+          fontWeight: 700,
+          color: tokens.foreground,
+          textAlign: "center",
+          lineHeight: 1.3,
+        }}
+      >
+        {node.title}
+      </div>
+      {node.description && (
+        <div
+          style={{
+            fontFamily: tokens.fontFamily,
+            fontSize: 14,
+            color: tokens.foreground,
+            opacity: 0.65,
+            textAlign: "center",
+            lineHeight: 1.4,
+            maxWidth: width - 8,
+          }}
+        >
+          {node.description}
+        </div>
+      )}
+    </div>
+  )
+}
+
+const EdgeArrow: React.FC<{
+  index: number
+  total: number
+  layout: "horizontal" | "vertical"
+  progress: number
+  tokens: ReturnType<typeof useThemeTokens>
+  edge?: FlowEdge
+}> = ({ index, total, layout, progress, tokens, edge }) => {
+  const threshold = (index + 1) / (total + 1)
+  const edgeOpacity = interpolate(progress, [threshold - 0.1, threshold + 0.05], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  })
+
+  const isDashed = edge?.style === "dashed"
+  const arrowColor = `${tokens.foreground}60`
+
+  if (layout === "vertical") {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          opacity: edgeOpacity,
+          padding: "4px 0",
+        }}
+      >
+        <div
+          style={{
+            width: 2,
+            height: 28,
+            background: arrowColor,
+            ...(isDashed
+              ? {
+                  backgroundImage: `repeating-linear-gradient(to bottom, ${arrowColor} 0, ${arrowColor} 4px, transparent 4px, transparent 8px)`,
+                  background: "none",
+                }
+              : {}),
+          }}
+        />
+        <div
+          style={{
+            width: 0,
+            height: 0,
+            borderLeft: "6px solid transparent",
+            borderRight: "6px solid transparent",
+            borderTop: `8px solid ${arrowColor}`,
+          }}
+        />
+        {edge?.label && (
+          <div
+            style={{
+              fontSize: 11,
+              color: tokens.foreground,
+              opacity: 0.5,
+              fontFamily: tokens.fontFamily,
+              marginTop: 2,
+            }}
+          >
+            {edge.label}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        opacity: edgeOpacity,
+        padding: "0 4px",
+        flexDirection: "column",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <div
+          style={{
+            width: 32,
+            height: 2,
+            background: arrowColor,
+            ...(isDashed
+              ? {
+                  backgroundImage: `repeating-linear-gradient(to right, ${arrowColor} 0, ${arrowColor} 4px, transparent 4px, transparent 8px)`,
+                  background: "none",
+                }
+              : {}),
+          }}
+        />
+        <div
+          style={{
+            width: 0,
+            height: 0,
+            borderTop: "6px solid transparent",
+            borderBottom: "6px solid transparent",
+            borderLeft: `8px solid ${arrowColor}`,
+          }}
+        />
+      </div>
+      {edge?.label && (
+        <div
+          style={{ fontSize: 11, color: tokens.foreground, opacity: 0.5, fontFamily: tokens.fontFamily, marginTop: 4 }}
+        >
+          {edge.label}
+        </div>
+      )}
+    </div>
+  )
+}
+
+const DataDrivenFlow: React.FC<{
+  nodes: FlowNode[]
+  edges: FlowEdge[]
+  layout: "horizontal" | "vertical"
+  introText?: string
+  outroText?: string
+  showParticle?: boolean
+  beats?: Beat[]
+  tokens: ReturnType<typeof useThemeTokens>
+}> = ({ nodes, edges, layout, introText, outroText, showParticle, beats, tokens }) => {
+  const frame = useCurrentFrame()
+  const { fps } = useVideoConfig()
+
+  const visualDelay = beats?.[2] ? getBeatStartFrame(beats[2], fps) : Math.ceil(fps * 0.8)
+  const edgeProgress = spring({
+    frame: Math.max(0, frame - visualDelay),
+    fps,
+    config: { damping: 80 },
+    durationInFrames: Math.ceil(fps * 2),
+  })
+
+  const introReveal = useBeatReveal({
+    beat: beats?.[1] ?? undefined,
+    fallbackDelayMs: 300,
+    animationMs: 300,
+  })
+
+  const outroReveal = useBeatReveal({
+    beat: undefined,
+    fallbackDelayMs: 1200 + nodes.length * 200,
+    animationMs: 300,
+  })
+
+  const beatOffset = 2
+
+  const particleX = showParticle ? interpolate(edgeProgress, [0, 1], [0, 100], { extrapolateRight: "clamp" }) : 0
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24, width: "100%" }}>
+      {introText && (
+        <div
+          style={{
+            fontFamily: tokens.fontFamily,
+            fontSize: 22,
+            color: tokens.foreground,
+            opacity: introReveal.opacity * 0.85,
+            transform: `translateY(${introReveal.y}px)`,
+            textAlign: "center",
+            maxWidth: 800,
+            lineHeight: 1.5,
+          }}
+        >
+          {introText}
+        </div>
+      )}
+
+      <div
+        style={{
+          display: "flex",
+          flexDirection: layout === "vertical" ? "column" : "row",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 0,
+          position: "relative",
+        }}
+      >
+        {nodes.map((node, i) => (
+          <React.Fragment key={node.id}>
+            <FlowNodeCard
+              node={node}
+              beat={beats?.[i + beatOffset] ?? null}
+              index={i}
+              tokens={tokens}
+              layout={layout}
+              nodeCount={nodes.length}
+            />
+            {i < nodes.length - 1 && (
+              <EdgeArrow
+                index={i}
+                total={nodes.length - 1}
+                layout={layout}
+                progress={edgeProgress}
+                tokens={tokens}
+                edge={edges[i]}
+              />
+            )}
+          </React.Fragment>
+        ))}
+
+        {showParticle && edgeProgress > 0.05 && edgeProgress < 0.95 && (
+          <div
+            style={{
+              position: "absolute",
+              [layout === "horizontal" ? "left" : "top"]: `${particleX}%`,
+              [layout === "horizontal" ? "top" : "left"]: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: tokens.primary,
+              boxShadow: `0 0 12px ${tokens.primary}`,
+            }}
+          />
+        )}
+      </div>
+
+      {outroText && (
+        <div
+          style={{
+            fontFamily: tokens.fontFamily,
+            fontSize: 20,
+            color: tokens.primary,
+            fontWeight: 600,
+            opacity: outroReveal.opacity,
+            transform: `translateY(${outroReveal.y}px)`,
+            textAlign: "center",
+            maxWidth: 800,
+            marginTop: 8,
+          }}
+        >
+          {outroText}
+        </div>
+      )}
+    </div>
+  )
+}
+
+const LegacyGitDiagram: React.FC<{
+  description: string
+  beats?: Beat[]
+  tokens: ReturnType<typeof useThemeTokens>
+}> = ({ description, beats, tokens }) => {
+  const frame = useCurrentFrame()
+  const { fps } = useVideoConfig()
+
+  const descReveal = useBeatReveal({
+    beat: beats?.[1] ?? undefined,
+    fallbackDelayMs: 400,
+    animationMs: 300,
+  })
+
+  const visualDelay = beats?.[2] ? getBeatStartFrame(beats[2], fps) : Math.ceil(fps * 1)
+  const visualProgress = spring({
+    frame: Math.max(0, frame - visualDelay),
+    fps,
+    config: { damping: 100 },
+    durationInFrames: Math.ceil(fps * 3),
+  })
+
+  const mainLineLength = interpolate(visualProgress, [0, 0.4], [0, 500], { extrapolateRight: "clamp" })
+  const branchDivergeLength = interpolate(visualProgress, [0.3, 0.5], [0, 100], { extrapolateRight: "clamp" })
+  const featureLineLength = interpolate(visualProgress, [0.5, 0.8], [0, 200], { extrapolateRight: "clamp" })
+  const mergeLineLength = interpolate(visualProgress, [0.8, 1], [0, 100], { extrapolateRight: "clamp" })
+
+  const mainColor = tokens.primary
+  const branchColor = tokens.secondary || "#a855f7"
+
+  const getCommitOpacity = (progress: number, threshold: number) =>
+    interpolate(progress, [threshold - 0.05, threshold], [0, 1], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+    })
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 40 }}>
+      <div
+        style={{
+          fontFamily: tokens.fontFamily,
+          fontSize: 24,
+          color: tokens.foreground,
+          opacity: descReveal.opacity * 0.8,
+          transform: `translateY(${descReveal.y}px)`,
+          lineHeight: 1.5,
+          textAlign: "center",
+          maxWidth: 700,
+        }}
+      >
+        {description}
+      </div>
+
+      <div
+        style={{
+          width: 600,
+          height: 200,
+          position: "relative",
+          opacity: interpolate(visualProgress, [0, 0.05], [0, 1], { extrapolateRight: "clamp" }),
+        }}
+      >
+        <svg width="600" height="200" viewBox="0 0 600 200">
+          <path
+            d="M 50 150 L 550 150"
+            fill="none"
+            stroke={mainColor}
+            strokeWidth="6"
+            strokeDasharray="500"
+            strokeDashoffset={500 - mainLineLength}
+            strokeLinecap="round"
+          />
+          <path
+            d="M 150 150 C 200 150, 200 50, 250 50"
+            fill="none"
+            stroke={branchColor}
+            strokeWidth="6"
+            strokeDasharray="150"
+            strokeDashoffset={150 - branchDivergeLength * 1.5}
+            strokeLinecap="round"
+          />
+          <path
+            d="M 250 50 L 400 50"
+            fill="none"
+            stroke={branchColor}
+            strokeWidth="6"
+            strokeDasharray="150"
+            strokeDashoffset={150 - featureLineLength * 0.75}
+            strokeLinecap="round"
+          />
+          <path
+            d="M 400 50 C 450 50, 450 150, 500 150"
+            fill="none"
+            stroke={branchColor}
+            strokeWidth="6"
+            strokeDasharray="150"
+            strokeDashoffset={150 - mergeLineLength * 1.5}
+            strokeLinecap="round"
+          />
+
+          <circle cx="50" cy="150" r="10" fill={mainColor} opacity={getCommitOpacity(visualProgress, 0.05)} />
+          <circle cx="150" cy="150" r="10" fill={mainColor} opacity={getCommitOpacity(visualProgress, 0.15)} />
+          <circle cx="280" cy="150" r="10" fill={mainColor} opacity={getCommitOpacity(visualProgress, 0.6)} />
+          <circle cx="500" cy="150" r="10" fill={mainColor} opacity={getCommitOpacity(visualProgress, 0.95)} />
+
+          <circle cx="250" cy="50" r="10" fill={branchColor} opacity={getCommitOpacity(visualProgress, 0.45)} />
+          <circle cx="325" cy="50" r="10" fill={branchColor} opacity={getCommitOpacity(visualProgress, 0.65)} />
+          <circle cx="400" cy="50" r="10" fill={branchColor} opacity={getCommitOpacity(visualProgress, 0.8)} />
+        </svg>
+
+        <div
+          style={{
+            position: "absolute",
+            top: 170,
+            left: 50,
+            color: mainColor,
+            fontFamily: tokens.monoFontFamily || tokens.fontFamily,
+            fontWeight: "bold",
+            opacity: getCommitOpacity(visualProgress, 0.1),
+          }}
+        >
+          main
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            top: 15,
+            left: 250,
+            color: branchColor,
+            fontFamily: tokens.monoFontFamily || tokens.fontFamily,
+            fontWeight: "bold",
+            opacity: getCommitOpacity(visualProgress, 0.5),
+          }}
+        >
+          feature-branch
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export const FlowDiagramScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as FlowDiagramProps
-  const { nodes = [], introText, outroText, showParticle = true, title, timing } = props
-  const frame = useCurrentFrame()
-  const { fps, width, height } = useVideoConfig()
+  const { title, description, beats, layout = "horizontal", introText, outroText, showParticle } = props
   const tokens = useThemeTokens()
-  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
-  const localFrame = Math.max(0, frame - motionStartFrame)
+  const phase1 = usePhase1Entry({ durationMs: 100 })
 
-  const NODE_Y = height / 2 - NODE_HEIGHT / 2
-
-  const totalWidth = nodes.length * NODE_WIDTH + (nodes.length - 1) * NODE_GAP
-  const startX = (width - totalWidth) / 2
-
-  // Phase timing
-  const introEnd = introText ? Math.ceil(fps * 2.5) : 0
-  const nodeStagger = Math.ceil(fps * 0.35)
-  const nodesStart = introEnd
-  const nodesEnd = nodesStart + nodes.length * nodeStagger + Math.ceil(fps * 0.5)
-
-  // Orb animation starts after all nodes are visible
-  const orbStart = nodesEnd + Math.ceil(fps * 0.5)
-  const cycleDuration = Math.ceil(fps * NODE_CYCLE_DURATION)
-  const orbEnd = orbStart + nodes.length * cycleDuration
-  const outroStart = orbEnd + Math.ceil(fps * 0.5)
-
-  // Intro text animation
-  const introOpacity = introText
-    ? interpolate(localFrame, [0, Math.ceil(fps * 0.4), introEnd - Math.ceil(fps * 0.3), introEnd], [0, 1, 1, 0], {
-        extrapolateLeft: "clamp",
-        extrapolateRight: "clamp",
-      })
-    : 0
-
-  // Outro text animation
-  const outroSpring = spring({
-    frame: Math.max(0, localFrame - outroStart),
-    fps,
-    config: { damping: 20, stiffness: 180 },
-    durationInFrames: Math.ceil(fps * 0.5),
-  })
-
-  // Compute per-node glow and orb state
-  const nodeCenter = NODE_Y + NODE_HEIGHT / 2
-
-  // Current orb position and color
-  let orbX: number | null = null
-  let orbY: number | null = null
-  let orbColor: string | null = null
-  let orbOpacity = 0
-
-  if (showParticle && localFrame >= orbStart && localFrame < orbEnd) {
-    const orbFrame = localFrame - orbStart
-    const currentNodeIdx = Math.min(Math.floor(orbFrame / cycleDuration), nodes.length - 1)
-    const cycleFrame = orbFrame - currentNodeIdx * cycleDuration
-    const cycleProgress = cycleFrame / cycleDuration
-
-    const nodeColor = nodes[currentNodeIdx]?.color ?? tokens.primary
-    const nextNodeColor = nodes[currentNodeIdx + 1]?.color ?? nodeColor
-
-    // Orb travel phase: 0.35 - 0.85 of cycle
-    if (cycleProgress >= 0.35 && cycleProgress <= 0.85 && currentNodeIdx < nodes.length - 1) {
-      const travelProgress = (cycleProgress - 0.35) / 0.5
-      const fromX = startX + currentNodeIdx * (NODE_WIDTH + NODE_GAP) + NODE_WIDTH
-      const toX = startX + (currentNodeIdx + 1) * (NODE_WIDTH + NODE_GAP)
-      orbX = fromX + (toX - fromX) * travelProgress
-      orbY = nodeCenter
-
-      // Color interpolation: start with current node color, blend to next
-      const r1 = parseInt(nodeColor.slice(1, 3), 16)
-      const g1 = parseInt(nodeColor.slice(3, 5), 16)
-      const b1 = parseInt(nodeColor.slice(5, 7), 16)
-      const r2 = parseInt(nextNodeColor.slice(1, 3), 16)
-      const g2 = parseInt(nextNodeColor.slice(3, 5), 16)
-      const b2 = parseInt(nextNodeColor.slice(5, 7), 16)
-      const r = Math.round(r1 + (r2 - r1) * travelProgress)
-      const g = Math.round(g1 + (g2 - g1) * travelProgress)
-      const b = Math.round(b1 + (b2 - b1) * travelProgress)
-      orbColor = `rgb(${r},${g},${b})`
-
-      // Fade in at start, fade out at end
-      orbOpacity = interpolate(travelProgress, [0, 0.1, 0.9, 1], [0, 1, 1, 0], {
-        extrapolateLeft: "clamp",
-        extrapolateRight: "clamp",
-      })
-    }
-  }
-
-  // Compute per-node glow intensity
-  function getNodeGlow(nodeIndex: number): { glowIntensity: number; glowColor: string } {
-    if (!showParticle || localFrame < orbStart || localFrame >= orbEnd) {
-      return { glowIntensity: 0, glowColor: nodes[nodeIndex]?.color ?? tokens.primary }
-    }
-    const orbFrame = localFrame - orbStart
-    const currentNodeIdx = Math.min(Math.floor(orbFrame / cycleDuration), nodes.length - 1)
-    const cycleFrame = orbFrame - currentNodeIdx * cycleDuration
-    const cycleProgress = cycleFrame / cycleDuration
-    const color = nodes[nodeIndex]?.color ?? tokens.primary
-
-    if (nodeIndex === currentNodeIdx) {
-      // Current node: glow bright at start of cycle, then fade
-      const intensity = interpolate(cycleProgress, [0, 0.15, 0.35, 0.5], [0, 1, 0.3, 0], {
-        extrapolateLeft: "clamp",
-        extrapolateRight: "clamp",
-      })
-      return { glowIntensity: intensity, glowColor: color }
-    }
-
-    if (nodeIndex === currentNodeIdx + 1) {
-      // Next node: glow when orb arrives (end of travel)
-      const intensity = interpolate(cycleProgress, [0.75, 0.9, 1], [0, 1, 0.8], {
-        extrapolateLeft: "clamp",
-        extrapolateRight: "clamp",
-      })
-      return { glowIntensity: intensity, glowColor: color }
-    }
-
-    // Already visited: subtle persistent glow
-    if (nodeIndex < currentNodeIdx) {
-      return { glowIntensity: 0.15, glowColor: color }
-    }
-
-    return { glowIntensity: 0, glowColor: color }
-  }
+  const nodes = normalizeNodes(props.nodes)
+  const edges = normalizeEdges(props.edges)
+  const useDataDriven = nodes.length > 0
 
   return (
     <AbsoluteFill
@@ -165,228 +549,46 @@ export const FlowDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =>
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        padding: "40px 60px",
       }}
     >
-      {/* Title */}
-      {title && (
+      <div
+        style={{
+          textAlign: "center",
+          maxWidth: 900,
+          marginBottom: useDataDriven ? 32 : 80,
+          opacity: phase1.opacity,
+          transform: `scale(${phase1.scale})`,
+        }}
+      >
         <div
           style={{
-            position: "absolute",
-            top: 48,
             fontFamily: tokens.fontFamily,
-            fontSize: 32,
+            fontSize: 48,
             fontWeight: 700,
             color: tokens.foreground,
-            textAlign: "center",
-            maxWidth: 920,
-            opacity: interpolate(localFrame, [nodesStart, nodesStart + Math.ceil(fps * 0.4)], [0, 1], {
-              extrapolateRight: "clamp",
-            }),
           }}
         >
           {title}
         </div>
-      )}
-
-      {/* Intro text overlay */}
-      {introText && (
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: tokens.backgroundGradient,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 80,
-            opacity: introOpacity,
-            pointerEvents: "none",
-          }}
-        >
-          <div
-            style={{
-              fontFamily: tokens.fontFamily,
-              fontSize: 32,
-              color: tokens.foreground,
-              textAlign: "center",
-              maxWidth: 900,
-              lineHeight: 1.6,
-              fontWeight: 500,
-            }}
-          >
-            {introText}
-          </div>
-        </div>
-      )}
-
-      {/* SVG layer: connection lines + orb */}
-      <svg
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width,
-          height,
-          pointerEvents: "none",
-        }}
-      >
-        {/* Connection lines between nodes */}
-        {nodes.map((_, i) => {
-          if (i >= nodes.length - 1) return null
-          const x1 = startX + i * (NODE_WIDTH + NODE_GAP) + NODE_WIDTH
-          const x2 = startX + (i + 1) * (NODE_WIDTH + NODE_GAP)
-          const lineDelay = nodesStart + (i + 1) * nodeStagger + Math.ceil(fps * 0.18)
-          const lineProgress = spring({
-            frame: Math.max(0, localFrame - lineDelay),
-            fps,
-            config: { damping: 200 },
-            durationInFrames: Math.ceil(fps * 0.45),
-          })
-          const currentX2 = interpolate(lineProgress, [0, 1], [x1 + 4, x2 - 4], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          })
-          const lineOpacity = interpolate(lineProgress, [0, 0.08, 1], [0, 1, 1], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          })
-
-          if (lineProgress <= 0.01 || currentX2 <= x1 + 6) {
-            return null
-          }
-
-          return (
-            <g key={i} opacity={lineOpacity}>
-              <line
-                x1={x1 + 4}
-                y1={nodeCenter}
-                x2={currentX2}
-                y2={nodeCenter}
-                stroke={tokens.foregroundMid}
-                strokeWidth={2}
-                strokeDasharray="6 4"
-                strokeLinecap="round"
-              />
-            </g>
-          )
-        })}
-
-        {/* Orb with glow */}
-        {localFrame >= orbStart && orbX !== null && orbY !== null && orbColor && orbOpacity > 0 && (
-          <>
-            <circle cx={orbX} cy={orbY} r={18} fill={orbColor} opacity={orbOpacity * 0.2} />
-            <circle cx={orbX} cy={orbY} r={10} fill={orbColor} opacity={orbOpacity * 0.5} />
-            <circle cx={orbX} cy={orbY} r={5} fill="#ffffff" opacity={orbOpacity * 0.9} />
-          </>
-        )}
-      </svg>
-
-      {/* Nodes */}
-      <div
-        style={{
-          position: "absolute",
-          top: NODE_Y,
-          left: startX,
-          display: "flex",
-          gap: NODE_GAP,
-        }}
-      >
-        {nodes.map((node, i) => {
-          const delay = nodesStart + i * nodeStagger
-          const s = spring({
-            frame: Math.max(0, localFrame - delay),
-            fps,
-            config: { damping: 20, stiffness: 180 },
-            durationInFrames: Math.ceil(fps * 0.5),
-          })
-          const y = interpolate(s, [0, 1], [20, 0])
-          const opacity = interpolate(s, [0, 0.3], [0, 1], { extrapolateRight: "clamp" })
-
-          const { glowIntensity, glowColor } = getNodeGlow(i)
-          const orbFrame = localFrame - orbStart
-          const currentOrbNode = Math.min(Math.floor(orbFrame / cycleDuration), nodes.length - 1)
-          const isVisited = localFrame >= orbStart && i <= currentOrbNode
-          const borderColor = isVisited || glowIntensity > 0.1 ? node.color : tokens.card.border
-          const glowShadow =
-            glowIntensity > 0
-              ? `0 0 ${30 * glowIntensity}px ${glowColor}${Math.round(glowIntensity * 80)
-                  .toString(16)
-                  .padStart(2, "0")}, 0 0 ${60 * glowIntensity}px ${glowColor}${Math.round(glowIntensity * 40)
-                  .toString(16)
-                  .padStart(2, "0")}`
-              : tokens.card.shadow
-
-          return (
-            <div
-              key={node.id}
-              style={{
-                width: NODE_WIDTH,
-                height: NODE_HEIGHT,
-                background: tokens.card.bg,
-                border: `2px solid ${borderColor}`,
-                borderRadius: 10,
-                padding: "14px 18px",
-                opacity,
-                transform: `translateY(${y}px)`,
-                boxShadow: glowShadow,
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: tokens.fontFamily,
-                  fontSize: 19,
-                  fontWeight: 700,
-                  color: node.color,
-                  marginBottom: 6,
-                }}
-              >
-                {node.title}
-              </div>
-              <div
-                style={{
-                  fontFamily: tokens.fontFamily,
-                  fontSize: 15,
-                  color: tokens.foreground,
-                  opacity: 0.72,
-                  lineHeight: 1.4,
-                }}
-              >
-                {node.description}
-              </div>
-            </div>
-          )
-        })}
       </div>
 
-      {/* Outro callout */}
-      {outroText && localFrame >= outroStart && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: 60,
-            left: 80,
-            right: 80,
-            maxWidth: 1040,
-            margin: "0 auto",
-            background: `${tokens.card.bg}ee`,
-            border: `1px solid ${tokens.card.border}`,
-            borderLeft: `4px solid ${tokens.primary}`,
-            borderRadius: 10,
-            padding: "16px 24px",
-            fontFamily: tokens.fontFamily,
-            fontSize: 22,
-            color: tokens.foreground,
-            fontWeight: 500,
-            opacity: outroSpring,
-            transform: `translateY(${interpolate(outroSpring, [0, 1], [20, 0])}px)`,
-          }}
-        >
-          {outroText}
-        </div>
+      {useDataDriven ? (
+        <DataDrivenFlow
+          nodes={nodes}
+          edges={edges}
+          layout={layout}
+          introText={introText || description}
+          outroText={outroText}
+          showParticle={showParticle}
+          beats={beats}
+          tokens={tokens}
+        />
+      ) : (
+        <LegacyGitDiagram description={description || ""} beats={beats} tokens={tokens} />
       )}
+
+      <MascotWatermark animation="idle" />
     </AbsoluteFill>
   )
 }

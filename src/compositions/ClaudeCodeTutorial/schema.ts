@@ -4,21 +4,22 @@ import {
   BriefSchema,
   DirectionSceneFieldsSchema,
   SoundDesignSchema,
+  TransitionConfigSchema,
   VoiceoverConfigSchema,
-} from "../../utils/direction"
+} from "../../shared/schemas"
 
 const PixelLogoSchema = z.object({
   enabled: z.boolean().default(true),
-  scale: z.number().min(1).max(12).optional(),
-  animation: z.enum(["none", "build", "glint", "pulse"]).optional(),
+  scale: z.number().min(1).max(12).nullable().optional(),
+  animation: z.enum(["none", "build", "glint", "pulse"]).nullable().optional(),
 })
 
 const IntroSceneSchema = z
   .object({
     type: z.literal("intro"),
     title: z.string(),
-    subtitle: z.string().optional(),
-    pixelLogo: PixelLogoSchema.optional(),
+    subtitle: z.string().nullable().optional(),
+    pixelLogo: PixelLogoSchema.nullable().optional(),
     durationInSeconds: z.number().min(1).max(30),
   })
   .merge(DirectionSceneFieldsSchema)
@@ -26,13 +27,13 @@ const IntroSceneSchema = z
 const TerminalLineSchema = z.object({
   kind: z.enum(["command", "output", "claude", "blank"]),
   text: z.string(),
-  delayAfterMs: z.number().int().min(0).optional(),
+  delayAfterMs: z.number().int().min(0).nullable().optional(),
 })
 
 const TerminalSceneSchema = z
   .object({
     type: z.literal("terminal"),
-    title: z.string().optional(),
+    title: z.string().nullable().optional(),
     lines: z.array(TerminalLineSchema).min(1),
     durationInSeconds: z.number().min(2).max(120),
   })
@@ -42,7 +43,7 @@ const CalloutSceneSchema = z
   .object({
     type: z.literal("callout"),
     text: z.string(),
-    position: z.enum(["top", "bottom", "right"]),
+    position: z.enum(["top", "center", "bottom", "right"]),
     background: z.enum(["overlay", "solid"]).default("overlay"),
     durationInSeconds: z.number().min(1).max(15),
   })
@@ -52,7 +53,7 @@ const OutroSceneSchema = z
   .object({
     type: z.literal("outro"),
     title: z.string(),
-    bullets: z.array(z.string()).optional(),
+    bullets: z.array(z.string()).nullable().optional(),
     durationInSeconds: z.number().min(2).max(20),
   })
   .merge(DirectionSceneFieldsSchema)
@@ -62,7 +63,47 @@ const CustomSceneSchema = z
     type: z.literal("custom"),
     componentId: z.string(),
     durationInSeconds: z.number().min(1).max(120),
-    props: z.record(z.string(), z.any()).optional(),
+    props: z.record(z.string(), z.any()).nullable().optional(),
+  })
+  .merge(DirectionSceneFieldsSchema)
+
+const BenefitItemSchema = z.object({ text: z.string() })
+
+const HeroSceneSchema = z
+  .object({
+    type: z.literal("hero"),
+    title: z.string(),
+    subtitle: z.string().nullable().optional(),
+    durationInSeconds: z.number().min(1).max(30),
+  })
+  .merge(DirectionSceneFieldsSchema)
+
+const BenefitsSceneSchema = z
+  .object({
+    type: z.literal("benefits"),
+    title: z.string().nullable().optional(),
+    items: z.array(BenefitItemSchema).min(1),
+    durationInSeconds: z.number().min(2).max(30),
+  })
+  .merge(DirectionSceneFieldsSchema)
+
+const PricingSceneSchema = z
+  .object({
+    type: z.literal("pricing"),
+    price: z.string(),
+    period: z.string().nullable().optional(),
+    note: z.string().nullable().optional(),
+    variant: z.enum(["light", "dark"]),
+    durationInSeconds: z.number().min(1).max(15),
+  })
+  .merge(DirectionSceneFieldsSchema)
+
+const CtaSceneSchema = z
+  .object({
+    type: z.literal("cta"),
+    text: z.string(),
+    url: z.string().nullable().optional(),
+    durationInSeconds: z.number().min(1).max(15),
   })
   .merge(DirectionSceneFieldsSchema)
 
@@ -72,6 +113,10 @@ const SceneSchema = z.union([
   CalloutSceneSchema,
   OutroSceneSchema,
   CustomSceneSchema,
+  HeroSceneSchema,
+  BenefitsSceneSchema,
+  PricingSceneSchema,
+  CtaSceneSchema,
 ])
 
 const SubtitlesConfigSchema = z.object({
@@ -89,11 +134,14 @@ export const TutorialConfigSchema = z.object({
   width: z.literal(1280),
   height: z.literal(720),
   theme: z.enum(["default", "linea-directa", "atom-dark"]).default("default"),
-  brief: BriefSchema.optional(),
+  brief: BriefSchema.nullable().optional(),
   scenes: z.array(SceneSchema).min(1),
-  voiceover: VoiceoverConfigSchema.optional(),
-  soundDesign: SoundDesignSchema.optional(),
-  subtitles: SubtitlesConfigSchema.optional(),
+  voiceover: VoiceoverConfigSchema.nullable().optional(),
+  soundDesign: SoundDesignSchema.nullable().optional(),
+  subtitles: SubtitlesConfigSchema.nullable().optional(),
+  // Zod data field, not a CSS transition.
+  // eslint-disable-next-line @remotion/non-pure-animation
+  transition: TransitionConfigSchema,
 })
 
 export type TutorialConfig = z.infer<typeof TutorialConfigSchema>
@@ -106,3 +154,7 @@ export type TerminalSceneProps = z.infer<typeof TerminalSceneSchema>
 export type CalloutSceneProps = z.infer<typeof CalloutSceneSchema>
 export type OutroSceneProps = z.infer<typeof OutroSceneSchema>
 export type CustomSceneProps = z.infer<typeof CustomSceneSchema>
+export type HeroSceneProps = z.infer<typeof HeroSceneSchema>
+export type BenefitsSceneProps = z.infer<typeof BenefitsSceneSchema>
+export type PricingSceneProps = z.infer<typeof PricingSceneSchema>
+export type CtaSceneProps = z.infer<typeof CtaSceneSchema>

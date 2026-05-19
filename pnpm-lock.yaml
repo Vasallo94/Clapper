@@ -26,6 +26,9 @@ importers:
       '@remotion/transitions':
         specifier: 4.0.457
         version: 4.0.457(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      mediabunny:
+        specifier: 1.42.0
+        version: 1.42.0
       react:
         specifier: 19.2.3
         version: 19.2.3
@@ -132,7 +135,7 @@ importers:
     dependencies:
       '@langchain/langgraph-sdk':
         specifier: ^1.9.1
-        version: 1.9.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(ws@8.20.0)
+        version: 1.9.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(ws@8.20.1)
       '@remotion/player':
         specifier: ^4.0.457
         version: 4.0.457(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -3696,8 +3699,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.20.0:
-    resolution: {integrity: sha512-sAt8BhgNbzCtgGbt2OxmpuryO63ZoDk/sqaB/znQm94T4fCEsy/yV+7CdC1kJhOU9lboAEU7R3kquuycDoibVA==}
+  ws@8.20.1:
+    resolution: {integrity: sha512-It4dO0K5v//JtTXuPkfEOaI3uUN87iYPnqo/ZzqCoG3g8uhA66QUMs/SrM0YK7/NAu+r4LMh/9dq2A7k+rHs+w==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -4212,7 +4215,7 @@ snapshots:
       google-auth-library: 10.6.2
       p-retry: 4.6.2
       protobufjs: 7.5.8
-      ws: 8.20.0
+      ws: 8.20.1
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -4258,7 +4261,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@langchain/core@1.1.44(ws@8.20.0)':
+  '@langchain/core@1.1.44(ws@8.20.1)':
     dependencies:
       '@cfworker/json-schema': 4.1.1
       '@standard-schema/spec': 1.1.0
@@ -4266,7 +4269,7 @@ snapshots:
       camelcase: 6.3.0
       decamelize: 1.2.0
       js-tiktoken: 1.0.21
-      langsmith: 0.6.0(ws@8.20.0)
+      langsmith: 0.6.0(ws@8.20.1)
       mustache: 4.2.0
       p-queue: 6.6.2
       zod: 4.3.6
@@ -4277,9 +4280,9 @@ snapshots:
       - openai
       - ws
 
-  '@langchain/langgraph-sdk@1.9.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(ws@8.20.0)':
+  '@langchain/langgraph-sdk@1.9.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(ws@8.20.1)':
     dependencies:
-      '@langchain/core': 1.1.44(ws@8.20.0)
+      '@langchain/core': 1.1.44(ws@8.20.1)
       '@langchain/protocol': 0.0.15
       '@types/json-schema': 7.0.15
       p-queue: 9.2.0
@@ -6177,11 +6180,11 @@ snapshots:
 
   kleur@3.0.3: {}
 
-  langsmith@0.6.0(ws@8.20.0):
+  langsmith@0.6.0(ws@8.20.1):
     dependencies:
       p-queue: 6.6.2
     optionalDependencies:
-      ws: 8.20.0
+      ws: 8.20.1
 
   levn@0.4.1:
     dependencies:
@@ -7501,7 +7504,7 @@ snapshots:
 
   ws@8.17.1: {}
 
-  ws@8.20.0: {}
+  ws@8.20.1: {}
 
   y18n@5.0.8: {}
 

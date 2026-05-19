@@ -55,7 +55,7 @@ class TestSubmitRender:
         submit_render(id="test", scenes=[{"type": "intro", "durationInSeconds": 3}], voiceover=vo)
         body = json.loads(route.calls[0].request.content)
         assert body["voiceover"] == vo
-        assert "_skipAudioGeneration" not in body
+        assert body["_skipAudioGeneration"] is True
 
     @respx.mock
     def test_submit_render_includes_sound_design(self):
@@ -66,7 +66,7 @@ class TestSubmitRender:
         submit_render(id="test", scenes=[{"type": "intro", "durationInSeconds": 3}], sound_design=sd)
         body = json.loads(route.calls[0].request.content)
         assert body["soundDesign"] == sd
-        assert "_skipAudioGeneration" not in body
+        assert body["_skipAudioGeneration"] is True
 
     @respx.mock
     def test_default_dimensions_are_tutorial(self):
@@ -98,7 +98,7 @@ class TestSubmitRender:
         body = json.loads(route.calls[0].request.content)
         assert body["voiceover"] == vo
         assert body["soundDesign"] == sd
-        assert "_skipAudioGeneration" not in body
+        assert body["_skipAudioGeneration"] is True
 
 
 class TestSubmitRenderWithRuntime:

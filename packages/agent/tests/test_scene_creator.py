@@ -61,4 +61,4 @@ def test_scene_creator_definition():
     assert "write_scene" in tool_names
     assert "read_scene" in tool_names
     assert "present_custom_scene" in tool_names
-    assert len(defn["tools"]) == 3
+    assert len(defn["tools"]) == 6

@@ -34,7 +34,9 @@ from .context import PipelineContext
 PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
 SKILLS_DIR = Path(__file__).parent.parent / "skills"
 
-DEFAULT_MODEL = "gemini-3.1-pro-preview"
+MODEL_PRO   = os.environ.get("LLM_MODEL_PRO",   "gemini-3.1-pro-preview")
+MODEL_FLASH = os.environ.get("LLM_MODEL_FLASH",  "gemini-3.1-flash-preview")
+DEFAULT_MODEL = MODEL_PRO
 
 
 def load_prompt(name: str) -> str:

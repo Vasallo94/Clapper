@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { useStream } from "@langchain/langgraph-sdk/react"
 import type { Message } from "@langchain/langgraph-sdk"
 import type { UseStreamOptions, SubagentStreamInterface, UseStream } from "@langchain/langgraph-sdk/react"
 import { ASSISTANT_ID } from "../api"
 import { appendTargetMetadata } from "../lib/targetMetadata"
-import type { ActiveVideoTarget, CheckpointType, Enrichment, PipelineStageId } from "../types"
+import { extractPlanState, type PlanState } from "../lib/planState"
+import type { ActiveVideoTarget, CheckpointType, Enrichment } from "../types"
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -25,22 +26,6 @@ const CHECKPOINT_TYPE_MAP: Record<string, CheckpointType> = {
   target_selection_checkpoint: "target_selection",
   revision_plan_checkpoint: "revision_plan",
   variant_plan_checkpoint: "variant_plan",
-}
-
-/**
- * Maps subagent_type strings to pipeline stage identifiers.
- */
-const SUBAGENT_TO_STAGE: Record<string, PipelineStageId> = {
-  orchestrator: "orchestrator",
-  researcher: "researcher",
-  copywriter: "copywriter",
-  director: "director",
-  audio_planner: "sound_engineer",
-  voice_generator: "sound_engineer",
-  sound_engineer: "sound_engineer",
-  scene_creator: "scene_creator",
-  validator: "validator",
-  reviewer: "rendering",
 }
 
 // ---------------------------------------------------------------------------
@@ -67,8 +52,6 @@ export interface UseVideoStreamOptions {
   threadId?: string | null
   /** Called when the SDK creates or switches to a new thread. */
   onThreadId?: (threadId: string) => void
-  /** Called when the pipeline advances to a new stage. */
-  onPipelineAdvance?: (stage: PipelineStageId, message: string) => void
   /** Called on unrecoverable stream errors. */
   onError?: (error: unknown) => void
   /** The currently active video target — injected as metadata into messages. */
@@ -93,6 +76,8 @@ export interface VideoStreamReturn {
   isInterrupted: boolean
   /** Local enrichments (video results, system messages). */
   enrichments: Enrichment[]
+  /** Pipeline plan state extracted from agent state, or null if no plan exists. */
+  planState: PlanState | null
 
   // --- Actions ---
   /** Send a new user message. Injects target metadata automatically. */
@@ -112,11 +97,9 @@ export interface VideoStreamReturn {
 // ---------------------------------------------------------------------------
 
 export function useVideoStream(options: UseVideoStreamOptions = {}): VideoStreamReturn {
-  const { threadId, onThreadId, onPipelineAdvance, onError, activeTarget } = options
+  const { threadId, onThreadId, onError, activeTarget } = options
 
   // Stable refs for callbacks to avoid re-creating the stream config
-  const onPipelineAdvanceRef = useRef(onPipelineAdvance)
-  onPipelineAdvanceRef.current = onPipelineAdvance
   const onErrorRef = useRef(onError)
   onErrorRef.current = onError
   const activeTargetRef = useRef(activeTarget)
@@ -124,12 +107,6 @@ export function useVideoStream(options: UseVideoStreamOptions = {}): VideoStream
 
   // Local enrichments state
   const [enrichments, setEnrichments] = useState<Enrichment[]>([])
-
-  // Track which subagent types we have already reported to avoid duplicates
-  const reportedSubagentsRef = useRef<Set<string>>(new Set())
-
-  // Track loading transitions for auto-done
-  const wasLoadingRef = useRef(false)
 
   // ----- SDK useStream -----
   // The backend is a DeepAgent but we lack its TS type on the frontend.
@@ -144,28 +121,16 @@ export function useVideoStream(options: UseVideoStreamOptions = {}): VideoStream
     onError: (error: unknown) => {
       onErrorRef.current?.(error)
     },
-    onFinish: () => {
-      // Reset subagent tracking when a run finishes
-      reportedSubagentsRef.current.clear()
-    },
+    onFinish: () => {},
     filterSubagentMessages: true,
     subagentToolNames: ["task"],
   } as DeepAgentStreamOptions) as unknown as FullStream
 
-  // ----- Pipeline stage tracking via activeSubagents -----
-  useEffect(() => {
-    for (const sub of stream.activeSubagents) {
-      const subagentType = sub.toolCall?.args?.subagent_type
-      if (!subagentType || typeof subagentType !== "string") continue
-      if (reportedSubagentsRef.current.has(subagentType)) continue
-
-      const stage = SUBAGENT_TO_STAGE[subagentType]
-      if (stage) {
-        reportedSubagentsRef.current.add(subagentType)
-        onPipelineAdvanceRef.current?.(stage, `${subagentType} trabajando...`)
-      }
-    }
-  }, [stream.activeSubagents])
+  // ----- Plan state from agent values -----
+  const planState = useMemo(
+    () => extractPlanState(stream.values as Record<string, unknown> | undefined),
+    [stream.values],
+  )
 
   // ----- Checkpoint extraction from interrupt -----
   const interrupt = stream.interrupt
@@ -180,15 +145,6 @@ export function useVideoStream(options: UseVideoStreamOptions = {}): VideoStream
   })()
 
   const isInterrupted = interrupt != null
-
-  // ----- Auto-advance pipeline to "done" on stream finish -----
-  useEffect(() => {
-    const wasLoading = wasLoadingRef.current
-    wasLoadingRef.current = stream.isLoading
-    if (wasLoading && !stream.isLoading && !stream.error && !isInterrupted && stream.messages.length > 0) {
-      onPipelineAdvanceRef.current?.("done", "Pipeline completado")
-    }
-  }, [stream.isLoading, stream.error, isInterrupted, stream.messages.length])
 
   // ----- Enrichments -----
   const messagesRef = useRef(stream.messages)
@@ -238,8 +194,6 @@ export function useVideoStream(options: UseVideoStreamOptions = {}): VideoStream
   // ----- Thread switching -----
   const switchThread = useCallback(
     (newThreadId: string | null) => {
-      reportedSubagentsRef.current.clear()
-      wasLoadingRef.current = false
       setEnrichments([])
       stream.switchThread(newThreadId)
     },
@@ -260,6 +214,7 @@ export function useVideoStream(options: UseVideoStreamOptions = {}): VideoStream
     checkpointData: interruptValue,
     isInterrupted,
     enrichments,
+    planState,
 
     // Actions
     submit,

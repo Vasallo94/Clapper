@@ -1,20 +1,40 @@
 import React, { useEffect, useRef, useState } from "react"
 import type { SubagentStreamInterface, ToolCallWithResult } from "@langchain/langgraph-sdk/react"
 import { theme } from "../theme"
-import { SubagentBadge } from "./SubagentBadge"
-import { ClapperboardIcon } from "./WorkingIndicator"
 
 interface Props {
   subagent: SubagentStreamInterface
   defaultExpanded?: boolean
 }
 
-const STATUS_COLORS: Record<string, { dot: string; border: string; name: string }> = {
-  pending: { dot: "#f59e0b", border: theme.colors.border.default, name: "#f59e0b" },
-  running: { dot: "#f59e0b", border: theme.colors.border.default, name: "#f59e0b" },
-  complete: { dot: "#22c55e", border: theme.colors.border.subtle, name: "#22c55e" },
-  error: { dot: "#ef4444", border: "rgba(239,68,68,0.3)", name: "#ef4444" },
+// ─── Agent type icons ────────────────────────────────────────────────────────
+
+const AGENT_ICONS: Record<string, string> = {
+  researcher: "⊙",
+  copywriter: "✦",
+  director: "◎",
+  audio_planner: "♪",
+  voice_generator: "◉",
+  scene_creator: "⬡",
+  validator: "⊛",
+  reviewer: "◑",
+  orchestrator: "⊗",
 }
+
+function agentIcon(type: string): string {
+  return AGENT_ICONS[type] ?? "◈"
+}
+
+// ─── Status palette ──────────────────────────────────────────────────────────
+
+const STATUS: Record<string, { accent: string; label: string }> = {
+  pending: { accent: theme.colors.status.warning, label: "en espera" },
+  running: { accent: theme.colors.status.warning, label: "en ejecución" },
+  complete: { accent: theme.colors.status.success, label: "completado" },
+  error: { accent: theme.colors.status.error, label: "error" },
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function formatDuration(startedAt: Date | null, completedAt: Date | null): string | null {
   if (!startedAt) return null
@@ -23,13 +43,19 @@ function formatDuration(startedAt: Date | null, completedAt: Date | null): strin
   return `${(ms / 1000).toFixed(0)}s`
 }
 
-function toolIcon(tc: ToolCallWithResult): { char: string; color: string } {
-  const isDone = tc.result !== undefined
-  if (!isDone) return { char: "▶", color: "#f59e0b" } // ▶
-  const resultContent = typeof tc.result?.content === "string" ? tc.result.content : ""
-  const isError = /^[Ee]rror\b/.test(resultContent.trim()) || tc.state === "error"
-  if (isError) return { char: "✗", color: "#ef4444" } // ✗
-  return { char: "✓", color: "#22c55e" } // ✓
+function formatArgsPreview(args: unknown): string {
+  if (!args || typeof args !== "object") return ""
+  const entries = Object.entries(args as Record<string, unknown>)
+  if (entries.length === 0) return ""
+  const [key, val] = entries[0]
+  const strVal = typeof val === "string" ? val : JSON.stringify(val)
+  const preview = `${key}: ${strVal}`.slice(0, 45)
+  return entries.length > 1 ? `${preview}…` : preview
+}
+
+function formatResult(content: string | unknown): string {
+  const str = typeof content === "string" ? content : JSON.stringify(content, null, 2)
+  return str.length > 600 ? str.slice(0, 600) + "\n…" : str
 }
 
 function extractMessageText(msg: { content: unknown }): string {
@@ -47,27 +73,251 @@ function extractMessageText(msg: { content: unknown }): string {
 function extractThinkingText(subagent: SubagentStreamInterface): string {
   const aiMessages = subagent.messages.filter((m) => (m as { type: string }).type === "ai")
   if (aiMessages.length === 0) return ""
-  // Show all AI reasoning steps, not just the last, so intermediate decisions are visible
   return aiMessages
     .map((m) => extractMessageText(m as { content: unknown }))
     .filter(Boolean)
     .join("\n\n─────\n\n")
 }
 
+// ─── ToolRow sub-component ───────────────────────────────────────────────────
+
+function ToolRow({ tc }: { tc: ToolCallWithResult }) {
+  const [expanded, setExpanded] = useState(false)
+  const isDone = tc.result !== undefined
+  const resultContent = typeof tc.result?.content === "string" ? tc.result.content : ""
+  const isError = /^[Ee]rror\b/.test(resultContent.trim()) || tc.state === "error"
+
+  const statusIcon = isDone ? (isError ? "✗" : "✓") : "▶"
+  const statusColor = isDone
+    ? isError
+      ? theme.colors.status.error
+      : theme.colors.status.success
+    : theme.colors.status.warning
+  const argsPreview = formatArgsPreview(tc.call.args)
+  const isActive = !isDone
+
+  return (
+    <div>
+      <div
+        className={isActive ? "tool-row-active" : undefined}
+        role="button"
+        tabIndex={0}
+        onClick={() => setExpanded((v) => !v)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault()
+            setExpanded((v) => !v)
+          }
+        }}
+        style={{
+          display: "grid",
+          gridTemplateColumns: "14px 1fr auto",
+          alignItems: "center",
+          gap: 8,
+          padding: "4px 8px",
+          borderRadius: theme.radius.sm,
+          cursor: "pointer",
+          userSelect: "none",
+        }}
+      >
+        {/* Status icon */}
+        <span
+          style={{
+            fontFamily: theme.fonts.mono,
+            fontSize: 11,
+            color: statusColor,
+            lineHeight: 1,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          {statusIcon}
+        </span>
+
+        {/* Tool name + args preview */}
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10, overflow: "hidden" }}>
+          <span
+            style={{
+              fontFamily: theme.fonts.mono,
+              fontSize: 11,
+              color: theme.colors.text.primary,
+              flexShrink: 0,
+              minWidth: "18ch",
+            }}
+          >
+            {tc.call.name}
+          </span>
+          {argsPreview && (
+            <span
+              style={{
+                fontFamily: theme.fonts.mono,
+                fontSize: 10,
+                color: theme.colors.text.muted,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {argsPreview}
+            </span>
+          )}
+        </div>
+
+        {/* Expand toggle */}
+        <span style={{ color: theme.colors.text.muted, fontSize: 9, flexShrink: 0 }}>{expanded ? "▾" : "▸"}</span>
+      </div>
+
+      {/* Expanded detail */}
+      {expanded && (
+        <div
+          style={{
+            marginLeft: 22,
+            marginBottom: 4,
+            borderLeft: `1px solid ${theme.colors.border.default}`,
+            paddingLeft: 10,
+          }}
+        >
+          {/* Args */}
+          {tc.call.args && (
+            <div style={{ marginBottom: 6 }}>
+              <div
+                style={{
+                  fontSize: 9,
+                  color: theme.colors.text.muted,
+                  fontFamily: theme.fonts.mono,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  marginBottom: 3,
+                }}
+              >
+                args
+              </div>
+              <pre
+                style={{
+                  fontFamily: theme.fonts.mono,
+                  fontSize: 10,
+                  color: theme.colors.text.secondary,
+                  background: theme.colors.bg.primary,
+                  borderRadius: theme.radius.sm,
+                  padding: "6px 8px",
+                  margin: 0,
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-all",
+                  maxHeight: 120,
+                  overflowY: "auto",
+                  lineHeight: 1.5,
+                }}
+              >
+                {JSON.stringify(tc.call.args, null, 2)}
+              </pre>
+            </div>
+          )}
+
+          {/* Result */}
+          {tc.result && (
+            <div>
+              <div
+                style={{
+                  fontSize: 9,
+                  color: theme.colors.text.muted,
+                  fontFamily: theme.fonts.mono,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  marginBottom: 3,
+                }}
+              >
+                result
+              </div>
+              <pre
+                style={{
+                  fontFamily: theme.fonts.mono,
+                  fontSize: 10,
+                  color: isError ? theme.colors.status.error : theme.colors.text.secondary,
+                  background: theme.colors.bg.primary,
+                  borderRadius: theme.radius.sm,
+                  padding: "6px 8px",
+                  margin: 0,
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-all",
+                  maxHeight: 200,
+                  overflowY: "auto",
+                  lineHeight: 1.5,
+                }}
+              >
+                {formatResult(tc.result.content)}
+              </pre>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── ReasoningBlock sub-component ────────────────────────────────────────────
+
+function ReasoningBlock({ text, isActive }: { text: string; isActive: boolean }) {
+  if (!text) return null
+  return (
+    <div
+      style={{
+        marginTop: 8,
+        borderRadius: theme.radius.sm,
+        border: `1px solid ${theme.colors.border.subtle}`,
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          fontSize: 9,
+          color: theme.colors.text.muted,
+          fontFamily: theme.fonts.mono,
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+          padding: "4px 10px",
+          borderBottom: `1px solid ${theme.colors.border.subtle}`,
+          background: theme.colors.bg.primary,
+        }}
+      >
+        reasoning
+      </div>
+      <div
+        style={{
+          padding: "8px 10px",
+          background: theme.colors.bg.primary,
+          fontSize: 12,
+          color: theme.colors.text.secondary,
+          lineHeight: 1.6,
+          maxHeight: 180,
+          overflowY: "auto",
+          whiteSpace: "pre-wrap",
+          fontFamily: theme.fonts.sans,
+        }}
+      >
+        {text}
+        {isActive && <span className="cursor-blink" />}
+      </div>
+    </div>
+  )
+}
+
+// ─── SubagentCard ─────────────────────────────────────────────────────────────
+
 export function SubagentCard({ subagent, defaultExpanded = true }: Props) {
   const [expanded, setExpanded] = useState(defaultExpanded)
   const prevStatus = useRef(subagent.status)
 
-  // Auto-collapse when subagent completes
   useEffect(() => {
     if (prevStatus.current !== "complete" && subagent.status === "complete") {
-      setExpanded(false)
+      const timer = setTimeout(() => setExpanded(false), 800)
+      return () => clearTimeout(timer)
     }
     prevStatus.current = subagent.status
   }, [subagent.status])
 
-  const colors = STATUS_COLORS[subagent.status] ?? STATUS_COLORS.pending
-  const agentName = subagent.toolCall.args.subagent_type ?? subagent.toolCall.name
+  const palette = STATUS[subagent.status] ?? STATUS.pending
+  const agentName = (subagent.toolCall.args.subagent_type as string | undefined) ?? subagent.toolCall.name
+  const icon = agentIcon(agentName)
   const doneTools = subagent.toolCalls.filter((tc) => tc.result !== undefined).length
   const duration = formatDuration(subagent.startedAt, subagent.completedAt)
   const thinkingText = extractThinkingText(subagent)
@@ -76,11 +326,13 @@ export function SubagentCard({ subagent, defaultExpanded = true }: Props) {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault()
-      setExpanded((prev) => !prev)
+      setExpanded((v) => !v)
     }
   }
 
-  // --- Collapsed state ---
+  const accentBorder = `3px solid ${palette.accent}`
+
+  // ── Collapsed ──────────────────────────────────────────────────────────────
   if (!expanded) {
     return (
       <div
@@ -93,43 +345,54 @@ export function SubagentCard({ subagent, defaultExpanded = true }: Props) {
         onKeyDown={handleKeyDown}
         style={{
           background: theme.colors.bg.elevated,
-          padding: "8px 12px",
           borderRadius: theme.radius.md,
-          border: `1px solid ${colors.border}`,
+          border: `1px solid ${theme.colors.border.subtle}`,
+          borderLeft: accentBorder,
           marginBottom: 6,
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          padding: "7px 12px 7px 10px",
+          gap: 8,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ width: 6, height: 6, borderRadius: "50%", background: colors.dot }} />
-          <span style={{ color: colors.name, fontSize: 12, fontWeight: 600, fontFamily: theme.fonts.mono }}>
+          <span style={{ color: palette.accent, fontSize: 13, lineHeight: 1 }}>{icon}</span>
+          <span
+            style={{
+              color: theme.colors.text.primary,
+              fontSize: 12,
+              fontWeight: 600,
+              fontFamily: theme.fonts.mono,
+            }}
+          >
             {agentName}
           </span>
           <span style={{ color: theme.colors.text.muted, fontSize: 11 }}>
-            {doneTools} tools{duration ? ` · ${duration}` : ""}
+            {subagent.status === "complete" ? "✓" : "▶"} {doneTools} herramientas
+            {duration ? ` · ${duration}` : ""}
           </span>
         </div>
-        <span style={{ color: theme.colors.text.muted, fontSize: 10 }}>{"▼"}</span>
+        <span style={{ color: theme.colors.text.muted, fontSize: 10 }}>▼</span>
       </div>
     )
   }
 
-  // --- Expanded state ---
+  // ── Expanded ───────────────────────────────────────────────────────────────
   return (
     <div
       className="animate-card-reveal"
       style={{
         background: theme.colors.bg.elevated,
-        padding: "10px 12px",
         borderRadius: theme.radius.md,
-        border: `1px solid ${colors.border}`,
+        border: `1px solid ${theme.colors.border.subtle}`,
+        borderLeft: accentBorder,
         marginBottom: 6,
+        overflow: "hidden",
       }}
     >
-      {/* Header row */}
+      {/* Header */}
       <div
         role={subagent.status === "complete" ? "button" : undefined}
         tabIndex={subagent.status === "complete" ? 0 : undefined}
@@ -141,82 +404,88 @@ export function SubagentCard({ subagent, defaultExpanded = true }: Props) {
           display: "flex",
           alignItems: "center",
           gap: 8,
-          marginBottom: subagent.toolCalls.length > 0 || thinkingText ? 8 : 0,
+          padding: "9px 12px 9px 10px",
           cursor: subagent.status === "complete" ? "pointer" : "default",
+          borderBottom:
+            subagent.toolCalls.length > 0 || thinkingText ? `1px solid ${theme.colors.border.subtle}` : undefined,
         }}
       >
+        {/* Pulsing status dot */}
         <div
           className={isActive ? "animate-pulse" : undefined}
-          style={{ width: 6, height: 6, borderRadius: "50%", background: colors.dot, flexShrink: 0 }}
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            background: palette.accent,
+            flexShrink: 0,
+          }}
         />
-        <span style={{ color: colors.name, fontSize: 12, fontWeight: 600, fontFamily: theme.fonts.mono }}>
+
+        {/* Icon + name */}
+        <span style={{ color: palette.accent, fontSize: 13, lineHeight: 1, flexShrink: 0 }}>{icon}</span>
+        <span
+          style={{
+            color: theme.colors.text.primary,
+            fontSize: 12,
+            fontWeight: 600,
+            fontFamily: theme.fonts.mono,
+          }}
+        >
           {agentName}
         </span>
-        {isActive && <SubagentBadge agentName={agentName} />}
-        {isActive && (
-          <span style={{ marginLeft: "auto", display: "flex", alignItems: "center" }}>
-            <ClapperboardIcon size={20} />
+
+        {/* Spacer */}
+        <div style={{ flex: 1 }} />
+
+        {/* Status badge + timer */}
+        <span
+          style={{
+            fontSize: 10,
+            color: palette.accent,
+            fontFamily: theme.fonts.mono,
+            background: `${palette.accent}14`,
+            borderRadius: theme.radius.sm,
+            padding: "2px 6px",
+          }}
+        >
+          {palette.label}
+        </span>
+        {duration && (
+          <span
+            style={{
+              fontSize: 11,
+              color: theme.colors.text.muted,
+              fontFamily: theme.fonts.mono,
+              marginLeft: 4,
+            }}
+          >
+            {duration}
           </span>
         )}
         {subagent.status === "complete" && (
-          <span style={{ color: theme.colors.text.muted, fontSize: 10, marginLeft: "auto" }}>{"▲"}</span>
+          <span style={{ color: theme.colors.text.muted, fontSize: 10, marginLeft: 4 }}>▲</span>
         )}
       </div>
 
-      {/* Tool calls list */}
+      {/* Tool trace */}
       {subagent.toolCalls.length > 0 && (
         <div
           style={{
-            borderLeft: `2px solid ${theme.colors.border.default}`,
-            paddingLeft: 10,
-            marginBottom: thinkingText ? 8 : 0,
+            padding: "6px 4px",
+            borderBottom: thinkingText ? `1px solid ${theme.colors.border.subtle}` : undefined,
           }}
         >
-          {subagent.toolCalls.map((tc) => {
-            const icon = toolIcon(tc)
-            return (
-              <div
-                key={tc.id}
-                style={{ fontSize: 11, marginBottom: 2, fontFamily: theme.fonts.mono, display: "flex", gap: 6 }}
-              >
-                <span style={{ color: icon.color, flexShrink: 0 }}>{icon.char}</span>
-                <span style={{ color: theme.colors.text.secondary }}>{tc.call.name}</span>
-              </div>
-            )
-          })}
+          {subagent.toolCalls.map((tc) => (
+            <ToolRow key={tc.id} tc={tc} />
+          ))}
         </div>
       )}
 
-      {/* Thinking text */}
+      {/* Reasoning block */}
       {thinkingText && (
-        <div
-          style={{
-            border: `1px solid ${theme.colors.border.subtle}`,
-            borderRadius: theme.radius.sm,
-            padding: "8px 10px",
-            backgroundColor: theme.colors.bg.primary,
-            fontSize: 12,
-            color: theme.colors.text.secondary,
-            lineHeight: 1.5,
-            maxHeight: 150,
-            overflow: "auto",
-            whiteSpace: "pre-wrap",
-          }}
-        >
-          <div
-            style={{
-              color: theme.colors.text.muted,
-              fontSize: 10,
-              fontWeight: 700,
-              marginBottom: 4,
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-            }}
-          >
-            Pensamiento operativo visible
-          </div>
-          {thinkingText}
-          {isActive && <span className="loading-dot" style={{ marginLeft: 2 }} />}
+        <div style={{ padding: "8px 10px 10px" }}>
+          <ReasoningBlock text={thinkingText} isActive={isActive} />
         </div>
       )}
     </div>

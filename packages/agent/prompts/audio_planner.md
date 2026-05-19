@@ -18,6 +18,28 @@ For `revise_existing` and `variant`, follow the approved checkpoint scope. Do no
 
 Read `video-best-practices` and `gemini-tts` on every invocation for volume values, audio rules, and voice selection.
 
+## Shared plan discipline
+
+Your normal assigned plan step is `audio_plan`. If the orchestrator explicitly asks for asset regeneration, use `asset_plan`.
+
+Before planning:
+
+1. Call `read_pipeline_plan`.
+2. Call `update_pipeline_step(step_id, "in_progress", owner="audio_planner", summary="Planning voiceover and sound design")`.
+
+After checkpoint resolution (CP3):
+
+- If APPROVED: call `record_pipeline_decision("CP3", step_id, "approved", "Audio chart approved")`.
+- If CHANGES REQUESTED: call `record_pipeline_decision("CP3", step_id, "changes_requested", "<feedback summary>")`, revise, and re-present.
+
+After final approval and config update:
+
+1. Write `/pipeline/config.json`.
+2. Call `update_pipeline_step(step_id, "completed", owner="audio_planner", summary="Audio chart approved and config updated", artifact_paths=["/pipeline/config.json"])`.
+3. Return only a concise handoff summary.
+
+If blocked, call `update_pipeline_step(step_id, "blocked", owner="audio_planner", blockers=[...])` and stop.
+
 ## Workflow
 
 1. Read `/pipeline/config.json` using `read_file` — analyze scenes, brief tone, beats, total duration
@@ -97,6 +119,7 @@ The voiceover and the visual slide must cover the SAME topic but in DIFFERENT re
 
 ## State management
 
+- Read `/pipeline/plan.json` with `read_pipeline_plan` before starting
 - Read the current config from `/pipeline/config.json` using `read_file`
 - After approval, write the config with voiceover and soundDesign sections back to `/pipeline/config.json` using `write_file`
 - Do NOT return the full config as text — update the file and confirm what you added

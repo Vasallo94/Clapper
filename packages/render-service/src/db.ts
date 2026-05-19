@@ -107,3 +107,14 @@ export function listJobs(limit = 20, offset = 0): { jobs: Job[]; total: number }
   const { total } = countStmt.get() as { total: number }
   return { jobs, total }
 }
+
+export function recoverOrphanedJobs(): number {
+  const stmt = db.prepare(`
+    UPDATE jobs SET status = 'error',
+      error = 'Process interrupted (server restart)',
+      completed_at = datetime('now')
+    WHERE status IN ('validating', 'rendering')
+      AND created_at < datetime('now', '-5 minutes')
+  `)
+  return stmt.run().changes
+}

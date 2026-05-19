@@ -39,16 +39,22 @@ const CheckIcon = ({ size, color }: { size: number; color: string }) => (
 interface ProblemSolutionProps {
   problem: string
   solution: string
+  problemLabel?: string
+  solutionLabel?: string
+  problemColor?: string
+  solutionColor?: string
   timing?: Timing
   beats?: Beat[]
 }
 
 const ProblemBlock: React.FC<{
   text: string
+  label: string
+  color: string
   beat: Beat | null
   tokens: ReturnType<typeof useThemeTokens>
-}> = ({ text, beat, tokens }) => {
-  const problemColor = "#ef4444"
+}> = ({ text, label, color, beat, tokens }) => {
+  const problemColor = color
   const { opacity, y } = useBeatReveal({
     beat: beat ?? undefined,
     fallbackDelayMs: 200,
@@ -99,7 +105,7 @@ const ProblemBlock: React.FC<{
             fontFamily: tokens.fontFamily,
           }}
         >
-          El Problema
+          {label}
         </div>
         <div style={{ fontSize: 22, color: tokens.foreground, fontFamily: tokens.fontFamily, lineHeight: 1.5 }}>
           {text}
@@ -111,10 +117,12 @@ const ProblemBlock: React.FC<{
 
 const SolutionBlock: React.FC<{
   text: string
+  label: string
+  color: string
   beat: Beat | null
   tokens: ReturnType<typeof useThemeTokens>
-}> = ({ text, beat, tokens }) => {
-  const solutionColor = "#22c55e"
+}> = ({ text, label, color, beat, tokens }) => {
+  const solutionColor = color
   const { opacity, y } = useBeatReveal({
     beat: beat ?? undefined,
     fallbackDelayMs: 800,
@@ -165,7 +173,7 @@ const SolutionBlock: React.FC<{
             fontFamily: tokens.fontFamily,
           }}
         >
-          La Solucion
+          {label}
         </div>
         <div style={{ fontSize: 22, color: tokens.foreground, fontFamily: tokens.fontFamily, lineHeight: 1.5 }}>
           {text}
@@ -177,9 +185,20 @@ const SolutionBlock: React.FC<{
 
 export const ProblemSolutionScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as ProblemSolutionProps
-  const { problem, solution, beats } = props
+  const {
+    problem,
+    solution,
+    problemLabel = "El Problema",
+    solutionLabel = "La Solución",
+    problemColor: problemColorProp,
+    solutionColor: solutionColorProp,
+    beats,
+  } = props
   const tokens = useThemeTokens()
   const phase1 = usePhase1Entry({ durationMs: 100 })
+
+  const pColor = problemColorProp || "#ef4444"
+  const sColor = solutionColorProp || "#22c55e"
 
   const lineHeight = interpolate(phase1.progress, [0.5, 1], [0, 80], {
     extrapolateLeft: "clamp",
@@ -197,18 +216,18 @@ export const ProblemSolutionScene: React.FC<Record<string, unknown>> = (rawProps
         padding: "40px 60px",
       }}
     >
-      <ProblemBlock text={problem} beat={beats?.[0] ?? null} tokens={tokens} />
+      <ProblemBlock text={problem} label={problemLabel} color={pColor} beat={beats?.[0] ?? null} tokens={tokens} />
 
       <div
         style={{
           width: 4,
           height: lineHeight,
-          background: "linear-gradient(#ef4444, #22c55e)",
+          background: `linear-gradient(${pColor}, ${sColor})`,
           overflow: "hidden",
         }}
       />
 
-      <SolutionBlock text={solution} beat={beats?.[2] ?? null} tokens={tokens} />
+      <SolutionBlock text={solution} label={solutionLabel} color={sColor} beat={beats?.[2] ?? null} tokens={tokens} />
     </AbsoluteFill>
   )
 }

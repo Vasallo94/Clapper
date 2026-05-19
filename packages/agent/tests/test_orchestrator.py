@@ -57,8 +57,9 @@ def test_skills_have_valid_frontmatter():
         assert "description:" in frontmatter, f"{skill_dir.name}/SKILL.md missing 'description' field"
 
 
-def test_subagents_with_skills_have_skills_key():
-    """Subagents that need domain knowledge must have a skills key."""
+def test_subagents_with_skills_have_skills_middleware():
+    """Subagents that need domain knowledge must have a SkillsMiddleware in 'middleware'."""
+    from deepagents.middleware.skills import SkillsMiddleware
     from src.subagents import (
         create_audio_planner,
         create_copywriter,
@@ -69,8 +70,83 @@ def test_subagents_with_skills_have_skills_key():
 
     for factory in [create_copywriter, create_director, create_audio_planner, create_sound_engineer, create_validator]:
         defn = factory()
-        assert "skills" in defn, f"{factory.__name__} missing 'skills' key"
-        assert len(defn["skills"]) > 0, f"{factory.__name__} has empty skills list"
+        middleware = defn.get("middleware", [])
+        has_skills = any(isinstance(mw, SkillsMiddleware) for mw in middleware)
+        assert has_skills, f"{factory.__name__} missing SkillsMiddleware in 'middleware'"
+
+
+def test_subagents_have_pipeline_plan_tools():
+    """Subagents must be able to inspect/update the shared pipeline plan."""
+    from src.subagents import (
+        create_audio_planner,
+        create_copywriter,
+        create_director,
+        create_researcher,
+        create_reviewer,
+        create_scene_creator,
+        create_scene_qa,
+        create_sound_engineer,
+        create_validator,
+        create_voice_generator,
+    )
+
+    factories = [
+        create_researcher,
+        create_copywriter,
+        create_director,
+        create_scene_qa,
+        create_audio_planner,
+        create_voice_generator,
+        create_sound_engineer,
+        create_scene_creator,
+        create_validator,
+        create_reviewer,
+    ]
+    for factory in factories:
+        tool_names = {getattr(tool, "__name__", "") for tool in factory()["tools"]}
+        assert "read_pipeline_plan" in tool_names, f"{factory.__name__} missing read_pipeline_plan"
+        assert "update_pipeline_step" in tool_names, f"{factory.__name__} missing update_pipeline_step"
+
+
+def test_checkpoint_subagents_have_decision_tool():
+    """Subagents with checkpoint interrupts must have record_pipeline_decision."""
+    from src.subagents import (
+        create_audio_planner,
+        create_copywriter,
+        create_director,
+        create_scene_creator,
+        create_scene_qa,
+    )
+
+    checkpoint_factories = [
+        create_copywriter,
+        create_director,
+        create_audio_planner,
+        create_scene_qa,
+        create_scene_creator,
+    ]
+    for factory in checkpoint_factories:
+        tool_names = {getattr(tool, "__name__", "") for tool in factory()["tools"]}
+        assert "record_pipeline_decision" in tool_names, f"{factory.__name__} missing record_pipeline_decision"
+
+
+def test_skills_middleware_uses_readable_virtual_paths():
+    """Skills must load metadata and expose SKILL.md paths readable by agent file tools."""
+    from src.orchestrator import create_agent_backend, create_skills_middleware
+
+    backend = create_agent_backend()
+    middleware = create_skills_middleware(backend)
+    update = middleware.before_agent({}, None, {})
+
+    skills = update["skills_metadata"]
+    assert len(skills) == 10
+    assert all(skill["path"].startswith("/skills/") for skill in skills)
+
+    first_skill_path = skills[0]["path"]
+    read_result = backend.read(first_skill_path, limit=5)
+    assert read_result.error is None
+    assert read_result.file_data is not None
+    assert "name:" in read_result.file_data["content"]
 
 
 def test_load_prompt():
@@ -141,6 +217,12 @@ def test_orchestrator_registers_mode_router_tools():
     for name in [
         "route_intent",
         "get_mode_contract",
+        "ask_user_interaction",
+        "create_pipeline_plan",
+        "read_pipeline_plan",
+        "update_pipeline_step",
+        "record_pipeline_decision",
+        "get_next_pipeline_step",
         "list_video_configs",
         "stage_existing_config",
         "present_revision_plan",

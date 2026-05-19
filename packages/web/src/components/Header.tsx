@@ -49,6 +49,7 @@ export function Header({ artifacts = [], activeTarget, onSelectTarget }: Props) 
           <option value="">Sin target activo</option>
           {artifacts.map((artifact) => (
             <option key={artifact.id} value={artifact.configPath}>
+              {artifact.source === "render" ? "render · " : ""}
               {artifact.title || artifact.configId || artifact.configPath}
             </option>
           ))}

@@ -45,6 +45,10 @@ interface ComparisonTableProps {
   title: string
   leftColumn: ColumnData
   rightColumn: ColumnData
+  leftColor?: string
+  rightColor?: string
+  leftIcon?: "check" | "cross"
+  rightIcon?: "check" | "cross"
   timing?: Timing
   beats?: Beat[]
 }
@@ -146,12 +150,21 @@ const ComparisonColumn: React.FC<{
 
 export const ComparisonTableScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const props = rawProps as unknown as ComparisonTableProps
-  const { title, leftColumn, rightColumn, beats } = props
+  const {
+    title,
+    leftColumn,
+    rightColumn,
+    leftColor: leftColorProp,
+    rightColor: rightColorProp,
+    leftIcon = "check",
+    rightIcon = "cross",
+    beats,
+  } = props
   const tokens = useThemeTokens()
   const phase1 = usePhase1Entry({ durationMs: 100 })
 
-  const successColor = "#22c55e"
-  const errorColor = "#ef4444"
+  const leftAccent = leftColorProp || "#22c55e"
+  const rightAccent = rightColorProp || "#ef4444"
 
   return (
     <AbsoluteFill
@@ -181,16 +194,16 @@ export const ComparisonTableScene: React.FC<Record<string, unknown>> = (rawProps
       <div style={{ display: "flex", width: "100%", maxWidth: 1000, gap: 40 }}>
         <ComparisonColumn
           column={leftColumn}
-          accent={successColor}
-          icon="check"
+          accent={leftAccent}
+          icon={leftIcon}
           beat={beats?.[2] ?? null}
           fallbackMs={600}
           tokens={tokens}
         />
         <ComparisonColumn
           column={rightColumn}
-          accent={errorColor}
-          icon="cross"
+          accent={rightAccent}
+          icon={rightIcon}
           beat={beats?.[1] ?? null}
           fallbackMs={300}
           tokens={tokens}

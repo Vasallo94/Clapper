@@ -145,3 +145,28 @@ body {
   transform-origin: 3px 12px;
   animation: clap 1.5s ease-in-out infinite;
 }
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.tool-row-active {
+  background: linear-gradient(90deg, transparent 0%, rgba(245, 158, 11, 0.07) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+.cursor-blink {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background: var(--text-secondary);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+}

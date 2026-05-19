@@ -1,4 +1,5 @@
-from ..orchestrator import SKILLS_DIR, load_prompt
+from ..orchestrator import create_skills_middleware, load_prompt
+from ..tools.pipeline import read_pipeline_plan, record_pipeline_decision, update_pipeline_step
 from ..tools.qa import present_qa_report, qa_scenes, render_scene_stills
 
 
@@ -12,6 +13,6 @@ def create_scene_qa() -> dict:
             "and suggests fixes."
         ),
         "system_prompt": load_prompt("scene_qa"),
-        "tools": [render_scene_stills, qa_scenes, present_qa_report],
-        "skills": [str(SKILLS_DIR)],
+        "tools": [read_pipeline_plan, update_pipeline_step, record_pipeline_decision, render_scene_stills, qa_scenes, present_qa_report],
+        "middleware": [create_skills_middleware()],
     }

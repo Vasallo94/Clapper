@@ -43,7 +43,8 @@ def create_scene_creator():
     by the orchestrator. The exact integration depends on the
     DeepAgents CompiledSubAgent API.
     """
-    from ...orchestrator import SKILLS_DIR, create_model, load_prompt
+    from ...orchestrator import create_model, create_skills_middleware, load_prompt
+    from ...tools.pipeline import read_pipeline_plan, record_pipeline_decision, update_pipeline_step
     from ...tools.scene import present_custom_scene
     from .tools import read_scene, write_scene
 
@@ -54,7 +55,7 @@ def create_scene_creator():
         "description": "Creates new custom Remotion scene components. Validates via lint + bundle compilation.",
         "graph": graph,
         "system_prompt": load_prompt("scene_creator"),
-        "tools": [write_scene, read_scene, present_custom_scene],
-        "skills": [str(SKILLS_DIR)],
+        "tools": [read_pipeline_plan, update_pipeline_step, record_pipeline_decision, write_scene, read_scene, present_custom_scene],
+        "middleware": [create_skills_middleware()],
         "model": create_model(),
     }

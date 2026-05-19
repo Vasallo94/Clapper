@@ -7,6 +7,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **`packages/web/src/lib/planState.ts`** — plan state extraction module that reads `/pipeline/plan.json` from LangGraph `stream.values.files`; provides `PlanState`/`PlanStep` types, `extractPlanState()` parser, `stepLabel()`/`modeLabel()` i18n mappings, `loadingLabelFromPlan()` and `isRenderingStep()` helpers
+- **`get_next_pipeline_step` tool** — deterministic next-step resolver that reads `plan.json` and returns the next actionable step, owner, progress count, and reason; replaces manual plan parsing in the orchestrator prompt; handles all states: `next_step`, `in_progress`, `blocked`, `all_completed`, `no_plan`
+- **Shared pipeline plan** — new `/pipeline/plan.json` coordination artifact with tools `create_pipeline_plan`, `read_pipeline_plan`, `update_pipeline_step`, and `record_pipeline_decision`; orchestrator and subagents now use it as the canonical pipeline state instead of relying on generic `write_todos`
+- **`packages/agent/tests/test_tools_pipeline.py`** — coverage for creating, reading, updating, blocking, and recording decisions in the shared pipeline plan
+- **ADR 0014** documenting the domain-specific shared pipeline plan and why `write_todos` remains scratch planning rather than pipeline memory
+- **DeepAgent container runtime** — agent Docker image now carries Python source, prompts, skills, LangGraph entrypoint/config, Remotion source, scripts, content and public assets; includes Node/pnpm dependencies so `scene_creator` can run eslint/bundle validation inside the container
+- **ADR 0013** documenting the deployment contract for self-contained DeepAgent images, `/skills/` virtual routing and shared runtime volumes
 - **`packages/render-service/src/server.ts`** — added `POST /api/render-stills` endpoint; accepts config JSON, spawns `render-scene-stills.ts` inside the Node.js container, returns PNG manifest JSON; allows the pure-Python agent container to delegate stills rendering without needing Node.js
 - **`packages/agent/src/tools/qa.py`** — three QA tools for visual scene review:
   - `render_scene_stills`: delegates to render-service `/api/render-stills` via HTTP POST (replaces subprocess npx call); default model updated to `gemini-3.1-flash-preview`
@@ -28,8 +35,24 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
   - 6 new validation tests (188 total passing)
 - Refactored 35 scene components to Two-Phase pattern (3 custom templates, 23 batch custom, 3 built-in, 4 ProductShort)
 
+### Removed
+
+- **Dead `AGENT_TO_STAGE` map and `advanceFromStream` from `usePipelineTracker.ts`** — duplicated `SUBAGENT_TO_STAGE` in `useVideoStream.ts` and was never called from App.tsx
+- **`SUBAGENT_TO_STAGE` heuristic pipeline advance in `useVideoStream.ts`** — the frontend no longer infers pipeline phase from which subagent is running; the stepper reads real step statuses from `plan.json` via `stream.values`
+- **`DISABLE_WRITE_TODOS` env var and runtime injection in `orchestrator.py`** — redundant with `orchestrator.md` prompt policy that already declares `write_todos` as optional scratch planning
+- **Duplicate `write_todos` policy in `orchestrator.md`** — consolidated two near-identical mentions (§ Shared pipeline plan + § Known runtime behavior) into one canonical reference
+- **Hardcoded `MODE_STEPS`, `STAGE_ORDER`, and `getStepStatus()` from `PipelineStepper.tsx`** — 7 mode-specific step arrays (310 lines) replaced by plan-driven rendering (~170 lines); steps, statuses, and mode now read from real `plan.json` state
+- **`currentStage` / `mode` / `getLoadingLabel` from `usePipelineTracker.ts`** — pipeline tracker simplified to event log only; stepper and loading labels now derived from `planState` extracted from LangGraph stream values
+
 ### Changed
 
+- **Orchestrator prompt refactored from procedural to policy-based** — replaced 80-line rigid step-by-step `## Workflow` with compact `## Execution policy` (common dispatch cycle, validation gates table, checkpoint table, mode-specific policy paragraphs); removed 10 redundant per-agent dispatch templates now covered by subagent `## Shared plan discipline`; prompt reduced from 300 → 244 lines
+- **Checkpoints as plan decisions** — 5 checkpoint subagents (copywriter CP1, director CP2, audio_planner CP3, scene_qa CP-QA, scene_creator CP4) now have `record_pipeline_decision` tool and prompt instructions to record human verdicts in `plan.json`; orchestrator records CP5 (validator) and CP6 (reviewer) decisions plus its own checkpoints (revision/variant/target)
+- Subagent prompts now enforce shared plan discipline: every agent reads `/pipeline/plan.json`, marks its assigned step `in_progress`, records `completed`/`blocked`/`skipped`, and returns a concise handoff with artifact paths
+- `orchestrator.md`: now creates `/pipeline/plan.json` after intent routing, updates step statuses around each dispatch, instructs subagents to read/update the plan, and documents the exact valid `write_todos` schema for optional scratch use
+- All subagent factories now receive `read_pipeline_plan` and `update_pipeline_step` tools so they can inspect shared context and mark their owned work
+- `docker-compose.yml`: replaced full-repository bind mounts with named runtime volumes for `src`, `content`, `public/audio`, `public/voiceover` and `.generated`, shared between agent and render-service
+- `packages/render-service/Dockerfile` and `packages/web/Dockerfile`: images now copy the source/assets they need instead of relying on `.:/app`
 - `director.md`: removed deprecated `leadInMs`/`audioStartMs` timing fields, added `scene-timing-guide` skill reference, added Audio Sync (auto-calculated) section
 - `audio_planner.md`: removed `leadInMs` object format from voiceover scenes example, added note that audio sync is automatic, added `scene-timing-guide` skill reference
 - `scene_creator.md`: mandated Two-Phase Animation Pattern with `usePhase1Entry`/`useBeatReveal`, replaced deprecated `useSlideIn` rule, added MANDATORY section with template
@@ -40,6 +63,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- **DeepAgents skills deployment** — skills now route through virtual `/skills/` on the agent `CompositeBackend`, so the metadata paths announced by `SkillsMiddleware` are readable later via `read_file`; added a regression test for metadata load plus full `SKILL.md` read
 - **`packages/agent/src/tools/qa.py`** — `render_scene_stills` now calls render-service via HTTP instead of spawning `npx tsx` (agent container is pure Python, no Node.js); fixed default model from `gemini-2.0-flash` to `gemini-3.1-flash-preview`; restored missing `import base64` and `from pathlib import Path` that were accidentally dropped during refactor
 - **`packages/agent/prompts/copywriter.md`** — limited post-approval `audit_content_quality` to exactly one call with an explicit STOP CONDITION to break the infinite audit loop
 - **`packages/web/src/components/SubagentCard.tsx`** — `extractThinkingText` now shows all intermediate AI reasoning steps separated by `─────` dividers (not just the last message) for better debugging of long-running subagents

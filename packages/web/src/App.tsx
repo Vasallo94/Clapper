@@ -3,6 +3,7 @@ import type { StoredVideoArtifact } from "./types"
 import { fetchConfigs, fetchJobStatus, fetchLatestRender } from "./api"
 import { useVideoStream } from "./hooks/useVideoStream"
 import { usePipelineTracker } from "./hooks/usePipelineTracker"
+import { loadingLabelFromPlan, isRenderingStep } from "./lib/planState"
 import { AppLayout } from "./components/AppLayout"
 import { Sidebar } from "./components/Sidebar"
 import { Header } from "./components/Header"
@@ -107,12 +108,9 @@ export default function App() {
       })
       setStoredThreads(getThreads())
     },
-    onPipelineAdvance: (stage, message) => {
-      pipeline.advance(stage, message)
-    },
     onError: (error) => {
       const msg = error instanceof Error ? error.message : String(error)
-      pipeline.advance("error", msg)
+      pipeline.addEvent("error", msg, "error")
     },
     activeTarget,
   })
@@ -256,7 +254,6 @@ export default function App() {
     if (!text || videoStream.isLoading) return
     setInput("")
     pipeline.reset()
-    pipeline.advance("orchestrator", "Mensaje recibido: " + text.slice(0, 60))
     videoStream.submit(text)
   }, [input, videoStream, pipeline])
 
@@ -292,14 +289,19 @@ export default function App() {
     [createCheckpointHandlers],
   )
 
+  // ----- Derived loading label -----
+  const loadingLabel = loadingLabelFromPlan(videoStream.planState)
+  const rendering = isRenderingStep(videoStream.planState)
+
   // ----- Render -----
 
   return (
     <AppLayout
       sidebar={
         <Sidebar
-          currentStage={pipeline.state.currentStage}
-          mode={pipeline.state.mode}
+          plan={videoStream.planState}
+          isLoading={videoStream.isLoading}
+          hasError={videoStream.error != null}
           events={pipeline.state.events}
           threads={storedThreads}
           currentThreadId={threadId ?? undefined}
@@ -320,10 +322,10 @@ export default function App() {
             checkpointHandlers={checkpointHandlers}
             enrichments={videoStream.enrichments}
             isLoading={videoStream.isLoading}
-            loadingLabel={pipeline.getLoadingLabel()}
+            loadingLabel={loadingLabel}
             error={videoStream.error}
             onRetry={() => {}}
-            currentStage={pipeline.state.currentStage}
+            isRendering={rendering}
           />
           <InputBar
             value={input}

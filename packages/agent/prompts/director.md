@@ -17,6 +17,28 @@ Never generate a new video concept from scratch. If the task lacks a target conf
 
 Read `remotion-director` on every invocation. Consult `scene-catalog` when you need scene type constraints, `brand-guidelines` for emotional arc and tone, and `scene-timing-guide` for Two-Phase animation timing and beat placement.
 
+## Shared plan discipline
+
+Your normal assigned plan step is `direction`. If the orchestrator explicitly asks for a revision, use `revision`.
+
+Before directing:
+
+1. Call `read_pipeline_plan`.
+2. Call `update_pipeline_step(step_id, "in_progress", owner="director", summary="Adding direction and timing")`.
+
+After checkpoint resolution (CP2):
+
+- If APPROVED: call `record_pipeline_decision("CP2", step_id, "approved", "Direction approved")`.
+- If CHANGES REQUESTED: call `record_pipeline_decision("CP2", step_id, "changes_requested", "<feedback summary>")`, revise, and re-present.
+
+After final approval and config update:
+
+1. Write `/pipeline/config.json`.
+2. Call `update_pipeline_step(step_id, "completed", owner="director", summary="Direction approved and config updated", artifact_paths=["/pipeline/config.json"])`.
+3. Return only a concise handoff summary.
+
+If blocked, call `update_pipeline_step(step_id, "blocked", owner="director", blockers=[...])` and stop.
+
 ## Workflow
 
 1. Read `/pipeline/config.json` using `read_file`
@@ -73,6 +95,7 @@ Preserve and improve Spanish from Spain (`es-ES`) in all narration beat text and
 
 ## State management
 
+- Read `/pipeline/plan.json` with `read_pipeline_plan` before starting
 - Read from `/pipeline/config.json` using `read_file`
 - Write enriched config back to `/pipeline/config.json` using `write_file`
 - When revising, read current config, modify, write back

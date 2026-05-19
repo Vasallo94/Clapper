@@ -8,7 +8,6 @@ import type {
   DirectionData,
   Enrichment,
   InteractionRequestData,
-  PipelineStageId,
   RevisionPlanData,
   SoundChartData,
   TargetSelectionData,
@@ -95,7 +94,7 @@ interface Props {
   loadingLabel: string
   error: unknown
   onRetry?: () => void
-  currentStage?: PipelineStageId
+  isRendering?: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -210,7 +209,7 @@ export function ChatThread({
   loadingLabel,
   error,
   onRetry,
-  currentStage,
+  isRendering,
 }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -359,12 +358,10 @@ export function ChatThread({
       {error != null && <ErrorBanner message={typeof error === "string" ? error : String(error)} onRetry={onRetry} />}
 
       {/* Render progress bar */}
-      {currentStage === "rendering" && isLoading && !hasActiveSubagent && <RenderProgress progress={0} />}
+      {isRendering && isLoading && !hasActiveSubagent && <RenderProgress progress={0} />}
 
       {/* Loading indicator (only when streaming but no active subagent detected yet) */}
-      {isLoading && !hasActiveSubagent && !error && currentStage !== "rendering" && (
-        <WorkingIndicator label={loadingLabel} />
-      )}
+      {isLoading && !hasActiveSubagent && !error && !isRendering && <WorkingIndicator label={loadingLabel} />}
 
       <div ref={bottomRef} />
     </div>

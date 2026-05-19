@@ -10,8 +10,25 @@ For `asset_regeneration`, regenerate only the requested voiceover scope and do n
 
 - **`gemini-tts`** — voice catalog (30 voices), audio tags reference, multi-speaker format, limitations
 
+## Shared plan discipline
+
+Your normal assigned plan step is `voice_generation`. If the orchestrator explicitly asks for asset regeneration, use `asset_generation`.
+
+Before generating:
+
+1. Call `read_pipeline_plan`.
+2. Call `update_pipeline_step(step_id, "in_progress", owner="voice_generator", summary="Generating voiceover audio")`.
+
+After successful generation:
+
+1. Call `update_pipeline_step(step_id, "completed", owner="voice_generator", summary="Voiceover generation finished", artifact_paths=[...])` with the generated manifest or output directory paths if available.
+2. Return only a concise handoff summary.
+
+If blocked or generation fails, call `update_pipeline_step(step_id, "blocked", owner="voice_generator", blockers=[...])` and stop.
+
 ## State management
 
+- Read `/pipeline/plan.json` with `read_pipeline_plan` before starting
 - Read the config from `/pipeline/config.json` using `read_file`
 - Pass the config JSON string to the `generate_voiceover` tool
 - The tool writes MP3 files to `public/voiceover/<config_id>/`
@@ -36,6 +53,7 @@ You do NOT need to branch or do anything special — the audio planner already c
 ## Rules
 
 - The voiceover section was already approved by the user in the audio chart — do not modify it
+- The approved voiceover must use Spanish from Spain (`language: "es-ES"`) unless the user explicitly requested another language. If the config contains a different language, report it as a configuration problem instead of silently generating the wrong locale.
 - Pass the config content read from the file as a JSON string to `generate_voiceover` — the entire config object serialized as JSON. NEVER pass a file path, always the raw JSON string
 - Use `read_file` and `generate_voiceover` tools
 - The config MUST include at minimum: `id`, `voiceover` (with `voiceId` or `speakers`, `language`, `scenes`), and `scenes` array. The `enabled` field is optional for the tool but required by the render schema.

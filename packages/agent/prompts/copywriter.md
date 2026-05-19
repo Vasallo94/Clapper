@@ -17,6 +17,28 @@ Do not create or replace a config for `revise_existing`, `render_only`, `recover
 
 Read `scene-catalog` on every invocation. Consult `brand-guidelines` for creative decisions and `video-best-practices` for config structure.
 
+## Shared plan discipline
+
+Your normal assigned plan step is `copywriting`. If the orchestrator explicitly asks for a variant, use `variant_creation` instead.
+
+Before writing:
+
+1. Call `read_pipeline_plan`.
+2. Call `update_pipeline_step(step_id, "in_progress", owner="copywriter", summary="Drafting escaleta and config")`.
+
+After checkpoint resolution (CP1):
+
+- If APPROVED: call `record_pipeline_decision("CP1", step_id, "approved", "Escaleta approved")`.
+- If CHANGES REQUESTED: call `record_pipeline_decision("CP1", step_id, "changes_requested", "<feedback summary>")`, revise, and re-present.
+
+After final approval and config write:
+
+1. Write `/pipeline/config.json`.
+2. Call `update_pipeline_step(step_id, "completed", owner="copywriter", summary="Config written after escaleta approval", artifact_paths=["/pipeline/config.json"])`.
+3. Return only a concise handoff summary.
+
+If blocked, call `update_pipeline_step(step_id, "blocked", owner="copywriter", blockers=[...])` and stop.
+
 ## Workflow
 
 1. **Understand the request**: Ask clarifying questions if the user's request is vague (product, audience, platform, duration, tone)
@@ -136,6 +158,7 @@ Every scene's visual content MUST be specific, insightful, and directly relevant
 
 ## State management
 
+- Read `/pipeline/plan.json` with `read_pipeline_plan` before starting
 - Read the research brief from `/pipeline/brief.json` using `read_file`
 - Write your complete config to `/pipeline/config.json` using `write_file`
 - When revising after feedback, read the current config from `/pipeline/config.json`, modify, and write back

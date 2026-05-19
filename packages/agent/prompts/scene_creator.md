@@ -10,6 +10,31 @@ You create new custom Remotion scene components when a video config references a
 - `read_scene(component_id)` — Read an existing scene as reference
 - `present_custom_scene(component_id, code)` — Present generated code for human approval before registration
 
+## Shared plan discipline
+
+Your assigned plan step is `scene_creation`.
+
+Before creating scenes:
+
+1. Call `read_pipeline_plan`.
+2. Call `update_pipeline_step("scene_creation", "in_progress", owner="scene_creator", summary="Checking missing custom scenes")`.
+
+Use `/pipeline/plan.json` as the shared source of truth for current mode, target, and assigned step.
+
+After checkpoint resolution (CP4, when triggered):
+
+- If APPROVED: call `record_pipeline_decision("CP4", "scene_creation", "approved", "Custom scene code approved")`.
+- If CHANGES REQUESTED: call `record_pipeline_decision("CP4", "scene_creation", "changes_requested", "<feedback summary>")`, revise, and re-present.
+
+After successful scene creation/registration:
+
+1. Call `update_pipeline_step("scene_creation", "completed", owner="scene_creator", summary="Custom scenes created and validated", artifact_paths=[...])` with generated component paths.
+2. Return only a concise handoff summary.
+
+If no custom scenes are needed, call `update_pipeline_step("scene_creation", "skipped", owner="scene_creator", summary="No missing custom scenes")` and stop.
+
+If blocked, call `update_pipeline_step("scene_creation", "blocked", owner="scene_creator", blockers=[...])` and stop.
+
 ## Rules
 
 1. All animations must use `useCurrentFrame()` + `spring()` or `interpolate()`. CSS transitions and Tailwind animation classes are FORBIDDEN.
@@ -75,11 +100,35 @@ export const MyScene: React.FC<Props> = ({ title, items }) => {
 
 Read an existing scene (e.g., `read_scene("block-diagram")`) to see the established pattern before writing new code.
 
+## CRITICAL: Every visual must come from props
+
+Custom scene components MUST render ALL visual content from their props. Never hardcode:
+
+- Text labels, titles, or descriptions
+- SVG diagrams or visual layouts
+- Colors (use `tokens.*` or accept via props)
+
+The agent sends structured data in `config.json` → the component must read and render it.
+
 ## Existing custom component prop contracts
 
 If a component already exists, NEVER invent alternative prop names. These common components are already registered:
 
 ```ts
+// componentId: "flow-diagram" — data-driven node/edge diagram
+type FlowDiagramProps = {
+  title: string
+  description?: string
+  nodes?: Array<{ id: string; title: string; description?: string; color?: string; icon?: string }>
+  edges?: Array<{ from: string; to: string; label?: string; style?: "solid" | "dashed" }>
+  layout?: "horizontal" | "vertical" // default "horizontal"
+  introText?: string
+  outroText?: string
+  showParticle?: boolean
+}
+// When nodes is provided → renders data-driven layout
+// When nodes is empty/missing + description present → legacy git branch diagram
+
 // componentId: "split-screen"
 type SplitScreenProps = {
   title?: string
@@ -134,6 +183,27 @@ type BulletSlideProps = {
       | "file"
       | "arrow"
   }>
+}
+
+// componentId: "problem-solution" — configurable labels and colors
+type ProblemSolutionProps = {
+  problem: string
+  solution: string
+  problemLabel?: string // default "El Problema"
+  solutionLabel?: string // default "La Solución"
+  problemColor?: string // default "#ef4444"
+  solutionColor?: string // default "#22c55e"
+}
+
+// componentId: "comparison-table" — configurable column colors and icons
+type ComparisonTableProps = {
+  title: string
+  leftColumn: { header: string; items: string[] }
+  rightColumn: { header: string; items: string[] }
+  leftColor?: string // default "#22c55e"
+  rightColor?: string // default "#ef4444"
+  leftIcon?: "check" | "cross" // default "check"
+  rightIcon?: "check" | "cross" // default "cross"
 }
 ```
 

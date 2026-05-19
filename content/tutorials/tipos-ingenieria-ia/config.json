@@ -1,0 +1,471 @@
+{
+  "id": "tipos-ingenieria-ia",
+  "title": "3 Tipos de Ingeniería IA",
+  "description": "Diferencias entre Prompt, Context e Intent Engineering",
+  "composition": "ClaudeCodeTutorial",
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "theme": "linea-directa",
+  "transition": null,
+  "brief": {
+    "platform": "linkedin",
+    "audience": "developers junior-mid",
+    "goal": "Enseñar la diferencia entre prompt, context e intent engineering de forma práctica",
+    "promise": "Al terminar sabrás cuándo usar cada técnica",
+    "tone": "cercano, técnico pero accesible",
+    "cta": "Usa la herramienta adecuada",
+    "hookStrategy": "problema-solución",
+    "templateId": "tutorial-code-walkthrough",
+    "narrativeArc": [
+      "hook",
+      "mental-model",
+      "prompt-concept",
+      "context-concept",
+      "intent-concept",
+      "pitfalls",
+      "summary"
+    ]
+  },
+  "scenes": [
+    {
+      "type": "intro",
+      "title": "3 tipos de Ingeniería IA",
+      "subtitle": "Prompt, Context e Intent Engineering",
+      "durationInSeconds": 4,
+      "timing": {
+        "tailHoldMs": 600,
+        "transitionMs": 0
+      },
+      "beats": [
+        {
+          "id": "hook",
+          "startMs": 200,
+          "narration": "¿Conoces la diferencia entre Prompt, Context e Intent Engineering?",
+          "visual": "Title appears"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "icon-grid",
+      "props": {
+        "title": "Niveles de abstracción",
+        "columns": 3,
+        "items": [
+          {
+            "icon": "terminal",
+            "title": "Prompt",
+            "description": "Instrucciones estáticas"
+          },
+          {
+            "icon": "layers",
+            "title": "Context",
+            "description": "Datos externos (RAG)"
+          },
+          {
+            "icon": "gear",
+            "title": "Intent",
+            "description": "Sistemas autónomos"
+          }
+        ]
+      },
+      "durationInSeconds": 12,
+      "timing": {
+        "tailHoldMs": 800,
+        "transitionMs": 600
+      },
+      "beats": [
+        {
+          "id": "beat-prompt",
+          "startMs": 500,
+          "narration": "El ecosistema de IA tiene tres grandes niveles de abstracción.",
+          "visual": "Grid frame"
+        },
+        {
+          "id": "beat-prompt-desc",
+          "startMs": 3500,
+          "narration": "Primero, Prompt Engineering: instrucciones estáticas y directas.",
+          "visual": "Prompt icon appears"
+        },
+        {
+          "id": "beat-context",
+          "startMs": 6500,
+          "narration": "Segundo, Context Engineering: donde inyectamos datos externos al vuelo.",
+          "visual": "Context icon appears"
+        },
+        {
+          "id": "beat-intent",
+          "startMs": 9500,
+          "narration": "Y tercero, Intent Engineering: sistemas autónomos que resuelven problemas.",
+          "visual": "Intent icon appears"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "split-screen",
+      "props": {
+        "title": "1. Prompt Engineering",
+        "left": {
+          "label": "Concepto",
+          "items": ["Optimización NLP pura", "Memoria del modelo", "Tareas deterministas"],
+          "icon": "folder"
+        },
+        "right": {
+          "label": "Flujo de datos",
+          "items": ["Usuario → LLM → Respuesta", "Sin transformación de datos externos"],
+          "icon": "code"
+        }
+      },
+      "durationInSeconds": 12,
+      "timing": {
+        "tailHoldMs": 800,
+        "transitionMs": 800
+      },
+      "beats": [
+        {
+          "id": "split-concept",
+          "startMs": 500,
+          "narration": "Empecemos por Prompt Engineering.",
+          "visual": "Split screen intro"
+        },
+        {
+          "id": "split-left",
+          "startMs": 3000,
+          "narration": "Es optimización del lenguaje puro para tareas deterministas.",
+          "visual": "Left column items appear"
+        },
+        {
+          "id": "split-right",
+          "startMs": 7000,
+          "narration": "El flujo es simple: el usuario pregunta y el modelo responde, sin datos externos.",
+          "visual": "Right column items appear"
+        }
+      ]
+    },
+    {
+      "type": "terminal",
+      "lines": [
+        {
+          "kind": "command",
+          "text": "System: 'Eres un asistente sarcástico. Responde en JSON.'"
+        },
+        {
+          "kind": "command",
+          "text": "User: '¿Cuánto es 2+2?'"
+        },
+        {
+          "kind": "claude",
+          "text": "{\n  \"answer\": \"Son 4, genio.\"\n}"
+        }
+      ],
+      "durationInSeconds": 14,
+      "timing": {
+        "tailHoldMs": 1000,
+        "transitionMs": 500
+      },
+      "beats": [
+        {
+          "id": "term-sys",
+          "startMs": 500,
+          "narration": "Le damos un rol al sistema de manera manual.",
+          "visual": "System command"
+        },
+        {
+          "id": "term-user",
+          "startMs": 5000,
+          "narration": "El usuario hace su consulta.",
+          "visual": "User command"
+        },
+        {
+          "id": "term-out",
+          "startMs": 9000,
+          "narration": "Y el modelo genera la salida basándose exclusivamente en su entrenamiento previo.",
+          "visual": "Claude output"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "flow-diagram",
+      "props": {
+        "title": "Query → Vector DB → Contexto → LLM",
+        "description": "2. Context Engineering: Inyectar información externa dinámica (RAG) para evitar alucinaciones."
+      },
+      "durationInSeconds": 12,
+      "timing": {
+        "tailHoldMs": 800,
+        "transitionMs": 1000
+      },
+      "beats": [
+        {
+          "id": "flow-intro",
+          "startMs": 500,
+          "narration": "Pero los modelos alucinan si no conocen tu negocio. Aquí entra el Context Engineering.",
+          "visual": "Diagram title"
+        },
+        {
+          "id": "flow-rag",
+          "startMs": 5000,
+          "narration": "Buscamos información en una base de datos vectorial y la añadimos al contexto.",
+          "visual": "Diagram flow"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "code-block",
+      "props": {
+        "title": "Context Engineering (RAG)",
+        "language": "python",
+        "code": "vector = embed(query)\ndocs = db.query(vector, top_k=3)\nprompt = f'Context: {docs}\\nQuestion: {query}'"
+      },
+      "durationInSeconds": 14,
+      "timing": {
+        "tailHoldMs": 1000,
+        "transitionMs": 500
+      },
+      "beats": [
+        {
+          "id": "code-embed",
+          "startMs": 500,
+          "narration": "En código, vectorizamos la pregunta del usuario.",
+          "visual": "Code line 1"
+        },
+        {
+          "id": "code-query",
+          "startMs": 4000,
+          "narration": "Buscamos los documentos relevantes.",
+          "visual": "Code line 2"
+        },
+        {
+          "id": "code-prompt",
+          "startMs": 8000,
+          "narration": "Y armamos un nuevo prompt dinámico que incluye esa información. Esto es RAG.",
+          "visual": "Code line 3"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "block-diagram",
+      "props": {
+        "title": "3. Intent Engineering",
+        "blocks": [
+          {
+            "id": "goal",
+            "label": "User Goal",
+            "row": 0,
+            "col": 0
+          },
+          {
+            "id": "agent",
+            "label": "Agent Planner",
+            "row": 0,
+            "col": 1,
+            "connections": ["tools"]
+          },
+          {
+            "id": "tools",
+            "label": "Tool Execution",
+            "sublabel": "API / Code",
+            "row": 0,
+            "col": 2,
+            "connections": ["agent"]
+          }
+        ]
+      },
+      "durationInSeconds": 12,
+      "timing": {
+        "tailHoldMs": 800,
+        "transitionMs": 1000
+      },
+      "beats": [
+        {
+          "id": "block-intent",
+          "startMs": 500,
+          "narration": "Finalmente, Intent Engineering lleva esto más allá.",
+          "visual": "Block title"
+        },
+        {
+          "id": "block-goal",
+          "startMs": 3000,
+          "narration": "Le das un objetivo de alto nivel a un agente.",
+          "visual": "Goal block"
+        },
+        {
+          "id": "block-tools",
+          "startMs": 7000,
+          "narration": "Él mismo planifica qué herramientas usar y en qué orden ejecutarlas.",
+          "visual": "Agent and tools blocks"
+        }
+      ]
+    },
+    {
+      "type": "terminal",
+      "lines": [
+        {
+          "kind": "command",
+          "text": "Goal: 'Busca el clima y guárdalo'"
+        },
+        {
+          "kind": "output",
+          "text": "Ejecutando: get_weather()"
+        },
+        {
+          "kind": "output",
+          "text": "Ejecutando: execute_sql()"
+        },
+        {
+          "kind": "claude",
+          "text": "Clima obtenido y guardado correctamente."
+        }
+      ],
+      "durationInSeconds": 15,
+      "timing": {
+        "tailHoldMs": 1200,
+        "transitionMs": 500
+      },
+      "beats": [
+        {
+          "id": "term2-goal",
+          "startMs": 500,
+          "narration": "Por ejemplo, le pedimos que busque el clima y lo guarde.",
+          "visual": "Goal command"
+        },
+        {
+          "id": "term2-tools",
+          "startMs": 5000,
+          "narration": "El agente ejecuta de forma autónoma una función para el clima y otra de base de datos.",
+          "visual": "Tool executions"
+        },
+        {
+          "id": "term2-done",
+          "startMs": 10000,
+          "narration": "Resolviendo el problema completo sin microgestión.",
+          "visual": "Agent completion"
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "text": "Error común: Usar agentes para tareas simples añade latencia y costes innecesarios.",
+      "position": "center",
+      "durationInSeconds": 8,
+      "timing": {
+        "tailHoldMs": 1000,
+        "transitionMs": 800
+      },
+      "beats": [
+        {
+          "id": "callout-warn",
+          "startMs": 500,
+          "narration": "Pero cuidado: no uses agentes complejos para tareas simples, sólo añadirás latencia.",
+          "visual": "Callout text"
+        }
+      ]
+    },
+    {
+      "type": "outro",
+      "title": "Usa la herramienta adecuada",
+      "bullets": ["Prompt: Tareas estáticas", "Context: Datos dinámicos", "Intent: Acciones y flujos"],
+      "durationInSeconds": 10,
+      "timing": {
+        "tailHoldMs": 2000,
+        "transitionMs": 1200
+      },
+      "beats": [
+        {
+          "id": "outro-intro",
+          "startMs": 500,
+          "narration": "La clave es usar la herramienta adecuada:",
+          "visual": "Title"
+        },
+        {
+          "id": "outro-prompt",
+          "startMs": 3000,
+          "narration": "Prompt para tareas estáticas.",
+          "visual": "Bullet 1"
+        },
+        {
+          "id": "outro-context",
+          "startMs": 5000,
+          "narration": "Context para inyectar datos dinámicos.",
+          "visual": "Bullet 2"
+        },
+        {
+          "id": "outro-intent",
+          "startMs": 7000,
+          "narration": "E Intent para acciones autónomas.",
+          "visual": "Bullet 3"
+        }
+      ]
+    }
+  ],
+  "voiceover": {
+    "provider": "gemini",
+    "voiceId": "Orus",
+    "language": "es-ES",
+    "scenes": [
+      {
+        "sceneIndex": 0,
+        "path": "voiceover/tipos-ingenieria-ia/0.mp3",
+        "durationMs": 5680
+      },
+      {
+        "sceneIndex": 1,
+        "path": "voiceover/tipos-ingenieria-ia/1.mp3",
+        "durationMs": 20200
+      },
+      {
+        "sceneIndex": 2,
+        "path": "voiceover/tipos-ingenieria-ia/2.mp3",
+        "durationMs": 12160
+      },
+      {
+        "sceneIndex": 3,
+        "path": "voiceover/tipos-ingenieria-ia/3.mp3",
+        "durationMs": 10720
+      },
+      {
+        "sceneIndex": 4,
+        "path": "voiceover/tipos-ingenieria-ia/4.mp3",
+        "durationMs": 11400
+      },
+      {
+        "sceneIndex": 5,
+        "path": "voiceover/tipos-ingenieria-ia/5.mp3",
+        "durationMs": 12840
+      },
+      {
+        "sceneIndex": 6,
+        "path": "voiceover/tipos-ingenieria-ia/6.mp3",
+        "durationMs": 13120
+      },
+      {
+        "sceneIndex": 7,
+        "path": "voiceover/tipos-ingenieria-ia/7.mp3",
+        "durationMs": 12640
+      },
+      {
+        "sceneIndex": 8,
+        "path": "voiceover/tipos-ingenieria-ia/8.mp3",
+        "durationMs": 6360
+      },
+      {
+        "sceneIndex": 9,
+        "path": "voiceover/tipos-ingenieria-ia/9.mp3",
+        "durationMs": 11320
+      }
+    ]
+  },
+  "soundDesign": {
+    "musicBed": {
+      "path": "audio/library/lofi-tech-ambient.mp3",
+      "volume": 0.15
+    },
+    "sfx": []
+  },
+  "_skipAudioGeneration": true
+}

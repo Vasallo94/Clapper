@@ -42,7 +42,7 @@ export const LineaDirectaBrandLockup: React.FC<LineaDirectaBrandLockupProps> = (
 
   const width = (compact ? 360 : 520) * scale
   const height = (compact ? 256 : 370) * scale
-  const shadow = inverse ? "0 18px 40px rgba(0,0,0,0.34)" : "0 14px 30px rgba(0,0,0,0.16)"
+  const shadow = inverse ? "drop-shadow(0 16px 32px rgba(0,0,0,0.28))" : "none"
 
   return (
     <div
@@ -52,13 +52,13 @@ export const LineaDirectaBrandLockup: React.FC<LineaDirectaBrandLockupProps> = (
         height,
         opacity,
         transform: `translateY(${y + idleY}px)`,
-        filter: `drop-shadow(${shadow})`,
+        filter: shadow,
         overflow: "hidden",
         clipPath: `inset(0 ${revealInset}% 0 0)`,
       }}
     >
       <Img
-        src={staticFile("branding/linea-directa-logo.svg")}
+        src={staticFile("branding/linea-directa-logo.png")}
         style={{
           width: "100%",
           height: "100%",

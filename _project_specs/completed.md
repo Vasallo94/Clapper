@@ -4,6 +4,338 @@ Specs movidas aquí tras implementación exitosa.
 
 ---
 
+## 2026-05-19 — UI desde plan.json
+
+### Objective
+
+Hacer que el frontend lea el estado real del pipeline desde `/pipeline/plan.json` (via `stream.values.files`) en vez de adivinar la fase desde nombres de subagentes en el stream.
+
+### Scope
+
+- Crear `packages/web/src/lib/planState.ts` — tipos, extracción de plan desde LangGraph state, labels en español, helpers.
+- Reescribir `PipelineStepper.tsx` — plan-driven (170 líneas vs 310 hardcodeadas). Steps, status y mode vienen del plan real.
+- Modificar `useVideoStream.ts` — exponer `planState` desde `stream.values`, eliminar `SUBAGENT_TO_STAGE` heuristic.
+- Simplificar `usePipelineTracker.ts` — solo event log, sin `currentStage`/`mode`/`getLoadingLabel`.
+- Actualizar `App.tsx`, `Sidebar.tsx`, `ChatThread.tsx` — wiring de plan state, derivar `loadingLabel` e `isRendering` del plan.
+
+### Acceptance Criteria
+
+1. Stepper muestra steps reales de plan.json con statuses reales.
+2. No hay mapas hardcodeados agent→stage en el frontend.
+3. Mode label viene de plan.mode, no de setMode (que nunca se llamaba).
+4. Loading label derivado del step in_progress actual.
+5. TypeScript compila sin errores.
+
+### Result
+
+Implementado. TypeScript ✓, 37/37 tests ✓. Frontend ahora es una _vista_ de estado real, no una _estimación_.
+
+---
+
+## 2026-05-19 — Eliminar heurísticas duplicadas
+
+### Objective
+
+Quitar lógica dispersa que infiere fase actual del pipeline desde mensajes/tool calls cuando ya existe plan.json como fuente de verdad.
+
+### Scope
+
+- Eliminar `AGENT_TO_STAGE` map y `advanceFromStream` de `usePipelineTracker.ts` (código muerto, nunca llamado).
+- Eliminar `DISABLE_WRITE_TODOS` env var y su inyección runtime en `orchestrator.py` (redundante con política del prompt).
+- Consolidar mención duplicada de `write_todos` en `orchestrator.md`.
+
+### Remaining heuristics (for Point 6: UI desde plan.json)
+
+- `SUBAGENT_TO_STAGE` en `useVideoStream.ts` — mecanismo activo que infiere etapa desde subagentes del stream. Reemplazar cuando frontend lea plan.json.
+- `MODE_STEPS` / `STAGE_ORDER` / `getStepStatus()` en `PipelineStepper.tsx` — stepper hardcodeado con 7 definiciones por modo. `setMode()` nunca se llama; siempre cae a `STEPS_NEW_VIDEO`. Reemplazar con stepper derivado de plan.json.
+- `getLoadingLabel()` en `usePipelineTracker.ts` — labels estáticos por etapa. Derivar de plan step metadata.
+
+### Acceptance Criteria
+
+1. No hay código muerto referenciando mapas agent→stage duplicados.
+2. No hay heurísticas runtime (env vars) que parcheen el prompt.
+3. 37 tests pasan, TypeScript compila sin errores.
+
+### Result
+
+Implementado. 37/37 tests ✓, TypeScript ✓. Heurísticas activas (frontend tracking) documentadas como scope de Point 6.
+
+---
+
+## 2026-05-19 — get_next_pipeline_step Tool
+
+### Objective
+
+Crear herramienta determinista que lea plan.json y devuelva el siguiente paso a ejecutar, reduciendo la carga cognitiva del prompt del orquestador.
+
+### Scope
+
+- Implementar `get_next_pipeline_step()` en `pipeline.py` con 5 estados: `next_step`, `in_progress`, `blocked`, `all_completed`, `no_plan`.
+- Registrar en orchestrator.py tools, **init**.py exports, orchestrator.md tool catalog y execution policy common cycle.
+- 7 tests cubriendo todos los estados y edge cases.
+
+### Acceptance Criteria
+
+1. Tool implementado y registrado en orquestador.
+2. Prompt actualizado: common cycle usa `get_next_pipeline_step` en vez de parsing manual.
+3. 37 tests pasan (30 + 7 nuevos).
+4. Tool catalog en orchestrator.md incluye `get_next_pipeline_step`.
+
+### Result
+
+Implementado. 37/37 tests ✓.
+
+---
+
+## 2026-05-19 — Checkpoints como Decisiones del Plan
+
+### Objective
+
+Que cada checkpoint (CP1-CP6, CP-QA) registre la decisión humana en `plan.json` via `record_pipeline_decision`, no solo "step completed".
+
+### Scope
+
+- Añadir `record_pipeline_decision` tool a 5 subagent factories con checkpoint interrupt (copywriter, director, audio_planner, scene_qa, scene_creator).
+- Actualizar prompts con instrucciones de `record_pipeline_decision` después de cada resolución de checkpoint (approved / changes_requested).
+- Orchestrator registra CP5 (validator warnings), CP6 (reviewer approval), y sus propios checkpoints (revision/variant/target).
+- Tests: factory-level (5 factories tienen el tool) + prompt-level (5 prompts mencionan su CP id y record_pipeline_decision).
+
+### Acceptance Criteria
+
+1. 5 checkpoint subagent factories incluyen `record_pipeline_decision` en tools.
+2. 5 checkpoint prompts mencionan `record_pipeline_decision` y su CP id.
+3. Orchestrator prompt documenta explícitamente quién registra cada CP.
+4. 30 tests pasan.
+
+### Result
+
+Implementado. 30/30 tests ✓. Cada checkpoint ahora registra la decisión humana en plan.json.
+
+---
+
+## 2026-05-19 — Orquestador Policy-Based
+
+### Objective
+
+Convertir `orchestrator.md` de un guion procedural rígido (paso 2a, 2b, 2c...) a una policy basada en `plan.json` que dice "lee el plan, decide siguiente step permitido, despacha".
+
+### Scope
+
+- Reemplazar `## Workflow` (80 líneas, 14 sub-pasos rígidos para `new_video`) con `## Execution policy` compacta.
+- Common dispatch cycle de 7 pasos genéricos.
+- Validation gates como tabla (copywriting, direction, scene_qa, voice+sound).
+- Checkpoints como tabla (CP1-CP6 con owner y condición).
+- Mode-specific policies como párrafos compactos (no sub-listas numeradas).
+- Eliminar 10 templates de dispatch redundantes (cubiertos por `## Shared plan discipline` de cada subagente).
+- Limpiar referencias a "step 2n" y "step 2g" del sistema anterior.
+
+### Acceptance Criteria
+
+1. Prompt reducido de 300 a ≤250 líneas.
+2. No existe sección `## Workflow`.
+3. Existe sección `## Execution policy` con sub-secciones: Common cycle, Dispatching subagents, Parallel dispatch, Validation gates, Conditional steps, Checkpoints, Mode-specific policies.
+4. 28 tests pasan (`test_prompts_filesystem.py` + `test_orchestrator.py` + `test_tools_pipeline.py`).
+5. No hay templates de dispatch per-agent en el prompt.
+
+### Result
+
+Implementado. 300 → 244 líneas. 28/28 tests ✓.
+
+---
+
+## 2026-05-19 — Subagentes Responsables del Plan Compartido
+
+### Objective
+
+Hacer que todos los subagentes usen `/pipeline/plan.json` como contexto compartido y actualicen explicitamente el estado de su paso.
+
+### Scope
+
+- Anadir seccion `Shared plan discipline` a researcher, copywriter, director, scene_qa, audio_planner, voice_generator, sound_engineer, scene_creator, validator y reviewer.
+- Obligar a `read_pipeline_plan` antes de trabajar.
+- Obligar a `update_pipeline_step(..., "in_progress")` al empezar.
+- Obligar a marcar `completed`, `blocked` o `skipped` segun resultado.
+- Registrar artifact paths esperados para brief, config, QA, validation y review.
+- Anadir test de prompts para evitar regresiones.
+
+### Acceptance Criteria
+
+1. Cada prompt de subagente contiene `Shared plan discipline`.
+2. Cada prompt menciona `read_pipeline_plan`.
+3. Cada prompt menciona `update_pipeline_step`.
+4. Cada prompt referencia `/pipeline/plan.json`.
+5. Cada prompt menciona su step principal.
+
+### Test Cases
+
+1. `uv run pytest tests/test_prompts_filesystem.py tests/test_orchestrator.py -q` — 23 passed.
+
+---
+
+## 2026-05-18 — Shared Pipeline Plan
+
+### Objective
+
+Introducir un plan compartido del pipeline para que el orquestador y los subagentes coordinen trabajo mediante `/pipeline/plan.json`, sin depender de `write_todos` como memoria global.
+
+### Scope
+
+- Crear tools `create_pipeline_plan`, `read_pipeline_plan`, `update_pipeline_step` y `record_pipeline_decision`.
+- Registrar las tools en el orquestador.
+- Dar `read_pipeline_plan` y `update_pipeline_step` a todos los subagentes.
+- Ajustar el prompt del orquestador para que `/pipeline/plan.json` sea la fuente de verdad de coordinacion.
+- Documentar que `write_todos` es scratch opcional y anadir schema correcto para evitar llamadas con `items`.
+- Crear ADR 0014.
+
+### Acceptance Criteria
+
+1. El orquestador puede crear un plan con pasos por defecto segun modo.
+2. El orquestador y subagentes pueden leer `/pipeline/plan.json`.
+3. Cada agente puede actualizar el estado de su paso.
+4. El prompt del orquestador declara que `pipeline_plan` es la fuente de verdad de coordinacion.
+5. `write_todos` queda descrito como scratch opcional, no como plan canonico.
+6. Hay tests unitarios para crear, leer y actualizar el plan.
+
+### Test Cases
+
+1. `uv run pytest tests/test_tools_pipeline.py tests/test_orchestrator.py -q` — 18 passed.
+2. `uv run pytest tests/test_prompts_filesystem.py tests/test_tools_pipeline.py tests/test_orchestrator.py -q` — 27 passed.
+3. `uv run python -m py_compile src/tools/pipeline.py` — pass.
+
+---
+
+## 2026-05-18 — DeepAgent Container Runtime
+
+### Objective
+
+Hacer que el despliegue Docker del DeepAgent sea autocontenido y reproducible, sin depender de montar todo el repo del host en `/app`.
+
+### Scope
+
+- Copiar codigo Python, prompts, skills, LangGraph config y assets Remotion en las imagenes.
+- Exponer skills por `/skills/` con `FilesystemBackend(..., virtual_mode=True)`.
+- Sustituir bind mounts completos por volumenes nombrados compartidos entre agente y render-service.
+- Mantener `scene_creator` funcional dentro del agente con Node/pnpm y dependencias workspace.
+- Endurecer `.dockerignore` para no enviar secretos ni artefactos locales al contexto Docker.
+
+### Acceptance Criteria
+
+1. La imagen del agente incluye `packages/agent/src`, `prompts`, `skills`, `graph_server.py` y `langgraph.json`.
+2. `SkillsMiddleware` carga 10 skills y publica rutas `/skills/...`.
+3. Un `SKILL.md` publicado por metadata se puede leer con el backend normal del agente.
+4. `docker-compose.yml` no usa `.:/app`.
+5. Agent, render-service y web construyen desde sus Dockerfiles.
+
+### Test Cases
+
+1. `uv run pytest tests/test_orchestrator.py -q` — 12 passed.
+2. `docker compose config --quiet` — pass.
+3. `docker compose build agent render-service web` — pass.
+4. `docker run --rm remotion-playground-agent uv run --project /app/packages/agent python -c "..."` — carga 10 skills, lee `/skills/brand-guidelines/SKILL.md` sin error.
+
+---
+
+## 2026-05-13 — Target Dropdown Incluye Renders Recientes
+
+### Objective
+
+Hacer que el selector de target del frontend represente lo que el usuario entiende por "vídeo objetivo": tanto configs curados de `content/**` como renders recientes completados en `.generated/renders/**`.
+
+### Scope
+
+- Incluir renders completados recientes en `GET /api/configs` si tienen `config.json` y `output.mp4`.
+- Mantener filtrado para no listar carpetas temporales de validación ni renders incompletos.
+- Mezclar configs remotos con artifacts locales sin duplicados en el frontend.
+- Permitir previsualizar renders CLI mediante `/api/render/:id/stream` aunque no exista job en SQLite.
+- Marcar renders en el dropdown con prefijo `render ·`.
+
+### Acceptance Criteria
+
+1. Un render completado en `.generated/renders/<id>/` aparece como target seleccionable.
+2. Las carpetas sin `output.mp4` no aparecen.
+3. Los configs de `content/**` siguen apareciendo.
+4. Seleccionar un render con `jobId` muestra la card de vídeo directamente.
+
+### Test Cases
+
+1. `npm run build --workspace packages/web` — pass.
+2. `npm run test --workspace packages/render-service` — pass.
+3. `npm run lint` — pass.
+
+---
+
+## 2026-05-13 — Estabilización E2E del Video Generator
+
+### Objective
+
+Corregir los fallos detectados en el test E2E del 2026-05-13: onboarding que termina abruptamente, crash de render por props incorrectos en `split-screen`, desincronización básica del panel de pipeline, escaleta poco informativa para escenas custom, baja visibilidad del texto del orquestador, y generación de contenido en inglés.
+
+### Scope
+
+- Ajustar política de onboarding para que "Crear un video nuevo" continúe preguntando por el tema/brief.
+- Normalizar defensivamente props de `split-screen`, `icon-grid` y `bullet-slide`.
+- Documentar interfaces exactas de esos componentes en skill/prompt.
+- Añadir validación anidada de props custom antes del render.
+- Añadir stages `scene_creator` y `validator` al tracker/pipeline UI.
+- Mostrar summaries útiles para escenas custom en la escaleta.
+- Elevar texto del orquestador a mensajes de chat visibles.
+- Forzar español de España en prompts creativos y de audio.
+- Registrar el rediseño UIUX completo como mejora futura.
+
+### Acceptance Criteria
+
+1. El onboarding no termina con "Proceso completado" tras elegir "Crear un video nuevo"; pide el tema/brief siguiente.
+2. `SplitScreenScene` normaliza `title/subtitle` heredados a `label/items` y no crashea si faltan `items`.
+3. `icon-grid` y `bullet-slide` toleran shapes comunes incorrectos sin romper render.
+4. La documentación de props de custom components incluye interfaces exactas para `split-screen`, `icon-grid` y `bullet-slide`.
+5. La validación de calidad detecta props anidados incorrectos para esos componentes antes del render.
+6. El tracker muestra fases más fieles para `scene_creator`, `validator` y render.
+7. La escaleta muestra contenido útil para escenas custom en vez de `-`.
+8. El texto del orquestador dirigido al usuario aparece como mensaje de chat visible.
+9. Los prompts fuerzan español de España para usuario, escenas y voiceover.
+
+### Test Cases
+
+1. `npx tsx scripts/render.ts .generated/renders/f2fa4232-f6f1-4d6a-a6f1-5fac61da4204/config.json` — render completed successfully.
+2. `npm run lint` — pass.
+3. `npm run build --workspace packages/web` — pass.
+4. `uv run pytest tests/test_tools_validation.py tests/test_tools_interactions.py tests/test_orchestrator.py tests/test_modes.py tests/test_tools_configs.py` — 41 passed.
+
+---
+
+## 2026-05-13 — Interacciones Conversacionales del DeepAgent
+
+### Objective
+
+Añadir una capa genérica de interacción humano-agente para que el DeepAgent pueda pedir input durante procesos creativos sin depender siempre de cards específicas de escaleta, dirección o audio.
+
+### Scope
+
+- Definir el contrato `interaction_request` para texto, selección única, selección múltiple y aprobación simple.
+- Añadir la tool backend `ask_user_interaction` basada en `interrupt()`.
+- Exponer la tool en el orquestador y documentar su política de uso en el prompt.
+- Añadir tipos frontend para interacciones conversacionales.
+- Crear `InteractionRequestCard` y conectarla en `ChatThread`/`App`.
+- Mantener las cards ricas existentes sin migrarlas en esta pasada.
+
+### Acceptance Criteria
+
+1. Existe un contrato `interaction_request` compartido entre backend y frontend.
+2. El backend expone una tool directa para lanzar interacciones conversacionales mediante `interrupt()`.
+3. El orquestador conoce cuándo usar la tool: onboarding, aclaraciones bloqueantes y elecciones creativas ligeras.
+4. El frontend renderiza `text`, `single_choice`, `multi_choice` y `approval` sin caer en JSON bruto.
+5. Las respuestas se reanudan con payload estructurado suficiente para que el agente continúe.
+6. Las cards existentes de escaleta, dirección, audio, target, revisión y variante siguen funcionando.
+7. La UI mantiene `GenericCheckpointCard` como fallback para tipos desconocidos.
+
+### Test Cases
+
+1. `uv run pytest tests/test_tools_interactions.py tests/test_orchestrator.py tests/test_modes.py tests/test_tools_configs.py` — 32 passed.
+2. `npm run build --workspace packages/web` — TypeScript and Vite build pass.
+3. `npm run lint` — root Remotion lint/typecheck pass.
+
+---
+
 ## 2026-05-12 — Linea Directa Brand Lockup
 
 ### Objective

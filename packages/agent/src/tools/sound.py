@@ -54,16 +54,26 @@ def copy_library_track(track_id: str, config_id: str, dest_name: str, runtime: A
         dest_name: Destination filename without extension (e.g. 'music-bed' or 'sfx-swoosh').
         runtime: Optional ToolRuntime. When present, runtime.context.config_id takes precedence.
     """
+    import shutil
+    from pathlib import PurePosixPath
+
     ctx = get_pipeline_context(runtime)
     effective_config_id = (ctx.config_id if ctx else None) or config_id
 
-    import shutil
+    # Strip any path components to prevent traversal (agent may pass full paths)
+    safe_track_id = PurePosixPath(track_id).name
+    safe_dest_name = PurePosixPath(dest_name).name
+    # Remove .mp3 suffix if the agent accidentally included it
+    if safe_track_id.endswith(".mp3"):
+        safe_track_id = safe_track_id[:-4]
+    if safe_dest_name.endswith(".mp3"):
+        safe_dest_name = safe_dest_name[:-4]
 
-    source = _audio_library_dir() / f"{track_id}.mp3"
+    source = _audio_library_dir() / f"{safe_track_id}.mp3"
     if not source.exists():
-        return f"Error: track '{track_id}' not found in library at {source}"
+        return f"Error: track '{safe_track_id}' not found in library at {source}"
 
     dest_dir = _audio_dir(effective_config_id)
-    dest = dest_dir / f"{dest_name}.mp3"
+    dest = dest_dir / f"{safe_dest_name}.mp3"
     shutil.copy2(source, dest)
-    return f"Copied {track_id}.mp3 → {dest}"
+    return f"Copied {safe_track_id}.mp3 → {dest}"

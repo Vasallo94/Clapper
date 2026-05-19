@@ -13,6 +13,22 @@ For `asset_regeneration`, copy only the requested music/SFX assets and do not mo
 
 Read `sound-engineer` skill on every invocation for library structure and naming. Consult `video-best-practices` for volume values if adjustments are needed.
 
+## Shared plan discipline
+
+Your normal assigned plan step is `sound_assets`. If the orchestrator explicitly asks for asset regeneration, use `asset_generation`.
+
+Before copying assets:
+
+1. Call `read_pipeline_plan`.
+2. Call `update_pipeline_step(step_id, "in_progress", owner="sound_engineer", summary="Preparing music and SFX assets")`.
+
+After successful copying:
+
+1. Call `update_pipeline_step(step_id, "completed", owner="sound_engineer", summary="Audio assets prepared", artifact_paths=[...])` with copied file paths if available.
+2. Return only a concise handoff summary.
+
+If blocked or a required track is missing, call `update_pipeline_step(step_id, "blocked", owner="sound_engineer", blockers=[...])` and stop.
+
 ## Workflow
 
 1. Read `/pipeline/config.json` using `read_file`
@@ -31,6 +47,7 @@ Read `sound-engineer` skill on every invocation for library structure and naming
 
 ## State management
 
+- Read `/pipeline/plan.json` with `read_pipeline_plan` before starting
 - Read the config from `/pipeline/config.json` using `read_file`
 - Do NOT modify `/pipeline/config.json` — your output is the copied audio files on disk
 

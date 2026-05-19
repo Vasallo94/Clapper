@@ -2,7 +2,8 @@ import os
 from pathlib import Path
 
 from deepagents import create_deep_agent
-from deepagents.backends import CompositeBackend, StateBackend, StoreBackend
+from deepagents.backends import CompositeBackend, FilesystemBackend, StateBackend, StoreBackend
+from deepagents.middleware.skills import SkillsMiddleware
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.checkpoint.memory import MemorySaver  # used when running standalone
 
@@ -19,6 +20,13 @@ from .tools.configs import (
     save_pipeline_config_to_source,
     stage_existing_config,
 )
+from .tools.pipeline import (
+    create_pipeline_plan,
+    get_next_pipeline_step,
+    read_pipeline_plan,
+    record_pipeline_decision,
+    update_pipeline_step,
+)
 
 from .config import PROJECT_ROOT
 from .context import PipelineContext
@@ -28,11 +36,30 @@ SKILLS_DIR = Path(__file__).parent.parent / "skills"
 
 DEFAULT_MODEL = "gemini-3.1-pro-preview"
 
-DISABLE_WRITE_TODOS = os.environ.get("DISABLE_WRITE_TODOS", "").lower() in ("1", "true", "yes")
-
 
 def load_prompt(name: str) -> str:
     return (PROMPTS_DIR / f"{name}.md").read_text(encoding="utf-8")
+
+
+def create_agent_backend() -> CompositeBackend:
+    return CompositeBackend(
+        default=StateBackend(),
+        routes={
+            "/skills/": FilesystemBackend(root_dir=str(SKILLS_DIR), virtual_mode=True),
+            "/memories/": StoreBackend(
+                namespace=lambda rt: ("video-orchestrator",),
+            ),
+        },
+    )
+
+
+def create_skills_middleware(backend=None) -> SkillsMiddleware:
+    # Skills must use the same virtual path space exposed by FilesystemMiddleware.
+    # The model sees /skills/... in the prompt and can later read those files with read_file.
+    return SkillsMiddleware(
+        backend=backend or create_agent_backend(),
+        sources=["/skills/"],
+    )
 
 
 def _load_vertex_credentials():
@@ -82,14 +109,7 @@ def create_video_orchestrator(*, checkpointer=None):
 
     model = create_model()
 
-    backend = CompositeBackend(
-        default=StateBackend(),
-        routes={
-            "/memories/": StoreBackend(
-                namespace=lambda rt: ("video-orchestrator",),
-            ),
-        },
-    )
+    backend = create_agent_backend()
 
     subagents = [
         create_researcher(),
@@ -105,10 +125,8 @@ def create_video_orchestrator(*, checkpointer=None):
     ]
 
     system_prompt = load_prompt("orchestrator")
-    if DISABLE_WRITE_TODOS:
-        system_prompt += "\n\nDo NOT use write_todos tool. Plan using text responses only."
 
-    middleware = []
+    middleware: list = [create_skills_middleware(backend)]
     try:
         from deepagents.middleware.summarization import create_summarization_tool_middleware
         middleware.append(create_summarization_tool_middleware(model, StateBackend))
@@ -122,6 +140,11 @@ def create_video_orchestrator(*, checkpointer=None):
             get_mode_contract,
             list_mode_contracts,
             ask_user_interaction,
+            create_pipeline_plan,
+            read_pipeline_plan,
+            update_pipeline_step,
+            record_pipeline_decision,
+            get_next_pipeline_step,
             list_video_configs,
             load_video_config,
             stage_existing_config,
@@ -136,14 +159,12 @@ def create_video_orchestrator(*, checkpointer=None):
         ],
         "system_prompt": system_prompt,
         "subagents": subagents,
-        "skills": [str(SKILLS_DIR)],
         "backend": backend,
+        "middleware": middleware,
         "memory": ["/memories/AGENTS.md"],
         "name": "video-orchestrator",
         "context_schema": PipelineContext,
     }
-    if middleware:
-        kwargs["middleware"] = middleware
     if checkpointer is not None:
         kwargs["checkpointer"] = checkpointer
 

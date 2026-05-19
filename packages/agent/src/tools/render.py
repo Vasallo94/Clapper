@@ -120,8 +120,9 @@ def submit_render(
         config["voiceover"] = voiceover
     if sound_design is not None:
         config["soundDesign"] = sound_design
-    if voiceover is None and sound_design is None:
-        config["_skipAudioGeneration"] = True
+    # Pipeline agents (voice_generator, sound_engineer) already generated audio
+    # files into shared volumes — render script must not regenerate them.
+    config["_skipAudioGeneration"] = True
     if composition == "ProductShort":
         config["composition"] = composition
         config["product"] = product

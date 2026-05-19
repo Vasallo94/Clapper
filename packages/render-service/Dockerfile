@@ -25,6 +25,8 @@ COPY packages/render-service/src packages/render-service/src
 # Remotion compositions + shared render scripts
 COPY src src
 COPY scripts scripts
+COPY public public
+COPY content content
 COPY remotion.config.ts tsconfig.json ./
 
 # Download Chromium for Remotion

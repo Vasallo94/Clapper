@@ -1,4 +1,5 @@
-from ..orchestrator import SKILLS_DIR, load_prompt
+from ..orchestrator import create_skills_middleware, load_prompt
+from ..tools.pipeline import read_pipeline_plan, record_pipeline_decision, update_pipeline_step
 from ..tools.render import present_direction
 from ..tools.validation import audit_content_quality
 
@@ -9,6 +10,6 @@ def create_director() -> dict:
         "name": "director",
         "description": "Polishes timing, narrative beats, and audio/visual synchronization with human approval.",
         "system_prompt": load_prompt("director"),
-        "tools": [present_direction, audit_content_quality],
-        "skills": [str(SKILLS_DIR)],
+        "tools": [read_pipeline_plan, update_pipeline_step, record_pipeline_decision, present_direction, audit_content_quality],
+        "middleware": [create_skills_middleware()],
     }

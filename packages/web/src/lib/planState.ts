@@ -88,9 +88,14 @@ export function extractPlanState(values: Record<string, unknown> | undefined): P
       blockers: Array.isArray(s.blockers) ? s.blockers : [],
     }))
 
-    const completed = steps.filter((s) => s.status === "completed" || s.status === "skipped").length
-    const inProgress = steps.find((s) => s.status === "in_progress")
-    const nextPending = steps.find((s) => s.status === "pending")
+    let completed = 0
+    let inProgress: PlanStep | undefined
+    let nextPending: PlanStep | undefined
+    for (const s of steps) {
+      if (s.status === "completed" || s.status === "skipped") completed++
+      else if (s.status === "in_progress" && !inProgress) inProgress = s
+      else if (s.status === "pending" && !nextPending) nextPending = s
+    }
 
     return {
       mode: String(raw.mode ?? ""),

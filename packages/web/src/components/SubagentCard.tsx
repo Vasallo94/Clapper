@@ -84,8 +84,7 @@ function extractThinkingText(subagent: SubagentStreamInterface): string {
 function ToolRow({ tc }: { tc: ToolCallWithResult }) {
   const [expanded, setExpanded] = useState(false)
   const isDone = tc.result !== undefined
-  const resultContent = typeof tc.result?.content === "string" ? tc.result.content : ""
-  const isError = /^[Ee]rror\b/.test(resultContent.trim()) || tc.state === "error"
+  const isError = tc.state === "error"
 
   const statusIcon = isDone ? (isError ? "✗" : "✓") : "▶"
   const statusColor = isDone
@@ -322,6 +321,7 @@ export function SubagentCard({ subagent, defaultExpanded = true }: Props) {
   const duration = formatDuration(subagent.startedAt, subagent.completedAt)
   const thinkingText = extractThinkingText(subagent)
   const isActive = subagent.status === "running" || subagent.status === "pending"
+  const isCollapsible = subagent.status === "complete"
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -394,18 +394,18 @@ export function SubagentCard({ subagent, defaultExpanded = true }: Props) {
     >
       {/* Header */}
       <div
-        role={subagent.status === "complete" ? "button" : undefined}
-        tabIndex={subagent.status === "complete" ? 0 : undefined}
-        aria-expanded={subagent.status === "complete" ? true : undefined}
-        aria-label={subagent.status === "complete" ? `Colapsar detalles de ${agentName}` : undefined}
-        onClick={() => subagent.status === "complete" && setExpanded(false)}
-        onKeyDown={subagent.status === "complete" ? handleKeyDown : undefined}
+        role={isCollapsible ? "button" : undefined}
+        tabIndex={isCollapsible ? 0 : undefined}
+        aria-expanded={isCollapsible ? true : undefined}
+        aria-label={isCollapsible ? `Colapsar detalles de ${agentName}` : undefined}
+        onClick={() => isCollapsible && setExpanded(false)}
+        onKeyDown={isCollapsible ? handleKeyDown : undefined}
         style={{
           display: "flex",
           alignItems: "center",
           gap: 8,
           padding: "9px 12px 9px 10px",
-          cursor: subagent.status === "complete" ? "pointer" : "default",
+          cursor: isCollapsible ? "pointer" : "default",
           borderBottom:
             subagent.toolCalls.length > 0 || thinkingText ? `1px solid ${theme.colors.border.subtle}` : undefined,
         }}

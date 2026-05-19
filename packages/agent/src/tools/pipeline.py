@@ -99,13 +99,14 @@ def _default_steps(mode: str) -> list[dict[str, Any]]:
 
 
 def _current_step(steps: list[dict[str, Any]]) -> str:
+    pending_id = ""
     for step in steps:
-        if step.get("status") == "in_progress":
+        st = step.get("status")
+        if st == "in_progress":
             return str(step.get("id", ""))
-    for step in steps:
-        if step.get("status") == "pending":
-            return str(step.get("id", ""))
-    return ""
+        if st == "pending" and not pending_id:
+            pending_id = str(step.get("id", ""))
+    return pending_id
 
 
 def create_pipeline_plan(
@@ -262,10 +263,17 @@ def get_next_pipeline_step(
         }
 
     steps = plan.get("steps", [])
-    completed = [s for s in steps if s.get("status") in ("completed", "skipped")]
-    blocked = [s for s in steps if s.get("status") == "blocked"]
-    in_progress = [s for s in steps if s.get("status") == "in_progress"]
-    pending = [s for s in steps if s.get("status") == "pending"]
+    completed, blocked, in_progress, pending = [], [], [], []
+    for s in steps:
+        st = s.get("status")
+        if st in ("completed", "skipped"):
+            completed.append(s)
+        elif st == "blocked":
+            blocked.append(s)
+        elif st == "in_progress":
+            in_progress.append(s)
+        elif st == "pending":
+            pending.append(s)
 
     progress = {
         "completed": len(completed),

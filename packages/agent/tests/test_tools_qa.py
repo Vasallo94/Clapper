@@ -6,60 +6,44 @@ import pytest
 
 
 class TestRenderSceneStills:
-    def test_returns_manifest_on_success(self, tmp_path):
+    def test_returns_manifest_on_success(self):
         manifest = {"scenes": [{"index": 0, "path": "/tmp/scene-0.png", "frameNumber": 54}]}
-        mock_result = MagicMock()
-        mock_result.returncode = 0
-        mock_result.stdout = json.dumps(manifest)
+        mock_resp = MagicMock()
+        mock_resp.text = json.dumps(manifest)
+        mock_resp.raise_for_status = MagicMock()
 
-        with patch("src.tools.qa.subprocess.run", return_value=mock_result):
-            with patch("src.tools.qa.PROJECT_ROOT", tmp_path):
-                script = tmp_path / "scripts" / "render-scene-stills.ts"
-                script.parent.mkdir(parents=True)
-                script.touch()
+        with patch("src.tools.qa.httpx.post", return_value=mock_resp):
+            from src.tools.qa import render_scene_stills
 
-                from src.tools.qa import render_scene_stills
+            result = json.loads(render_scene_stills('{"id": "test", "scenes": []}'))
+            assert "scenes" in result
+            assert result["scenes"][0]["index"] == 0
 
-                result = json.loads(render_scene_stills('{"id": "test", "scenes": []}'))
-                assert "scenes" in result
-                assert result["scenes"][0]["index"] == 0
+    def test_returns_error_on_failure(self):
+        import httpx
 
-    def test_returns_error_on_failure(self, tmp_path):
-        mock_result = MagicMock()
-        mock_result.returncode = 1
-        mock_result.stderr = "Bundle failed"
+        with patch("src.tools.qa.httpx.post", side_effect=httpx.HTTPError("Connection refused")):
+            from src.tools.qa import render_scene_stills
 
-        with patch("src.tools.qa.subprocess.run", return_value=mock_result):
-            with patch("src.tools.qa.PROJECT_ROOT", tmp_path):
-                script = tmp_path / "scripts" / "render-scene-stills.ts"
-                script.parent.mkdir(parents=True)
-                script.touch()
+            result = json.loads(render_scene_stills('{"id": "test", "scenes": []}'))
+            assert "error" in result
+            assert "Connection refused" in result["error"]
 
-                from src.tools.qa import render_scene_stills
-
-                result = json.loads(render_scene_stills('{"id": "test", "scenes": []}'))
-                assert "error" in result
-                assert "Bundle failed" in result["error"]
-
-    def test_uses_pipeline_context_config_id(self, tmp_path):
+    def test_uses_pipeline_context_render_url(self):
         manifest = {"scenes": []}
-        mock_result = MagicMock()
-        mock_result.returncode = 0
-        mock_result.stdout = json.dumps(manifest)
+        mock_resp = MagicMock()
+        mock_resp.text = json.dumps(manifest)
+        mock_resp.raise_for_status = MagicMock()
 
         runtime = MagicMock()
         from src.context import PipelineContext
         runtime.context = PipelineContext(config_id="ctx-video")
 
-        with patch("src.tools.qa.subprocess.run", return_value=mock_result):
-            with patch("src.tools.qa.PROJECT_ROOT", tmp_path):
-                script = tmp_path / "scripts" / "render-scene-stills.ts"
-                script.parent.mkdir(parents=True)
-                script.touch()
+        with patch("src.tools.qa.httpx.post", return_value=mock_resp) as mock_post:
+            from src.tools.qa import render_scene_stills
 
-                from src.tools.qa import render_scene_stills
-
-                render_scene_stills('{"scenes": []}', runtime=runtime)
+            render_scene_stills('{"scenes": []}', runtime=runtime)
+            assert mock_post.called
 
 
 class TestContextBuilder:
@@ -145,7 +129,7 @@ class TestQaScenes:
             "suggested_changes": {},
         })
 
-        with patch("langchain_google_genai.ChatGoogleGenerativeAI") as MockModel:
+        with patch("src.tools.qa.ChatGoogleGenerativeAI") as MockModel:
             MockModel.return_value.invoke.return_value = llm_response
 
             from src.tools.qa import qa_scenes
@@ -169,7 +153,7 @@ class TestQaScenes:
         llm_response = MagicMock()
         llm_response.content = "I think this scene looks great!"
 
-        with patch("langchain_google_genai.ChatGoogleGenerativeAI") as MockModel:
+        with patch("src.tools.qa.ChatGoogleGenerativeAI") as MockModel:
             MockModel.return_value.invoke.return_value = llm_response
 
             from src.tools.qa import qa_scenes

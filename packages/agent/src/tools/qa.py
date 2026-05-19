@@ -5,8 +5,10 @@ import re
 from pathlib import Path
 from typing import Annotated, Any
 
-import requests
+import httpx
+from langchain_core.messages import HumanMessage
 from langchain_core.tools import InjectedToolArg
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 from ._checkpoint import checkpoint_interrupt
 from ..context import get_pipeline_context
@@ -32,17 +34,16 @@ def render_scene_stills(
     ctx = get_pipeline_context(runtime)
     render_url = (ctx.render_service_url if ctx else None) or _DEFAULT_RENDER_SERVICE_URL
 
-    config = json.loads(config_json)
     try:
-        resp = requests.post(
+        resp = httpx.post(
             f"{render_url}/api/render-stills",
-            data=config_json,
+            content=config_json,
             headers={"Content-Type": "application/json"},
             timeout=180,
         )
         resp.raise_for_status()
         return resp.text
-    except requests.RequestException as exc:
+    except httpx.HTTPError as exc:
         return json.dumps({"error": str(exc)})
 
 
@@ -185,17 +186,13 @@ def qa_scenes(
         config_json: Full config as a JSON string.
         stills_manifest_json: JSON string from render_scene_stills output.
     """
-    import base64
-
-    from langchain_core.messages import HumanMessage
-    from langchain_google_genai import ChatGoogleGenerativeAI
-
     config = json.loads(config_json)
     manifest = json.loads(stills_manifest_json)
     scenes = config.get("scenes", [])
     stills = {s["index"]: s["path"] for s in manifest.get("scenes", [])}
 
     results = []
+    model: ChatGoogleGenerativeAI | None = None
 
     for index, scene in enumerate(scenes):
         still_path = stills.get(index)
@@ -203,7 +200,8 @@ def qa_scenes(
             results.append({"index": index, "verdict": "SKIP", "reason": "No still available"})
             continue
 
-        model = ChatGoogleGenerativeAI(model=QA_MODEL)
+        if model is None:
+            model = ChatGoogleGenerativeAI(model=QA_MODEL)
         context = _build_context(config, scene, index, still_path)
         image_data = base64.b64encode(Path(still_path).read_bytes()).decode("utf-8")
         prompt = _build_qa_prompt(context)

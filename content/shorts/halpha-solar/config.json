@@ -7,6 +7,7 @@
   "width": 1080,
   "height": 1920,
   "theme": "h-alpha",
+  "signature": "Enrique Vasallo",
   "transition": { "type": "fade", "durationInFrames": 12 },
   "scenes": [
     {
@@ -18,7 +19,7 @@
         "imageAlt": "Disco solar en H-alpha con filamentos y protuberancias",
         "title": "¿Quieres ver el Sol con otros ojos?",
         "description": "A simple vista es un disco liso y amarillo. En una sola línea de color, se transforma.",
-        "layout": "image-left"
+        "layout": "image-top"
       }
     },
     {

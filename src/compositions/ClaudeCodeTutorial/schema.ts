@@ -134,6 +134,7 @@ export const TutorialConfigSchema = z.object({
   width: z.union([z.literal(1280), z.literal(1080)]),
   height: z.union([z.literal(720), z.literal(1920)]),
   composition: z.string().nullable().optional(),
+  signature: z.string().nullable().optional(),
   theme: z.enum(["default", "linea-directa", "atom-dark", "h-alpha"]).default("default"),
   brief: BriefSchema.nullable().optional(),
   scenes: z.array(SceneSchema).min(1),

@@ -1,6 +1,7 @@
 import React from "react"
 import { AbsoluteFill, Img } from "remotion"
 import { useThemeTokens } from "../../../../shared/themes"
+import { resolveAssetSrc } from "../../../../shared/resolveAssetSrc"
 import type { Beat, Timing } from "../../../../utils/direction"
 import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
 import { useBeatReveal } from "../../../../shared/hooks/useBeatReveal"
@@ -48,12 +49,12 @@ const AnnotationMarker: React.FC<{
     >
       <div
         style={{
-          width: 24,
-          height: 24,
+          width: 30,
+          height: 30,
           borderRadius: "50%",
           background: tokens.primary,
           color: tokens.primaryForeground,
-          fontSize: 13,
+          fontSize: 15,
           fontWeight: 700,
           display: "flex",
           alignItems: "center",
@@ -69,9 +70,9 @@ const AnnotationMarker: React.FC<{
             ...offset,
             background: tokens.primary,
             color: tokens.primaryForeground,
-            fontSize: 12,
-            fontWeight: 600,
-            padding: "5px 12px",
+            fontSize: 16,
+            fontWeight: 700,
+            padding: "6px 14px",
             borderRadius: 4,
             whiteSpace: "nowrap",
             fontFamily: tokens.fontFamily,
@@ -113,7 +114,7 @@ export const AnnotatedImageScene: React.FC<Record<string, unknown>> = (rawProps)
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "40px 60px",
+        padding: "30px 20px",
       }}
     >
       <div
@@ -121,13 +122,13 @@ export const AnnotatedImageScene: React.FC<Record<string, unknown>> = (rawProps)
           position: "relative",
           opacity: phase1.opacity,
           transform: `scale(${phase1.scale})`,
-          maxWidth: 900,
+          maxWidth: 1040,
           width: "100%",
         }}
       >
         {imageSrc ? (
           <Img
-            src={imageSrc}
+            src={resolveAssetSrc(imageSrc)}
             style={{
               width: "100%",
               borderRadius: 10,

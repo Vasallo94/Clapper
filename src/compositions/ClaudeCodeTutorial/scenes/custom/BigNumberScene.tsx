@@ -21,9 +21,13 @@ interface BigNumberProps {
 }
 
 function extractNumeric(value: string): { numeric: number; isNumeric: boolean } {
-  const cleaned = value.replace(/[^0-9.]/g, "")
-  const num = parseFloat(cleaned)
-  return { numeric: isNaN(num) ? 0 : num, isNumeric: !isNaN(num) && cleaned.length > 0 }
+  // Support a decimal comma (es): "656,28" -> 656.28. A lone comma is the decimal
+  // separator; if a dot is also present the comma is treated as a thousands separator.
+  const cleaned = value.replace(/[^0-9.,]/g, "")
+  const dotForm =
+    cleaned.includes(",") && !cleaned.includes(".") ? cleaned.replace(",", ".") : cleaned.replace(/,/g, "")
+  const num = parseFloat(dotForm)
+  return { numeric: isNaN(num) ? 0 : num, isNumeric: !isNaN(num) && dotForm.length > 0 }
 }
 
 function formatAnimatedValue(value: string, progress: number): string {
@@ -31,11 +35,12 @@ function formatAnimatedValue(value: string, progress: number): string {
   if (!isNumeric) return progress > 0.5 ? value : ""
 
   const current = numeric * progress
-  const decimalMatch = value.match(/\.(\d+)/)
+  const decimalMatch = value.match(/[.,](\d+)/)
   const decimals = decimalMatch ? decimalMatch[1].length : 0
-  const formatted = current.toFixed(decimals)
+  const sep = value.includes(",") && !value.includes(".") ? "," : "."
+  const formatted = current.toFixed(decimals).replace(".", sep)
 
-  return value.replace(/[\d.]+/, formatted)
+  return value.replace(/[\d.,]+/, formatted)
 }
 
 const MetricCard: React.FC<{

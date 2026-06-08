@@ -148,5 +148,17 @@
       }
     }
   },
-  "subtitles": { "enabled": true, "style": "karaoke", "fontSize": 34, "position": "bottom" }
+  "subtitles": { "enabled": true, "style": "karaoke", "fontSize": 34, "position": "bottom" },
+  "soundDesign": {
+    "enabled": true,
+    "musicBed": {
+      "libraryId": "halpha-ambient-drone",
+      "volume": -23,
+      "duckingVolume": -30,
+      "fadeInMs": 2500,
+      "fadeOutMs": 3500,
+      "duckingFadeMs": 500
+    },
+    "sfx": []
+  }
 }

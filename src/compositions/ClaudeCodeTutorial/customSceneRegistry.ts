@@ -16,6 +16,7 @@ import { CodeBlockScene } from "./scenes/custom/CodeBlockScene"
 import { CodeDiffScene } from "./scenes/custom/CodeDiffScene"
 import { ComparisonTableScene } from "./scenes/custom/ComparisonTableScene"
 import { CountdownScene } from "./scenes/custom/CountdownScene"
+import { EtalonScene } from "./scenes/custom/EtalonScene"
 import { FileExplorerScene } from "./scenes/custom/FileExplorerScene"
 import { FlowDiagramScene } from "./scenes/custom/FlowDiagramScene"
 import { IconGridScene } from "./scenes/custom/IconGridScene"
@@ -44,6 +45,7 @@ export const customSceneRegistry: Record<string, FC<Record<string, unknown>>> = 
   "code-diff": CodeDiffScene,
   "comparison-table": ComparisonTableScene,
   countdown: CountdownScene,
+  etalon: EtalonScene,
   "file-explorer": FileExplorerScene,
   "flow-diagram": FlowDiagramScene,
   "icon-grid": IconGridScene,

@@ -5,6 +5,7 @@ import { resolveAssetSrc } from "../../../../shared/resolveAssetSrc"
 import type { Beat, Timing } from "../../../../utils/direction"
 import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
 import { useBeatReveal } from "../../../../shared/hooks/useBeatReveal"
+import { useKenBurns } from "../../../../shared/hooks/useKenBurns"
 
 interface Annotation {
   x: number
@@ -106,6 +107,7 @@ export const AnnotatedImageScene: React.FC<Record<string, unknown>> = (rawProps)
   const { imageSrc, imageAlt, annotations, beats } = props
   const tokens = useThemeTokens()
   const phase1 = usePhase1Entry({ durationMs: 100 })
+  const kb = useKenBurns({ zoomPerSecond: 0.006, from: 1, maxScale: 1.12 })
 
   return (
     <AbsoluteFill
@@ -121,7 +123,8 @@ export const AnnotatedImageScene: React.FC<Record<string, unknown>> = (rawProps)
         style={{
           position: "relative",
           opacity: phase1.opacity,
-          transform: `scale(${phase1.scale})`,
+          transform: `scale(${phase1.scale * kb.scale})`,
+          transformOrigin: "center center",
           maxWidth: 1040,
           width: "100%",
         }}

@@ -35,16 +35,18 @@
     },
     {
       "type": "custom",
-      "componentId": "block-diagram",
+      "componentId": "etalon",
       "durationInSeconds": 14,
       "props": {
         "title": "Aislar un solo color: el etalon",
-        "blocks": [
-          { "label": "Dos espejos", "detail": "Dos superficies casi perfectas, muy juntas y paralelas." },
-          { "label": "Mil reflexiones", "detail": "La luz rebota miles de veces entre ellas." },
-          { "label": "Solo Hα sale", "detail": "Únicamente el rojo de Hα se refuerza. El resto se cancela." }
-        ]
-      }
+        "captions": ["Dos espejos casi perfectos", "La luz rebota miles de veces", "Solo Hα sale reforzada"]
+      },
+      "beats": [
+        { "id": "plates", "startMs": 600, "narration": "el etalon" },
+        { "id": "espejos", "startMs": 5833, "narration": "dos espejos" },
+        { "id": "rebota", "startMs": 8748, "narration": "rebota miles de veces" },
+        { "id": "reforzada", "startMs": 13566, "narration": "solo Hα sale reforzada" }
+      ]
     },
     {
       "type": "custom",
@@ -76,7 +78,15 @@
           { "x": 69, "y": 31, "text": "Protuberancias", "position": "right" },
           { "x": 57, "y": 60, "text": "Textura cromosférica", "position": "bottom" }
         ]
-      }
+      },
+      "beats": [
+        { "id": "img", "startMs": 300, "narration": "ya sabes leer lo que ves" },
+        { "id": "filamentos", "startMs": 2625, "narration": "filamentos oscuros" },
+        { "id": "plages", "startMs": 4343, "narration": "plages brillantes" },
+        { "id": "mancha", "startMs": 5875, "narration": "manchas" },
+        { "id": "protuberancias", "startMs": 6862, "narration": "protuberancias en el borde" },
+        { "id": "textura", "startMs": 8999, "narration": "textura de espículas" }
+      ]
     },
     {
       "type": "cta",

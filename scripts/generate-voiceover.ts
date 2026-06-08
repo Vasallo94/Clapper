@@ -12,6 +12,25 @@ import {
   getVoiceoverText,
   type VoiceoverScene,
 } from "../src/utils/direction"
+import type { SpeakerConfig } from "../src/shared/schemas"
+
+function findFfmpeg(): string {
+  // Try system ffmpeg first, then Remotion's bundled copy
+  try {
+    execFileSync("ffmpeg", ["-version"], { stdio: "pipe" })
+    return "ffmpeg"
+  } catch {
+    const remotionFfmpeg = path.resolve("node_modules/@remotion/compositor-win32-x64-msvc/ffmpeg.exe")
+    if (existsSync(remotionFfmpeg)) return remotionFfmpeg
+    // Fallback for other platforms
+    const compositorGlob = path.resolve("node_modules/@remotion/compositor-")
+    for (const suffix of ["linux-x64-gnu", "darwin-arm64", "darwin-x64"]) {
+      const candidate = `${compositorGlob}${suffix}/ffmpeg`
+      if (existsSync(candidate)) return candidate
+    }
+    throw new Error("ffmpeg not found. Install ffmpeg or run: npx remotion browser ensure")
+  }
+}
 
 const configPath = process.argv[2]
 if (!configPath) {
@@ -51,15 +70,39 @@ const languageCode = config.voiceover.language || "es-ES"
 const elevenLabsDefaults = (config.voiceover.elevenlabs || {}) as ElevenLabsOptions
 const scenes = config.voiceover.scenes || {}
 const outDir = path.resolve("public", "voiceover", config.id)
+const speakers: SpeakerConfig[] | null =
+  Array.isArray(config.voiceover.speakers) && config.voiceover.speakers.length === 2 ? config.voiceover.speakers : null
 
 mkdirSync(outDir, { recursive: true })
 
 const geminiApiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
+const googleCredentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS
 const elevenLabsApiKey = process.env.ELEVENLABS_API_KEY
 
-if (provider === "gemini" && !geminiApiKey) {
-  console.error("❌ Set GOOGLE_AI_API_KEY or GEMINI_API_KEY environment variable")
-  process.exit(1)
+// Resolve GOOGLE_APPLICATION_CREDENTIALS to absolute path for google-auth-library
+if (googleCredentialsPath) {
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = path.resolve(googleCredentialsPath)
+}
+
+let ai: GoogleGenAI | null = null
+
+if (provider === "gemini") {
+  if (googleCredentialsPath && existsSync(path.resolve(googleCredentialsPath))) {
+    const saContent = JSON.parse(readFileSync(path.resolve(googleCredentialsPath), "utf-8"))
+    const projectId = saContent.project_id
+    if (projectId) {
+      ai = new GoogleGenAI({ vertexai: true, project: projectId, location: "us-central1" })
+      console.log(`🔑 Using Vertex AI with service account (project: ${projectId})`)
+    }
+  }
+  if (!ai && geminiApiKey) {
+    ai = new GoogleGenAI({ apiKey: geminiApiKey })
+    console.log("🔑 Using Google AI Studio with API key")
+  }
+  if (!ai) {
+    console.error("❌ Set GOOGLE_APPLICATION_CREDENTIALS (service account) or GOOGLE_AI_API_KEY")
+    process.exit(1)
+  }
 }
 
 if (provider === "elevenlabs" && !elevenLabsApiKey) {
@@ -67,7 +110,23 @@ if (provider === "elevenlabs" && !elevenLabsApiKey) {
   process.exit(1)
 }
 
-const ai = geminiApiKey ? new GoogleGenAI({ apiKey: geminiApiKey }) : null
+function buildSpeechConfig(spkrs: SpeakerConfig[] | null): Record<string, unknown> {
+  if (spkrs) {
+    return {
+      languageCode,
+      multiSpeakerVoiceConfig: {
+        speakerVoiceConfigs: spkrs.map((s) => ({
+          speaker: s.name,
+          voiceConfig: { prebuiltVoiceConfig: { voiceName: s.voiceId } },
+        })),
+      },
+    }
+  }
+  return {
+    languageCode,
+    voiceConfig: { prebuiltVoiceConfig: { voiceName: voiceId } },
+  }
+}
 
 async function generateWithGemini(sceneIndex: string, text: string, mp3Path: string) {
   if (!ai) {
@@ -79,16 +138,11 @@ async function generateWithGemini(sceneIndex: string, text: string, mp3Path: str
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       response = await ai.models.generateContent({
-        model: "gemini-2.5-flash-preview-tts",
-        contents: [{ parts: [{ text }] }],
+        model: "gemini-3.1-flash-tts-preview",
+        contents: [{ role: "user", parts: [{ text }] }],
         config: {
           responseModalities: ["AUDIO"],
-          speechConfig: {
-            languageCode,
-            voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: voiceId },
-            },
-          },
+          speechConfig: buildSpeechConfig(speakers),
         },
       })
       break
@@ -114,7 +168,8 @@ async function generateWithGemini(sceneIndex: string, text: string, mp3Path: str
 
   writeFileSync(pcmPath, pcmBuffer)
 
-  execFileSync("ffmpeg", ["-f", "s16le", "-ar", "24000", "-ac", "1", "-i", pcmPath, "-y", mp3Path], {
+  const ffmpegPath = findFfmpeg()
+  execFileSync(ffmpegPath, ["-f", "s16le", "-ar", "24000", "-ac", "1", "-i", pcmPath, "-y", mp3Path], {
     stdio: "pipe",
   })
 
@@ -133,6 +188,7 @@ function createSceneFingerprint(sceneIndex: string, sceneText: string, sceneValu
     sceneIndex,
     text: sceneText,
     sceneValue,
+    speakers,
   }
 
   return createHash("sha256").update(JSON.stringify(basePayload)).digest("hex")
@@ -288,7 +344,10 @@ async function generateScene(sceneIndex: string, text: string, sceneValue?: Voic
 
 async function main() {
   const entries = Object.entries(scenes)
-  console.log(`🎙️  Generating ${entries.length} voiceover clips (provider: ${provider}, voice: ${voiceId})...`)
+  const mode = speakers ? "multi-speaker" : "single-speaker"
+  console.log(
+    `🎙️  Generating ${entries.length} voiceover clips (provider: ${provider}, mode: ${mode}, voice: ${speakers ? speakers.map((s) => `${s.name}:${s.voiceId}`).join("+") : voiceId})...`,
+  )
 
   for (const [sceneIndex, sceneValue] of entries as Array<[string, VoiceoverScene]>) {
     const text = getVoiceoverText(sceneValue)

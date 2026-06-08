@@ -1,0 +1,768 @@
+{
+  "id": "claude-code-complete-guide",
+  "title": "Claude Code: Guía Completa",
+  "description": "Tutorial completo que cubre las 10 áreas principales de Claude Code: Tool Use, demos en acción, gestión de contexto, cambios y control, custom commands, MCP servers, integración GitHub, hooks y SDK. Dirigido a desarrolladores de Línea Directa.",
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "theme": "linea-directa",
+  "brief": {
+    "platform": "LinkedIn / Interno Línea Directa",
+    "audience": "Desarrolladores de Línea Directa adoptando Claude Code",
+    "goal": "Que conozcan todas las capacidades de Claude Code antes de empezar a usarlo",
+    "promise": "Domina Claude Code en menos de 3 minutos",
+    "tone": "Profesional, cercano, directo — un compañero técnico explicando la herramienta",
+    "cta": "Empieza a usar Claude Code hoy",
+    "hookStrategy": "Abrir con la arquitectura (qué hace diferente a Claude Code), seguido de resultados reales (3.9x Chalk)"
+  },
+  "scenes": [
+    {
+      "type": "intro",
+      "title": "Claude Code: Guía Completa",
+      "subtitle": "Todo lo que necesitas saber en menos de 3 minutos",
+      "durationInSeconds": 7,
+      "pixelLogo": {
+        "enabled": true,
+        "animation": "build"
+      },
+      "timing": {
+        "leadInMs": 400,
+        "audioStartMs": 200,
+        "tailHoldMs": 500,
+        "transitionMs": 0
+      },
+      "beats": [
+        {
+          "id": "brand-reveal",
+          "startMs": 0,
+          "endMs": 800,
+          "narration": "Claude Code.",
+          "visual": "Logo completa build animation, título entra con spring",
+          "animation": "logo-build → title-spring-in",
+          "emphasis": "high"
+        },
+        {
+          "id": "promise",
+          "startMs": 1000,
+          "endMs": 4500,
+          "narration": "La herramienta de IA para desarrolladores que realmente funciona.",
+          "visual": "Subtítulo aparece con fade-in suave",
+          "animation": "subtitle-fade-in",
+          "emphasis": "medium"
+        },
+        {
+          "id": "hook",
+          "startMs": 5000,
+          "endMs": 8500,
+          "narration": "En menos de tres minutos, vas a conocer todo lo que puede hacer por ti.",
+          "visual": "Hold en lockup completo, anticipo de transición",
+          "animation": "hold → anticipate-transition"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "flow-diagram",
+      "durationInSeconds": 14,
+      "props": {
+        "title": "Cómo funciona: Tool Use",
+        "introText": "Los modelos de lenguaje solo procesan texto. Las tools les dan superpoderes.",
+        "nodes": [
+          { "id": "request", "title": "Tu petición", "description": "Texto en lenguaje natural", "color": "#4A90D9" },
+          {
+            "id": "model",
+            "title": "Modelo de lenguaje",
+            "description": "Procesa y decide la acción",
+            "color": "#9B59B6"
+          },
+          { "id": "tools", "title": "Tools", "description": "Leer, escribir, ejecutar", "color": "#E67E22" },
+          {
+            "id": "result",
+            "title": "Resultado",
+            "description": "Código modificado, tests pasados",
+            "color": "#27AE60"
+          }
+        ],
+        "showParticle": true,
+        "outroText": "Claude tiene el mejor tool use del mercado"
+      },
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 100,
+        "tailHoldMs": 500,
+        "minVisualHoldMs": 600,
+        "transitionMs": 600
+      },
+      "beats": [
+        {
+          "id": "concept",
+          "startMs": 0,
+          "endMs": 2500,
+          "narration": "Claude Code funciona con tool use.",
+          "visual": "introText visible, diagrama vacío",
+          "animation": "introText-fade-in"
+        },
+        {
+          "id": "limitation",
+          "startMs": 2800,
+          "endMs": 5500,
+          "narration": "El modelo solo procesa texto —",
+          "visual": "Nodo 'Tu petición' aparece, introText desvanece",
+          "animation": "node-request-spring-in"
+        },
+        {
+          "id": "tools-reveal",
+          "startMs": 5800,
+          "endMs": 9000,
+          "narration": "pero con herramientas puede leer, escribir y ejecutar.",
+          "visual": "Nodos model, tools y result aparecen en stagger, líneas se dibujan",
+          "animation": "nodes-stagger-in → connections-draw",
+          "emphasis": "medium"
+        },
+        {
+          "id": "advantage",
+          "startMs": 9500,
+          "endMs": 12000,
+          "narration": "Claude tiene el mejor tool use del mercado.",
+          "visual": "Partícula completa el recorrido, outroText aparece",
+          "animation": "particle-complete → outroText-spring-in",
+          "emphasis": "high"
+        }
+      ]
+    },
+    {
+      "type": "terminal",
+      "title": "Claude Code en acción",
+      "durationInSeconds": 16,
+      "lines": [
+        { "kind": "command", "text": "claude \"Optimize the Chalk library for performance\"" },
+        { "kind": "claude", "text": "Analyzing benchmarks... Found 3 bottlenecks in string processing" },
+        { "kind": "output", "text": "✓ Result: 3.9x throughput improvement", "delayAfterMs": 800 },
+        { "kind": "blank", "text": "" },
+        { "kind": "command", "text": "claude \"Analyze churn data from streaming_customers.csv\"" },
+        { "kind": "claude", "text": "Creating Jupyter notebook for analysis..." },
+        { "kind": "output", "text": "✓ 3 key churn drivers identified", "delayAfterMs": 600 },
+        { "kind": "blank", "text": "" },
+        { "kind": "command", "text": "claude \"Fix button styling on localhost:3000\"" },
+        { "kind": "claude", "text": "Opening browser via Playwright MCP... Updating CSS..." },
+        { "kind": "output", "text": "✓ UI updated — screenshot verified", "delayAfterMs": 600 }
+      ],
+      "timing": {
+        "leadInMs": 150,
+        "audioStartMs": 100,
+        "tailHoldMs": 500,
+        "minVisualHoldMs": 600,
+        "transitionMs": 800
+      },
+      "beats": [
+        {
+          "id": "intro-demos",
+          "startMs": 0,
+          "endMs": 1800,
+          "narration": "Mira lo que es capaz de hacer.",
+          "visual": "Terminal aparece, cursor listo",
+          "animation": "terminal-fade-in"
+        },
+        {
+          "id": "chalk-demo",
+          "startMs": 2000,
+          "endMs": 6000,
+          "narration": "Optimizar una librería JavaScript y conseguir casi cuatro veces más rendimiento.",
+          "visual": "Comando Chalk se escribe, Claude analiza, output 3.9x aparece",
+          "animation": "typewriter → claude-stream → output-reveal",
+          "emphasis": "high"
+        },
+        {
+          "id": "jupyter-demo",
+          "startMs": 6500,
+          "endMs": 10000,
+          "narration": "Analizar datos de clientes en un Jupyter notebook.",
+          "visual": "Comando churn se escribe, Claude crea notebook, output aparece",
+          "animation": "typewriter → claude-stream → output-reveal",
+          "emphasis": "medium"
+        },
+        {
+          "id": "playwright-demo",
+          "startMs": 10500,
+          "endMs": 14500,
+          "narration": "O corregir una interfaz abriendo un navegador real.",
+          "visual": "Comando fix se escribe, Claude abre browser, output verified",
+          "animation": "typewriter → claude-stream → output-reveal",
+          "emphasis": "medium"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "block-diagram",
+      "durationInSeconds": 12,
+      "props": {
+        "title": "Tres niveles de contexto",
+        "layout": "horizontal",
+        "blocks": [
+          { "id": "project", "title": "Project", "subtitle": "Compartido con el equipo", "color": "#4A90D9" },
+          { "id": "local", "title": "Local", "subtitle": "Personal, no se commitea", "color": "#9B59B6" },
+          { "id": "machine", "title": "Machine", "subtitle": "Global, todos los proyectos", "color": "#27AE60" }
+        ],
+        "connections": [
+          { "from": "project", "to": "local" },
+          { "from": "local", "to": "machine" }
+        ]
+      },
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 100,
+        "tailHoldMs": 450,
+        "minVisualHoldMs": 600,
+        "transitionMs": 1000
+      },
+      "beats": [
+        {
+          "id": "context-intro",
+          "startMs": 0,
+          "endMs": 2500,
+          "narration": "El contexto es clave. Claude Code tiene tres niveles.",
+          "visual": "Título aparece, bloques aún no visibles",
+          "animation": "title-spring-in"
+        },
+        {
+          "id": "project-block",
+          "startMs": 3000,
+          "endMs": 5000,
+          "narration": "El de proyecto, compartido con tu equipo.",
+          "visual": "Bloque Project aparece con spring",
+          "animation": "block-spring-in",
+          "emphasis": "medium"
+        },
+        {
+          "id": "local-block",
+          "startMs": 5500,
+          "endMs": 7500,
+          "narration": "El local, solo para ti.",
+          "visual": "Bloque Local aparece, conexión con Project se dibuja",
+          "animation": "block-spring-in → connection-draw"
+        },
+        {
+          "id": "machine-block",
+          "startMs": 8000,
+          "endMs": 10500,
+          "narration": "Y el de máquina, que aplica a todos tus proyectos.",
+          "visual": "Bloque Machine aparece, conexión con Local se dibuja",
+          "animation": "block-spring-in → connection-draw",
+          "emphasis": "medium"
+        }
+      ]
+    },
+    {
+      "type": "terminal",
+      "title": "Gestión de contexto",
+      "durationInSeconds": 11,
+      "lines": [
+        { "kind": "command", "text": "/init" },
+        {
+          "kind": "output",
+          "text": "✓ CLAUDE.md created — project summary, architecture, key files",
+          "delayAfterMs": 600
+        },
+        { "kind": "blank", "text": "" },
+        { "kind": "command", "text": "@ src/schema.ts \"explain this schema\"" },
+        { "kind": "claude", "text": "This defines your data model: Users, Orders, Products..." },
+        { "kind": "blank", "text": "" },
+        { "kind": "command", "text": "# \"Always use TypeScript strict mode\"" },
+        { "kind": "output", "text": "✓ Rule saved to CLAUDE.md", "delayAfterMs": 400 }
+      ],
+      "timing": {
+        "leadInMs": 150,
+        "audioStartMs": 100,
+        "tailHoldMs": 450,
+        "minVisualHoldMs": 500,
+        "transitionMs": 400
+      },
+      "beats": [
+        {
+          "id": "init-cmd",
+          "startMs": 0,
+          "endMs": 3200,
+          "narration": "Con slash init creas un CLAUDE.md automáticamente.",
+          "visual": "/init se escribe, output aparece",
+          "animation": "typewriter → output-reveal",
+          "emphasis": "medium"
+        },
+        {
+          "id": "at-mention",
+          "startMs": 3500,
+          "endMs": 6500,
+          "narration": "Con arroba mencionas archivos específicos.",
+          "visual": "@ comando se escribe, Claude responde",
+          "animation": "typewriter → claude-stream"
+        },
+        {
+          "id": "hash-memory",
+          "startMs": 7000,
+          "endMs": 9500,
+          "narration": "Y con almohadilla guardas reglas permanentes en memoria.",
+          "visual": "# comando se escribe, regla guardada",
+          "animation": "typewriter → output-reveal",
+          "emphasis": "medium"
+        }
+      ]
+    },
+    {
+      "type": "terminal",
+      "title": "Hacer cambios",
+      "durationInSeconds": 9,
+      "lines": [
+        { "kind": "command", "text": "[Ctrl+V] screenshot pasted" },
+        { "kind": "claude", "text": "I see the misaligned navbar. Fixing padding..." },
+        { "kind": "output", "text": "✓ Navbar alignment fixed", "delayAfterMs": 600 },
+        { "kind": "blank", "text": "" },
+        { "kind": "command", "text": "[Shift+Tab ×2] Plan Mode activated" },
+        { "kind": "claude", "text": "Reading 12 files... 3-step implementation plan ready." },
+        { "kind": "blank", "text": "" },
+        { "kind": "command", "text": "ultra think: why is this race condition happening?" },
+        { "kind": "claude", "text": "Extended analysis: mutex not released on error path at line 47" }
+      ],
+      "timing": {
+        "leadInMs": 150,
+        "audioStartMs": 100,
+        "tailHoldMs": 400,
+        "minVisualHoldMs": 500,
+        "transitionMs": 600
+      },
+      "beats": [
+        {
+          "id": "screenshot",
+          "startMs": 0,
+          "endMs": 2500,
+          "narration": "Pega screenshots con Control-V para cambios de UI.",
+          "visual": "Ctrl+V aparece, Claude fija navbar",
+          "animation": "typewriter → claude-stream → output-reveal"
+        },
+        {
+          "id": "plan-mode",
+          "startMs": 2800,
+          "endMs": 5000,
+          "narration": "Activa Plan Mode para tareas complejas.",
+          "visual": "Shift+Tab se escribe, Claude planifica",
+          "animation": "typewriter → claude-stream",
+          "emphasis": "medium"
+        },
+        {
+          "id": "think-mode",
+          "startMs": 5200,
+          "endMs": 7500,
+          "narration": "O usa Think Mode para depuración profunda.",
+          "visual": "ultra think se escribe, análisis profundo",
+          "animation": "typewriter → claude-stream",
+          "emphasis": "medium"
+        }
+      ]
+    },
+    {
+      "type": "terminal",
+      "title": "Control de contexto",
+      "durationInSeconds": 9,
+      "lines": [
+        { "kind": "command", "text": "[Esc]" },
+        { "kind": "output", "text": "→ Claude interrupted. Redirecting..." },
+        { "kind": "blank", "text": "" },
+        { "kind": "command", "text": "/compact" },
+        { "kind": "output", "text": "✓ Conversation summarized — expertise preserved", "delayAfterMs": 400 },
+        { "kind": "blank", "text": "" },
+        { "kind": "command", "text": "/clear" },
+        { "kind": "output", "text": "✓ Fresh start — ready for new task", "delayAfterMs": 400 }
+      ],
+      "timing": {
+        "leadInMs": 150,
+        "audioStartMs": 100,
+        "tailHoldMs": 400,
+        "minVisualHoldMs": 500,
+        "transitionMs": 400
+      },
+      "beats": [
+        {
+          "id": "control-intro",
+          "startMs": 0,
+          "endMs": 1200,
+          "narration": "Controla la conversación.",
+          "visual": "Terminal con cursor",
+          "animation": "hold"
+        },
+        {
+          "id": "escape",
+          "startMs": 1500,
+          "endMs": 3200,
+          "narration": "Escape para interrumpir.",
+          "visual": "Esc se pulsa, Claude se detiene",
+          "animation": "typewriter → output-reveal"
+        },
+        {
+          "id": "compact",
+          "startMs": 3500,
+          "endMs": 5800,
+          "narration": "Compact para comprimir el historial sin perder conocimiento.",
+          "visual": "/compact se escribe, historial comprimido",
+          "animation": "typewriter → output-reveal",
+          "emphasis": "medium"
+        },
+        {
+          "id": "clear",
+          "startMs": 6000,
+          "endMs": 7800,
+          "narration": "Y clear para empezar de cero.",
+          "visual": "/clear se escribe, pantalla limpia",
+          "animation": "typewriter → output-reveal"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "file-explorer",
+      "durationInSeconds": 11,
+      "props": {
+        "rootPath": ".claude/commands/",
+        "files": [
+          { "name": "audit.md", "type": "file" },
+          { "name": "test-gen.md", "type": "file" },
+          { "name": "vuln-fix.md", "type": "file" }
+        ],
+        "expandFile": "audit.md",
+        "fileContent": "Run a security audit on $ARGUMENTS\n\nCheck for:\n- SQL injection\n- XSS vulnerabilities\n- Exposed credentials",
+        "calloutText": "Escribe /audit src/ para ejecutarlo"
+      },
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 100,
+        "tailHoldMs": 450,
+        "minVisualHoldMs": 600,
+        "transitionMs": 1000
+      },
+      "beats": [
+        {
+          "id": "file-structure",
+          "startMs": 0,
+          "endMs": 4500,
+          "narration": "Los custom commands son archivos markdown en punto claude barra commands.",
+          "visual": "Árbol de archivos se despliega con stagger",
+          "animation": "files-slide-in-stagger"
+        },
+        {
+          "id": "file-expand",
+          "startMs": 4800,
+          "endMs": 7500,
+          "narration": "Cada archivo se convierte en un slash command",
+          "visual": "audit.md se expande, contenido se revela línea a línea",
+          "animation": "content-panel-fade → lines-reveal",
+          "emphasis": "medium"
+        },
+        {
+          "id": "callout",
+          "startMs": 7500,
+          "endMs": 9500,
+          "narration": "que puedes invocar con parámetros.",
+          "visual": "Callout '/audit src/' aparece con spring",
+          "animation": "callout-spring-in"
+        }
+      ]
+    },
+    {
+      "type": "terminal",
+      "title": "MCP Servers",
+      "durationInSeconds": 10,
+      "lines": [
+        { "kind": "command", "text": "claude mcp add playwright npx @anthropic/mcp-playwright" },
+        { "kind": "output", "text": "✓ MCP server \"playwright\" added", "delayAfterMs": 600 },
+        { "kind": "blank", "text": "" },
+        { "kind": "command", "text": "claude \"Test the login form at localhost:3000\"" },
+        { "kind": "claude", "text": "Opening browser... Filling form... Taking screenshot..." },
+        { "kind": "output", "text": "✓ Login flow verified — all tests pass", "delayAfterMs": 600 }
+      ],
+      "timing": {
+        "leadInMs": 150,
+        "audioStartMs": 100,
+        "tailHoldMs": 400,
+        "minVisualHoldMs": 500,
+        "transitionMs": 400
+      },
+      "beats": [
+        {
+          "id": "mcp-concept",
+          "startMs": 0,
+          "endMs": 2500,
+          "narration": "Los MCP servers añaden herramientas externas.",
+          "visual": "Terminal lista, concepto introducido",
+          "animation": "hold"
+        },
+        {
+          "id": "mcp-install",
+          "startMs": 2800,
+          "endMs": 5500,
+          "narration": "Un solo comando para instalar Playwright,",
+          "visual": "Comando mcp add se escribe, confirmación aparece",
+          "animation": "typewriter → output-reveal",
+          "emphasis": "medium"
+        },
+        {
+          "id": "mcp-usage",
+          "startMs": 5800,
+          "endMs": 9000,
+          "narration": "y Claude ya puede abrir un navegador y hacer tests automáticos.",
+          "visual": "Test command, Claude abre browser, tests pasan",
+          "animation": "typewriter → claude-stream → output-reveal",
+          "emphasis": "medium"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "flow-diagram",
+      "durationInSeconds": 10,
+      "props": {
+        "title": "Review automático de PRs",
+        "nodes": [
+          { "id": "pr", "title": "PR abierta", "description": "Desarrollador abre pull request", "color": "#4A90D9" },
+          {
+            "id": "review",
+            "title": "Claude revisa",
+            "description": "Analiza código e infraestructura",
+            "color": "#9B59B6"
+          },
+          {
+            "id": "risk",
+            "title": "Riesgo detectado",
+            "description": "Exposición de PII a partner externo",
+            "color": "#E74C3C"
+          },
+          { "id": "comment", "title": "Comentario", "description": "Claude publica el hallazgo", "color": "#27AE60" }
+        ],
+        "showParticle": true,
+        "outroText": "Usa @claude en issues para asignarle tareas"
+      },
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 100,
+        "tailHoldMs": 450,
+        "minVisualHoldMs": 600,
+        "transitionMs": 800
+      },
+      "beats": [
+        {
+          "id": "pr-flow",
+          "startMs": 0,
+          "endMs": 4000,
+          "narration": "En GitHub, Claude revisa automáticamente cada pull request.",
+          "visual": "Título aparece, nodos PR y Review entran con spring",
+          "animation": "title-spring → nodes-stagger-in"
+        },
+        {
+          "id": "pii-detection",
+          "startMs": 4500,
+          "endMs": 7500,
+          "narration": "Aquí detectó que se estaba exponiendo información personal a un partner externo.",
+          "visual": "Nodo Riesgo aparece en rojo, partícula llega al nodo Comment",
+          "animation": "risk-node-pulse → particle-arrive → comment-spring",
+          "emphasis": "high"
+        },
+        {
+          "id": "mention",
+          "startMs": 7800,
+          "endMs": 9500,
+          "narration": "Usa @claude en issues para asignarle tareas.",
+          "visual": "outroText aparece con spring",
+          "animation": "outroText-spring-in"
+        }
+      ]
+    },
+    {
+      "type": "terminal",
+      "title": "Hooks",
+      "durationInSeconds": 13,
+      "lines": [
+        { "kind": "command", "text": "// .claude/settings.local.json" },
+        {
+          "kind": "output",
+          "text": "{ preToolUse: [{ matcher: \"read|grep\", command: \"node hooks/read_hook.js\" }] }"
+        },
+        { "kind": "blank", "text": "" },
+        { "kind": "command", "text": "claude \"Read the .env file\"" },
+        { "kind": "output", "text": "⛔ Blocked by read hook — .env access denied", "delayAfterMs": 800 },
+        { "kind": "claude", "text": "Understood. I cannot access .env files." },
+        { "kind": "blank", "text": "" },
+        { "kind": "command", "text": "// Post-hook: tsc --no-emit after every edit" },
+        { "kind": "output", "text": "✓ Type errors caught instantly → Claude auto-fixes" }
+      ],
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 100,
+        "tailHoldMs": 500,
+        "minVisualHoldMs": 600,
+        "transitionMs": 800
+      },
+      "beats": [
+        {
+          "id": "hooks-concept",
+          "startMs": 0,
+          "endMs": 2500,
+          "narration": "Los hooks son tu sistema de guardrails.",
+          "visual": "Config JSON se muestra",
+          "animation": "output-reveal",
+          "emphasis": "medium"
+        },
+        {
+          "id": "pre-hook-block",
+          "startMs": 3000,
+          "endMs": 7000,
+          "narration": "Un pre-hook bloquea el acceso a archivos sensibles.",
+          "visual": "Comando .env, bloqueo ⛔ en rojo, Claude confirma restricción",
+          "animation": "typewriter → output-reveal-red → claude-stream",
+          "emphasis": "high"
+        },
+        {
+          "id": "post-hook-fix",
+          "startMs": 7500,
+          "endMs": 11000,
+          "narration": "Un post-hook ejecuta el type checker y Claude corrige los errores automáticamente.",
+          "visual": "Post-hook config, output ✓ en verde",
+          "animation": "typewriter → output-reveal-green",
+          "emphasis": "medium"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "block-diagram",
+      "durationInSeconds": 10,
+      "props": {
+        "title": "Tres formas de integrar",
+        "layout": "horizontal",
+        "blocks": [
+          { "id": "cli", "title": "CLI", "subtitle": "Scripts y pipelines", "color": "#4A90D9" },
+          { "id": "ts", "title": "TypeScript SDK", "subtitle": "Aplicaciones Node.js", "color": "#9B59B6" },
+          { "id": "py", "title": "Python SDK", "subtitle": "Pipelines ML y automatización", "color": "#27AE60" }
+        ]
+      },
+      "timing": {
+        "leadInMs": 200,
+        "audioStartMs": 100,
+        "tailHoldMs": 450,
+        "minVisualHoldMs": 600,
+        "transitionMs": 1000
+      },
+      "beats": [
+        {
+          "id": "sdk-intro",
+          "startMs": 0,
+          "endMs": 3200,
+          "narration": "Y si necesitas integrar Claude Code en tus pipelines, tienes tres opciones.",
+          "visual": "Título aparece, bloques aún no visibles",
+          "animation": "title-spring-in"
+        },
+        {
+          "id": "cli-block",
+          "startMs": 3500,
+          "endMs": 5200,
+          "narration": "CLI para scripts.",
+          "visual": "Bloque CLI aparece con spring",
+          "animation": "block-spring-in"
+        },
+        {
+          "id": "ts-block",
+          "startMs": 5500,
+          "endMs": 7200,
+          "narration": "TypeScript SDK para Node.",
+          "visual": "Bloque TypeScript SDK aparece",
+          "animation": "block-spring-in",
+          "emphasis": "medium"
+        },
+        {
+          "id": "py-block",
+          "startMs": 7500,
+          "endMs": 9200,
+          "narration": "Y Python SDK para machine learning.",
+          "visual": "Bloque Python SDK aparece",
+          "animation": "block-spring-in"
+        }
+      ]
+    },
+    {
+      "type": "outro",
+      "title": "Empieza a usar Claude Code",
+      "durationInSeconds": 8,
+      "bullets": [
+        "Tool use que se adapta a tu workflow",
+        "Sistema de contexto que mantiene a Claude enfocado",
+        "Extensible con MCP, Commands, Hooks y SDK"
+      ],
+      "timing": {
+        "leadInMs": 150,
+        "audioStartMs": 100,
+        "tailHoldMs": 800,
+        "minVisualHoldMs": 700,
+        "transitionMs": 1200
+      },
+      "beats": [
+        {
+          "id": "cta-title",
+          "startMs": 0,
+          "endMs": 1800,
+          "narration": "Empieza a usar Claude Code.",
+          "visual": "Título aparece con spring, mascota entra con idle",
+          "animation": "title-spring-in → mascot-idle",
+          "emphasis": "high"
+        },
+        {
+          "id": "bullet-1",
+          "startMs": 2000,
+          "endMs": 3200,
+          "narration": "Se adapta a tu workflow,",
+          "visual": "Primer bullet aparece con slide-in",
+          "animation": "bullet-slide-in"
+        },
+        {
+          "id": "bullet-2",
+          "startMs": 3500,
+          "endMs": 4800,
+          "narration": "mantiene el contexto",
+          "visual": "Segundo bullet aparece",
+          "animation": "bullet-slide-in"
+        },
+        {
+          "id": "bullet-3",
+          "startMs": 5000,
+          "endMs": 6500,
+          "narration": "y se extiende con todo lo que necesites.",
+          "visual": "Tercer bullet aparece, hold final de marca",
+          "animation": "bullet-slide-in → brand-hold",
+          "emphasis": "medium"
+        }
+      ]
+    }
+  ],
+  "voiceover": {
+    "enabled": true,
+    "provider": "gemini",
+    "voiceId": "Orus",
+    "language": "es-ES",
+    "scenes": {
+      "0": "Narra con tono profesional, cercano y directo, como un compañero técnico presentando una herramienta: [medium pause] Claude Code. [short pause] La herramienta de IA para desarrolladores que realmente funciona. [medium pause] En menos de tres minutos, vas a conocer todo lo que puede hacer por ti.",
+      "1": "Claude Code funciona con tool use. [short pause] El modelo solo procesa texto [short pause] — pero con herramientas puede leer, escribir y ejecutar. [medium pause] Claude tiene el mejor tool use del mercado.",
+      "2": "Mira lo que es capaz de hacer. [medium pause] Optimizar una librería JavaScript y conseguir casi cuatro veces más rendimiento. [short pause] Analizar datos de clientes en un Jupyter notebook. [short pause] O corregir una interfaz abriendo un navegador real.",
+      "3": "El contexto es clave. [medium pause] Claude Code tiene tres niveles. [short pause] El de proyecto, compartido con tu equipo. [short pause] El local, solo para ti. [short pause] Y el de máquina, que aplica a todos tus proyectos.",
+      "4": "Con slash init creas un CLAUDE punto MD automáticamente. [short pause] Con arroba mencionas archivos específicos. [short pause] Y con almohadilla guardas reglas permanentes en memoria.",
+      "5": "Pega screenshots con Control V para cambios de UI. [short pause] Activa Plan Mode para tareas complejas. [short pause] O usa Think Mode para depuración profunda.",
+      "6": "Controla la conversación. [medium pause] Escape para interrumpir. [short pause] Compact para comprimir el historial sin perder conocimiento. [short pause] Y clear para empezar de cero.",
+      "7": "Los custom commands son archivos markdown en punto claude barra commands. [short pause] Cada archivo se convierte en un slash command que puedes invocar con parámetros.",
+      "8": "Los MCP servers añaden herramientas externas. [short pause] Un solo comando para instalar Playwright, [short pause] y Claude ya puede abrir un navegador y hacer tests automáticos.",
+      "9": "En GitHub, Claude revisa automáticamente cada pull request. [medium pause] Aquí detectó que se estaba exponiendo información personal a un partner externo.",
+      "10": "Los hooks son tu sistema de guardrails. [medium pause] Un pre-hook bloquea el acceso a archivos sensibles. [short pause] Un post-hook ejecuta el type checker y Claude corrige los errores automáticamente.",
+      "11": "Y si necesitas integrar Claude Code en tus pipelines, tienes tres opciones. [medium pause] CLI para scripts. [short pause] TypeScript SDK para Node. [short pause] Y Python SDK para machine learning.",
+      "12": "Narra con tono pausado y con peso, como cierre de presentación: [medium pause] Empieza a usar Claude Code. [medium pause] Se adapta a tu workflow, [short pause] mantiene el contexto [short pause] y se extiende con todo lo que necesites."
+    }
+  },
+  "subtitles": {
+    "enabled": true,
+    "style": "karaoke",
+    "fontSize": 32,
+    "position": "bottom"
+  }
+}

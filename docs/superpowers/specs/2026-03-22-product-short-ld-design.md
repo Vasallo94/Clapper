@@ -168,6 +168,7 @@ Un solo `scripts/render.ts` que lee `config.composition` (default `"ClaudeCodeTu
 ## Animaciones
 
 Mismas reglas que ClaudeCodeTutorial:
+
 - Solo `useCurrentFrame()` + `spring()` + `interpolate()`
 - Prohibido CSS transitions y animaciones Tailwind
 - Remotion renderiza frame a frame

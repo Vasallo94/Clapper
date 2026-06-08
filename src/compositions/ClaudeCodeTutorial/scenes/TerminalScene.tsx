@@ -2,8 +2,8 @@
 import React, { useMemo } from "react"
 import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig, spring } from "remotion"
 import type { TerminalSceneProps, TerminalLine } from "../schema"
-import { useThemeTokens, type ThemeTokens } from "../themes"
-import { MascotWatermark } from "../components/MascotWatermark"
+import { useThemeTokens, type ThemeTokens } from "../../../shared/themes"
+import { MascotWatermark } from "../../../shared/components/MascotWatermark"
 import { getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
 
 const COMMAND_CHARS_PER_FRAME = 0.75

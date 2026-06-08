@@ -8,7 +8,7 @@ export const dbToLinear = (db: number): number => Math.pow(10, db / 20)
 export interface SceneAudioInfo {
   startFrame: number
   durationFrames: number
-  timing?: Timing
+  timing?: Timing | null
   audioDurationMs: number | null // null = no voiceover for this scene
   sceneType: string
 }
@@ -100,7 +100,7 @@ export function getSceneSfxEntries(sceneIndex: number, sceneType: string, soundD
 /**
  * Calculate the frame (relative to scene start) where an SFX should trigger.
  */
-export function sfxTriggerFrame(sfx: SfxEntry, sceneTiming: Timing | undefined, fps: number): number {
+export function sfxTriggerFrame(sfx: SfxEntry, sceneTiming: Timing | null | undefined, fps: number): number {
   switch (sfx.trigger) {
     case "scene-start":
       return msToFrames(sceneTiming?.leadInMs ?? 0, fps)

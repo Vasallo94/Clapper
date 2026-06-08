@@ -12,21 +12,22 @@
 
 ## File Map
 
-| Action | File | Responsibility |
-|--------|------|---------------|
-| Install | `@remotion/paths` | SVG path utilities (evolvePath, getPointAtLength) |
-| Create | `src/compositions/ClaudeCodeTutorial/scenes/custom/BlockDiagramScene.tsx` | Animated block diagram with connections |
-| Create | `src/compositions/ClaudeCodeTutorial/scenes/custom/FileExplorerScene.tsx` | IDE-style file tree + content viewer |
-| Create | `src/compositions/ClaudeCodeTutorial/scenes/custom/FlowDiagramScene.tsx` | Flow diagram with animated particle |
-| Create | `src/compositions/ClaudeCodeTutorial/scenes/custom/svg-icons.tsx` | Shared SVG icons (folder, file, markdown) |
-| Modify | `src/compositions/ClaudeCodeTutorial/customSceneRegistry.ts` | Register all 3 components |
-| Create | `tutorials/claude-code-memory/config.json` | Full video config (9 scenes) |
+| Action  | File                                                                      | Responsibility                                    |
+| ------- | ------------------------------------------------------------------------- | ------------------------------------------------- |
+| Install | `@remotion/paths`                                                         | SVG path utilities (evolvePath, getPointAtLength) |
+| Create  | `src/compositions/ClaudeCodeTutorial/scenes/custom/BlockDiagramScene.tsx` | Animated block diagram with connections           |
+| Create  | `src/compositions/ClaudeCodeTutorial/scenes/custom/FileExplorerScene.tsx` | IDE-style file tree + content viewer              |
+| Create  | `src/compositions/ClaudeCodeTutorial/scenes/custom/FlowDiagramScene.tsx`  | Flow diagram with animated particle               |
+| Create  | `src/compositions/ClaudeCodeTutorial/scenes/custom/svg-icons.tsx`         | Shared SVG icons (folder, file, markdown)         |
+| Modify  | `src/compositions/ClaudeCodeTutorial/customSceneRegistry.ts`              | Register all 3 components                         |
+| Create  | `tutorials/claude-code-memory/config.json`                                | Full video config (9 scenes)                      |
 
 ---
 
 ### Task 1: Install @remotion/paths
 
 **Files:**
+
 - Modify: `package.json`
 
 - [ ] **Step 1: Install the package**
@@ -57,6 +58,7 @@ git commit -m "chore: add @remotion/paths for SVG path animations"
 Shared inline SVG icons for the FileExplorerScene. No emojis anywhere.
 
 **Files:**
+
 - Create: `src/compositions/ClaudeCodeTutorial/scenes/custom/svg-icons.tsx`
 
 - [ ] **Step 1: Create the SVG icons file**
@@ -106,7 +108,11 @@ export const MarkdownIcon: React.FC<IconProps> = ({ size = 16, color = "#98c379"
   </svg>
 )
 
-export const ChevronIcon: React.FC<IconProps & { open?: boolean }> = ({ size = 12, color = "#636d83", open = true }) => (
+export const ChevronIcon: React.FC<IconProps & { open?: boolean }> = ({
+  size = 12,
+  color = "#636d83",
+  open = true,
+}) => (
   <svg
     width={size}
     height={size}
@@ -141,6 +147,7 @@ git commit -m "feat: add SVG icon components for custom scenes"
 Animated blocks with staggered spring entrances and connecting lines. Used in Scene 4 (3-block system overview) and Scene 6a (4-block memory types grid).
 
 **Files:**
+
 - Create: `src/compositions/ClaudeCodeTutorial/scenes/custom/BlockDiagramScene.tsx`
 
 - [ ] **Step 1: Create BlockDiagramScene**
@@ -148,13 +155,7 @@ Animated blocks with staggered spring entrances and connecting lines. Used in Sc
 ```tsx
 // src/compositions/ClaudeCodeTutorial/scenes/custom/BlockDiagramScene.tsx
 import React from "react"
-import {
-  AbsoluteFill,
-  interpolate,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion"
+import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { useThemeTokens } from "../../themes"
 
 interface Block {
@@ -221,9 +222,7 @@ export const BlockDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =
 
       {/* SVG layer for connection lines */}
       {!isGrid && connections.length > 0 && (
-        <svg
-          style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }}
-        >
+        <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
           {connections.map((conn, ci) => {
             const fromIdx = blocks.findIndex((b) => b.id === conn.from)
             const toIdx = blocks.findIndex((b) => b.id === conn.to)
@@ -359,6 +358,7 @@ git commit -m "feat: add BlockDiagramScene custom component"
 IDE-style file tree on the left, file content panel on the right. Files appear with staggered springs, one file expands to show content with syntax-highlighted frontmatter.
 
 **Files:**
+
 - Create: `src/compositions/ClaudeCodeTutorial/scenes/custom/FileExplorerScene.tsx`
 
 - [ ] **Step 1: Create FileExplorerScene**
@@ -366,13 +366,7 @@ IDE-style file tree on the left, file content panel on the right. Files appear w
 ```tsx
 // src/compositions/ClaudeCodeTutorial/scenes/custom/FileExplorerScene.tsx
 import React from "react"
-import {
-  AbsoluteFill,
-  interpolate,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion"
+import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { useThemeTokens } from "../../themes"
 import { FolderIcon, MarkdownIcon, ChevronIcon } from "./svg-icons"
 
@@ -408,12 +402,10 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
   const body = fmMatch ? fmMatch[2].trim() : fileContent
 
   // Content reveal progress
-  const contentProgress = interpolate(
-    frame,
-    [expandStart, expandStart + contentRevealDuration],
-    [0, 1],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-  )
+  const contentProgress = interpolate(frame, [expandStart, expandStart + contentRevealDuration], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  })
 
   // Callout animation
   const calloutDelay = expandStart + contentRevealDuration + Math.ceil(fps * 0.3)
@@ -481,9 +473,7 @@ export const FileExplorerScene: React.FC<Record<string, unknown>> = (rawProps) =
 
           const Icon = file.type === "folder" ? FolderIcon : MarkdownIcon
           const nameColor = file.isNew ? tokens.primary : tokens.foreground
-          const bgHighlight = isExpanded && frame >= expandStart
-            ? `${tokens.primary}15`
-            : "transparent"
+          const bgHighlight = isExpanded && frame >= expandStart ? `${tokens.primary}15` : "transparent"
 
           return (
             <div
@@ -670,6 +660,7 @@ git commit -m "feat: add FileExplorerScene custom component"
 Flow diagram with nodes connected by SVG paths, animated data particle, and intro/outro callout text. Uses `@remotion/paths`.
 
 **Files:**
+
 - Create: `src/compositions/ClaudeCodeTutorial/scenes/custom/FlowDiagramScene.tsx`
 
 - [ ] **Step 1: Create FlowDiagramScene**
@@ -677,13 +668,7 @@ Flow diagram with nodes connected by SVG paths, animated data particle, and intr
 ```tsx
 // src/compositions/ClaudeCodeTutorial/scenes/custom/FlowDiagramScene.tsx
 import React from "react"
-import {
-  AbsoluteFill,
-  interpolate,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion"
+import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
 import { evolvePath, getPointAtLength, getLength } from "@remotion/paths"
 import { useThemeTokens } from "../../themes"
 
@@ -740,25 +725,19 @@ export const FlowDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =>
   const pathLength = fullPath ? getLength(fullPath) : 0
 
   // Particle position
-  const particleProgress = interpolate(
-    frame,
-    [particleStart, particleEnd],
-    [0, 1],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-  )
+  const particleProgress = interpolate(frame, [particleStart, particleEnd], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  })
 
   const particlePoint =
-    fullPath && pathLength > 0 && showParticle
-      ? getPointAtLength(fullPath, particleProgress * pathLength)
-      : null
+    fullPath && pathLength > 0 && showParticle ? getPointAtLength(fullPath, particleProgress * pathLength) : null
 
   // Path drawing animation
-  const pathDrawProgress = interpolate(
-    frame,
-    [nodesEnd, nodesEnd + Math.ceil(fps * 0.6)],
-    [0, 1],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-  )
+  const pathDrawProgress = interpolate(frame, [nodesEnd, nodesEnd + Math.ceil(fps * 0.6)], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  })
 
   // Which node is the particle currently at?
   const activeNodeIndex = Math.floor(particleProgress * nodes.length)
@@ -871,19 +850,8 @@ export const FlowDiagramScene: React.FC<Record<string, unknown>> = (rawProps) =>
         {/* Particle glow */}
         {particlePoint && showParticle && frame >= particleStart && (
           <>
-            <circle
-              cx={particlePoint.x}
-              cy={particlePoint.y}
-              r={12}
-              fill={tokens.primary}
-              opacity={0.3}
-            />
-            <circle
-              cx={particlePoint.x}
-              cy={particlePoint.y}
-              r={6}
-              fill={tokens.primary}
-            />
+            <circle cx={particlePoint.x} cy={particlePoint.y} r={12} fill={tokens.primary} opacity={0.3} />
+            <circle cx={particlePoint.x} cy={particlePoint.y} r={6} fill={tokens.primary} />
           </>
         )}
       </svg>
@@ -1004,6 +972,7 @@ git commit -m "feat: add FlowDiagramScene custom component with particle animati
 Wire all 3 components into the registry so they're available to config.json.
 
 **Files:**
+
 - Modify: `src/compositions/ClaudeCodeTutorial/customSceneRegistry.ts`
 
 - [ ] **Step 1: Update the registry**
@@ -1049,6 +1018,7 @@ git commit -m "feat: register BlockDiagram, FileExplorer, FlowDiagram in custom 
 The full video config with 9 scenes (Scene 6 split into 6a and 6b).
 
 **Files:**
+
 - Create: `tutorials/claude-code-memory/config.json`
 
 - [ ] **Step 1: Create the tutorial directory and config**
@@ -1079,16 +1049,37 @@ Write `tutorials/claude-code-memory/config.json`:
       "type": "terminal",
       "title": "Una conversación sobre telescopios solares",
       "lines": [
-        { "kind": "command", "text": "Quiero preparar un setup de astrofotografía solar para el eclipse total de 2026 en España. ¿Qué telescopio me recomiendas?" },
+        {
+          "kind": "command",
+          "text": "Quiero preparar un setup de astrofotografía solar para el eclipse total de 2026 en España. ¿Qué telescopio me recomiendas?"
+        },
         { "kind": "blank", "text": "", "delayAfterMs": 800 },
-        { "kind": "claude", "text": "Para el eclipse total del 12 de agosto de 2026 en España, necesitas un telescopio solar dedicado con filtro H-Alpha." },
-        { "kind": "claude", "text": "Te recomiendo el DayStar HelioStar 100Ha — apertura de 100mm, filtro H-Alpha integrado, ideal para prominencias y cromosfera." },
+        {
+          "kind": "claude",
+          "text": "Para el eclipse total del 12 de agosto de 2026 en España, necesitas un telescopio solar dedicado con filtro H-Alpha."
+        },
+        {
+          "kind": "claude",
+          "text": "Te recomiendo el DayStar HelioStar 100Ha — apertura de 100mm, filtro H-Alpha integrado, ideal para prominencias y cromosfera."
+        },
         { "kind": "blank", "text": "", "delayAfterMs": 400 },
-        { "kind": "claude", "text": "Para la cámara, la ZWO ASI432MM es excelente para solar: sensor monocromo, alta velocidad de captura, y buen rango dinámico." },
-        { "kind": "claude", "text": "Añade una Powermate 2x de TeleVue para aumentar la focal y capturar detalles en las manchas solares." },
+        {
+          "kind": "claude",
+          "text": "Para la cámara, la ZWO ASI432MM es excelente para solar: sensor monocromo, alta velocidad de captura, y buen rango dinámico."
+        },
+        {
+          "kind": "claude",
+          "text": "Añade una Powermate 2x de TeleVue para aumentar la focal y capturar detalles en las manchas solares."
+        },
         { "kind": "blank", "text": "", "delayAfterMs": 600 },
-        { "kind": "command", "text": "Perfecto, voy con HelioStar 100Ha + ASI432MM + Powermate 2x. Lo documento en mi vault." },
-        { "kind": "claude", "text": "Buena elección. Es un setup equilibrado para solar: resolución, contraste y portabilidad para el día del eclipse." }
+        {
+          "kind": "command",
+          "text": "Perfecto, voy con HelioStar 100Ha + ASI432MM + Powermate 2x. Lo documento en mi vault."
+        },
+        {
+          "kind": "claude",
+          "text": "Buena elección. Es un setup equilibrado para solar: resolución, contraste y portabilidad para el día del eclipse."
+        }
       ],
       "durationInSeconds": 35
     },
@@ -1141,10 +1132,30 @@ Write `tutorials/claude-code-memory/config.json`:
         "title": "4 tipos de memoria automática",
         "layout": "grid",
         "blocks": [
-          { "id": "user", "title": "user", "subtitle": "Es astrofotógrafo, prefiere recomendaciones con investigación", "color": "#61afef" },
-          { "id": "feedback", "title": "feedback", "subtitle": "No resumir al final de cada respuesta", "color": "#98c379" },
-          { "id": "project", "title": "project", "subtitle": "Merge freeze a partir del 5 de marzo", "color": "#c678dd" },
-          { "id": "reference", "title": "reference", "subtitle": "Los bugs se trackean en Linear proyecto INGEST", "color": "#d19a66" }
+          {
+            "id": "user",
+            "title": "user",
+            "subtitle": "Es astrofotógrafo, prefiere recomendaciones con investigación",
+            "color": "#61afef"
+          },
+          {
+            "id": "feedback",
+            "title": "feedback",
+            "subtitle": "No resumir al final de cada respuesta",
+            "color": "#98c379"
+          },
+          {
+            "id": "project",
+            "title": "project",
+            "subtitle": "Merge freeze a partir del 5 de marzo",
+            "color": "#c678dd"
+          },
+          {
+            "id": "reference",
+            "title": "reference",
+            "subtitle": "Los bugs se trackean en Linear proyecto INGEST",
+            "color": "#d19a66"
+          }
         ]
       }
     },
@@ -1175,10 +1186,30 @@ Write `tutorials/claude-code-memory/config.json`:
         "introText": "Como el sueño REM consolida tu memoria del día, Auto Dream consolida las notas de Claude",
         "showParticle": true,
         "nodes": [
-          { "id": "orient", "title": "Orientación", "description": "Inventaría todos los archivos de memoria", "color": "#61afef" },
-          { "id": "signal", "title": "Recopilar señal", "description": "Busca correcciones, temas recurrentes", "color": "#98c379" },
-          { "id": "consolidate", "title": "Consolidación", "description": "Fusiona duplicados, convierte fechas, elimina obsoletos", "color": "#c678dd" },
-          { "id": "prune", "title": "Poda e indexado", "description": "Actualiza MEMORY.md, máx 200 líneas", "color": "#d19a66" }
+          {
+            "id": "orient",
+            "title": "Orientación",
+            "description": "Inventaría todos los archivos de memoria",
+            "color": "#61afef"
+          },
+          {
+            "id": "signal",
+            "title": "Recopilar señal",
+            "description": "Busca correcciones, temas recurrentes",
+            "color": "#98c379"
+          },
+          {
+            "id": "consolidate",
+            "title": "Consolidación",
+            "description": "Fusiona duplicados, convierte fechas, elimina obsoletos",
+            "color": "#c678dd"
+          },
+          {
+            "id": "prune",
+            "title": "Poda e indexado",
+            "description": "Actualiza MEMORY.md, máx 200 líneas",
+            "color": "#d19a66"
+          }
         ],
         "outroText": "Se activa cuando: han pasado 24h desde la última ejecución + 5 sesiones completadas"
       }
@@ -1237,6 +1268,7 @@ Open browser to the Remotion Studio URL (usually http://localhost:3000). Select 
 - [ ] **Step 2: Visual check each scene**
 
 Scrub through the timeline and verify:
+
 - Scene 1 (Intro): title and subtitle animate in with blue→purple accent line
 - Scene 2 (Terminal): conversation types out correctly, no text overflow
 - Scene 3 (File Explorer): files appear with stagger, `user_astrophotography.md` opens, frontmatter has syntax coloring, callout appears at bottom

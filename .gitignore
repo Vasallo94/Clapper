@@ -8,9 +8,41 @@ dist
 out
 
 # Vídeos generados — binarios grandes, no trackear
-tutorials/*/output.mp4
-shorts/*/output.mp4
+content/**/output.mp4
 public/voiceover/
 .superpowers/
 .claude/hooks/
 .claude/voiceover-usage.log
+
+# Service account keys — NEVER commit
+*_sa.json
+*-sa.json
+*.credentials.json
+service-account*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+*.egg-info/
+
+# Build artifacts
+build/
+*.stackdump
+
+# LangGraph runtime state
+packages/agent/.langgraph_api/
+
+# Generated configs (agent test runs)
+/config.json
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Generated audio/video assets
+public/audio/*/
+!public/audio/library/
+
+# All transient pipeline outputs (renders, generated assets)
+.generated/

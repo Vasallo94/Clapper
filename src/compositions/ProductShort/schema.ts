@@ -4,27 +4,27 @@ import {
   BriefSchema,
   DirectionSceneFieldsSchema,
   SoundDesignSchema,
+  TransitionConfigSchema,
   VoiceoverConfigSchema,
-} from "../../utils/direction"
+} from "../../shared/schemas"
 
 const HeroSceneSchema = z
   .object({
     type: z.literal("hero"),
     title: z.string(),
-    subtitle: z.string().optional(),
+    subtitle: z.string().nullable().optional(),
     durationInSeconds: z.number().min(1).max(10),
   })
   .merge(DirectionSceneFieldsSchema)
 
 const BenefitItemSchema = z.object({
-  icon: z.string(),
   text: z.string(),
 })
 
 const BenefitsSceneSchema = z
   .object({
     type: z.literal("benefits"),
-    title: z.string().optional(),
+    title: z.string().nullable().optional(),
     items: z.array(BenefitItemSchema).min(1),
     durationInSeconds: z.number().min(2).max(15),
   })
@@ -34,8 +34,8 @@ const PricingSceneSchema = z
   .object({
     type: z.literal("pricing"),
     price: z.string(),
-    period: z.string().optional(),
-    note: z.string().optional(),
+    period: z.string().nullable().optional(),
+    note: z.string().nullable().optional(),
     variant: z.enum(["light", "dark"]),
     durationInSeconds: z.number().min(1).max(10),
   })
@@ -45,7 +45,7 @@ const CtaSceneSchema = z
   .object({
     type: z.literal("cta"),
     text: z.string(),
-    url: z.string().optional(),
+    url: z.string().nullable().optional(),
     durationInSeconds: z.number().min(1).max(10),
   })
   .merge(DirectionSceneFieldsSchema)
@@ -61,10 +61,13 @@ export const ProductShortConfigSchema = z.object({
   fps: z.literal(30),
   width: z.literal(1080),
   height: z.literal(1920),
-  brief: BriefSchema.optional(),
+  brief: BriefSchema.nullable().optional(),
   scenes: z.array(ProductShortSceneSchema).min(1),
-  voiceover: VoiceoverConfigSchema.optional(),
-  soundDesign: SoundDesignSchema.optional(),
+  voiceover: VoiceoverConfigSchema.nullable().optional(),
+  soundDesign: SoundDesignSchema.nullable().optional(),
+  // Zod data field, not a CSS transition.
+  // eslint-disable-next-line @remotion/non-pure-animation
+  transition: TransitionConfigSchema,
 })
 
 export type ProductShortConfig = z.infer<typeof ProductShortConfigSchema>

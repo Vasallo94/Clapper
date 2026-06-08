@@ -1,0 +1,14 @@
+{
+  "id": "test-short",
+  "composition": "ProductShort",
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "theme": "linea-directa",
+  "product": "Test Product",
+  "headline": "Test Headline",
+  "scenes": [
+    { "type": "hero", "durationInSeconds": 3, "title": "Test Headline" },
+    { "type": "cta", "durationInSeconds": 2, "text": "CTA Text", "url": "test.com" }
+  ]
+}

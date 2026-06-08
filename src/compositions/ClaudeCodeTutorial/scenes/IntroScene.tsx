@@ -1,39 +1,21 @@
 // src/compositions/ClaudeCodeTutorial/scenes/IntroScene.tsx
 import React from "react"
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion"
 import type { IntroSceneProps } from "../schema"
-import { useThemeTokens } from "../themes"
-import { PhoneMascot } from "../components/PhoneMascot"
-import { PixelLogo } from "../components/pixel-art/PixelLogo"
-import { getBeatStartFrame, getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
+import { useThemeTokens } from "../../../shared/themes"
+import { LineaDirectaBrandLockup } from "../../../shared/components/LineaDirectaBrandLockup"
+import { PixelLogo } from "../../../shared/components/pixel-art/PixelLogo"
+import { getBeatStartFrame } from "../../../utils/direction"
+import { usePhase1Entry } from "../../../shared/hooks/usePhase1Entry"
 
-export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle, pixelLogo, timing, beats }) => {
+export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle, pixelLogo, beats }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const tokens = useThemeTokens()
 
-  const configuredMotionStart = msToFrames(getSceneMotionDelayMs(timing), fps)
-  const firstNarratedBeat = beats?.find((beat) => beat.narration.trim())
-  const accentStart = firstNarratedBeat ? getBeatStartFrame(firstNarratedBeat, fps) : configuredMotionStart
-
-  // Lockup: title, subtitle, and logo animate in immediately on scene entry
-  const lockupOpacity = interpolate(frame, [0, Math.ceil(fps * 0.16)], [0, 1], {
-    extrapolateRight: "clamp",
-  })
-  const titleSpring = spring({
-    frame,
-    fps,
-    config: { damping: 18, stiffness: 110 },
-    durationInFrames: Math.ceil(fps * 0.7),
-  })
-  const titleY = interpolate(titleSpring, [0, 1], [18, 0])
-  const subtitleSpring = spring({
-    frame: Math.max(0, frame - Math.ceil(fps * 0.14)),
-    fps,
-    config: { damping: 20, stiffness: 120 },
-    durationInFrames: Math.ceil(fps * 0.55),
-  })
-  const subtitleY = interpolate(subtitleSpring, [0, 1], [14, 0])
+  const phase1 = usePhase1Entry({ durationMs: 100 })
+  const firstNarratedBeat = beats?.find((beat) => beat.narration?.trim())
+  const accentStart = firstNarratedBeat ? getBeatStartFrame(firstNarratedBeat, fps) : Math.ceil(fps * 0.2)
 
   // Accent line waits for the first narrated beat
   const accentFrame = Math.max(0, frame - accentStart)
@@ -57,8 +39,8 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle, pixelLo
       }}
     >
       {tokens.mascot.show && (
-        <div style={{ marginBottom: 24, opacity: lockupOpacity }}>
-          <PhoneMascot scale={1} animation="entry" />
+        <div style={{ marginBottom: 2, opacity: phase1.opacity }}>
+          <LineaDirectaBrandLockup scale={0.72} animation="reveal" compact />
         </div>
       )}
 
@@ -66,8 +48,8 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle, pixelLo
         <div
           style={{
             marginBottom: 8,
-            opacity: lockupOpacity,
-            transform: `translateY(${interpolate(titleSpring, [0, 1], [10, 0])}px)`,
+            opacity: phase1.opacity,
+            transform: `scale(${phase1.scale})`,
             position: "relative",
             width: 64 * logoScale,
             height: 96 * logoScale,
@@ -84,19 +66,21 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle, pixelLo
         </div>
       )}
 
-      <div
-        style={{
-          fontFamily: tokens.fontFamily,
-          fontSize: 14,
-          fontWeight: 600,
-          letterSpacing: 4,
-          textTransform: "uppercase",
-          color: tokens.primary,
-          opacity: lockupOpacity,
-        }}
-      >
-        {tokens.label}
-      </div>
+      {!tokens.mascot.show && (
+        <div
+          style={{
+            fontFamily: tokens.fontFamily,
+            fontSize: 14,
+            fontWeight: 600,
+            letterSpacing: 4,
+            textTransform: "uppercase",
+            color: tokens.primary,
+            opacity: phase1.opacity,
+          }}
+        >
+          {tokens.label}
+        </div>
+      )}
 
       <div
         style={{
@@ -107,8 +91,8 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle, pixelLo
           textAlign: "center",
           maxWidth: 900,
           lineHeight: 1.2,
-          opacity: lockupOpacity,
-          transform: `translateY(${titleY}px)`,
+          opacity: phase1.opacity,
+          transform: `scale(${phase1.scale})`,
         }}
       >
         {title}
@@ -131,8 +115,8 @@ export const IntroScene: React.FC<IntroSceneProps> = ({ title, subtitle, pixelLo
             color: tokens.foregroundMid,
             textAlign: "center",
             maxWidth: 700,
-            opacity: lockupOpacity,
-            transform: `translateY(${subtitleY}px)`,
+            opacity: phase1.opacity,
+            transform: `scale(${phase1.scale})`,
           }}
         >
           {subtitle}

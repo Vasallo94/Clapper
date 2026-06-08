@@ -1,19 +1,62 @@
 import React from "react"
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
+import { AbsoluteFill, interpolate } from "remotion"
 import type { BenefitsSceneProps } from "../schema"
-import { useThemeTokens } from "../../ClaudeCodeTutorial/themes"
-import { useSlideIn } from "../../ClaudeCodeTutorial/hooks/useSlideIn"
-import { getSceneMotionDelayMs, msToFrames } from "../../../utils/direction"
+import { useThemeTokens } from "../../../shared/themes"
+import { usePhase1Entry } from "../../../shared/hooks/usePhase1Entry"
+import { useBeatReveal } from "../../../shared/hooks/useBeatReveal"
 
-const STAGGER_FRAMES = 12
+const BenefitItem: React.FC<{
+  item: { text: string }
+  index: number
+  tokens: ReturnType<typeof useThemeTokens>
+}> = ({ item, index, tokens }) => {
+  const { opacity, y } = useBeatReveal({
+    fallbackDelayMs: 200 + index * 150,
+    animationMs: 250,
+  })
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 24, opacity, transform: `translateY(${y}px)` }}>
+      <div
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: "50%",
+          background: `${tokens.primary}18`,
+          border: `2px solid ${tokens.primary}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        <svg width={24} height={24} viewBox="0 0 16 16" fill="none">
+          <path
+            d="M3.5 8.5l3 3 6-7"
+            stroke={tokens.primary}
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+      <div
+        style={{
+          fontFamily: tokens.fontFamily,
+          fontSize: 36,
+          fontWeight: 500,
+          color: tokens.foreground,
+          lineHeight: 1.3,
+        }}
+      >
+        {item.text}
+      </div>
+    </div>
+  )
+}
 
-export const BenefitsScene: React.FC<BenefitsSceneProps> = ({ title, items, timing }) => {
-  const frame = useCurrentFrame()
-  const { fps } = useVideoConfig()
+export const BenefitsScene: React.FC<BenefitsSceneProps> = ({ title, items }) => {
   const tokens = useThemeTokens()
-  const motionStartFrame = msToFrames(getSceneMotionDelayMs(timing), fps)
-
-  const titleAnim = useSlideIn({ delay: motionStartFrame })
+  const phase1 = usePhase1Entry({ durationMs: 100 })
 
   return (
     <AbsoluteFill
@@ -25,7 +68,6 @@ export const BenefitsScene: React.FC<BenefitsSceneProps> = ({ title, items, timi
         gap: 40,
       }}
     >
-      {/* Accent bar on the left */}
       <div
         style={{
           position: "absolute",
@@ -38,56 +80,37 @@ export const BenefitsScene: React.FC<BenefitsSceneProps> = ({ title, items, timi
       />
 
       {title && (
-        <div
-          style={{
-            fontFamily: tokens.fontFamily,
-            fontSize: 48,
-            fontWeight: 700,
-            color: tokens.foreground,
-            opacity: titleAnim.opacity,
-            paddingLeft: 24,
-          }}
-        >
-          {title}
+        <div style={{ paddingLeft: 24 }}>
+          <div
+            style={{
+              fontFamily: tokens.fontFamily,
+              fontSize: 48,
+              fontWeight: 700,
+              color: tokens.foreground,
+              opacity: phase1.opacity,
+            }}
+          >
+            {title}
+          </div>
+          <div
+            style={{
+              height: 3,
+              width: interpolate(phase1.progress, [0.3, 1], [0, 200], {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+              }),
+              background: tokens.primary,
+              borderRadius: 2,
+              marginTop: 12,
+            }}
+          />
         </div>
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 36, paddingLeft: 24 }}>
-        {items.map((item, idx) => {
-          const itemSpring = spring({
-            frame: Math.max(0, frame - motionStartFrame - (idx + 1) * STAGGER_FRAMES),
-            fps,
-            config: { damping: 200 },
-            durationInFrames: 20,
-          })
-          const itemX = interpolate(itemSpring, [0, 1], [40, 0])
-
-          return (
-            <div
-              key={idx}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 24,
-                opacity: itemSpring,
-                transform: `translateX(${itemX}px)`,
-              }}
-            >
-              <div style={{ fontSize: 48, flexShrink: 0 }}>{item.icon}</div>
-              <div
-                style={{
-                  fontFamily: tokens.fontFamily,
-                  fontSize: 36,
-                  fontWeight: 500,
-                  color: tokens.foreground,
-                  lineHeight: 1.3,
-                }}
-              >
-                {item.text}
-              </div>
-            </div>
-          )
-        })}
+        {items.map((item, idx) => (
+          <BenefitItem key={idx} item={item} index={idx} tokens={tokens} />
+        ))}
       </div>
     </AbsoluteFill>
   )

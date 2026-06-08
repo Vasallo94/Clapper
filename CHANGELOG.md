@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **`h-alpha` theme + `VerticalShort` composition** — new "paper atlas" theme cloning the H-alpha website palette (cream paper, serif, solar-red + teal) and a reusable 1080×1920 vertical composition that reuses the existing scene engine; `TutorialConfigSchema` now accepts vertical dimensions and an optional `composition` field
 - **`docs/superpowers/specs/2026-06-08-halpha-solar-video-design.md`** + **`docs/superpowers/plans/2026-06-08-halpha-solar-video.md`** — design spec and implementation plan for the vertical LinkedIn short presenting the H-alpha solar physics website; defines the `h-alpha` theme cloning the site palette, a 6-scene ~78s escaleta (física → instrumento → imagen), and the reuse of the existing dimension-agnostic scene engine for a 1080×1920 `VerticalShort` composition
 - **`packages/web/src/lib/planState.ts`** — plan state extraction module that reads `/pipeline/plan.json` from LangGraph `stream.values.files`; provides `PlanState`/`PlanStep` types, `extractPlanState()` parser, `stepLabel()`/`modeLabel()` i18n mappings, `loadingLabelFromPlan()` and `isRenderingStep()` helpers
 - **`get_next_pipeline_step` tool** — deterministic next-step resolver that reads `plan.json` and returns the next actionable step, owner, progress count, and reason; replaces manual plan parsing in the orchestrator prompt; handles all states: `next_step`, `in_progress`, `blocked`, `all_completed`, `no_plan`

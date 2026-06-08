@@ -72,6 +72,34 @@ export const RemotionRoot: React.FC = () => {
         calculateMetadata={calculateMetadata}
       />
       <Composition
+        id="VerticalShort"
+        component={ClaudeCodeTutorial}
+        durationInFrames={300}
+        fps={30}
+        width={1080}
+        height={1920}
+        schema={TutorialConfigSchema}
+        defaultProps={{
+          id: "halpha-solar",
+          title: "El Sol en Hα",
+          description: "Qué se ve en una imagen solar en H-alpha y por qué",
+          composition: "VerticalShort",
+          fps: 30 as const,
+          width: 1080 as const,
+          height: 1920 as const,
+          theme: "h-alpha" as const,
+          scenes: [
+            {
+              type: "intro" as const,
+              title: "El Sol en Hα",
+              subtitle: "Otra forma de ver nuestra estrella",
+              durationInSeconds: 4,
+            },
+          ],
+        }}
+        calculateMetadata={calculateMetadata}
+      />
+      <Composition
         id="ProductShort"
         component={ProductShort}
         durationInFrames={450}

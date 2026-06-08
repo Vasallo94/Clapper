@@ -217,10 +217,61 @@ const atomDarkTheme: ThemeTokens = {
   accentLine: "linear-gradient(90deg, #61afef, #c678dd)",
 }
 
+const hAlphaTheme: ThemeTokens = {
+  background: "#f4f1e8",
+  backgroundGradient: "radial-gradient(ellipse at 50% 28%, #fbf9f3 0%, #f4f1e8 72%)",
+  foreground: "#16232c",
+  foregroundMid: "#586a72",
+  foregroundLow: "#8a979e",
+  primary: "#d94332",
+  primaryForeground: "#fffdfa",
+  secondary: "#2c7782",
+  fontFamily: '"Times New Roman", Georgia, "DejaVu Serif", ui-serif, serif',
+  monoFontFamily: monoFont,
+  terminal: {
+    sceneBackground: "#14313f",
+    bg: "#14313f",
+    titleBar: "#1b3d4d",
+    titleText: "#7fa6b0",
+    command: "#f4f1e8",
+    output: "#d7e0e2",
+    claude: "#e58a7d",
+    shadow: "0 14px 34px rgba(22,31,38,0.18)",
+    dots: ["#d94332", "#e0a93b", "#2c7782"],
+    labelColor: "#586a72",
+    successColor: "#2c7782",
+    statusBarBg: "#0f2630",
+    borderColor: "#2a4a57",
+    separatorColor: "#2a4a57",
+    costColor: "#7fa6b0",
+    userMessageBg: "#1b3d4d",
+    userMessageBorder: "#2a4a57",
+  },
+  card: {
+    bg: "#fffdfa",
+    bgGradient: "linear-gradient(180deg, #fffdfa 0%, #f7f4ec 100%)",
+    border: "#d5d8d2",
+    accentBorder: "#d94332",
+    shadow: "0 14px 34px rgba(22,31,38,0.09)",
+  },
+  mascot: {
+    show: false,
+    cornerScale: 0.5,
+    cornerOpacity: 0.7,
+    cornerBottom: 20,
+    cornerRight: 24,
+  },
+  overlay: "rgba(244,241,232,0.85)",
+  label: "H-alpha · Física solar",
+  labelColor: "#9d241c",
+  accentLine: "linear-gradient(90deg, #d94332, #2c7782)",
+}
+
 const themes: Record<ThemeName, ThemeTokens> = {
   default: defaultTheme,
   "linea-directa": lineaDirectaTheme,
   "atom-dark": atomDarkTheme,
+  "h-alpha": hAlphaTheme,
 }
 
 export function getTheme(name: ThemeName): ThemeTokens {

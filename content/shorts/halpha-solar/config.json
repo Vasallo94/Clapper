@@ -70,7 +70,7 @@
         "imageSrc": "images/halpha/sun-h-alpha.png",
         "imageAlt": "Disco solar en H-alpha anotado",
         "annotations": [
-          { "x": 42, "y": 51, "text": "Filamentos", "position": "left" },
+          { "x": 42, "y": 51, "text": "Filamentos", "position": "bottom" },
           { "x": 40, "y": 37, "text": "Plages", "position": "left" },
           { "x": 48, "y": 38, "text": "Mancha solar", "position": "top" },
           { "x": 69, "y": 31, "text": "Protuberancias", "position": "right" },

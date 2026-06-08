@@ -89,15 +89,15 @@ const AnnotationMarker: React.FC<{
 const getCalloutOffset = (pos: string) => {
   switch (pos) {
     case "top":
-      return { top: "auto", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)" }
+      return { top: "auto", bottom: "calc(100% + 16px)", left: "50%", transform: "translateX(-50%)" }
     case "bottom":
-      return { top: "calc(100% + 8px)", bottom: "auto", left: "50%", transform: "translateX(-50%)" }
+      return { top: "calc(100% + 16px)", bottom: "auto", left: "50%", transform: "translateX(-50%)" }
     case "left":
-      return { top: "50%", right: "calc(100% + 8px)", left: "auto", transform: "translateY(-50%)" }
+      return { top: "50%", right: "calc(100% + 16px)", left: "auto", transform: "translateY(-50%)" }
     case "right":
-      return { top: "50%", left: "calc(100% + 8px)", right: "auto", transform: "translateY(-50%)" }
+      return { top: "50%", left: "calc(100% + 16px)", right: "auto", transform: "translateY(-50%)" }
     default:
-      return { top: "calc(100% + 8px)", bottom: "auto", left: "50%", transform: "translateX(-50%)" }
+      return { top: "calc(100% + 16px)", bottom: "auto", left: "50%", transform: "translateX(-50%)" }
   }
 }
 

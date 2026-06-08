@@ -6,6 +6,7 @@ import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
 import type { Beat, Timing } from "../../../../utils/direction"
 import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
 import { useBeatReveal } from "../../../../shared/hooks/useBeatReveal"
+import { useKenBurns } from "../../../../shared/hooks/useKenBurns"
 
 interface MediaCardProps {
   imageSrc?: string
@@ -30,20 +31,31 @@ const MediaImage: React.FC<{
     fallbackDelayMs: 200,
     animationMs: 300,
   })
+  const kb = useKenBurns({ zoomPerSecond: 0.008, from: 1.02, maxScale: 1.16 })
 
   return (
     <div style={{ flex: 1, width: "100%", opacity, transform: `translateY(${y}px)` }}>
       {imageSrc ? (
-        <Img
-          src={resolveAssetSrc(imageSrc)}
+        <div
           style={{
             width: "100%",
             height,
-            objectFit: "cover",
             borderRadius: 10,
+            overflow: "hidden",
             border: `1px solid ${tokens.card.border}`,
+            boxShadow: tokens.card.shadow,
           }}
-        />
+        >
+          <Img
+            src={resolveAssetSrc(imageSrc)}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              transform: `scale(${kb.scale})`,
+            }}
+          />
+        </div>
       ) : (
         <div
           style={{

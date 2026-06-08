@@ -25,6 +25,7 @@ import { MediaCardScene } from "./scenes/custom/MediaCardScene"
 import { ProblemSolutionScene } from "./scenes/custom/ProblemSolutionScene"
 import { ProgressBarsScene } from "./scenes/custom/ProgressBarsScene"
 import { QuoteScene } from "./scenes/custom/QuoteScene"
+import { SpectrumScene } from "./scenes/custom/SpectrumScene"
 import { SplitScreenScene } from "./scenes/custom/SplitScreenScene"
 import { StatRevealScene } from "./scenes/custom/StatRevealScene"
 import { StepListScene } from "./scenes/custom/StepListScene"
@@ -52,6 +53,7 @@ export const customSceneRegistry: Record<string, FC<Record<string, unknown>>> = 
   "problem-solution": ProblemSolutionScene,
   "progress-bars": ProgressBarsScene,
   quote: QuoteScene,
+  spectrum: SpectrumScene,
   "split-screen": SplitScreenScene,
   "stat-reveal": StatRevealScene,
   timeline: TimelineScene,

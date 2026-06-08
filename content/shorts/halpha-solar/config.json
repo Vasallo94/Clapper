@@ -24,14 +24,17 @@
     },
     {
       "type": "custom",
-      "componentId": "big-number",
+      "componentId": "spectrum",
       "durationInSeconds": 14,
       "props": {
         "title": "El hidrógeno emite un rojo muy concreto",
-        "metrics": [
-          { "value": "656,28", "suffix": " nm", "label": "La línea hidrógeno-alfa, donde brilla la cromosfera" }
-        ]
-      }
+        "value": "656,28",
+        "caption": "La línea hidrógeno-alfa: donde brilla la cromosfera"
+      },
+      "beats": [
+        { "id": "sweep", "startMs": 400, "narration": "el hidrógeno emite" },
+        { "id": "rojo", "startMs": 3929, "narration": "un rojo muy concreto" }
+      ]
     },
     {
       "type": "custom",
@@ -55,6 +58,7 @@
       "props": {
         "title": "La cadena óptica",
         "layout": "vertical",
+        "showParticle": true,
         "nodes": [
           { "id": "obj", "title": "Objetivo", "description": "Recoge la luz del Sol" },
           { "id": "erf", "title": "ERF", "description": "Aparta el calor y la energía" },
@@ -62,7 +66,16 @@
           { "id": "blocking", "title": "Blocking filter", "description": "Limpia la luz sobrante" },
           { "id": "eye", "title": "Ojo / cámara", "description": "Imagen limpia y segura" }
         ]
-      }
+      },
+      "beats": [
+        { "id": "start", "startMs": 300, "narration": "la cadena óptica" },
+        { "id": "intro", "startMs": 500, "narration": "el etalon no trabaja solo" },
+        { "id": "objetivo", "startMs": 1200, "narration": "objetivo" },
+        { "id": "erf", "startMs": 3419, "narration": "un filtro aparta el calor" },
+        { "id": "etalon", "startMs": 5000, "narration": "etalon" },
+        { "id": "blocking", "startMs": 6333, "narration": "otro limpia la luz sobrante" },
+        { "id": "ojo", "startMs": 8492, "narration": "ni hay imagen, ni hay seguridad" }
+      ]
     },
     {
       "type": "custom",

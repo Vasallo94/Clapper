@@ -1,0 +1,87 @@
+{
+  "id": "halpha-solar",
+  "title": "El Sol en Hα",
+  "description": "Qué se ve en una imagen solar en H-alpha y por qué",
+  "composition": "VerticalShort",
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "theme": "h-alpha",
+  "transition": { "type": "fade", "durationInFrames": 12 },
+  "scenes": [
+    {
+      "type": "custom",
+      "componentId": "media-card",
+      "durationInSeconds": 8,
+      "props": {
+        "imageSrc": "images/halpha/sun-h-alpha.png",
+        "imageAlt": "Disco solar en H-alpha con filamentos y protuberancias",
+        "title": "¿Quieres ver el Sol con otros ojos?",
+        "description": "A simple vista es un disco liso y amarillo. En una sola línea de color, se transforma.",
+        "layout": "image-left"
+      }
+    },
+    {
+      "type": "custom",
+      "componentId": "big-number",
+      "durationInSeconds": 14,
+      "props": {
+        "title": "El hidrógeno emite un rojo muy concreto",
+        "metrics": [
+          { "value": "656,28", "suffix": " nm", "label": "La línea hidrógeno-alfa, donde brilla la cromosfera" }
+        ]
+      }
+    },
+    {
+      "type": "custom",
+      "componentId": "block-diagram",
+      "durationInSeconds": 14,
+      "props": {
+        "title": "Aislar un solo color: el etalon",
+        "blocks": [
+          { "label": "Dos espejos", "detail": "Dos superficies casi perfectas, muy juntas y paralelas." },
+          { "label": "Mil reflexiones", "detail": "La luz rebota miles de veces entre ellas." },
+          { "label": "Solo Hα sale", "detail": "Únicamente el rojo de Hα se refuerza. El resto se cancela." }
+        ]
+      }
+    },
+    {
+      "type": "custom",
+      "componentId": "flow-diagram",
+      "durationInSeconds": 12,
+      "props": {
+        "title": "La cadena óptica",
+        "layout": "vertical",
+        "nodes": [
+          { "id": "obj", "title": "Objetivo", "description": "Recoge la luz del Sol" },
+          { "id": "erf", "title": "ERF", "description": "Aparta el calor y la energía" },
+          { "id": "etalon", "title": "Etalon", "description": "Selecciona la rendija de Hα" },
+          { "id": "blocking", "title": "Blocking filter", "description": "Limpia la luz sobrante" },
+          { "id": "eye", "title": "Ojo / cámara", "description": "Imagen limpia y segura" }
+        ]
+      }
+    },
+    {
+      "type": "custom",
+      "componentId": "annotated-image",
+      "durationInSeconds": 16,
+      "props": {
+        "imageSrc": "images/halpha/sun-h-alpha.png",
+        "imageAlt": "Disco solar en H-alpha anotado",
+        "annotations": [
+          { "x": 42, "y": 51, "text": "Filamentos", "position": "left" },
+          { "x": 40, "y": 37, "text": "Plages", "position": "left" },
+          { "x": 48, "y": 38, "text": "Mancha solar", "position": "top" },
+          { "x": 69, "y": 31, "text": "Protuberancias", "position": "right" },
+          { "x": 57, "y": 60, "text": "Textura cromosférica", "position": "bottom" }
+        ]
+      }
+    },
+    {
+      "type": "cta",
+      "durationInSeconds": 8,
+      "text": "La misma estrella, vista en un solo color. Aprende a leer el Sol.",
+      "url": "vasallo94.github.io/H-alpha"
+    }
+  ]
+}

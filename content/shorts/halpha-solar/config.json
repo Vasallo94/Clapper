@@ -84,5 +84,69 @@
       "text": "La misma estrella, vista en un solo color. Aprende a leer el Sol.",
       "url": "vasallo94.github.io/H-alpha"
     }
-  ]
+  ],
+  "voiceover": {
+    "enabled": true,
+    "provider": "elevenlabs",
+    "voiceId": "nPczCjzI2devNBz1zQrb",
+    "language": "es",
+    "elevenlabs": {
+      "modelId": "eleven_multilingual_v2",
+      "outputFormat": "mp3_44100_128",
+      "seed": 42,
+      "applyTextNormalization": "on",
+      "voiceSettings": {
+        "stability": 0.55,
+        "similarityBoost": 0.8,
+        "style": 0.1,
+        "useSpeakerBoost": true,
+        "speed": 1.0
+      }
+    },
+    "scenes": {
+      "0": {
+        "text": "A simple vista, el Sol es un disco liso y amarillo. Pero en una sola línea de color, se transforma.",
+        "leadInMs": 600,
+        "audioStartMs": 600,
+        "tailHoldMs": 500,
+        "elevenlabs": { "nextText": "El Sol es casi todo hidrógeno." }
+      },
+      "1": {
+        "text": "El Sol es casi todo hidrógeno, y el hidrógeno emite un rojo muy concreto: la línea hidrógeno alfa. En ese color brilla la cromosfera, una capa fina sobre la superficie que la luz blanca normalmente esconde.",
+        "leadInMs": 400,
+        "audioStartMs": 400,
+        "tailHoldMs": 500,
+        "elevenlabs": { "previousText": "se transforma.", "nextText": "Para quedarse solo con ese rojo." }
+      },
+      "2": {
+        "text": "Para quedarse solo con ese rojo, un telescopio de hidrógeno alfa usa un etalon: dos espejos casi perfectos. La luz rebota miles de veces y solo una nota, la de hidrógeno alfa, sale reforzada. Todo lo demás se cancela.",
+        "leadInMs": 400,
+        "audioStartMs": 400,
+        "tailHoldMs": 500,
+        "elevenlabs": { "previousText": "la luz blanca esconde.", "nextText": "Pero el etalon no trabaja solo." }
+      },
+      "3": {
+        "text": "Pero el etalon no trabaja solo. Antes, un filtro aparta el calor; después, otro limpia la luz sobrante. Sin esa cadena, ni hay imagen, ni hay seguridad.",
+        "leadInMs": 400,
+        "audioStartMs": 400,
+        "tailHoldMs": 500,
+        "elevenlabs": { "previousText": "Todo lo demás se cancela.", "nextText": "Y ahora ya sabes leer lo que ves." }
+      },
+      "4": {
+        "text": "Y ahora ya sabes leer lo que ves: filamentos oscuros, plages brillantes, manchas, protuberancias en el borde, y la textura de espículas que da el aspecto granulado.",
+        "leadInMs": 500,
+        "audioStartMs": 500,
+        "tailHoldMs": 600,
+        "elevenlabs": { "previousText": "ni hay seguridad.", "nextText": "La misma estrella, vista en un solo color." }
+      },
+      "5": {
+        "text": "La misma estrella, vista en un solo color. Tienes la explicación completa, paso a paso, en la web.",
+        "leadInMs": 400,
+        "audioStartMs": 400,
+        "tailHoldMs": 1200,
+        "elevenlabs": { "previousText": "el aspecto granulado.", "voiceSettings": { "stability": 0.6, "style": 0.08 } }
+      }
+    }
+  },
+  "subtitles": { "enabled": true, "style": "karaoke", "fontSize": 34, "position": "bottom" }
 }

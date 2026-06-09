@@ -1,6 +1,26 @@
-# Remotion Video Platform
+# 🎬 Clapper
 
-Plataforma de generación de vídeos con [Remotion](https://remotion.dev), automatizada con skills de [Claude Code](https://claude.ai/code). Cada tipo de vídeo es una composición independiente con su propio schema, escenas y skill.
+**Describe un vídeo en lenguaje natural y obtén un MP4 renderizado.**
+
+Clapper es una plataforma agéntica de generación de vídeo: un pipeline multi-agente
+([LangGraph](https://github.com/langchain-ai/langgraph) + [deepagents](https://github.com/hwchase17/deepagents))
+orquestado mediante skills de [Claude Code](https://claude.ai/code) que investiga el tema,
+escribe el copy, diseña la escaleta, genera voz y música, y renderiza con
+[Remotion](https://remotion.dev) — todo a partir de un prompt.
+
+Cada tipo de vídeo es una **composición** independiente (su propio schema Zod, escenas y skill),
+y la arquitectura de temas permite reusar el mismo motor para varias marcas.
+
+### Por qué es interesante
+
+- **Orquestación multi-agente real** — director, scene_creator, audio_planner, voice_generator,
+  sound_engineer, validator y render colaboran sobre un grafo LangGraph, no una sola llamada al modelo.
+- **El config JSON es la fuente de verdad** — separación limpia entre _qué_ dice el vídeo (config)
+  y _cómo_ se renderiza (composición React), validado con Zod en tiempo de render.
+- **Skills como interfaz** — `/tutorial-generator`, `/short-ld`: el humano dirige el criterio creativo,
+  el agente ejecuta el trabajo técnico.
+- **Tests de regresión visual** — vitest + pixelmatch + `renderStill` para que un cambio no rompa un frame.
+- **Multi-marca** — temas intercambiables (colores, tipografía, mascota/logo) sobre el mismo motor.
 
 ## Setup
 

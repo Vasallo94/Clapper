@@ -3,9 +3,18 @@
 ## Prerequisites
 
 - Node.js 20+
+- pnpm 11+ (via `corepack enable`)
 - Python 3.12+
 - uv (Python package manager)
 - API key for an LLM provider (set LLM_MODEL and corresponding key)
+
+## Install dependencies
+
+This is a **single pnpm workspace** (`pnpm-workspace.yaml`). Install everything once from the repo root — there is no per-package npm install:
+
+```bash
+pnpm install  # from repo root, first time only
+```
 
 ## Start all services
 
@@ -14,9 +23,7 @@ Open 3 terminals:
 ### Terminal 1: Render service
 
 ```bash
-cd packages/render-service
-npm install  # first time only
-npm run dev
+pnpm run --filter=render-service dev
 ```
 
 ### Terminal 2: Agent API
@@ -30,9 +37,7 @@ LLM_MODEL=google_genai:gemini-2.5-pro uv run uvicorn src.api:app --port 8000 --r
 ### Terminal 3: Web frontend
 
 ```bash
-cd packages/web
-npm install  # first time only
-npm run dev
+pnpm run --filter=web dev
 ```
 
 Open http://localhost:5173 in the browser.

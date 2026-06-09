@@ -9,14 +9,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 - **Dependabot — 6 alertas resueltas (1 crítica, 5 moderadas)** mediante bumps en los cuatro lockfiles del monorepo:
   - `vitest` `3.2.4 → 3.2.6` (raíz, **crítica** [GHSA-5xrq-8626-4rwp](https://github.com/advisories/GHSA-5xrq-8626-4rwp): lectura/ejecución de archivos arbitrarios con el servidor de Vitest UI activo)
-  - `qs` `6.15.1 → 6.15.2` ([GHSA-q8mj-m7cp-5q26](https://github.com/advisories/GHSA-q8mj-m7cp-5q26): DoS por `TypeError` en `qs.stringify`) — transitiva vía `express@5`; forzada en raíz con `pnpm.overrides` y regenerada en `packages/render-service/package-lock.json`
+  - `qs` `6.15.1 → 6.15.2` ([GHSA-q8mj-m7cp-5q26](https://github.com/advisories/GHSA-q8mj-m7cp-5q26): DoS por `TypeError` en `qs.stringify`) — transitiva vía `express@5`; forzada en raíz con `pnpm.overrides` (única fuente tras eliminar el lockfile npm de render-service, ver ADR 0016)
   - `ws` `8.17.1`/`8.20.0 → 8.20.1` ([GHSA-58qx-3vcg-4xpx](https://github.com/advisories/GHSA-58qx-3vcg-4xpx): divulgación de memoria no inicializada) — transitiva, forzada con `pnpm.overrides`
   - `starlette` `1.0.0 → 1.2.1` ([GHSA-86qp-5c8j-p5mr](https://github.com/advisories/GHSA-86qp-5c8j-p5mr): falta de validación del header Host) — transitiva vía `fastapi`, `packages/agent/uv.lock`
   - `idna` `3.13 → 3.18` ([GHSA-65pc-fj4g-8rjx](https://github.com/advisories/GHSA-65pc-fj4g-8rjx): bypass del fix de CVE-2024-3651 en `idna.encode()`) — transitiva, `packages/agent/uv.lock`
   - Añadidos `overrides` selectivos por rango vulnerable en `pnpm-workspace.yaml` para fijar las versiones parcheadas de las dependencias transitivas
 
+### Removed
+
+- **`packages/render-service/package-lock.json`** y **`packages/web/package-lock.json`** — npm lockfiles huérfanos, vestigios de la migración npm→pnpm. Ningún Dockerfile, `docker-compose.yml`, CI ni script los consumía (todos los builds usan `pnpm install --frozen-lockfile`), y ninguno de los dos paquetes es deployable en aislamiento vía npm (render-service hace `spawn` de scripts Remotion del root; web se resuelve por el workspace). Ambos son miembros normales del workspace pnpm; `pnpm-lock.yaml` queda como único lockfile JS. Elimina el doble/triple mantenimiento y los escaneos Dependabot duplicados (ver ADR 0016)
+
 ### Added
 
+- **ADR 0016** consolidando el workspace JS en pnpm y eliminando los npm lockfiles huérfanos de render-service y web; corrige la premisa de ADR 0015 de que render-service "no está en el grafo del workspace pnpm" y supersede su paso de remediación `npm --package-lock-only`
 - **ADR 0015** documenting transitive security remediation via range-scoped `pnpm` overrides in `pnpm-workspace.yaml`, and why per-ecosystem bumps are required across the pnpm/npm/uv lockfiles
 - **`packages/web/src/lib/planState.ts`** — plan state extraction module that reads `/pipeline/plan.json` from LangGraph `stream.values.files`; provides `PlanState`/`PlanStep` types, `extractPlanState()` parser, `stepLabel()`/`modeLabel()` i18n mappings, `loadingLabelFromPlan()` and `isRenderingStep()` helpers
 - **`get_next_pipeline_step` tool** — deterministic next-step resolver that reads `plan.json` and returns the next actionable step, owner, progress count, and reason; replaces manual plan parsing in the orchestrator prompt; handles all states: `next_step`, `in_progress`, `blocked`, `all_completed`, `no_plan`

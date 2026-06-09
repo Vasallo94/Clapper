@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Project renamed to Clapper** — repository and npm package renamed from `remotion-playground` to `clapper`; README rewritten to lead with the agentic multi-agent value proposition (prompt → rendered MP4) and `package.json` description updated accordingly
+
 ### Added
 
 - **Animated concept scenes + audio sync** — new `EtalonScene` (light bouncing between plates into a red Hα ray) and `SpectrumScene` (visible spectrum with Fraunhofer lines and a cursor sweeping to the Hα line), a reusable `useKenBurns` hook for continuous slow zoom on imagery, `flow-diagram` light particle, and per-scene `beats` synced to the real voiceover timestamps so elements reveal as the narration names them (fixes the "everything appears then freezes" problem)

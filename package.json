@@ -1,7 +1,7 @@
 {
-  "name": "remotion-playground",
+  "name": "clapper",
   "version": "1.0.0",
-  "description": "My Remotion video",
+  "description": "Agentic video-generation platform: a multi-agent LangGraph pipeline that turns a prompt into a rendered MP4 (Remotion + Claude Code skills).",
   "repository": {},
   "license": "UNLICENSED",
   "private": true,

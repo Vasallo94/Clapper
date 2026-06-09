@@ -5,6 +5,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Security
+
+- **Dependabot — 6 alertas resueltas (1 crítica, 5 moderadas)** mediante bumps en los cuatro lockfiles del monorepo:
+  - `vitest` `3.2.4 → 3.2.6` (raíz, **crítica** [GHSA-5xrq-8626-4rwp](https://github.com/advisories/GHSA-5xrq-8626-4rwp): lectura/ejecución de archivos arbitrarios con el servidor de Vitest UI activo)
+  - `qs` `6.15.1 → 6.15.2` ([GHSA-q8mj-m7cp-5q26](https://github.com/advisories/GHSA-q8mj-m7cp-5q26): DoS por `TypeError` en `qs.stringify`) — transitiva vía `express@5`; forzada en raíz con `pnpm.overrides` y regenerada en `packages/render-service/package-lock.json`
+  - `ws` `8.17.1`/`8.20.0 → 8.20.1` ([GHSA-58qx-3vcg-4xpx](https://github.com/advisories/GHSA-58qx-3vcg-4xpx): divulgación de memoria no inicializada) — transitiva, forzada con `pnpm.overrides`
+  - `starlette` `1.0.0 → 1.2.1` ([GHSA-86qp-5c8j-p5mr](https://github.com/advisories/GHSA-86qp-5c8j-p5mr): falta de validación del header Host) — transitiva vía `fastapi`, `packages/agent/uv.lock`
+  - `idna` `3.13 → 3.18` ([GHSA-65pc-fj4g-8rjx](https://github.com/advisories/GHSA-65pc-fj4g-8rjx): bypass del fix de CVE-2024-3651 en `idna.encode()`) — transitiva, `packages/agent/uv.lock`
+  - Añadidos `overrides` selectivos por rango vulnerable en `pnpm-workspace.yaml` para fijar las versiones parcheadas de las dependencias transitivas
+
 ### Added
 
 - **`packages/web/src/lib/planState.ts`** — plan state extraction module that reads `/pipeline/plan.json` from LangGraph `stream.values.files`; provides `PlanState`/`PlanStep` types, `extractPlanState()` parser, `stepLabel()`/`modeLabel()` i18n mappings, `loadingLabelFromPlan()` and `isRenderingStep()` helpers

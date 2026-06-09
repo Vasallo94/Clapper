@@ -6,3 +6,6 @@ allowBuilds:
   better-sqlite3: true
   esbuild: true
   protobufjs: true
+overrides:
+  "qs@>=6.11.1 <=6.15.1": "6.15.2"
+  "ws@>=8.0.0 <8.20.1": "8.20.1"

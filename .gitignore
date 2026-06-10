@@ -46,3 +46,4 @@ public/audio/*/
 
 # All transient pipeline outputs (renders, generated assets)
 .generated/
+.afp/

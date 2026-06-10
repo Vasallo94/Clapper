@@ -1,5 +1,5 @@
 {
-  "name": "clapper",
+  "name": "claqueta",
   "version": "1.0.0",
   "description": "Agentic video-generation platform: a multi-agent LangGraph pipeline that turns a prompt into a rendered MP4 (Remotion + Claude Code skills).",
   "repository": {},
@@ -38,7 +38,7 @@
     "prettier": "3.8.1",
     "tsx": "^4.21.0",
     "typescript": "5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.6"
   },
   "scripts": {
     "dev": "remotion studio",

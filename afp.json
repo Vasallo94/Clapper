@@ -1,0 +1,12 @@
+{
+  "afp_version": "0.2",
+  "subject_uri": "afp:app/claqueta/claqueta",
+  "sink": {
+    "type": "github_issues",
+    "repo": "Vasallo94/Claqueta",
+    "label": "afp-report"
+  },
+  "redaction": "required",
+  "accepts_remote": true,
+  "schema_extensions": []
+}

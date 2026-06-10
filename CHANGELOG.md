@@ -5,9 +5,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
-### Changed
+### Security
 
-- **Project renamed to Clapper** — repository and npm package renamed from `remotion-playground` to `clapper`; README rewritten to lead with the agentic multi-agent value proposition (prompt → rendered MP4) and `package.json` description updated accordingly
+- **Dependabot — 6 alertas resueltas (1 crítica, 5 moderadas)** mediante bumps en los cuatro lockfiles del monorepo:
+  - `vitest` `3.2.4 → 3.2.6` (raíz, **crítica** [GHSA-5xrq-8626-4rwp](https://github.com/advisories/GHSA-5xrq-8626-4rwp): lectura/ejecución de archivos arbitrarios con el servidor de Vitest UI activo)
+  - `qs` `6.15.1 → 6.15.2` ([GHSA-q8mj-m7cp-5q26](https://github.com/advisories/GHSA-q8mj-m7cp-5q26): DoS por `TypeError` en `qs.stringify`) — transitiva vía `express@5`; forzada en raíz con `pnpm.overrides` y regenerada en `packages/render-service/package-lock.json`
+  - `ws` `8.17.1`/`8.20.0 → 8.20.1` ([GHSA-58qx-3vcg-4xpx](https://github.com/advisories/GHSA-58qx-3vcg-4xpx): divulgación de memoria no inicializada) — transitiva, forzada con `pnpm.overrides`
+  - `starlette` `1.0.0 → 1.2.1` ([GHSA-86qp-5c8j-p5mr](https://github.com/advisories/GHSA-86qp-5c8j-p5mr): falta de validación del header Host) — transitiva vía `fastapi`, `packages/agent/uv.lock`
+  - `idna` `3.13 → 3.18` ([GHSA-65pc-fj4g-8rjx](https://github.com/advisories/GHSA-65pc-fj4g-8rjx): bypass del fix de CVE-2024-3651 en `idna.encode()`) — transitiva, `packages/agent/uv.lock`
+  - Añadidos `overrides` selectivos por rango vulnerable en `pnpm-workspace.yaml` para fijar las versiones parcheadas de las dependencias transitivas
 
 ### Added
 
@@ -15,6 +21,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - **Vertical scene support** — `media-card` gains an `image-top` layout (large image above centered text), `annotated-image` renders larger with bigger annotation markers, `big-number` parses decimal-comma values (`656,28`), `CtaScene` only shows the phone mascot when `mascot.show`, and a new `SignatureWatermark` (driven by a config `signature` field) provides a text author byline as an alternative to the pixel-skull `LogoWatermark`
 - **`h-alpha` theme + `VerticalShort` composition** — new "paper atlas" theme cloning the H-alpha website palette (cream paper, serif, solar-red + teal) and a reusable 1080×1920 vertical composition that reuses the existing scene engine; `TutorialConfigSchema` now accepts vertical dimensions and an optional `composition` field
 - **`docs/superpowers/specs/2026-06-08-halpha-solar-video-design.md`** + **`docs/superpowers/plans/2026-06-08-halpha-solar-video.md`** — design spec and implementation plan for the vertical LinkedIn short presenting the H-alpha solar physics website; defines the `h-alpha` theme cloning the site palette, a 6-scene ~78s escaleta (física → instrumento → imagen), and the reuse of the existing dimension-agnostic scene engine for a 1080×1920 `VerticalShort` composition
+- **ADR 0015** documenting transitive security remediation via range-scoped `pnpm` overrides in `pnpm-workspace.yaml`, and why per-ecosystem bumps are required across the pnpm/npm/uv lockfiles
+
 - **`packages/web/src/lib/planState.ts`** — plan state extraction module that reads `/pipeline/plan.json` from LangGraph `stream.values.files`; provides `PlanState`/`PlanStep` types, `extractPlanState()` parser, `stepLabel()`/`modeLabel()` i18n mappings, `loadingLabelFromPlan()` and `isRenderingStep()` helpers
 - **`get_next_pipeline_step` tool** — deterministic next-step resolver that reads `plan.json` and returns the next actionable step, owner, progress count, and reason; replaces manual plan parsing in the orchestrator prompt; handles all states: `next_step`, `in_progress`, `blocked`, `all_completed`, `no_plan`
 - **Shared pipeline plan** — new `/pipeline/plan.json` coordination artifact with tools `create_pipeline_plan`, `read_pipeline_plan`, `update_pipeline_step`, and `record_pipeline_decision`; orchestrator and subagents now use it as the canonical pipeline state instead of relying on generic `write_todos`

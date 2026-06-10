@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore", message=".*files_update.*deprecated.*deepagent
 from dotenv import load_dotenv
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
-logger = logging.getLogger("video-agent")
+logger = logging.getLogger("claqueta")
 
 _ROOT = Path(os.environ.get("PROJECT_ROOT", str(Path(__file__).resolve().parent.parent.parent)))
 load_dotenv(_ROOT / ".env")

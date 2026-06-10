@@ -1,7 +1,7 @@
 {
   "dependencies": ["."],
   "graphs": {
-    "agent": "./graph_server.py:graph"
+    "claqueta": "./graph_server.py:graph"
   },
   "python_version": "3.12",
   "env": "../../.env"

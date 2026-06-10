@@ -1,5 +1,5 @@
 [project]
-name = "remotion-agent"
+name = "claqueta-agent"
 version = "0.1.0"
 description = "DeepAgents orchestrator for Remotion video generation"
 requires-python = ">=3.12"

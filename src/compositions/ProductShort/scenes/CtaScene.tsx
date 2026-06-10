@@ -65,9 +65,11 @@ export const CtaScene: React.FC<CtaSceneProps> = ({ text, url }) => {
         })}
       </div>
 
-      <div style={{ transform: "scale(0.8)" }}>
-        <PhoneMascot scale={1.5} animation="ring" />
-      </div>
+      {tokens.mascot.show && (
+        <div style={{ transform: "scale(0.8)" }}>
+          <PhoneMascot scale={1.5} animation="ring" />
+        </div>
+      )}
 
       <div
         style={{

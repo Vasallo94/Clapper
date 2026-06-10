@@ -1,10 +1,12 @@
 import React from "react"
 import { AbsoluteFill, Img } from "remotion"
 import { useThemeTokens } from "../../../../shared/themes"
+import { resolveAssetSrc } from "../../../../shared/resolveAssetSrc"
 import { MascotWatermark } from "../../../../shared/components/MascotWatermark"
 import type { Beat, Timing } from "../../../../utils/direction"
 import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
 import { useBeatReveal } from "../../../../shared/hooks/useBeatReveal"
+import { useKenBurns } from "../../../../shared/hooks/useKenBurns"
 
 interface MediaCardProps {
   imageSrc?: string
@@ -12,7 +14,7 @@ interface MediaCardProps {
   title: string
   description?: string
   cta?: string
-  layout?: "image-left" | "image-right"
+  layout?: "image-left" | "image-right" | "image-top"
   timing?: Timing
   beats?: Beat[]
 }
@@ -22,26 +24,38 @@ const MediaImage: React.FC<{
   imageAlt?: string
   beat: Beat | null
   tokens: ReturnType<typeof useThemeTokens>
-}> = ({ imageSrc, imageAlt, beat, tokens }) => {
+  height?: number
+}> = ({ imageSrc, imageAlt, beat, tokens, height = 240 }) => {
   const { opacity, y } = useBeatReveal({
     beat: beat ?? undefined,
     fallbackDelayMs: 200,
     animationMs: 300,
   })
+  const kb = useKenBurns({ zoomPerSecond: 0.008, from: 1.02, maxScale: 1.16 })
 
   return (
-    <div style={{ flex: 1, opacity, transform: `translateY(${y}px)` }}>
+    <div style={{ flex: 1, width: "100%", opacity, transform: `translateY(${y}px)` }}>
       {imageSrc ? (
-        <Img
-          src={imageSrc}
+        <div
           style={{
             width: "100%",
-            height: 240,
-            objectFit: "cover",
+            height,
             borderRadius: 10,
+            overflow: "hidden",
             border: `1px solid ${tokens.card.border}`,
+            boxShadow: tokens.card.shadow,
           }}
-        />
+        >
+          <Img
+            src={resolveAssetSrc(imageSrc)}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              transform: `scale(${kb.scale})`,
+            }}
+          />
+        </div>
       ) : (
         <div
           style={{
@@ -103,18 +117,28 @@ export const MediaCardScene: React.FC<Record<string, unknown>> = (rawProps) => {
   const phase1 = usePhase1Entry({ durationMs: 100 })
 
   const isRight = layout === "image-right"
+  const isTop = layout === "image-top"
 
-  const imageEl = <MediaImage imageSrc={imageSrc} imageAlt={imageAlt} beat={beats?.[0] ?? null} tokens={tokens} />
+  const imageEl = (
+    <MediaImage
+      imageSrc={imageSrc}
+      imageAlt={imageAlt}
+      beat={beats?.[0] ?? null}
+      tokens={tokens}
+      height={isTop ? 620 : 240}
+    />
+  )
 
   const textEl = (
-    <div style={{ flex: 1 }}>
+    <div style={{ flex: 1, textAlign: isTop ? "center" : "left" }}>
       <div
         style={{
-          fontSize: 28,
+          fontSize: isTop ? 46 : 28,
           fontWeight: 700,
           color: tokens.foreground,
           fontFamily: tokens.fontFamily,
-          marginBottom: 12,
+          marginBottom: isTop ? 18 : 12,
+          lineHeight: 1.2,
           opacity: phase1.opacity,
           transform: `scale(${phase1.scale})`,
         }}
@@ -124,7 +148,7 @@ export const MediaCardScene: React.FC<Record<string, unknown>> = (rawProps) => {
       {description && (
         <div
           style={{
-            fontSize: 16,
+            fontSize: isTop ? 26 : 16,
             color: tokens.foregroundMid,
             fontFamily: tokens.fontFamily,
             lineHeight: 1.6,
@@ -149,8 +173,22 @@ export const MediaCardScene: React.FC<Record<string, unknown>> = (rawProps) => {
         padding: "40px 80px",
       }}
     >
-      <div style={{ display: "flex", gap: 40, alignItems: "center", width: "100%" }}>
-        {isRight ? (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: isTop ? "column" : "row",
+          gap: isTop ? 56 : 40,
+          alignItems: "center",
+          width: "100%",
+          maxWidth: isTop ? 860 : undefined,
+        }}
+      >
+        {isTop ? (
+          <>
+            {imageEl}
+            {textEl}
+          </>
+        ) : isRight ? (
           <>
             {textEl}
             {imageEl}

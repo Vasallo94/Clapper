@@ -13,6 +13,7 @@ import { PricingScene } from "../ProductShort/scenes/PricingScene"
 import { CtaScene } from "../ProductShort/scenes/CtaScene"
 import { KaraokeSubtitles, type WordTimestamp } from "../../shared/components/KaraokeSubtitles"
 import { LogoWatermark } from "../../shared/components/LogoWatermark"
+import { SignatureWatermark } from "../../shared/components/SignatureWatermark"
 import { CompositionShell } from "../../shared/CompositionShell"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,7 +63,8 @@ export const ClaudeCodeTutorial: React.FC<TutorialConfig> = (config) => {
   const theme = getTheme(config.theme ?? "default")
   const subtitlesEnabled = config.subtitles?.enabled !== false && Boolean(config.voiceover?.enabled)
   const sceneTimestamps = useTimestamps(config.id, config.scenes.length, subtitlesEnabled)
-  const showLogoWatermark = !theme.mascot.show
+  const signature = config.signature ?? null
+  const showLogoWatermark = !theme.mascot.show && !signature
 
   return (
     <CompositionShell
@@ -82,6 +84,7 @@ export const ClaudeCodeTutorial: React.FC<TutorialConfig> = (config) => {
               fontSize={config.subtitles?.fontSize ?? 32}
             />
           )}
+          {signature && scene.type !== "intro" && <SignatureWatermark text={signature} />}
           {showLogoWatermark && scene.type !== "intro" && <LogoWatermark />}
         </>
       )}

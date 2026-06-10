@@ -16,6 +16,7 @@ import { CodeBlockScene } from "./scenes/custom/CodeBlockScene"
 import { CodeDiffScene } from "./scenes/custom/CodeDiffScene"
 import { ComparisonTableScene } from "./scenes/custom/ComparisonTableScene"
 import { CountdownScene } from "./scenes/custom/CountdownScene"
+import { EtalonScene } from "./scenes/custom/EtalonScene"
 import { FileExplorerScene } from "./scenes/custom/FileExplorerScene"
 import { FlowDiagramScene } from "./scenes/custom/FlowDiagramScene"
 import { IconGridScene } from "./scenes/custom/IconGridScene"
@@ -24,6 +25,7 @@ import { MediaCardScene } from "./scenes/custom/MediaCardScene"
 import { ProblemSolutionScene } from "./scenes/custom/ProblemSolutionScene"
 import { ProgressBarsScene } from "./scenes/custom/ProgressBarsScene"
 import { QuoteScene } from "./scenes/custom/QuoteScene"
+import { SpectrumScene } from "./scenes/custom/SpectrumScene"
 import { SplitScreenScene } from "./scenes/custom/SplitScreenScene"
 import { StatRevealScene } from "./scenes/custom/StatRevealScene"
 import { StepListScene } from "./scenes/custom/StepListScene"
@@ -44,12 +46,14 @@ export const customSceneRegistry: Record<string, FC<Record<string, unknown>>> = 
   "code-diff": CodeDiffScene,
   "comparison-table": ComparisonTableScene,
   countdown: CountdownScene,
+  etalon: EtalonScene,
   "file-explorer": FileExplorerScene,
   "flow-diagram": FlowDiagramScene,
   "icon-grid": IconGridScene,
   "problem-solution": ProblemSolutionScene,
   "progress-bars": ProgressBarsScene,
   quote: QuoteScene,
+  spectrum: SpectrumScene,
   "split-screen": SplitScreenScene,
   "stat-reveal": StatRevealScene,
   timeline: TimelineScene,

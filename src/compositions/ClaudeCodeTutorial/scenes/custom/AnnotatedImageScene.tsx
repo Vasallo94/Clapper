@@ -1,9 +1,11 @@
 import React from "react"
 import { AbsoluteFill, Img } from "remotion"
 import { useThemeTokens } from "../../../../shared/themes"
+import { resolveAssetSrc } from "../../../../shared/resolveAssetSrc"
 import type { Beat, Timing } from "../../../../utils/direction"
 import { usePhase1Entry } from "../../../../shared/hooks/usePhase1Entry"
 import { useBeatReveal } from "../../../../shared/hooks/useBeatReveal"
+import { useKenBurns } from "../../../../shared/hooks/useKenBurns"
 
 interface Annotation {
   x: number
@@ -48,12 +50,12 @@ const AnnotationMarker: React.FC<{
     >
       <div
         style={{
-          width: 24,
-          height: 24,
+          width: 30,
+          height: 30,
           borderRadius: "50%",
           background: tokens.primary,
           color: tokens.primaryForeground,
-          fontSize: 13,
+          fontSize: 15,
           fontWeight: 700,
           display: "flex",
           alignItems: "center",
@@ -69,9 +71,9 @@ const AnnotationMarker: React.FC<{
             ...offset,
             background: tokens.primary,
             color: tokens.primaryForeground,
-            fontSize: 12,
-            fontWeight: 600,
-            padding: "5px 12px",
+            fontSize: 16,
+            fontWeight: 700,
+            padding: "6px 14px",
             borderRadius: 4,
             whiteSpace: "nowrap",
             fontFamily: tokens.fontFamily,
@@ -88,15 +90,15 @@ const AnnotationMarker: React.FC<{
 const getCalloutOffset = (pos: string) => {
   switch (pos) {
     case "top":
-      return { top: "auto", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)" }
+      return { top: "auto", bottom: "calc(100% + 16px)", left: "50%", transform: "translateX(-50%)" }
     case "bottom":
-      return { top: "calc(100% + 8px)", bottom: "auto", left: "50%", transform: "translateX(-50%)" }
+      return { top: "calc(100% + 16px)", bottom: "auto", left: "50%", transform: "translateX(-50%)" }
     case "left":
-      return { top: "50%", right: "calc(100% + 8px)", left: "auto", transform: "translateY(-50%)" }
+      return { top: "50%", right: "calc(100% + 16px)", left: "auto", transform: "translateY(-50%)" }
     case "right":
-      return { top: "50%", left: "calc(100% + 8px)", right: "auto", transform: "translateY(-50%)" }
+      return { top: "50%", left: "calc(100% + 16px)", right: "auto", transform: "translateY(-50%)" }
     default:
-      return { top: "calc(100% + 8px)", bottom: "auto", left: "50%", transform: "translateX(-50%)" }
+      return { top: "calc(100% + 16px)", bottom: "auto", left: "50%", transform: "translateX(-50%)" }
   }
 }
 
@@ -105,6 +107,7 @@ export const AnnotatedImageScene: React.FC<Record<string, unknown>> = (rawProps)
   const { imageSrc, imageAlt, annotations, beats } = props
   const tokens = useThemeTokens()
   const phase1 = usePhase1Entry({ durationMs: 100 })
+  const kb = useKenBurns({ zoomPerSecond: 0.006, from: 1, maxScale: 1.12 })
 
   return (
     <AbsoluteFill
@@ -113,21 +116,22 @@ export const AnnotatedImageScene: React.FC<Record<string, unknown>> = (rawProps)
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "40px 60px",
+        padding: "30px 20px",
       }}
     >
       <div
         style={{
           position: "relative",
           opacity: phase1.opacity,
-          transform: `scale(${phase1.scale})`,
-          maxWidth: 900,
+          transform: `scale(${phase1.scale * kb.scale})`,
+          transformOrigin: "center center",
+          maxWidth: 1040,
           width: "100%",
         }}
       >
         {imageSrc ? (
           <Img
-            src={imageSrc}
+            src={resolveAssetSrc(imageSrc)}
             style={{
               width: "100%",
               borderRadius: 10,

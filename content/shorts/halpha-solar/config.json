@@ -1,0 +1,187 @@
+{
+  "id": "halpha-solar",
+  "title": "El Sol en Hα",
+  "description": "Qué se ve en una imagen solar en H-alpha y por qué",
+  "composition": "VerticalShort",
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "theme": "h-alpha",
+  "signature": "Enrique Vasallo",
+  "transition": { "type": "fade", "durationInFrames": 12 },
+  "scenes": [
+    {
+      "type": "custom",
+      "componentId": "media-card",
+      "durationInSeconds": 8,
+      "props": {
+        "imageSrc": "images/halpha/sun-h-alpha.png",
+        "imageAlt": "Disco solar en H-alpha con filamentos y protuberancias",
+        "title": "¿Quieres ver el Sol con otros ojos?",
+        "description": "A simple vista es un disco liso y amarillo. En una sola línea de color, se transforma.",
+        "layout": "image-top"
+      }
+    },
+    {
+      "type": "custom",
+      "componentId": "spectrum",
+      "durationInSeconds": 14,
+      "props": {
+        "title": "El hidrógeno emite un rojo muy concreto",
+        "value": "656,28",
+        "caption": "La línea hidrógeno-alfa: donde brilla la cromosfera"
+      },
+      "beats": [
+        { "id": "sweep", "startMs": 400, "narration": "el hidrógeno emite" },
+        { "id": "rojo", "startMs": 3929, "narration": "un rojo muy concreto" }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "etalon",
+      "durationInSeconds": 14,
+      "props": {
+        "title": "Aislar un solo color: el etalon",
+        "captions": ["Dos espejos casi perfectos", "La luz rebota miles de veces", "Solo Hα sale reforzada"]
+      },
+      "beats": [
+        { "id": "plates", "startMs": 600, "narration": "el etalon" },
+        { "id": "espejos", "startMs": 5833, "narration": "dos espejos" },
+        { "id": "rebota", "startMs": 8748, "narration": "rebota miles de veces" },
+        { "id": "reforzada", "startMs": 13566, "narration": "solo Hα sale reforzada" }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "flow-diagram",
+      "durationInSeconds": 12,
+      "props": {
+        "title": "La cadena óptica",
+        "layout": "vertical",
+        "showParticle": true,
+        "nodes": [
+          { "id": "obj", "title": "Objetivo", "description": "Recoge la luz del Sol" },
+          { "id": "erf", "title": "ERF", "description": "Aparta el calor y la energía" },
+          { "id": "etalon", "title": "Etalon", "description": "Selecciona la rendija de Hα" },
+          { "id": "blocking", "title": "Blocking filter", "description": "Limpia la luz sobrante" },
+          { "id": "eye", "title": "Ojo / cámara", "description": "Imagen limpia y segura" }
+        ]
+      },
+      "beats": [
+        { "id": "start", "startMs": 300, "narration": "la cadena óptica" },
+        { "id": "intro", "startMs": 500, "narration": "el etalon no trabaja solo" },
+        { "id": "objetivo", "startMs": 1200, "narration": "objetivo" },
+        { "id": "erf", "startMs": 3419, "narration": "un filtro aparta el calor" },
+        { "id": "etalon", "startMs": 5000, "narration": "etalon" },
+        { "id": "blocking", "startMs": 6333, "narration": "otro limpia la luz sobrante" },
+        { "id": "ojo", "startMs": 8492, "narration": "ni hay imagen, ni hay seguridad" }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "annotated-image",
+      "durationInSeconds": 16,
+      "props": {
+        "imageSrc": "images/halpha/sun-h-alpha.png",
+        "imageAlt": "Disco solar en H-alpha anotado",
+        "annotations": [
+          { "x": 42, "y": 51, "text": "Filamentos", "position": "bottom" },
+          { "x": 40, "y": 37, "text": "Plages", "position": "left" },
+          { "x": 48, "y": 38, "text": "Mancha solar", "position": "top" },
+          { "x": 69, "y": 31, "text": "Protuberancias", "position": "right" },
+          { "x": 57, "y": 60, "text": "Textura cromosférica", "position": "bottom" }
+        ]
+      },
+      "beats": [
+        { "id": "img", "startMs": 300, "narration": "ya sabes leer lo que ves" },
+        { "id": "filamentos", "startMs": 2625, "narration": "filamentos oscuros" },
+        { "id": "plages", "startMs": 4343, "narration": "plages brillantes" },
+        { "id": "mancha", "startMs": 5875, "narration": "manchas" },
+        { "id": "protuberancias", "startMs": 6862, "narration": "protuberancias en el borde" },
+        { "id": "textura", "startMs": 8999, "narration": "textura de espículas" }
+      ]
+    },
+    {
+      "type": "cta",
+      "durationInSeconds": 8,
+      "text": "La misma estrella, vista en un solo color. Aprende a leer el Sol.",
+      "url": "vasallo94.github.io/H-alpha"
+    }
+  ],
+  "voiceover": {
+    "enabled": true,
+    "provider": "elevenlabs",
+    "voiceId": "nPczCjzI2devNBz1zQrb",
+    "language": "es",
+    "elevenlabs": {
+      "modelId": "eleven_multilingual_v2",
+      "outputFormat": "mp3_44100_128",
+      "seed": 42,
+      "applyTextNormalization": "on",
+      "voiceSettings": {
+        "stability": 0.55,
+        "similarityBoost": 0.8,
+        "style": 0.1,
+        "useSpeakerBoost": true,
+        "speed": 1.0
+      }
+    },
+    "scenes": {
+      "0": {
+        "text": "A simple vista, el Sol es un disco liso y amarillo. Pero en una sola línea de color, se transforma.",
+        "leadInMs": 600,
+        "audioStartMs": 600,
+        "tailHoldMs": 500,
+        "elevenlabs": { "nextText": "El Sol es casi todo hidrógeno." }
+      },
+      "1": {
+        "text": "El Sol es casi todo hidrógeno, y el hidrógeno emite un rojo muy concreto: la línea hidrógeno alfa. En ese color brilla la cromosfera, una capa fina sobre la superficie que la luz blanca normalmente esconde.",
+        "leadInMs": 400,
+        "audioStartMs": 400,
+        "tailHoldMs": 500,
+        "elevenlabs": { "previousText": "se transforma.", "nextText": "Para quedarse solo con ese rojo." }
+      },
+      "2": {
+        "text": "Para quedarse solo con ese rojo, un telescopio de hidrógeno alfa usa un etalon: dos espejos casi perfectos. La luz rebota miles de veces y solo una nota, la de hidrógeno alfa, sale reforzada. Todo lo demás se cancela.",
+        "leadInMs": 400,
+        "audioStartMs": 400,
+        "tailHoldMs": 500,
+        "elevenlabs": { "previousText": "la luz blanca esconde.", "nextText": "Pero el etalon no trabaja solo." }
+      },
+      "3": {
+        "text": "Pero el etalon no trabaja solo. Antes, un filtro aparta el calor; después, otro limpia la luz sobrante. Sin esa cadena, ni hay imagen, ni hay seguridad.",
+        "leadInMs": 400,
+        "audioStartMs": 400,
+        "tailHoldMs": 500,
+        "elevenlabs": { "previousText": "Todo lo demás se cancela.", "nextText": "Y ahora ya sabes leer lo que ves." }
+      },
+      "4": {
+        "text": "Y ahora ya sabes leer lo que ves: filamentos oscuros, plages brillantes, manchas, protuberancias en el borde, y la textura de espículas que da el aspecto granulado.",
+        "leadInMs": 500,
+        "audioStartMs": 500,
+        "tailHoldMs": 600,
+        "elevenlabs": { "previousText": "ni hay seguridad.", "nextText": "La misma estrella, vista en un solo color." }
+      },
+      "5": {
+        "text": "La misma estrella, vista en un solo color. Tienes la explicación completa, paso a paso, en la web.",
+        "leadInMs": 400,
+        "audioStartMs": 400,
+        "tailHoldMs": 1200,
+        "elevenlabs": { "previousText": "el aspecto granulado.", "voiceSettings": { "stability": 0.6, "style": 0.08 } }
+      }
+    }
+  },
+  "subtitles": { "enabled": true, "style": "karaoke", "fontSize": 34, "position": "bottom" },
+  "soundDesign": {
+    "enabled": true,
+    "musicBed": {
+      "libraryId": "halpha-ambient-drone",
+      "volume": -23,
+      "duckingVolume": -30,
+      "fadeInMs": 2500,
+      "fadeOutMs": 3500,
+      "duckingFadeMs": 500
+    },
+    "sfx": []
+  }
+}

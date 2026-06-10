@@ -7,6 +7,7 @@ from deepagents.middleware.skills import SkillsMiddleware
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.checkpoint.memory import MemorySaver  # used when running standalone
 
+from .tools.friction import report_friction
 from .tools.render import check_render_status, submit_render
 from .tools.validation import audit_content_quality, validate_config
 from .modes import get_mode_contract, list_mode_contracts, route_intent
@@ -158,13 +159,14 @@ def create_video_orchestrator(*, checkpointer=None):
             check_render_status,
             validate_config,
             audit_content_quality,
+            report_friction,
         ],
         "system_prompt": system_prompt,
         "subagents": subagents,
         "backend": backend,
         "middleware": middleware,
         "memory": ["/memories/AGENTS.md"],
-        "name": "video-orchestrator",
+        "name": "claqueta",
         "context_schema": PipelineContext,
     }
     if checkpointer is not None:

@@ -273,7 +273,7 @@ export function ChatThread({
           }}
         >
           <div style={{ fontSize: 28, fontWeight: 700, color: theme.colors.text.muted, letterSpacing: "-0.02em" }}>
-            Video Generator
+            Claqueta
           </div>
           <div
             style={{

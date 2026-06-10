@@ -251,3 +251,13 @@ All agents read `/pipeline/plan.json` and use `read_file`/`write_file` for `/pip
 
 - When using `langgraph dev`, runs may terminate with `status: "success"` but `next: ["tools"]`. This means tool calls are pending. Resume by sending a new run with `input: null` to continue execution.
 - If `write_todos` fails or is unavailable, continue using the shared plan tools (see § Shared pipeline plan).
+
+## Friction reporting (AFP)
+
+Claqueta recoge feedback sobre sí misma: tú, que vives dentro del harness, eres su tester de caja negra.
+
+- Cuando una tool del pipeline, un subagente o el propio harness rompa o degrade tu plan — bug, comportamiento no documentado, capacidad ausente, interfaz confusa, output erróneo — usa `report_friction` después de resolver o esquivar el problema. Un workaround que tuviste que inventar es señal fuerte de que hay que reportar.
+- No reportes errores tuyos evitables ni fallos puntuales de red. Sé honesto con `fault_domain`: si usaste mal la tool y la documentación podría haberlo evitado, es `agent_misuse`.
+- En `component` indica la pieza concreta (orchestrator, pipeline, web, render-service, o el nombre del subagente/tool).
+- Nunca incluyas secretos, tokens ni datos personales en el texto libre.
+- El reporte queda como borrador local pendiente de revisión humana; tu trabajo termina ahí. No insistas ni lo menciones más de una vez por fricción.

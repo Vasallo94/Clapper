@@ -1,0 +1,444 @@
+{
+  "id": "monitor",
+  "title": "/monitor — Deja de hacer polling",
+  "description": "Cómo usar el Monitor tool de Claude Code para reaccionar a eventos en vez de hacer polling",
+  "theme": "default",
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "brief": {
+    "platform": "linkedin",
+    "audience": "Desarrolladores que ya usan Claude Code y quieren sacarle más partido",
+    "goal": "Mostrar que Monitor reacciona a eventos reales en vez de malgastar tokens en polling",
+    "promise": "Con Monitor, Claude actúa al instante sin consumir un solo token mientras espera",
+    "tone": "técnico-directo con contraste claro entre el antes y el después",
+    "cta": "Prueba Monitor en tu próximo build o watch de logs",
+    "hookStrategy": "problem-first — mostrar el dolor del polling antes de presentar la solución"
+  },
+  "scenes": [
+    {
+      "type": "intro",
+      "title": "/monitor",
+      "subtitle": "Deja de hacer polling, empieza a reaccionar",
+      "durationInSeconds": 8,
+      "beats": [
+        {
+          "id": "opening-lockup",
+          "startMs": 0,
+          "endMs": 800,
+          "narration": "",
+          "visual": "Título y subtítulo visibles antes de que empiece la voz",
+          "animation": "hold",
+          "emphasis": "medium"
+        },
+        {
+          "id": "hook-what",
+          "startMs": 800,
+          "endMs": 5500,
+          "narration": "Monitor. Claude Code lanza un proceso en background y reacciona cuando su salida emite algo.",
+          "visual": "Acento y subtítulo hacen el primer gesto fuerte",
+          "animation": "accent-reveal",
+          "emphasis": "high"
+        },
+        {
+          "id": "hook-tagline",
+          "startMs": 5500,
+          "endMs": 7600,
+          "narration": "Sin timers. Sin llamadas innecesarias.",
+          "visual": "Subtítulo se asienta como promesa",
+          "animation": "subtitle-settle",
+          "emphasis": "medium"
+        }
+      ]
+    },
+    {
+      "type": "terminal",
+      "title": "El problema con /loop",
+      "timing": {
+        "transitionMs": 600,
+        "leadInMs": 400,
+        "audioStartMs": 400,
+        "tailHoldMs": 500,
+        "minVisualHoldMs": 600
+      },
+      "lines": [
+        { "kind": "command", "text": "/loop 2m \"avisa si falla algun test\"" },
+        { "kind": "blank", "text": "" },
+        { "kind": "output", "text": "[llamada 1/4 — sin fallos]" },
+        { "kind": "output", "text": "[llamada 2/4 — sin fallos]" },
+        { "kind": "output", "text": "[llamada 3/4 — sin fallos]" },
+        { "kind": "output", "text": "[llamada 4/4 — FALLO detectado]", "delayAfterMs": 600 },
+        { "kind": "blank", "text": "" },
+        { "kind": "claude", "text": "3 llamadas API desperdiciadas antes de detectar el fallo." }
+      ],
+      "beats": [
+        {
+          "id": "loop-context",
+          "startMs": 400,
+          "endMs": 3500,
+          "narration": "Primero el problema. /loop funciona como un cronjob:",
+          "visual": "Comando /loop aparece con typewriter",
+          "animation": "typewriter",
+          "emphasis": "medium"
+        },
+        {
+          "id": "loop-polling",
+          "startMs": 3500,
+          "endMs": 7500,
+          "narration": "Claude se despierta cada dos minutos y comprueba si algo cambió.",
+          "visual": "Tres líneas de sin fallos aparecen secuencialmente",
+          "animation": "reveal",
+          "emphasis": "low"
+        },
+        {
+          "id": "loop-count",
+          "startMs": 7500,
+          "endMs": 10000,
+          "narration": "Cuatro llamadas. Tres inútiles.",
+          "visual": "FALLO detectado aparece con el delay de 600ms",
+          "animation": "emphasis",
+          "emphasis": "high"
+        },
+        {
+          "id": "loop-pivot",
+          "startMs": 10000,
+          "endMs": 13500,
+          "narration": "Hay una forma mejor.",
+          "visual": "Mensaje de Claude cierra la escena",
+          "animation": "fade-in",
+          "emphasis": "medium"
+        }
+      ],
+      "durationInSeconds": 14
+    },
+    {
+      "type": "callout",
+      "text": "Monitor lanza un proceso en background. Cada linea de stdout se convierte en un evento que despierta a Claude. Silencio = 0 tokens.",
+      "position": "bottom",
+      "background": "overlay",
+      "timing": {
+        "transitionMs": 1200,
+        "leadInMs": 400,
+        "audioStartMs": 400,
+        "tailHoldMs": 600,
+        "minVisualHoldMs": 500
+      },
+      "beats": [
+        {
+          "id": "mechanics-reveal",
+          "startMs": 400,
+          "endMs": 8600,
+          "narration": "Monitor invierte esto. Lanza un proceso. Cada línea de su salida despierta a Claude. Sin salida, cero tokens.",
+          "visual": "Texto del callout aparece completo",
+          "animation": "slide-up",
+          "emphasis": "high"
+        }
+      ],
+      "durationInSeconds": 9
+    },
+    {
+      "type": "terminal",
+      "title": "Demo — Atrapa el primer fallo",
+      "timing": {
+        "transitionMs": 800,
+        "leadInMs": 500,
+        "audioStartMs": 500,
+        "tailHoldMs": 500,
+        "minVisualHoldMs": 600
+      },
+      "lines": [
+        { "kind": "command", "text": "monitorea los tests, avisa si algo falla y abre el archivo" },
+        { "kind": "blank", "text": "" },
+        { "kind": "claude", "text": "Lanzo monitor sobre pytest filtrando FAILED y ERROR..." },
+        { "kind": "output", "text": "[Monitor activo: pytest --tb=short | grep -E \"FAILED|ERROR\"]" },
+        { "kind": "blank", "text": "", "delayAfterMs": 1200 },
+        { "kind": "output", "text": "FAILED tests/api/test_auth.py::test_token_expiry" },
+        { "kind": "blank", "text": "" },
+        { "kind": "claude", "text": "Fallo en test_token_expiry. Abro el archivo y propongo el fix." }
+      ],
+      "beats": [
+        {
+          "id": "test-setup",
+          "startMs": 500,
+          "endMs": 2800,
+          "narration": "Ejemplo: monitorea los tests y avisa si algo falla.",
+          "visual": "Comando aparece con typewriter",
+          "animation": "typewriter",
+          "emphasis": "medium"
+        },
+        {
+          "id": "test-launch",
+          "startMs": 2800,
+          "endMs": 5500,
+          "narration": "Claude lanza el monitor.",
+          "visual": "Claude + línea monitor activo aparecen",
+          "animation": "stream",
+          "emphasis": "medium"
+        },
+        {
+          "id": "test-silence",
+          "startMs": 5500,
+          "endMs": 9000,
+          "narration": "Nada durante un rato.",
+          "visual": "Pausa visible — delayAfterMs de 1200ms",
+          "animation": "none",
+          "emphasis": "low"
+        },
+        {
+          "id": "test-failure",
+          "startMs": 9000,
+          "endMs": 11500,
+          "narration": "Y de repente, un fallo. Claude lo ve al instante.",
+          "visual": "FAILED tests/api/test_auth.py aparece",
+          "animation": "flash",
+          "emphasis": "high"
+        },
+        {
+          "id": "test-action",
+          "startMs": 11500,
+          "endMs": 13500,
+          "narration": "Y actúa.",
+          "visual": "Claude abre el archivo y propone el fix",
+          "animation": "fade-in",
+          "emphasis": "medium"
+        }
+      ],
+      "durationInSeconds": 14
+    },
+    {
+      "type": "terminal",
+      "title": "Demo — Reacciona al review del PR",
+      "timing": {
+        "transitionMs": 600,
+        "leadInMs": 500,
+        "audioStartMs": 500,
+        "tailHoldMs": 500,
+        "minVisualHoldMs": 600
+      },
+      "lines": [
+        { "kind": "command", "text": "avisa cuando llegue un review en el PR #142" },
+        { "kind": "blank", "text": "" },
+        { "kind": "claude", "text": "Lanzo monitor con polling cada 30s sobre el PR..." },
+        { "kind": "output", "text": "[Monitor activo — polling gh pr view 142 cada 30s]" },
+        { "kind": "blank", "text": "", "delayAfterMs": 1200 },
+        { "kind": "output", "text": "NEW_REVIEW: \"Este endpoint necesita validacion de input\"" },
+        { "kind": "blank", "text": "" },
+        { "kind": "claude", "text": "Review recibido. Implemento la validacion ahora." }
+      ],
+      "beats": [
+        {
+          "id": "pr-setup",
+          "startMs": 500,
+          "endMs": 2500,
+          "narration": "Otro caso: esperar un review de PR.",
+          "visual": "Comando aparece con typewriter",
+          "animation": "typewriter",
+          "emphasis": "medium"
+        },
+        {
+          "id": "pr-launch",
+          "startMs": 2500,
+          "endMs": 5500,
+          "narration": "Monitor hace comprobaciones cada treinta segundos.",
+          "visual": "Claude + monitor activo aparecen",
+          "animation": "stream",
+          "emphasis": "medium"
+        },
+        {
+          "id": "pr-silence",
+          "startMs": 5500,
+          "endMs": 9000,
+          "narration": "Silencio.",
+          "visual": "Pausa de polling",
+          "animation": "none",
+          "emphasis": "low"
+        },
+        {
+          "id": "pr-review-action",
+          "startMs": 9000,
+          "endMs": 13500,
+          "narration": "Y cuando llega el review, Claude actúa de inmediato.",
+          "visual": "NEW_REVIEW aparece + Claude responde",
+          "animation": "flash",
+          "emphasis": "high"
+        }
+      ],
+      "durationInSeconds": 14
+    },
+    {
+      "type": "outro",
+      "title": "Monitor en Claude Code",
+      "timing": {
+        "transitionMs": 1000,
+        "leadInMs": 400,
+        "audioStartMs": 400,
+        "tailHoldMs": 1500,
+        "minVisualHoldMs": 700
+      },
+      "beats": [
+        {
+          "id": "outro-1",
+          "startMs": 400,
+          "endMs": 2200,
+          "narration": "Monitor: eventos, no cronjobs.",
+          "visual": "Primer bullet aparece",
+          "animation": "bullet-reveal",
+          "emphasis": "medium"
+        },
+        {
+          "id": "outro-2",
+          "startMs": 2200,
+          "endMs": 4500,
+          "narration": "Notificación instantánea al ver cualquier salida.",
+          "visual": "Segundo bullet aparece",
+          "animation": "bullet-reveal",
+          "emphasis": "medium"
+        },
+        {
+          "id": "outro-3",
+          "startMs": 4500,
+          "endMs": 7500,
+          "narration": "Modo persistente para la sesión entera, tiempo límite para procesos acotados.",
+          "visual": "Tercer y cuarto bullet aparecen",
+          "animation": "bullet-reveal",
+          "emphasis": "medium"
+        },
+        {
+          "id": "outro-cta",
+          "startMs": 7500,
+          "endMs": 10500,
+          "narration": "Si te interesa Claude Code, sígueme para más.",
+          "visual": "Quinto bullet CTA aparece con énfasis",
+          "animation": "bullet-reveal",
+          "emphasis": "high"
+        }
+      ],
+      "bullets": [
+        "Monitor = eventos, no cronjobs",
+        "Notificación instantánea al ver cualquier salida",
+        "persistent: true para toda la sesión",
+        "timeout_ms para procesos acotados",
+        "Si te interesa Claude Code, sígueme"
+      ],
+      "durationInSeconds": 12
+    }
+  ],
+  "voiceover": {
+    "enabled": true,
+    "provider": "elevenlabs",
+    "voiceId": "y6WtESLj18d0diFRruBs",
+    "language": "es",
+    "elevenlabs": {
+      "modelId": "eleven_multilingual_v2",
+      "outputFormat": "mp3_44100_128",
+      "seed": 42,
+      "applyTextNormalization": "on",
+      "voiceSettings": {
+        "stability": 0.38,
+        "similarityBoost": 0.8,
+        "style": 0.22,
+        "useSpeakerBoost": true,
+        "speed": 1.03
+      }
+    },
+    "scenes": {
+      "0": {
+        "text": "Monitor. Claude Code lanza un proceso en background y reacciona cuando su salida emite algo. Sin timers. Sin llamadas innecesarias.",
+        "leadInMs": 800,
+        "audioStartMs": 800,
+        "tailHoldMs": 600,
+        "elevenlabs": {
+          "voiceSettings": { "stability": 0.34, "style": 0.26 },
+          "nextText": "Primero el problema."
+        }
+      },
+      "1": {
+        "text": "Primero el problema. /loop funciona como un cronjob: Claude se despierta cada dos minutos y comprueba si algo cambió. Cuatro llamadas. Tres inútiles. Hay una forma mejor.",
+        "leadInMs": 400,
+        "audioStartMs": 400,
+        "tailHoldMs": 500,
+        "elevenlabs": {
+          "previousText": "Monitor. Claude Code lanza un proceso en background.",
+          "nextText": "Monitor invierte esto."
+        }
+      },
+      "2": {
+        "text": "Monitor invierte esto. Lanza un proceso. Cada línea de su salida despierta a Claude. Sin salida, cero tokens.",
+        "leadInMs": 400,
+        "audioStartMs": 400,
+        "tailHoldMs": 600,
+        "elevenlabs": {
+          "previousText": "Hay una forma mejor.",
+          "nextText": "Ejemplo: monitorea los tests y avisa si algo falla."
+        }
+      },
+      "3": {
+        "text": "Ejemplo: monitorea los tests y avisa si algo falla. Claude lanza el monitor. Silencio mientras corren. Y al primer fallo, actúa.",
+        "leadInMs": 500,
+        "audioStartMs": 500,
+        "tailHoldMs": 500,
+        "elevenlabs": {
+          "previousText": "Sin salida, cero tokens.",
+          "nextText": "Otro caso: esperar un review de PR."
+        }
+      },
+      "4": {
+        "text": "Otro caso: esperar un review de PR. Monitor hace comprobaciones cada treinta segundos. Silencio. Y cuando llega, Claude actúa de inmediato.",
+        "leadInMs": 500,
+        "audioStartMs": 500,
+        "tailHoldMs": 500,
+        "elevenlabs": {
+          "previousText": "Y al primer fallo, actúa.",
+          "nextText": "Monitor: eventos, no cronjobs."
+        }
+      },
+      "5": {
+        "text": "Monitor: eventos, no cronjobs. Notificación instantánea al ver cualquier salida. Modo persistente para la sesión entera, tiempo límite para procesos acotados. Si te interesa Claude Code, sígueme para más.",
+        "leadInMs": 400,
+        "audioStartMs": 400,
+        "tailHoldMs": 1500,
+        "elevenlabs": {
+          "previousText": "Y cuando llega, Claude actúa de inmediato.",
+          "voiceSettings": { "stability": 0.42, "style": 0.18 }
+        }
+      }
+    }
+  },
+  "subtitles": {
+    "enabled": true,
+    "style": "karaoke",
+    "fontSize": 32,
+    "position": "bottom"
+  },
+  "soundDesign": {
+    "enabled": true,
+    "musicBed": {
+      "libraryId": "lofi-tech-2-loop",
+      "volume": -18,
+      "duckingVolume": -26,
+      "fadeInMs": 2000,
+      "fadeOutMs": 3000,
+      "duckingFadeMs": 400
+    },
+    "sfx": [
+      {
+        "id": "keyboard",
+        "prompt": "soft mechanical keyboard typing in quiet room, cherry mx switches, gentle ASMR clicks, no background noise",
+        "durationMs": 8000,
+        "trigger": "typewriter",
+        "sceneTypes": ["terminal"],
+        "loop": true,
+        "volume": -14
+      },
+      {
+        "id": "outro-stinger",
+        "prompt": "short musical stinger, lofi ending tag, warm, 2 seconds, fade out",
+        "durationMs": 2000,
+        "trigger": "scene-start",
+        "sceneTypes": ["outro"],
+        "loop": false,
+        "volume": -10
+      }
+    ]
+  }
+}

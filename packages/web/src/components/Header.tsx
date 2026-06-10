@@ -21,7 +21,7 @@ export function Header({ artifacts = [], activeTarget, onSelectTarget }: Props) 
     >
       <div style={{ width: 3, height: 20, backgroundColor: theme.colors.accent.primary, borderRadius: 2 }} />
       <span style={{ fontSize: 16, fontWeight: 600, color: theme.colors.text.primary, letterSpacing: "-0.01em" }}>
-        Video Generator
+        Claqueta
       </span>
       <span style={{ fontSize: 12, color: theme.colors.text.muted, fontFamily: theme.fonts.mono, marginLeft: 4 }}>
         mission control

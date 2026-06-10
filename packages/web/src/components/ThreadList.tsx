@@ -39,9 +39,7 @@ export function ThreadList({ threads, currentThreadId, onSelect, onDelete, onNew
             cursor: "pointer",
             backgroundColor: t.threadId === currentThreadId ? theme.colors.bg.hover : "transparent",
             borderLeft:
-              t.threadId === currentThreadId
-                ? `2px solid ${theme.colors.accent.primary}`
-                : "2px solid transparent",
+              t.threadId === currentThreadId ? `2px solid ${theme.colors.accent.primary}` : "2px solid transparent",
             marginBottom: 2,
             display: "flex",
             justifyContent: "space-between",

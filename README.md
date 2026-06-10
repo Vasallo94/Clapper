@@ -1,8 +1,8 @@
-# 🎬 Clapper
+# 🎬 Claqueta
 
 **Describe un vídeo en lenguaje natural y obtén un MP4 renderizado.**
 
-Clapper es una plataforma agéntica de generación de vídeo: un pipeline multi-agente
+Claqueta es una plataforma agéntica de generación de vídeo: un pipeline multi-agente
 ([LangGraph](https://github.com/langchain-ai/langgraph) + [deepagents](https://github.com/hwchase17/deepagents))
 orquestado mediante skills de [Claude Code](https://claude.ai/code) que investiga el tema,
 escribe el copy, diseña la escaleta, genera voz y música, y renderiza con

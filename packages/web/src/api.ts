@@ -5,7 +5,7 @@ export const client = new Client({
   apiUrl: import.meta.env.VITE_LANGGRAPH_URL ?? "http://127.0.0.1:2024",
 })
 
-export const ASSISTANT_ID = "agent"
+export const ASSISTANT_ID = "claqueta"
 
 const RENDER_URL = import.meta.env.VITE_RENDER_URL ?? "http://127.0.0.1:3100"
 

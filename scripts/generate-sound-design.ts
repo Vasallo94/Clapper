@@ -247,11 +247,15 @@ async function generateMusicBed(fingerprints: Fingerprints) {
       console.log("  🔄 Falling back to ElevenLabs for music bed...")
       const musicUrl = new URL("https://api.elevenlabs.io/v1/music")
       musicUrl.searchParams.set("output_format", "mp3_44100_128")
-      const audioBuffer = await fetchElevenLabs(musicUrl.toString(), {
-        prompt: musicBed.customPrompt,
-        music_length_ms: (totalDurationSeconds + 5) * 1000,
-        force_instrumental: true,
-      }, "music-bed")
+      const audioBuffer = await fetchElevenLabs(
+        musicUrl.toString(),
+        {
+          prompt: musicBed.customPrompt,
+          music_length_ms: (totalDurationSeconds + 5) * 1000,
+          force_instrumental: true,
+        },
+        "music-bed",
+      )
 
       if (audioBuffer) {
         writeFileSync(outputPath, audioBuffer)
@@ -322,11 +326,15 @@ async function generateSfx(fingerprints: Fingerprints) {
       console.log(`  🔄 Falling back to ElevenLabs for sfx-${sfx.id}...`)
       const sfxUrl = new URL("https://api.elevenlabs.io/v1/sound-generation")
       sfxUrl.searchParams.set("output_format", "mp3_44100_128")
-      const audioBuffer = await fetchElevenLabs(sfxUrl.toString(), {
-        text: sfx.prompt,
-        ...(sfx.durationMs ? { duration_seconds: sfx.durationMs / 1000 } : {}),
-        ...(sfx.loop ? { loop: true } : {}),
-      }, `sfx-${sfx.id}`)
+      const audioBuffer = await fetchElevenLabs(
+        sfxUrl.toString(),
+        {
+          text: sfx.prompt,
+          ...(sfx.durationMs ? { duration_seconds: sfx.durationMs / 1000 } : {}),
+          ...(sfx.loop ? { loop: true } : {}),
+        },
+        `sfx-${sfx.id}`,
+      )
 
       if (audioBuffer) {
         writeFileSync(outputPath, audioBuffer)

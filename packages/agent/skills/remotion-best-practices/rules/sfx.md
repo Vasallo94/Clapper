@@ -9,7 +9,6 @@ To include a sound effect, use the `<Audio>` tag:
 
 ```tsx
 import { Audio } from "@remotion/sfx"
-
 ;<Audio src={"https://remotion.media/whoosh.wav"} />
 ```
 

@@ -12,6 +12,7 @@ import { BlockDiagramScene } from "./scenes/custom/BlockDiagramScene"
 import { BrowserMockupScene } from "./scenes/custom/BrowserMockupScene"
 import { BulletSlideScene } from "./scenes/custom/BulletSlideScene"
 import { ChapterCardScene } from "./scenes/custom/ChapterCardScene"
+import { ClapperboardScene } from "./scenes/custom/ClapperboardScene"
 import { CodeBlockScene } from "./scenes/custom/CodeBlockScene"
 import { CodeDiffScene } from "./scenes/custom/CodeDiffScene"
 import { ComparisonTableScene } from "./scenes/custom/ComparisonTableScene"
@@ -42,6 +43,7 @@ export const customSceneRegistry: Record<string, FC<Record<string, unknown>>> = 
   "browser-mockup": BrowserMockupScene,
   "bullet-slide": BulletSlideScene,
   "chapter-card": ChapterCardScene,
+  clapperboard: ClapperboardScene,
   "code-block": CodeBlockScene,
   "code-diff": CodeDiffScene,
   "comparison-table": ComparisonTableScene,

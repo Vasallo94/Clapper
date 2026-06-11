@@ -12,6 +12,7 @@ ModeName = Literal[
     "variant",
     "asset_regeneration",
     "question",
+    "self_improve",
 ]
 
 
@@ -71,6 +72,7 @@ ALL_MODES: tuple[ModeName, ...] = (
     "variant",
     "asset_regeneration",
     "question",
+    "self_improve",
 )
 
 MODE_CONTRACTS: dict[ModeName, ModeContract] = {
@@ -215,6 +217,33 @@ MODE_CONTRACTS: dict[ModeName, ModeContract] = {
             "reviewer",
         ),
         rules=("Answer the question directly.", "Do not call render, validation, or file-writing tools."),
+    ),
+    "self_improve": ModeContract(
+        mode="self_improve",
+        description="Review accumulated friction (AFP drafts) and ship improvements to Claqueta's own creative code as GitHub PRs for human review.",
+        requires_target=False,
+        can_write_files=True,
+        can_render=True,
+        allowed_agents=("improver",),
+        forbidden_agents=(
+            "researcher",
+            "copywriter",
+            "director",
+            "audio_planner",
+            "voice_generator",
+            "sound_engineer",
+            "scene_creator",
+            "validator",
+            "reviewer",
+        ),
+        checkpoints=("improvement_plan_approval",),
+        rules=(
+            "Read the friction backlog before proposing anything.",
+            "Present an improvement plan and wait for explicit human approval before touching any code.",
+            "All changes go to an improve/* branch and a GitHub PR — never commit to main.",
+            "Only edit files inside the write allowlist (custom scenes, agent skills/prompts, content configs).",
+            "If a change touches scenes, render a sample video as PR evidence; if the render fails, do not open the PR.",
+        ),
     ),
 }
 

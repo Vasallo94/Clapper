@@ -41,6 +41,8 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/app/gemini_flash_tts_testing_sa.json
       - RENDER_SERVICE_URL=http://render-service:3100
       - BG_JOB_ISOLATED_LOOPS=true
+      - SELF_IMPROVE_THRESHOLD=${SELF_IMPROVE_THRESHOLD:-5}
+      - GITHUB_REPO=${GITHUB_REPO:-Vasallo94/Claqueta}
     depends_on:
       render-service:
         condition: service_healthy

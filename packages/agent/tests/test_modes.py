@@ -92,3 +92,20 @@ def test_get_mode_contract():
     contract = get_mode_contract("asset_regeneration")
     assert contract["mode"] == "asset_regeneration"
     assert "voice_generator" in contract["allowed_agents"]
+
+
+def test_self_improve_contract():
+    contract = get_mode_contract("self_improve")
+    assert contract["mode"] == "self_improve"
+    assert contract["requires_target"] is False
+    assert contract["can_write_files"] is True
+    assert contract["can_render"] is True
+    assert contract["allowed_agents"] == ("improver",)
+    assert "improvement_plan_approval" in contract["checkpoints"]
+
+
+def test_route_intent_self_improve():
+    decision = route_intent("self_improve", "revisa tu fricción acumulada")
+    assert decision["mode"] == "self_improve"
+    assert decision["requires_checkpoint"] is True
+    assert decision["missing_target"] is False

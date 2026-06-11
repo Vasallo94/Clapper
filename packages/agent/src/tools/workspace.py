@@ -164,3 +164,31 @@ def commit_and_push(branch: str, message: str, base_dir: Optional[Path] = None) 
     if push.returncode != 0:
         return f"ERROR: push falló — {_redact(push.stderr.strip())}"
     return f"Rama {branch} pusheada: {message.splitlines()[0]}"
+
+
+def open_pull_request(branch: str, title: str, body: str) -> str:
+    """Abre un PR en GitHub desde una rama improve/* hacia main.
+
+    Args:
+        branch: Rama improve/<slug> ya pusheada.
+        title: Título del PR (Conventional Commits).
+        body: Descripción: qué fricción resuelve, qué cambió, evidencia (render de muestra si aplica).
+    """
+    token = os.environ.get("GITHUB_TOKEN")
+    repo = os.environ.get("GITHUB_REPO")
+    if not token or not repo:
+        return "ERROR: faltan GITHUB_TOKEN o GITHUB_REPO en el entorno."
+    if not BRANCH_RE.match(branch):
+        return "ERROR: solo se permiten ramas improve/<slug>."
+    try:
+        response = httpx.post(
+            f"https://api.github.com/repos/{repo}/pulls",
+            headers={"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"},
+            json={"title": title, "body": body, "head": branch, "base": "main"},
+            timeout=30.0,
+        )
+    except httpx.HTTPError as exc:
+        return f"ERROR: la API de GitHub no respondió — {_redact(str(exc))}"
+    if response.status_code != 201:
+        return f"ERROR: GitHub devolvió {response.status_code}: {response.text[:300]}"
+    return f"PR abierto: {response.json()['html_url']}"

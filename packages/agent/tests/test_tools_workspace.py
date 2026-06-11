@@ -3,10 +3,14 @@
 La allowlist se valida EN CÓDIGO, no en prompt: escenas custom,
 customSceneRegistry.ts, skills/prompts del agente y content/.
 """
+import json
 import subprocess
 from pathlib import Path
 
-from src.tools.workspace import commit_and_push, is_path_allowed, prepare_workspace, write_workspace_file
+import respx
+from httpx import Response
+
+from src.tools.workspace import commit_and_push, is_path_allowed, open_pull_request, prepare_workspace, write_workspace_file
 
 
 # --- allowlist pura ---
@@ -127,3 +131,44 @@ def test_commit_without_changes_errors(tmp_path):
     prepare_workspace(repo_url=f"file://{origin}", base_dir=ws)
     result = commit_and_push("improve/empty", "chore: nothing", base_dir=ws)
     assert result.startswith("ERROR")
+
+
+# --- open_pull_request ---
+
+@respx.mock
+def test_open_pull_request_happy_path(monkeypatch):
+    monkeypatch.setenv("GITHUB_TOKEN", "ghp_test")
+    monkeypatch.setenv("GITHUB_REPO", "Vasallo94/Claqueta")
+    route = respx.post("https://api.github.com/repos/Vasallo94/Claqueta/pulls").mock(
+        return_value=Response(201, json={"html_url": "https://github.com/Vasallo94/Claqueta/pull/42"})
+    )
+    result = open_pull_request("improve/demo", "feat: demo", "body")
+    assert "pull/42" in result
+    sent = route.calls.last.request
+    assert sent.headers["authorization"] == "Bearer ghp_test"
+    payload = json.loads(sent.content)
+    assert payload == {"title": "feat: demo", "body": "body", "head": "improve/demo", "base": "main"}
+
+
+@respx.mock
+def test_open_pull_request_api_error(monkeypatch):
+    monkeypatch.setenv("GITHUB_TOKEN", "ghp_test")
+    monkeypatch.setenv("GITHUB_REPO", "Vasallo94/Claqueta")
+    respx.post("https://api.github.com/repos/Vasallo94/Claqueta/pulls").mock(
+        return_value=Response(422, json={"message": "Validation Failed"})
+    )
+    result = open_pull_request("improve/demo", "t", "b")
+    assert result.startswith("ERROR")
+    assert "422" in result
+
+
+def test_open_pull_request_requires_env(monkeypatch):
+    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+    monkeypatch.delenv("GITHUB_REPO", raising=False)
+    assert open_pull_request("improve/demo", "t", "b").startswith("ERROR")
+
+
+def test_open_pull_request_rejects_bad_branch(monkeypatch):
+    monkeypatch.setenv("GITHUB_TOKEN", "ghp_test")
+    monkeypatch.setenv("GITHUB_REPO", "Vasallo94/Claqueta")
+    assert open_pull_request("main", "t", "b").startswith("ERROR")

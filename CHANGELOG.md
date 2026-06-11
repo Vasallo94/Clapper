@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Config del vídeo meta «Hola, soy Claqueta»** — `content/tutorials/claqueta-se-presenta/config.json` con 6 escenas (clapperboard × 2, flow-diagram, crew-credits, terminal, icon-grid), voiceover Gemini `Kore` es-ES con textos aprobados, music bed `lofi-tech-2-loop`, y SFX con targeting preciso por componentId (`sceneTypes: ["custom/clapperboard"]` para el golpe de claqueta, `["terminal"]` para el teclado).
 - **Spec del vídeo meta «Hola, soy Claqueta»** — diseño y escaleta aprobada del tutorial landscape (~2:30) donde Claqueta se presenta en primera persona y revela que el vídeo salió de su propio pipeline: tema visual nuevo `claqueta` (sala de cine: negro proyector + ámbar tungsteno), escenas custom `ClapperboardScene` y `CrewCreditsScene`, y pipeline completo de audio. `docs/superpowers/specs/2026-06-12-claqueta-meta-video-design.md`
 - **Spec del modo `self_improve`** — diseño aprobado para que el agente desplegado mejore su propio código (escenas custom, skills/prompts, configs de contenido) vía PRs revisados por humano: backlog sobre drafts AFP, post-mortem por vídeo, trigger por umbral y bajo demanda, workspace git aislado en `.generated/workspace/` con allowlist dura. `docs/superpowers/specs/2026-06-11-self-improve-mode-design.md` + `_project_specs/features/2026-06-11-self-improve-mode.md` + plan de implementación en `docs/superpowers/plans/2026-06-11-self-improve-mode.md`
 

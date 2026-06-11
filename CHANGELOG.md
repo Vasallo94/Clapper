@@ -11,6 +11,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 - **Spec del modo `self_improve`** — diseño aprobado para que el agente desplegado mejore su propio código (escenas custom, skills/prompts, configs de contenido) vía PRs revisados por humano: backlog sobre drafts AFP, post-mortem por vídeo, trigger por umbral y bajo demanda, workspace git aislado en `.generated/workspace/` con allowlist dura. `docs/superpowers/specs/2026-06-11-self-improve-mode-design.md` + `_project_specs/features/2026-06-11-self-improve-mode.md` + plan de implementación en `docs/superpowers/plans/2026-06-11-self-improve-mode.md`
 
+- **Modo `self_improve` completo** — contrato de modo con checkpoint `improvement_plan_approval` (`src/modes.py`), tools de backlog AFP (`list_friction_drafts`/`read_friction_draft`/`mark_draft_addressed` con sidecars `.addressed`), workspace git aislado en `.generated/workspace/` con allowlist dura y doble validación en `commit_and_push` (`src/tools/workspace.py`), `open_pull_request` vía API REST de GitHub, post-mortem por vídeo y trigger por umbral en el prompt del orquestador, `git` en la imagen del agente + env `GITHUB_REPO`/`SELF_IMPROVE_THRESHOLD` en compose, y CI de PRs (`.github/workflows/pr-checks.yml`)
+
 ### Security
 
 - **Dependabot — 6 alertas resueltas (1 crítica, 5 moderadas)** mediante bumps en los cuatro lockfiles del monorepo:

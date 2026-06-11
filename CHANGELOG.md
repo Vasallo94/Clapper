@@ -7,7 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
-- **Spec del modo `self_improve`** — diseño aprobado para que el agente desplegado mejore su propio código (escenas custom, skills/prompts, configs de contenido) vía PRs revisados por humano: backlog sobre drafts AFP, post-mortem por vídeo, trigger por umbral y bajo demanda, workspace git aislado en `.generated/workspace/` con allowlist dura. `docs/superpowers/specs/2026-06-11-self-improve-mode-design.md` + `_project_specs/features/2026-06-11-self-improve-mode.md`
+- **Spec del modo `self_improve`** — diseño aprobado para que el agente desplegado mejore su propio código (escenas custom, skills/prompts, configs de contenido) vía PRs revisados por humano: backlog sobre drafts AFP, post-mortem por vídeo, trigger por umbral y bajo demanda, workspace git aislado en `.generated/workspace/` con allowlist dura. `docs/superpowers/specs/2026-06-11-self-improve-mode-design.md` + `_project_specs/features/2026-06-11-self-improve-mode.md` + plan de implementación en `docs/superpowers/plans/2026-06-11-self-improve-mode.md`
 
 ### Security
 

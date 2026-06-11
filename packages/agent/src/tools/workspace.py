@@ -100,3 +100,67 @@ def list_workspace_files(pattern: str, base_dir: Optional[Path] = None) -> list[
         for p in workspace.glob(pattern)
         if p.is_file() and ".git/" not in str(p.relative_to(workspace))
     )
+
+
+def prepare_workspace(repo_url: Optional[str] = None, base_dir: Optional[Path] = None) -> str:
+    """Clona (superficial) el repo en .generated/workspace/, limpiando el anterior.
+
+    Sin repo_url usa GITHUB_TOKEN + GITHUB_REPO del entorno. Aislado del
+    working tree del host: todo el trabajo de mejora ocurre aquí.
+    """
+    workspace = _workspace(base_dir)
+    if repo_url is None:
+        token = os.environ.get("GITHUB_TOKEN")
+        repo = os.environ.get("GITHUB_REPO")
+        if not token or not repo:
+            return "ERROR: faltan GITHUB_TOKEN o GITHUB_REPO en el entorno."
+        repo_url = f"https://x-access-token:{token}@github.com/{repo}.git"
+    if workspace.exists():
+        shutil.rmtree(workspace)
+    workspace.parent.mkdir(parents=True, exist_ok=True)
+    result = subprocess.run(
+        ["git", "clone", "--depth", "1", repo_url, str(workspace)],
+        capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        return f"ERROR: clone falló — {_redact(result.stderr.strip())}"
+    for key, value in (("user.name", "claqueta-agent"), ("user.email", "claqueta-agent@users.noreply.github.com")):
+        subprocess.run(["git", "-C", str(workspace), "config", key, value], check=True, capture_output=True)
+    return f"Workspace listo en {workspace}."
+
+
+def commit_and_push(branch: str, message: str, base_dir: Optional[Path] = None) -> str:
+    """Commitea los cambios del workspace en una rama improve/* y la pushea.
+
+    Rechaza ramas que no sean improve/<slug> y cualquier archivo staged
+    fuera de la allowlist (defensa en profundidad sobre write_workspace_file).
+
+    Args:
+        branch: Nombre de rama improve/<slug> (minúsculas, dígitos, guiones).
+        message: Mensaje de commit en formato Conventional Commits.
+    """
+    if not BRANCH_RE.match(branch):
+        return "ERROR: solo se permiten ramas improve/<slug> (minúsculas, dígitos, ._-). Nunca main."
+    workspace = _workspace(base_dir)
+    if not (workspace / ".git").exists():
+        return "ERROR: no hay workspace; llama prepare_workspace primero."
+
+    def _run(*args: str) -> subprocess.CompletedProcess:
+        return subprocess.run(["git", "-C", str(workspace), *args], capture_output=True, text=True)
+
+    _run("checkout", "-B", branch)
+    _run("add", "-A")
+    staged = [line for line in _run("diff", "--cached", "--name-only").stdout.splitlines() if line]
+    if not staged:
+        return "ERROR: no hay cambios que commitear."
+    blocked = [f for f in staged if not is_path_allowed(f)]
+    if blocked:
+        _run("reset")
+        return f"ERROR: cambios fuera de la allowlist: {', '.join(blocked)}. {ALLOWLIST_HELP}"
+    commit = _run("commit", "-m", message)
+    if commit.returncode != 0:
+        return f"ERROR: commit falló — {_redact(commit.stderr.strip())}"
+    push = _run("push", "-u", "origin", branch)
+    if push.returncode != 0:
+        return f"ERROR: push falló — {_redact(push.stderr.strip())}"
+    return f"Rama {branch} pusheada: {message.splitlines()[0]}"

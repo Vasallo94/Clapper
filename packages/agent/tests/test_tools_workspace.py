@@ -3,9 +3,10 @@
 La allowlist se valida EN CÓDIGO, no en prompt: escenas custom,
 customSceneRegistry.ts, skills/prompts del agente y content/.
 """
+import subprocess
 from pathlib import Path
 
-from src.tools.workspace import is_path_allowed, write_workspace_file
+from src.tools.workspace import commit_and_push, is_path_allowed, prepare_workspace, write_workspace_file
 
 
 # --- allowlist pura ---
@@ -56,3 +57,73 @@ def test_write_symlink_escape_errors(tmp_path):
     result = write_workspace_file("content/evil.json", "{}", base_dir=tmp_path)
     assert result.startswith("ERROR")
     assert not (outside / "evil.json").exists()
+
+
+# --- prepare_workspace y commit_and_push ---
+
+def _git(cwd, *args):
+    return subprocess.run(
+        ["git", "-C", str(cwd), "-c", "user.email=t@t", "-c", "user.name=t", *args],
+        check=True, capture_output=True, text=True,
+    )
+
+
+def _make_origin(tmp_path):
+    """Repo 'origin' bare con un commit semilla en main."""
+    origin = tmp_path / "origin.git"
+    subprocess.run(["git", "init", "--bare", "-b", "main", str(origin)], check=True, capture_output=True)
+    seed = tmp_path / "seed"
+    subprocess.run(["git", "clone", str(origin), str(seed)], check=True, capture_output=True)
+    (seed / "content").mkdir()
+    (seed / "content" / "seed.json").write_text("{}")
+    _git(seed, "add", "-A")
+    _git(seed, "commit", "-m", "seed")
+    _git(seed, "push", "origin", "HEAD:main")
+    return origin
+
+
+def test_prepare_workspace_clones(tmp_path):
+    origin = _make_origin(tmp_path)
+    ws = tmp_path / "ws"
+    result = prepare_workspace(repo_url=f"file://{origin}", base_dir=ws)
+    assert not result.startswith("ERROR")
+    assert (ws / ".git").exists()
+    assert (ws / "content" / "seed.json").exists()
+
+
+def test_commit_and_push_happy_path(tmp_path):
+    origin = _make_origin(tmp_path)
+    ws = tmp_path / "ws"
+    prepare_workspace(repo_url=f"file://{origin}", base_dir=ws)
+    write_workspace_file("content/tutorials/demo/config.json", '{"id": "demo"}', base_dir=ws)
+    result = commit_and_push("improve/demo-config", "feat(content): add demo config", base_dir=ws)
+    assert not result.startswith("ERROR")
+    branches = subprocess.run(
+        ["git", "-C", str(origin), "branch"], capture_output=True, text=True
+    ).stdout
+    assert "improve/demo-config" in branches
+
+
+def test_commit_rejects_bad_branch_names(tmp_path):
+    assert commit_and_push("main", "x", base_dir=tmp_path).startswith("ERROR")
+    assert commit_and_push("feature/x", "x", base_dir=tmp_path).startswith("ERROR")
+    assert commit_and_push("improve/CON MAYUS", "x", base_dir=tmp_path).startswith("ERROR")
+
+
+def test_commit_rejects_files_outside_allowlist(tmp_path):
+    origin = _make_origin(tmp_path)
+    ws = tmp_path / "ws"
+    prepare_workspace(repo_url=f"file://{origin}", base_dir=ws)
+    # Escritura directa (saltándose write_workspace_file) — defensa en profundidad
+    (ws / "package.json").write_text("{}")
+    result = commit_and_push("improve/evil", "chore: evil", base_dir=ws)
+    assert result.startswith("ERROR")
+    assert "package.json" in result
+
+
+def test_commit_without_changes_errors(tmp_path):
+    origin = _make_origin(tmp_path)
+    ws = tmp_path / "ws"
+    prepare_workspace(repo_url=f"file://{origin}", base_dir=ws)
+    result = commit_and_push("improve/empty", "chore: nothing", base_dir=ws)
+    assert result.startswith("ERROR")

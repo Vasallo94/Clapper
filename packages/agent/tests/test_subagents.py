@@ -186,3 +186,13 @@ def test_scene_qa_exported():
     from src.subagents import create_scene_qa
 
     assert callable(create_scene_qa)
+
+
+def test_improver_definition():
+    from src.subagents.improver import create_improver
+
+    agent = create_improver()
+    assert agent["name"] == "improver"
+    tool_names = {getattr(t, "__name__", getattr(t, "name", "")) for t in agent["tools"]}
+    assert {"list_friction_drafts", "read_friction_draft", "mark_draft_addressed"} <= tool_names
+    assert {"prepare_workspace", "write_workspace_file", "commit_and_push", "open_pull_request"} <= tool_names

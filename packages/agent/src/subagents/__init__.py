@@ -1,6 +1,7 @@
 from .audio_planner import create_audio_planner
 from .copywriter import create_copywriter
 from .director import create_director
+from .improver import create_improver
 from .researcher import create_researcher
 from .reviewer import create_reviewer
 from .scene_creator import create_scene_creator

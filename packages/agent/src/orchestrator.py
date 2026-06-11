@@ -7,6 +7,7 @@ from deepagents.middleware.skills import SkillsMiddleware
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.checkpoint.memory import MemorySaver  # used when running standalone
 
+from .tools.backlog import list_friction_drafts
 from .tools.friction import report_friction
 from .tools.render import check_render_status, submit_render
 from .tools.validation import audit_content_quality, validate_config
@@ -101,6 +102,7 @@ def create_video_orchestrator(*, checkpointer=None):
         create_audio_planner,
         create_copywriter,
         create_director,
+        create_improver,
         create_researcher,
         create_reviewer,
         create_scene_creator,
@@ -125,6 +127,7 @@ def create_video_orchestrator(*, checkpointer=None):
         create_scene_creator(),
         create_validator(),
         create_reviewer(),
+        create_improver(),
     ]
 
     system_prompt = load_prompt("orchestrator")
@@ -160,6 +163,7 @@ def create_video_orchestrator(*, checkpointer=None):
             validate_config,
             audit_content_quality,
             report_friction,
+            list_friction_drafts,
         ],
         "system_prompt": system_prompt,
         "subagents": subagents,

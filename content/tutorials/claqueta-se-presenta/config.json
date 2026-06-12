@@ -11,7 +11,7 @@
     {
       "type": "custom",
       "componentId": "clapperboard",
-      "durationInSeconds": 12,
+      "durationInSeconds": 14,
       "props": {
         "mode": "action",
         "title": "HOLA, SOY CLAQUETA",
@@ -43,7 +43,7 @@
     {
       "type": "custom",
       "componentId": "crew-credits",
-      "durationInSeconds": 30,
+      "durationInSeconds": 26,
       "props": {
         "title": "REPARTO",
         "credits": [
@@ -64,7 +64,7 @@
     {
       "type": "terminal",
       "title": "Claqueta · chat",
-      "durationInSeconds": 30,
+      "durationInSeconds": 24,
       "lines": [
         { "kind": "command", "text": "Hazme un short sobre los eclipses de 2026 en España" },
         {
@@ -80,7 +80,7 @@
     {
       "type": "custom",
       "componentId": "icon-grid",
-      "durationInSeconds": 30,
+      "durationInSeconds": 25,
       "props": {
         "title": "Qué puedes pedirme",
         "columns": 3,
@@ -97,7 +97,7 @@
     {
       "type": "custom",
       "componentId": "clapperboard",
-      "durationInSeconds": 25,
+      "durationInSeconds": 22,
       "props": {
         "mode": "cut",
         "title": "CORTEN",
@@ -125,9 +125,22 @@
   ],
   "voiceover": {
     "enabled": true,
-    "provider": "gemini",
-    "voiceId": "Kore",
-    "language": "es-ES",
+    "provider": "elevenlabs",
+    "voiceId": "cgSgspJ2msm6clMCkdW9",
+    "language": "es",
+    "elevenlabs": {
+      "modelId": "eleven_multilingual_v2",
+      "outputFormat": "mp3_44100_128",
+      "seed": 42,
+      "applyTextNormalization": "on",
+      "voiceSettings": {
+        "stability": 0.45,
+        "similarityBoost": 0.8,
+        "style": 0.25,
+        "useSpeakerBoost": true,
+        "speed": 1.0
+      }
+    },
     "scenes": {
       "0": {
         "text": "¡Acción! Hola — soy Claqueta. Y antes de que preguntes: sí, este vídeo lo estoy haciendo yo misma. Deja que me explique.",

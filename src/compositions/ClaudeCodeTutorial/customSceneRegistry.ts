@@ -12,10 +12,12 @@ import { BlockDiagramScene } from "./scenes/custom/BlockDiagramScene"
 import { BrowserMockupScene } from "./scenes/custom/BrowserMockupScene"
 import { BulletSlideScene } from "./scenes/custom/BulletSlideScene"
 import { ChapterCardScene } from "./scenes/custom/ChapterCardScene"
+import { ClapperboardScene } from "./scenes/custom/ClapperboardScene"
 import { CodeBlockScene } from "./scenes/custom/CodeBlockScene"
 import { CodeDiffScene } from "./scenes/custom/CodeDiffScene"
 import { ComparisonTableScene } from "./scenes/custom/ComparisonTableScene"
 import { CountdownScene } from "./scenes/custom/CountdownScene"
+import { CrewCreditsScene } from "./scenes/custom/CrewCreditsScene"
 import { EtalonScene } from "./scenes/custom/EtalonScene"
 import { FileExplorerScene } from "./scenes/custom/FileExplorerScene"
 import { FlowDiagramScene } from "./scenes/custom/FlowDiagramScene"
@@ -42,10 +44,12 @@ export const customSceneRegistry: Record<string, FC<Record<string, unknown>>> = 
   "browser-mockup": BrowserMockupScene,
   "bullet-slide": BulletSlideScene,
   "chapter-card": ChapterCardScene,
+  clapperboard: ClapperboardScene,
   "code-block": CodeBlockScene,
   "code-diff": CodeDiffScene,
   "comparison-table": ComparisonTableScene,
   countdown: CountdownScene,
+  "crew-credits": CrewCreditsScene,
   etalon: EtalonScene,
   "file-explorer": FileExplorerScene,
   "flow-diagram": FlowDiagramScene,

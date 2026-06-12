@@ -1,0 +1,220 @@
+{
+  "id": "claqueta-se-presenta",
+  "title": "Hola, soy Claqueta",
+  "description": "Claqueta, el pipeline de vídeo automatizado, se presenta a sí misma: qué es, cómo está montada, cómo se usa y qué puedes pedirle — en un vídeo generado por su propio pipeline.",
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "theme": "claqueta",
+  "transition": null,
+  "scenes": [
+    {
+      "type": "custom",
+      "componentId": "clapperboard",
+      "durationInSeconds": 14,
+      "props": {
+        "mode": "action",
+        "title": "HOLA, SOY CLAQUETA",
+        "subtitle": "un vídeo hecho por su protagonista"
+      }
+    },
+    {
+      "type": "custom",
+      "componentId": "flow-diagram",
+      "durationInSeconds": 23,
+      "props": {
+        "title": "Qué soy",
+        "description": "De una frase tuya a un MP4 terminado",
+        "layout": "horizontal",
+        "showParticle": true,
+        "nodes": [
+          { "id": "chat", "title": "Tú escribes", "description": "una idea en el chat", "icon": "💬" },
+          { "id": "brain", "title": "Yo pienso", "description": "investigo, guiono, dirijo", "icon": "🧠" },
+          { "id": "render", "title": "Yo ruedo", "description": "React, frame a frame", "icon": "🎬" },
+          { "id": "mp4", "title": "Tu vídeo", "description": "MP4 con voz y música", "icon": "🍿" }
+        ],
+        "edges": [
+          { "from": "chat", "to": "brain" },
+          { "from": "brain", "to": "render" },
+          { "from": "render", "to": "mp4" }
+        ]
+      }
+    },
+    {
+      "type": "custom",
+      "componentId": "crew-credits",
+      "durationInSeconds": 26,
+      "props": {
+        "title": "REPARTO",
+        "credits": [
+          { "role": "Investigación", "name": "La Documentalista" },
+          { "role": "Guion", "name": "La Guionista" },
+          { "role": "Dirección", "name": "La Directora" },
+          { "role": "Sonido", "name": "La Sonidista" },
+          { "role": "Voz", "name": "La Locutora" },
+          { "role": "Escenografía", "name": "La Escenógrafa" },
+          { "role": "Control de calidad", "name": "Scene QA" },
+          { "role": "Validación", "name": "La Validadora" },
+          { "role": "Crítica final", "name": "La Revisora" }
+        ],
+        "producedBy": "Un orquestador con Gemini",
+        "footer": "rodado en tres servicios Docker: chat · cerebro · sala de render"
+      }
+    },
+    {
+      "type": "terminal",
+      "title": "Claqueta · chat",
+      "durationInSeconds": 24,
+      "lines": [
+        { "kind": "command", "text": "Hazme un short sobre los eclipses de 2026 en España" },
+        {
+          "kind": "claude",
+          "text": "Te propongo esta escaleta: 1) gancho con la fecha, 2) qué se verá y dónde, 3) cómo observarlo seguro, 4) cierre con CTA. ¿La apruebas?"
+        },
+        { "kind": "output", "text": "⏸ checkpoint · escaleta_checkpoint — esperando decisión humana" },
+        { "kind": "command", "text": "Aprobada. Adelante." },
+        { "kind": "claude", "text": "Generando config.json, voz y música… renderizando frame a frame." },
+        { "kind": "output", "text": "✓ render completo · output.mp4 · 94s · 30fps" }
+      ]
+    },
+    {
+      "type": "custom",
+      "componentId": "icon-grid",
+      "durationInSeconds": 25,
+      "props": {
+        "title": "Qué puedes pedirme",
+        "columns": 3,
+        "items": [
+          { "icon": "lightbulb", "title": "Un vídeo nuevo", "description": "tutorial o short, desde cero" },
+          { "icon": "gear", "title": "Revisar uno existente", "description": "el cambio mínimo que lo arregla" },
+          { "icon": "layers", "title": "Una variante", "description": "nuevo público, mismo material" },
+          { "icon": "file", "title": "Regenerar audio", "description": "solo voz, música o SFX" },
+          { "icon": "book", "title": "Auditar calidad", "description": "informe sin tocar nada" },
+          { "icon": "shield", "title": "Mejorarme a mí misma", "description": "detecto fricción y abro un PR" }
+        ]
+      }
+    },
+    {
+      "type": "custom",
+      "componentId": "clapperboard",
+      "durationInSeconds": 22,
+      "props": {
+        "mode": "cut",
+        "title": "CORTEN",
+        "subtitle": "claqueta · pídeme un vídeo",
+        "configLines": [
+          "{",
+          "  \"id\": \"claqueta-se-presenta\",",
+          "  \"title\": \"Hola, soy Claqueta\",",
+          "  \"theme\": \"claqueta\",",
+          "  \"scenes\": [",
+          "    { \"componentId\": \"clapperboard\", \"mode\": \"action\" },",
+          "    { \"componentId\": \"flow-diagram\" },",
+          "    { \"componentId\": \"crew-credits\" },",
+          "    { \"type\": \"terminal\" },",
+          "    { \"componentId\": \"icon-grid\" },",
+          "    { \"componentId\": \"clapperboard\", \"mode\": \"cut\" }",
+          "  ],",
+          "  \"voiceover\": { \"provider\": \"gemini\" },",
+          "  \"soundDesign\": { \"enabled\": true },",
+          "  \"humanApproved\": true",
+          "}"
+        ]
+      }
+    }
+  ],
+  "voiceover": {
+    "enabled": true,
+    "provider": "elevenlabs",
+    "voiceId": "cgSgspJ2msm6clMCkdW9",
+    "language": "es",
+    "elevenlabs": {
+      "modelId": "eleven_multilingual_v2",
+      "outputFormat": "mp3_44100_128",
+      "seed": 42,
+      "applyTextNormalization": "on",
+      "voiceSettings": {
+        "stability": 0.45,
+        "similarityBoost": 0.8,
+        "style": 0.25,
+        "useSpeakerBoost": true,
+        "speed": 1.0
+      }
+    },
+    "scenes": {
+      "0": {
+        "text": "¡Acción! Hola — soy Claqueta. Y antes de que preguntes: sí, este vídeo lo estoy haciendo yo misma. Deja que me explique.",
+        "leadInMs": 2400,
+        "audioStartMs": 2300,
+        "tailHoldMs": 600
+      },
+      "1": {
+        "text": "Soy un pipeline de vídeo automatizado. Tú me escribes en un chat lo que quieres contar; yo lo investigo, escribo el guion, dirijo las escenas, pongo la voz y la música, y lo renderizo fotograma a fotograma con React. De una frase tuya a un MP4 terminado.",
+        "leadInMs": 300,
+        "audioStartMs": 200,
+        "tailHoldMs": 600
+      },
+      "2": {
+        "text": "Por dentro soy un equipo de rodaje completo: una investigadora que documenta el tema, una guionista que escribe la escaleta, una directora que decide cada plano, una sonidista, una locutora… y un orquestador que los coordina a todos. Tres servicios en Docker: el chat, el cerebro, y la sala de renderizado.",
+        "leadInMs": 400,
+        "audioStartMs": 250,
+        "tailHoldMs": 700
+      },
+      "3": {
+        "text": "Usarme es una conversación. Me pides un vídeo; yo te propongo la escaleta y espero. Porque mi regla de oro es: yo automatizo la ejecución, nunca el criterio. Tú apruebas el guion, tú apruebas el sonido. Cuando dices que sí, el resto es mío.",
+        "leadInMs": 300,
+        "audioStartMs": 200,
+        "tailHoldMs": 600
+      },
+      "4": {
+        "text": "Puedes pedirme un tutorial desde cero, retocar un vídeo que ya existe, sacar una variante, regenerar solo la voz… Y desde esta semana, algo más: cuando algo me hace tropezar, lo apunto. Y si me lo pides, me arreglo yo misma — y te abro un pull request para que tú decidas si el cambio entra.",
+        "leadInMs": 300,
+        "audioStartMs": 200,
+        "tailHoldMs": 600
+      },
+      "5": {
+        "text": "¿Y este vídeo? Su guion, sus escenas, esta voz que escuchas: todo salió de mi pipeline. Un humano solo aprobó la escaleta — como debe ser. Soy Claqueta. ¿Qué quieres rodar? …Corten.",
+        "leadInMs": 400,
+        "audioStartMs": 250,
+        "tailHoldMs": 6000
+      }
+    }
+  },
+  "soundDesign": {
+    "enabled": true,
+    "musicBed": {
+      "libraryId": "lofi-tech-2-loop",
+      "volume": -19,
+      "duckingVolume": -27,
+      "fadeInMs": 1500,
+      "fadeOutMs": 3000,
+      "duckingFadeMs": 400
+    },
+    "sfx": [
+      {
+        "id": "clapperboard-clap",
+        "prompt": "single sharp wooden film clapperboard clap, dry close-mic transient, short room tail, no music, no voice",
+        "durationMs": 1200,
+        "trigger": "scene-start",
+        "sceneTypes": ["custom/clapperboard"],
+        "loop": false,
+        "volume": -8
+      },
+      {
+        "id": "keyboard",
+        "prompt": "soft mechanical keyboard typing in quiet room, cherry mx switches, gentle ASMR clicks, no background noise",
+        "durationMs": 8000,
+        "trigger": "typewriter",
+        "sceneTypes": ["terminal"],
+        "loop": true,
+        "volume": -14
+      }
+    ]
+  },
+  "subtitles": {
+    "enabled": true,
+    "style": "karaoke",
+    "fontSize": 26,
+    "position": "bottom"
+  }
+}

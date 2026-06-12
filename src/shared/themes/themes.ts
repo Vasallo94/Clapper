@@ -267,11 +267,62 @@ const hAlphaTheme: ThemeTokens = {
   accentLine: "linear-gradient(90deg, #d94332, #2c7782)",
 }
 
+const claquetaTheme: ThemeTokens = {
+  background: "#0d0c0b",
+  backgroundGradient: "radial-gradient(ellipse at 50% 35%, #1a1612 0%, #0d0c0b 70%)",
+  foreground: "#f5efe0",
+  foregroundMid: "#a89a82",
+  foregroundLow: "#5f574a",
+  primary: "#ffb347",
+  primaryForeground: "#0d0c0b",
+  secondary: "#e8dcc3",
+  fontFamily: 'Georgia, "Times New Roman", ui-serif, serif',
+  monoFontFamily: monoFont,
+  terminal: {
+    sceneBackground: "radial-gradient(ellipse at 50% 30%, #1a1612 0%, #0d0c0b 75%)",
+    bg: "#14110e",
+    titleBar: "#1f1a14",
+    titleText: "#8a7c64",
+    command: "#f5efe0",
+    output: "#cfc4ac",
+    claude: "#ffb347",
+    shadow: "0 24px 70px rgba(0,0,0,0.75)",
+    dots: ["#ff5f57", "#febc2e", "#28c840"],
+    labelColor: "#a89a82",
+    successColor: "#c9a44d",
+    statusBarBg: "#110e0b",
+    borderColor: "#332b20",
+    separatorColor: "#332b20",
+    costColor: "#5f574a",
+    userMessageBg: "#1a1612",
+    userMessageBorder: "#332b20",
+  },
+  card: {
+    bg: "#171310",
+    bgGradient: "linear-gradient(160deg, #1d1813 0%, #12100d 100%)",
+    border: "#332b20",
+    accentBorder: "#ffb347",
+    shadow: "0 16px 50px rgba(0,0,0,0.6)",
+  },
+  mascot: {
+    show: false,
+    cornerScale: 0.5,
+    cornerOpacity: 0.7,
+    cornerBottom: 20,
+    cornerRight: 24,
+  },
+  overlay: "rgba(13,12,11,0.82)",
+  label: "Claqueta · se presenta",
+  labelColor: "#ffb347",
+  accentLine: "linear-gradient(90deg, #ffb347, #e8dcc3)",
+}
+
 const themes: Record<ThemeName, ThemeTokens> = {
   default: defaultTheme,
   "linea-directa": lineaDirectaTheme,
   "atom-dark": atomDarkTheme,
   "h-alpha": hAlphaTheme,
+  claqueta: claquetaTheme,
 }
 
 export function getTheme(name: ThemeName): ThemeTokens {

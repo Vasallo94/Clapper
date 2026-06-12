@@ -139,7 +139,7 @@ def test_skills_middleware_uses_readable_virtual_paths():
     update = middleware.before_agent({}, None, {})
 
     skills = update["skills_metadata"]
-    assert len(skills) == 10
+    assert len(skills) == 11
     assert all(skill["path"].startswith("/skills/") for skill in skills)
 
     first_skill_path = skills[0]["path"]

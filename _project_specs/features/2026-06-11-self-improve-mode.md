@@ -8,15 +8,15 @@ Diseño completo: `docs/superpowers/specs/2026-06-11-self-improve-mode-design.md
 
 ## Criterios de aceptación
 
-- [ ] Existe el `ModeContract` `self_improve` con checkpoint `improvement_plan_approval` y el router lo activa ante intents como "revisa tu fricción" / "mejora X".
-- [ ] El subagente `improver` lee y prioriza drafts AFP (`blocked` > `degraded` > `cosmetic`) y presenta un plan vía `AskUserQuestion` antes de tocar código.
-- [ ] `write_workspace_file` rechaza en código (no en prompt) cualquier ruta fuera de la allowlist: escenas custom, `customSceneRegistry.ts`, `packages/agent/skills/`, `packages/agent/prompts/`, `content/`.
-- [ ] `commit_and_push` solo acepta ramas `improve/*` y rechaza main; los mensajes siguen Conventional Commits.
-- [ ] `open_pull_request` crea el PR con descripción que enlaza la fricción origen y la evidencia; `mark_draft_addressed` anota el draft con la URL del PR.
-- [ ] Si el cambio toca escenas, se renderiza una muestra vía render-service; si el render falla, no se abre PR.
-- [ ] Tras cerrar un vídeo en `new_video`/`revise_existing`, el post-mortem deposita fricción vía `report_friction`, y si hay ≥ `SELF_IMPROVE_THRESHOLD` drafts el agente propone (no inicia) una sesión de mejora.
-- [ ] `.github/workflows/pr-checks.yml` ejecuta lint + typecheck en cada PR.
-- [ ] El clone de trabajo vive en `.generated/workspace/` y nunca se opera sobre el working tree del host.
+- [x] Existe el `ModeContract` `self_improve` con checkpoint `improvement_plan_approval` y el router lo activa ante intents como "revisa tu fricción" / "mejora X".
+- [x] El subagente `improver` lee y prioriza drafts AFP (`blocked` > `degraded` > `cosmetic`) y presenta un plan vía `AskUserQuestion` antes de tocar código.
+- [x] `write_workspace_file` rechaza en código (no en prompt) cualquier ruta fuera de la allowlist: escenas custom, `customSceneRegistry.ts`, `packages/agent/skills/`, `packages/agent/prompts/`, `content/`.
+- [x] `commit_and_push` solo acepta ramas `improve/*` y rechaza main; los mensajes siguen Conventional Commits.
+- [x] `open_pull_request` crea el PR con descripción que enlaza la fricción origen y la evidencia; `mark_draft_addressed` anota el draft con la URL del PR.
+- [x] Si el cambio toca escenas, se renderiza una muestra vía render-service; si el render falla, no se abre PR.
+- [x] Tras cerrar un vídeo en `new_video`/`revise_existing`, el post-mortem deposita fricción vía `report_friction`, y si hay ≥ `SELF_IMPROVE_THRESHOLD` drafts el agente propone (no inicia) una sesión de mejora.
+- [x] `.github/workflows/pr-checks.yml` ejecuta lint + typecheck en cada PR.
+- [x] El clone de trabajo vive en `.generated/workspace/` y nunca se opera sobre el working tree del host.
 
 ## Casos de test
 

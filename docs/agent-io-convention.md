@@ -17,12 +17,14 @@ The single source of truth for path constants is `packages/agent/src/paths.py`.
 
 ## WRITE paths (agent outputs)
 
-| Path                                                         | Description                                           |
-| ------------------------------------------------------------ | ----------------------------------------------------- |
-| `public/voiceover/{config_id}/`                              | Generated TTS MP3 files (gitignored)                  |
-| `public/audio/{config_id}/`                                  | Copied/generated music and SFX per video (gitignored) |
-| `src/compositions/ClaudeCodeTutorial/scenes/custom/*.tsx`    | New custom scene components                           |
-| `src/compositions/ClaudeCodeTutorial/customSceneRegistry.ts` | Scene registration (append)                           |
+| Path                                                         | Description                                               |
+| ------------------------------------------------------------ | --------------------------------------------------------- |
+| `public/voiceover/{config_id}/`                              | Generated TTS MP3 files (gitignored)                      |
+| `public/audio/{config_id}/`                                  | Copied/generated music and SFX per video (gitignored)     |
+| `src/compositions/ClaudeCodeTutorial/scenes/custom/*.tsx`    | New custom scene components                               |
+| `src/compositions/ClaudeCodeTutorial/customSceneRegistry.ts` | Scene registration (append)                               |
+| `.generated/workspace/`                                      | Isolated git clone for self_improve sessions (gitignored) |
+| `.afp/drafts/*.addressed`                                    | Sidecar marking a friction draft as addressed by a PR     |
 
 ## SUBMIT (HTTP, not filesystem)
 
@@ -41,9 +43,12 @@ This directory is fully gitignored and ephemeral.
 
 ## Environment variables
 
-| Variable                 | Default                       | Description                                  |
-| ------------------------ | ----------------------------- | -------------------------------------------- |
-| `PROJECT_ROOT`           | Auto-detected from `__file__` | `/app` in Docker                             |
-| `RENDER_SERVICE_URL`     | `http://localhost:3100`       | `http://host.docker.internal:3100` in Docker |
-| `RENDER_TIMEOUT_SECONDS` | `300`                         | Max poll wait for render completion          |
-| `LLM_MODEL`              | `gemini-3.1-pro-preview`      | LLM model for agent                          |
+| Variable                 | Default                       | Description                                                                  |
+| ------------------------ | ----------------------------- | ---------------------------------------------------------------------------- |
+| `PROJECT_ROOT`           | Auto-detected from `__file__` | `/app` in Docker                                                             |
+| `RENDER_SERVICE_URL`     | `http://localhost:3100`       | `http://host.docker.internal:3100` in Docker                                 |
+| `RENDER_TIMEOUT_SECONDS` | `300`                         | Max poll wait for render completion                                          |
+| `LLM_MODEL`              | `gemini-3.1-pro-preview`      | LLM model for agent                                                          |
+| `GITHUB_TOKEN`           | —                             | Fine-grained PAT (contents + pull requests, this repo only) for self_improve |
+| `GITHUB_REPO`            | `Vasallo94/Claqueta`          | owner/repo target for clones and PRs                                         |
+| `SELF_IMPROVE_THRESHOLD` | `5`                           | Pending AFP drafts that make the orchestrator offer an improvement session   |

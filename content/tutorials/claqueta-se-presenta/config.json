@@ -28,10 +28,10 @@
         "layout": "horizontal",
         "showParticle": true,
         "nodes": [
-          { "id": "chat", "title": "Tú escribes", "description": "una idea en el chat", "icon": "user" },
-          { "id": "brain", "title": "Yo pienso", "description": "investigo, guiono, dirijo", "icon": "lightbulb" },
-          { "id": "render", "title": "Yo ruedo", "description": "React, frame a frame", "icon": "code" },
-          { "id": "mp4", "title": "Tu vídeo", "description": "MP4 con voz y música", "icon": "check" }
+          { "id": "chat", "title": "Tú escribes", "description": "una idea en el chat", "icon": "💬" },
+          { "id": "brain", "title": "Yo pienso", "description": "investigo, guiono, dirijo", "icon": "🧠" },
+          { "id": "render", "title": "Yo ruedo", "description": "React, frame a frame", "icon": "🎬" },
+          { "id": "mp4", "title": "Tu vídeo", "description": "MP4 con voz y música", "icon": "🍿" }
         ],
         "edges": [
           { "from": "chat", "to": "brain" },
@@ -145,7 +145,7 @@
       "0": {
         "text": "¡Acción! Hola — soy Claqueta. Y antes de que preguntes: sí, este vídeo lo estoy haciendo yo misma. Deja que me explique.",
         "leadInMs": 2400,
-        "audioStartMs": 300,
+        "audioStartMs": 2300,
         "tailHoldMs": 600
       },
       "1": {
@@ -176,7 +176,7 @@
         "text": "¿Y este vídeo? Su guion, sus escenas, esta voz que escuchas: todo salió de mi pipeline. Un humano solo aprobó la escaleta — como debe ser. Soy Claqueta. ¿Qué quieres rodar? …Corten.",
         "leadInMs": 400,
         "audioStartMs": 250,
-        "tailHoldMs": 1200
+        "tailHoldMs": 6000
       }
     }
   },
@@ -214,7 +214,7 @@
   "subtitles": {
     "enabled": true,
     "style": "karaoke",
-    "fontSize": 32,
+    "fontSize": 26,
     "position": "bottom"
   }
 }
